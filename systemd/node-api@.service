@@ -6,13 +6,9 @@ After=network.target
 WantedBy=multi-user.target
 
 [Service]
-ExecStartPre=/city_trees/current/prod/rel/server/bin/server eval "CityTreesWeb.Release.before_start"
 ExecStart=/city_trees/current/prod/rel/server/bin/server start
-ExecStartPost=/city_trees/current/prod/rel/server/bin/server eval "CityTreesWeb.Release.migrate"
 ExecStop=/city_trees/current/prod/rel/server/bin/server stop
 EnvironmentFile=/city_trees/current/.env
-AmbientCapabilities=CAP_NET_BIND_SERVICE
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 Restart=always
 DynamicUser=yes
 
@@ -35,8 +31,4 @@ ConfigurationDirectory=city_trees
 ProtectClock=yes
 ProtectKernelLogs=yes
 RestrictSUIDSGID=yes
-
-# TODO switch to true, this service should not need home
 ProtectHome=false
-# TODO: investigate why break AmbientCapabilities
-PrivateUsers=yes

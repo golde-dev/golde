@@ -1,12 +1,155 @@
-
 {
-  "apps": {
-    "http": {
-      "tech-stack.tenacify.dev": {
-        "servers": {
-
-        }
-      }
-    }
-  }
+	"apps": {
+		"http": {
+			"servers": {
+				"srv0": {
+					"listen": [
+						":443"
+					],
+					"routes": [
+						{
+							"match": [
+								{
+									"host": [
+										"www.tech-stack.tenacify.dev"
+									]
+								}
+							],
+							"handle": [
+								{
+									"handler": "subroute",
+									"routes": [
+										{
+											"handle": [
+												{
+													"handler": "static_response",
+													"headers": {
+														"Location": [
+															"https://example.com{http.request.uri}"
+														]
+													},
+													"status_code": 302
+												}
+											]
+										}
+									]
+								}
+							],
+							"terminal": true
+						},
+						{
+							"match": [
+								{
+									"host": [
+										"tech-stack.tenacify.dev"
+									]
+								}
+							],
+							"handle": [
+								{
+									"handler": "subroute",
+									"routes": [
+										{
+											"group": "group4",
+											"handle": [
+												{
+													"handler": "subroute",
+													"routes": [
+														{
+															"handle": [
+																{
+																	"handler": "reverse_proxy",
+																	"load_balancing": {
+																		"retries": 2,
+																		"selection_policy": {
+																			"policy": "round_robin"
+																		}
+																	},
+																	"upstreams": [
+																		{
+																			"dial": "localhost:3000"
+																		},
+																		{
+																			"dial": "localhost:3000"
+																		},
+																		{
+																			"dial": "localhost:3000"
+																		},
+																		{
+																			"dial": "localhost:3000"
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											],
+											"match": [
+												{
+													"path": [
+														"/api*"
+													]
+												}
+											]
+										},
+										{
+											"group": "group4",
+											"handle": [
+												{
+													"handler": "subroute",
+													"routes": [
+														{
+															"handle": [
+																{
+																	"handler": "file_server",
+																	"hide": [
+																		"./Caddyfile"
+																	],
+																	"root": "/some/app"
+																}
+															]
+														}
+													]
+												}
+											],
+											"match": [
+												{
+													"path": [
+														"/app*"
+													]
+												}
+											]
+										},
+										{
+											"group": "group4",
+											"handle": [
+												{
+													"handler": "subroute",
+													"routes": [
+														{
+															"handle": [
+																{
+																	"handler": "file_server",
+																	"hide": [
+																		"./Caddyfile"
+																	],
+																	"root": "/some/website"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							],
+							"terminal": true
+						}
+					]
+				}
+			}
+		}
+	}
 }

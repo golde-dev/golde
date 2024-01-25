@@ -1,0 +1,162 @@
+{
+  "apps": {
+    "http": {
+      "servers": {
+        "deployedApps": {
+          "listen": [
+            ":443"
+          ],
+          "routes": [
+            {
+              "match": [
+                {
+                  "host": [
+                    "www.tech-stack-dev.tenacify.dev"
+                  ]
+                }
+              ],
+              "handle": [
+                {
+                  "handler": "tech-stack-dev-www-redirect",
+                  "routes": [
+                    {
+                      "handle": [
+                        {
+                          "handler": "static_response",
+                          "headers": {
+                            "Location": [
+                              "https://tech-stack-dev.tenacify.dev{http.request.uri}"
+                            ]
+                          },
+                          "status_code": 302
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "terminal": true
+            },
+            {
+              "match": [
+                {
+                  "host": [
+                    "tech-stack-dev.tenacify.dev"
+                  ]
+                }
+              ],
+              "handle": [
+                {
+                  "handler": "subroute",
+                  "routes": [
+                    {
+                      "group": "api",
+                      "handle": [
+                        {
+                          "handler": "subroute-api",
+                          "routes": [
+                            {
+                              "handle": [
+                                {
+                                  "handler": "reverse_proxy",
+                                  "load_balancing": {
+                                    "retries": 2,
+                                    "selection_policy": {
+                                      "policy": "round_robin"
+                                    }
+                                  },
+                                  "upstreams": [
+                                    {
+                                      "dial": "localhost:3005"
+                                    },
+                                    {
+                                      "dial": "localhost:3006"
+                                    },
+                                    {
+                                      "dial": "localhost:3007"
+                                    },
+                                    {
+                                      "dial": "localhost:3008"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "match": [
+                        {
+                          "path": [
+                            "/api/*"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "group": "app",
+                      "handle": [
+                        {
+                          "handler": "subroute-app",
+                          "routes": [
+                            {
+                              "handle": [
+                                {
+                                  "handler": "file_server",
+                                  "hide": [
+                                    "./Caddyfile"
+                                  ],
+                                  "root": "/opt/deployer/apps/tech-stack-dev/current/packages/app/dist"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "match": [
+                        {
+                          "path": [
+                            "/app*"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "group": "website",
+                      "handle": [
+                        {
+                          "handler": "subroute-website",
+                          "routes": [
+                            {
+                              "handle": [
+                                {
+                                  "handler": "file_server",
+                                  "hide": [
+                                    "./Caddyfile"
+                                  ],
+                                  "root": "/opt/deployer/apps/tech-stack-dev/current/packages/website/dist"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "match": [
+                        {
+                          "path": [
+                            "/"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "terminal": true
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -7,7 +7,6 @@
     "tsBuildInfoFile": "./build/buildInfo.json",
     "types": [
       "node",
-      "nodemailer"
     ]
   },
   "include": [
