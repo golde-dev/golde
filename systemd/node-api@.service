@@ -1,0 +1,42 @@
+[Unit]
+Description=City Trees App
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStartPre=/city_trees/current/prod/rel/server/bin/server eval "CityTreesWeb.Release.before_start"
+ExecStart=/city_trees/current/prod/rel/server/bin/server start
+ExecStartPost=/city_trees/current/prod/rel/server/bin/server eval "CityTreesWeb.Release.migrate"
+ExecStop=/city_trees/current/prod/rel/server/bin/server stop
+EnvironmentFile=/city_trees/current/.env
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+Restart=always
+DynamicUser=yes
+
+RemainAfterExit=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+PrivateDevices=yes
+PrivateUsers=yes
+RuntimeDirectory=city_trees 
+StateDirectory=city_trees
+CacheDirectory=city_trees
+LogsDirectory=city_trees
+ConfigurationDirectory=city_trees
+ProtectClock=yes
+ProtectKernelLogs=yes
+RestrictSUIDSGID=yes
+
+# TODO switch to true, this service should not need home
+ProtectHome=false
+# TODO: investigate why break AmbientCapabilities
+PrivateUsers=yes

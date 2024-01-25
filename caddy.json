@@ -1,0 +1,12 @@
+
+{
+  "apps": {
+    "http": {
+      "tech-stack.tenacify.dev": {
+        "servers": {
+
+        }
+      }
+    }
+  }
+}

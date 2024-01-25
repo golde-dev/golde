@@ -1,0 +1,27 @@
+www.tech-stack.tenacify.dev {
+	redir https://example.com{uri}
+}
+
+tech-stack.tenacify.dev {
+	# basicauth / {
+	# 	Bob $2a$14$Zkx19XLiW6VYouLHR5NmfOFU0z2GTNmpkT/5qqR7hx4IjWJPDhjvG
+	# }
+	handle /api* {
+		reverse_proxy {
+			to localhost:3000 localhost:3000 localhost:3000 localhost:3000
+
+			lb_policy round_robin
+			lb_retries 2
+		}
+	}
+	handle /app* {
+		file_server * {
+			root /some/app
+		}
+	}
+	handle {
+		file_server {
+			root /some/website
+		}
+	}
+}
