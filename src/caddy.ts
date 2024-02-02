@@ -1,6 +1,5 @@
 import { join } from "path";
-import { exampleConfig, type HostDeployApps } from "./config.js";
-import { writeFileSync } from "fs";
+import type { HostDeployApps } from "./types/config.js";
 
 export function translate(config: HostDeployApps) {
   return {
@@ -155,5 +154,3 @@ export function translate(config: HostDeployApps) {
   };
 }
 
-
-writeFileSync("./caddy-translated.json", JSON.stringify(translate(exampleConfig["wro-self-1-1"]), null, 2));

@@ -1,0 +1,19 @@
+
+import { systemNodeApi } from "./templates/nodeApi.js";
+import type { HostDeployApps } from "./types/config.js";
+
+
+export function translate(config: HostDeployApps) {
+  Object.entries(config).forEach(([app, appConf]) => {
+    const {
+      reverseProxy = {},
+    } = appConf;
+    
+    Object.entries(reverseProxy).forEach(([api, config]) => {
+      if (config.systemdTemplate === "node-api") {
+        systemNodeApi(app, api, config);
+      }
+    });
+  });
+}
+
