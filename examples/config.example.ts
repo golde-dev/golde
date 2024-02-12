@@ -19,6 +19,7 @@ export const exampleConfig: DeployConfig = {
         "api": {
           root: "./packages/api",
           systemdTemplate: "node-api",
+          nodeVersion: "20.11.0", 
           match: "/api/*",
           greenPorts: [3001, 3002, 3003, 3004],
           bluePorts: [3005, 3006, 3007, 3008],

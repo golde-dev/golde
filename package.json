@@ -2,6 +2,10 @@
   "name": "@tenacify/deployer",
   "packageManager": "yarn@4.0.2",
   "type": "module",
+  "main": "./lib/index.js",
+  "bin": {
+    "deployer": "./lib/bin/deployer.js" 
+  },
   "scripts": {
     "lint": "eslint . --ext .ts,.js,.tsx",
     "lint:fix": "eslint . --ext .ts,.js,.tsx --fix",
@@ -17,6 +21,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.504.0",
+    "commander": "^12.0.0",
     "pino": "^8.18.0",
     "zod": "^3.22.4"
   },

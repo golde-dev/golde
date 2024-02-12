@@ -15,7 +15,7 @@ const {
   root,
 } = config;
 
-const apiRuntime = `${app}-${api}`;
+const apiRuntime = `dx-${app}-${api}`;
 
 const templateWorker = `
 [Unit]
@@ -44,7 +44,7 @@ PrivateDevices=yes
 ProtectClock=yes
 ProtectKernelLogs=yes
 RestrictSUIDSGID=yes
-ProtectHome=false
+ProtectHome=true
 PrivateUsers=yes
 RuntimeDirectory="${apiRuntime}-#%i"
 StateDirectory="${apiRuntime}-#%i"

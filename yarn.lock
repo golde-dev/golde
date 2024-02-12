@@ -1828,6 +1828,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^6.20.0"
     "@typescript-eslint/parser": "npm:^6.20.0"
     "@vitest/coverage-v8": "npm:^1.2.2"
+    commander: "npm:^12.0.0"
     eslint: "npm:^8.56.0"
     husky: "npm:^9.0.10"
     lint-staged: "npm:^15.2.1"
@@ -2608,6 +2609,13 @@ __metadata:
   version: 11.1.0
   resolution: "commander@npm:11.1.0"
   checksum: 78ada0c4ad35447fd7a5bf66aecdf0ad0e5055e25a8b0f3c789abadd05cdc0657499a63a7cd36459253336fe4d3382003ed720155f733f2199c0017df5af5f72
+  languageName: node
+  linkType: hard
+
+"commander@npm:^12.0.0":
+  version: 12.0.0
+  resolution: "commander@npm:12.0.0"
+  checksum: b599d8a0b660aacc6947695456f18effbd8622abf0924e805c59ea7360bb42858bcbe668a5e0ae300bf936fd4efd7eed26f2ab5d20028e74931f2ab1843135e3
   languageName: node
   linkType: hard
 

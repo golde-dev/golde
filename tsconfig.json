@@ -1,7 +1,7 @@
 {
   "extends": "@chyzwar/tsconfig/api.json", 
   "compilerOptions": {
-    "outDir": "build",
+    "outDir": "lib",
     "rootDir": "src",
     "skipLibCheck": true,
     "tsBuildInfoFile": "./build/buildInfo.json",
@@ -11,5 +11,5 @@
   },
   "include": [
     "src/**/*"
-, "examples/config.example.ts"  ], 
+  ], 
 }

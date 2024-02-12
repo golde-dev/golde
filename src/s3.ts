@@ -6,10 +6,10 @@ import config from "./config.js";
 import { LogCode } from "./constants/logging.js";
 
 const {
-  R2_BUCKET: bucket,
-  R2_API_KEY: accessKeyId,
-  R2_API_SECRET: secretAccessKey,
-  R2_ENDPOINT: endpoint,
+  S3_BUCKET: bucket,
+  S3_API_KEY: accessKeyId,
+  S3_API_SECRET: secretAccessKey,
+  S3_ENDPOINT: endpoint,
 } = config;
 
 const client = new S3Client({

@@ -1,0 +1,16 @@
+[Unit]
+Description=YouTrack Service
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker exec %n stop
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull jetbrains/youtrack:<version>
+ExecStart=/usr/bin/docker run --rm --name %n jetbrains/youtrack:<version>
+ExecStop=/usr/bin/docker exec %n stop
+
+[Install]
+WantedBy=default.target
