@@ -9,6 +9,7 @@
   },
   "include": [
     "**/.eslintrc.cjs",
+    "**/config.example.ts",
     "commitlint.config.cjs",
     "vitest.workspace.ts",
     "vitest.config.ts",

@@ -8,7 +8,7 @@ export type NodeJSProxyApp = {
   systemdTemplate: string,
   greenPorts: number[]
   bluePorts: number[]
-}
+};
 
 export type ReverseProxyApp = NodeJSProxyApp;
 

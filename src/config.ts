@@ -3,6 +3,7 @@ import {z} from "zod";
 import {pino} from "pino";
 
 const schema = z.object({
+  S3_REGION: z.string().default("auto"),
   S3_ENDPOINT: z.string(),
   S3_BUCKET: z.string(),
   S3_API_KEY: z.string(),

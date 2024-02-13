@@ -1,42 +1,39 @@
-import { execSync } from "node:child_process"
-import { getBranchName, getCurrentHash } from "./git.js";
+import { execSync } from "node:child_process";
+import logger from "./logger.js";
 
 /**
  * Create tar file for selected dir path
  * Use zstd with maximum compression and all cores
+ * Find folders if search paths include "*"
  */
-export const tarArtifacts = (
-  artifactsPaths: string[]
+export const tarPaths = (
+  searchPaths: string[],
+  tarFile: string
 ) => {
-const paths = artifactsPaths.filter(p => !p.includes("*"));
-const patternPaths = artifactsPaths.filter(p => p.includes("*"))
+const paths = searchPaths.filter(p => !p.includes("*"));
+const patternPaths = searchPaths.filter(p => p.includes("*"));
 
 const [
   first, 
   ...rest
-] = patternPaths
+] = patternPaths;
 
 let foundPaths: string[] = [];
 
-if(first) {
+if (first) {
   foundPaths = execSync(`
     find -maxdepth 3 -path "${first}" ${rest.map(p => `-or -path "${p}"`).join(" ")} | cut -c3-`
   )
   .toString()
   .trim()
-  .split("\n")
+  .split("\n");
 }
 
-console.log(`
-  Paths included in artefact: 
-  ${[...paths, ...foundPaths].map(p => `  ${p}`).join("\n")}
-`)
+logger.debug({
+  staticPaths: paths,
+  foundPaths,
+  searchPaths,
+}, "Paths included in tar");
 
-const tarFile = `/tmp/${getBranchName()}.${getCurrentHash()}.tar.zst`
-
-console.time(`Created tar ${tarFile}`)  
-execSync(`tar -I "zstd -19 -T0" -cf "${tarFile}" ${paths.join(" ")} ${foundPaths.join(" ")}`)
-console.timeEnd(`Created tar ${tarFile}`)
-
-return tarFile;
-}
+execSync(`tar -I "zstd -19 -T0" -cf "${tarFile}" ${paths.join(" ")} ${foundPaths.join(" ")}`);
+};

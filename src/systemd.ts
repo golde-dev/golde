@@ -9,9 +9,9 @@ export function translate(config: HostDeployApps) {
       reverseProxy = {},
     } = appConf;
     
-    Object.entries(reverseProxy).forEach(([api, config]) => {
-      if (config.systemdTemplate === "node-api") {
-        systemNodeApi(app, api, config);
+    Object.entries(reverseProxy).forEach(([api, proxyConfig]) => {
+      if (proxyConfig.systemdTemplate === "node-api") {
+        systemNodeApi(app, api, proxyConfig);
       }
     });
   });
