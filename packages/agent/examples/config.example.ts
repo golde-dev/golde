@@ -1,4 +1,4 @@
-import type { DeployConfig } from "../src/types/config.js";
+import type { DeployConfig } from "../../cli/src/types/config.js";
 
 
 export const exampleConfig: DeployConfig = {

@@ -1,0 +1,17 @@
+{
+  "extends": "@chyzwar/tsconfig/lib.json", 
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "lib",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "tsBuildInfoFile": "./lib/buildInfo.json",
+    "types": [
+      "node",
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ], 
+}

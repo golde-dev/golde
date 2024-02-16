@@ -21,7 +21,23 @@ export type HostDeployApps = Record<string, {
   reverseProxy?: Record<string, ReverseProxyApp>
 }>;
 
-
-export type NewDeployConfig = {
-  artifactsPaths: string[]
+export type BranchMapping = {
+  app: string;
+  domain: string;
+  hosts: string[]
 };
+
+
+export interface CaddyConfig {
+  type: "caddy",
+  artifactsPaths: string[];
+  staticServer: Record<string, {
+    match: string,
+    root: string
+  }>
+  reverseProxy: Record<string, ReverseProxyApp>;
+  branchMapping: Record<string, BranchMapping>;
+}
+
+
+export type Config = Record<string, CaddyConfig>;

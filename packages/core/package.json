@@ -1,10 +1,9 @@
 {
-  "name": "@tenacify/root",
+  "name": "@tenacify/core",
   "packageManager": "yarn@4.0.2",
+  "version": "0.1.0",
   "type": "commonjs",
-  "workspaces": [
-    "packages/*"
-  ],
+  "main": "./lib/index.js",
   "scripts": {
     "lint": "eslint . --ext .ts,.js,.tsx",
     "lint:fix": "eslint . --ext .ts,.js,.tsx --fix",
@@ -12,30 +11,19 @@
     "build:watch": "tsc --build --watch --preserveWatchOutput",
     "test": "vitest --run",
     "test:coverage": "vitest --coverage",
-    "test:watch": "vitest",
-    "pkg:cli": "pkg ./lib/bin/deployer.js",
-    "postinstall": "husky install"
-  },
-  "lint-staged": {
-    "*.{js,ts,tsx}": "yarn lint:fix"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.511.0",
-    "commander": "^12.0.0",
-    "pino": "^8.18.0",
-    "zod": "^3.22.4"
+    "pino": "^8.18.0"
   },
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.18",
-    "@chyzwar/runner": "^0.4.19",
     "@types/node": "^20.11.17",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
     "@vitest/coverage-v8": "^1.2.2",
-    "@yao-pkg/pkg": "^5.11.3",
     "eslint": "^8.56.0",
-    "husky": "^9.0.10",
-    "lint-staged": "^15.2.2",
     "typescript": "^5.3.3",
     "vitest": "^1.2.2"
   }

@@ -1,15 +1,15 @@
 {
-  "extends": "@chyzwar/tsconfig/api.json", 
   "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src",
+    "module": "commonjs",
+    "target": "ES2019",
+    "strict": true,
+    "pretty": true,
     "skipLibCheck": true,
-    "tsBuildInfoFile": "./build/buildInfo.json",
-    "types": [
-      "node",
-    ]
+    "preserveWatchOutput": true
   },
-  "include": [
-    "src/**/*"
-  ], 
+  "include": [],
+  "references": [
+    {"path": "./packages/cli"},
+    {"path": "./packages/core"},
+  ]
 }

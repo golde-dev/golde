@@ -10,10 +10,7 @@ const schema = z.object({
   S3_API_SECRET: z.string(),
 });
 
-
-const result = schema.safeParse({
-  ...process.env,
-});
+const result = schema.safeParse(process.env);
 
 if (!result.success) {
   pino().error(result.error.format(), "Invalid environment variables:");
