@@ -3,7 +3,9 @@
   "packageManager": "yarn@4.0.2",
   "type": "commonjs",
   "main": "./lib/index.js",
-  "bin": "./lib/bin/deployer.js",
+  "bin": {
+    "deployer": "./lib/bin/deployer.js"
+  },
   "scripts": {
     "lint": "eslint . --ext .ts,.js,.tsx",
     "lint:fix": "eslint . --ext .ts,.js,.tsx --fix",
@@ -13,18 +15,18 @@
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest"
   },
-  "lint-staged": {
-    "*.{js,ts,tsx}": "yarn lint:fix"
-  },
   "dependencies": {
     "@tenacify/core": "^0.1.0",
     "commander": "^12.0.0",
+    "glob": "^10.3.10",
     "pino": "^8.18.0",
+    "tar": "^6.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.18",
     "@types/node": "^20.11.17",
+    "@types/tar": "^6.1.11",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
     "@vitest/coverage-v8": "^1.2.2",

@@ -27,7 +27,6 @@ export type BranchMapping = {
   hosts: string[]
 };
 
-
 export interface CaddyConfig {
   type: "caddy",
   artifactsPaths: string[];

@@ -1,27 +1,56 @@
 import { createReadStream, rmSync } from "fs";
-import { tarPaths } from "./tar.js";
+import { createNativeTar } from "./tar.js";
+import { createTar } from "./tar.js";
 import s3 from "./s3.js";
-import { basename } from "path";
-import { getCurrentHash } from "./git.js";
 import logger from "./logger.js";
+import { join } from "path";
 
-export const pushArtifacts = async(searchPaths: string[], app = "") => {
-  const tarFilePath = `/tmp/${app}/${getCurrentHash()}.tar.zst`;
-
+const tarArtifacts = async(searchPaths: string[], tarFilePath: string, tarFn: typeof createNativeTar) => {
   const startTar = Date.now();
-  tarPaths(searchPaths, tarFilePath);
+  await tarFn(searchPaths, tarFilePath);
   const endTar = Date.now();
-  logger.info(`Created tar for artifacts: ${tarFilePath} in ${endTar-startTar}ms`);  
 
+  const tarDuration = endTar - startTar;
+  logger.info(`Created tar for artifacts: ${tarFilePath} in ${tarDuration}ms`);  
+};
+
+const uploadTar = async(tarFilePath: string, s3Path: string) => {
   const readStream = createReadStream(tarFilePath);
-  const objectName = basename(tarFilePath);
-  const fileName = `/artifacts/${app}/${objectName}`;
 
   const startS3 = Date.now();
-  await s3.putObject(fileName, readStream);
+  await s3.putObject(s3Path, readStream);
   const endS3 = Date.now();
-  logger.info(
-    `Pushed artifacts to s3: ${fileName} in ${endS3-startS3}ms`
-  );
-  rmSync(tarFilePath, {force: true});
+
+  const s3Duration = endS3 - startS3;
+  logger.info(`Pushed artifacts to s3: ${s3Path} in ${s3Duration}ms`);
+};
+
+const artifactsBasePath = "/artifacts";
+
+export const pushArtifacts = async(
+  searchPaths: string[], 
+  app: string,
+  version: string,
+  path: string
+) => {
+  const localPath = join(path, app);
+  const s3BasePath = join(artifactsBasePath, app);
+  
+  rmSync(localPath, {force: true});
+
+  const ext = process.platform === "linux" 
+    ? "zst"
+    : "br";
+  
+  const tarFilePath = `${localPath}/${version}.tar.${ext}`;
+  const s3Path = `${s3BasePath}/${version}.tar.${ext}`;
+
+  if (ext === "zst") {
+    await tarArtifacts(searchPaths, tarFilePath, createNativeTar);
+  }
+  else {
+    await tarArtifacts(searchPaths, tarFilePath, createTar);
+  }
+
+  await uploadTar(tarFilePath, s3Path);
 };

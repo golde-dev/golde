@@ -90,5 +90,5 @@ export class S3 {
       }, "Failed to put object");
       throw error;
     }
-}
+  }
 }

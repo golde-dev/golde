@@ -1886,12 +1886,15 @@ __metadata:
     "@chyzwar/eslint-config": "npm:^0.2.18"
     "@tenacify/core": "npm:^0.1.0"
     "@types/node": "npm:^20.11.17"
+    "@types/tar": "npm:^6.1.11"
     "@typescript-eslint/eslint-plugin": "npm:^7.0.1"
     "@typescript-eslint/parser": "npm:^7.0.1"
     "@vitest/coverage-v8": "npm:^1.2.2"
     commander: "npm:^12.0.0"
     eslint: "npm:^8.56.0"
+    glob: "npm:^10.3.10"
     pino: "npm:^8.18.0"
+    tar: "npm:^6.2.0"
     typescript: "npm:^5.3.3"
     vitest: "npm:^1.2.2"
     zod: "npm:^3.22.4"
@@ -1961,6 +1964,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:*":
+  version: 20.11.19
+  resolution: "@types/node@npm:20.11.19"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 01f9856cc46e8f663e20279c091c917a56640913fe400cb759fe04ba7a584db666e07c048737318a181dedd2a30cc8a6eaf02ba7c55c29babe2daf12bf77cc99
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^20.11.17":
   version: 20.11.17
   resolution: "@types/node@npm:20.11.17"
@@ -1974,6 +1986,16 @@ __metadata:
   version: 7.5.6
   resolution: "@types/semver@npm:7.5.6"
   checksum: c5d53f3e42aca3a57b7c0243c2f89edab6b7c08537a1060c3ad6bb173f628c38c9d582ef4de3f8ff21e498f283b6def26f0b3950d54c0c8cce361957deb1d1c6
+  languageName: node
+  linkType: hard
+
+"@types/tar@npm:^6.1.11":
+  version: 6.1.11
+  resolution: "@types/tar@npm:6.1.11"
+  dependencies:
+    "@types/node": "npm:*"
+    minipass: "npm:^4.0.0"
+  checksum: 8e3ca70f5ff14f42eda2ed2de40995263775a80a24e9dbf9d5503bbee666ae724f4e0e3e2b21f821c5913d64471e52a4b1a35ef81f44f1d2ea5a7a1e3d37dbd4
   languageName: node
   linkType: hard
 
@@ -4177,6 +4199,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"minipass@npm:^4.0.0":
+  version: 4.2.8
+  resolution: "minipass@npm:4.2.8"
+  checksum: d26c1d722829f98325ea6e67745c8e9b2c5a180766cdd666ee68c563c8a2c39801011708a164ba35e78c5174169da38bc9fe34daee2ee653654343d145ea9d36
+  languageName: node
+  linkType: hard
+
 "minipass@npm:^5.0.0":
   version: 5.0.0
   resolution: "minipass@npm:5.0.0"
@@ -5281,7 +5310,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^6.1.11, tar@npm:^6.1.2":
+"tar@npm:^6.1.11, tar@npm:^6.1.2, tar@npm:^6.2.0":
   version: 6.2.0
   resolution: "tar@npm:6.2.0"
   dependencies:

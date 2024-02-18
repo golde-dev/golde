@@ -1,16 +1,33 @@
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { Command } from "commander";
 import { existsSync } from "fs";
-import { join } from "path";
 import { pushArtifacts } from "../artifacts.js";
 import type { Config } from "../types/config.js";
+import { getCurrentHash } from "../git.js";
+import logger from "../logger.js";
+import { cwd } from "process";
+import { resolve } from "path";
 
-const cwd = process.cwd();
+const pwd = cwd();
 
-const getConfig = async() => {
-  const {default: config} = existsSync("./deployer.config.ts") 
-  ? await import(join(cwd, "./deployer.config.ts")) as {default: Config}
-  : await import(join(cwd, "./deployer.config.js")) as {default: Config};
-  return config;
+const getConfig = async(): Promise<Config> => {
+  if (existsSync(`${pwd}/deployer.config.cjs`)) {
+    return require(`${pwd}/deployer.config.cjs`);
+  }
+  if (existsSync(`${pwd}/deployer.config.json`)) {
+    return require(`${pwd}/deployer.config.json`);
+  }
+  if (existsSync("./deployer.config.js")) {
+    throw new Error("Not implemented");
+  }
+  if (existsSync("./deployer.config.ts")) {
+    throw new Error("Not implemented");
+  }
+  logger.error("Missing config files");
+  throw new Error("No error");
 };
 
 const program = new Command();
@@ -23,13 +40,23 @@ program
 program
   .command("push")
   .description("push artifacts and config")
-  .action(async() => {
+  .option("-d, --debug", "enable debug mode")
+  .option("-p, --path <path>", "path for build artifacts", "/tmp")
+  .action(async function({debug, path}: {debug: boolean, path: string} ) {
+    if (debug) {
+      logger.level = "debug";
+    }
     const config = await getConfig();
+    const version = getCurrentHash();
+    const fullPath = resolve(path);
+    
     await Promise.all(Object.entries(config).map(async([appName, appConfig]) => {
-      const {
-        artifactsPaths,
-      } = appConfig;
-      await pushArtifacts(artifactsPaths, appName);
+      if (appConfig.type === "caddy") {
+        const {
+          artifactsPaths,
+        } = appConfig;
+        await pushArtifacts(artifactsPaths, appName, version, fullPath);
+      }
     }));
   });
 
