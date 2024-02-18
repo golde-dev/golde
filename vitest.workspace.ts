@@ -2,6 +2,7 @@ import { defineWorkspace } from "vitest/config";
 
 const projects = [
   "cli", 
+  "agent",
 ];
 
 export default defineWorkspace(

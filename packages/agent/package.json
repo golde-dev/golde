@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@tenacify/core": "^0.1.0",
     "commander": "^12.0.0",
     "pino": "^8.18.0",
     "zod": "^3.22.4"

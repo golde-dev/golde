@@ -8,8 +8,11 @@
     "esModuleInterop": true
   },
   "include": [
-    "**/.eslintrc.cjs",
-    "**/config.example.ts",
+    "packages/*/.eslintrc.cjs",
+    "packages/*/config.example.ts",
+    "packages/*/vitest.setup.ts",
+    "packages/*/vite.config.ts",
+    "packages/*/vitest.config.ts",
     "commitlint.config.cjs",
     "vitest.workspace.ts",
     "vitest.config.ts",
