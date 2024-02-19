@@ -36,7 +36,7 @@ export const pushArtifacts = async(
   const localPath = join(path, app);
   const s3BasePath = join(artifactsBasePath, app);
   
-  rmSync(localPath, {force: true});
+  rmSync(localPath, {force: true, recursive: true});
 
   const ext = process.platform === "linux" 
     ? "zst"

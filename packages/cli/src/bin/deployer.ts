@@ -1,32 +1,37 @@
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/no-require-imports */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+
 import { Command } from "commander";
 import { existsSync } from "fs";
+import { config } from "dotenv";
 import { pushArtifacts } from "../artifacts.js";
 import type { Config } from "../types/config.js";
 import { getCurrentHash } from "../git.js";
 import logger from "../logger.js";
 import { cwd } from "process";
-import { resolve } from "path";
+import { join, resolve } from "path";
+import { importDynamic, importTS } from "../utils/module.js";
 
 const pwd = cwd();
 
+config({path: join(pwd, ".env")});
+
+
 const getConfig = async(): Promise<Config> => {
   if (existsSync(`${pwd}/deployer.config.cjs`)) {
-    return require(`${pwd}/deployer.config.cjs`);
+    return require(`${pwd}/deployer.config.cjs`) as Config;
   }
   if (existsSync(`${pwd}/deployer.config.json`)) {
-    return require(`${pwd}/deployer.config.json`);
+    return require(`${pwd}/deployer.config.json`) as Config;
   }
-  if (existsSync("./deployer.config.js")) {
-    throw new Error("Not implemented");
+  if (existsSync(`${pwd}/deployer.config.js`)) {
+    const {default: deployerConfig} = await importDynamic<{default: Config}>(`${pwd}/deployer.config.js`);
+    return deployerConfig;
   }
   if (existsSync("./deployer.config.ts")) {
-    throw new Error("Not implemented");
+    const {default: deployerConfig} = await importTS<{default: Config}>(`${pwd}/deployer.config.ts`);
+    return deployerConfig; 
   }
-  logger.error("Missing config files");
+  logger.error("Missing config file");
   throw new Error("No error");
 };
 
@@ -46,11 +51,11 @@ program
     if (debug) {
       logger.level = "debug";
     }
-    const config = await getConfig();
+    const deployerConfig = await getConfig();
     const version = getCurrentHash();
     const fullPath = resolve(path);
     
-    await Promise.all(Object.entries(config).map(async([appName, appConfig]) => {
+    await Promise.all(Object.entries(deployerConfig).map(async([appName, appConfig]) => {
       if (appConfig.type === "caddy") {
         const {
           artifactsPaths,

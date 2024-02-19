@@ -2,13 +2,13 @@
 const config = {
   providers: {
     deployer: {
-      apiKey: "{{ env.DEPLOYER_KEY }}"
+      apiKey: "{{ env.DEPLOYER_API_KEY }}"
     },
     cloudflare: {
-      apiKey: "{{ env.CLOUDFLARE_KEY }}"
+      apiKey: "{{ env.CLOUDFLARE_API_KEY }}"
     },
     hCloud: {
-      TOKEN: "{{ env.HCLOUD_TOKEN }}"
+      token: "{{ env.HCLOUD_TOKEN }}"
     }
   },
   servers: {

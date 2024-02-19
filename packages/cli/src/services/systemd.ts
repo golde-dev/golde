@@ -1,6 +1,6 @@
 
-import { systemNodeApi } from "./templates/nodeApi.js";
-import type { HostDeployApps } from "./types/config.js";
+import { systemNodeApi } from "./nodeApi.js";
+import type { HostDeployApps } from "../types/config.js";
 
 
 export function translate(config: HostDeployApps) {

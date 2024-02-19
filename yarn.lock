@@ -1911,6 +1911,7 @@ __metadata:
   resolution: "@tenacify/agent@workspace:packages/agent"
   dependencies:
     "@chyzwar/eslint-config": "npm:^0.2.18"
+    "@tenacify/core": "npm:^0.1.0"
     "@types/node": "npm:^20.11.17"
     "@typescript-eslint/eslint-plugin": "npm:^7.0.1"
     "@typescript-eslint/parser": "npm:^7.0.1"
@@ -1936,7 +1937,10 @@ __metadata:
     "@typescript-eslint/parser": "npm:^7.0.1"
     "@vitest/coverage-v8": "npm:^1.2.2"
     commander: "npm:^12.0.0"
+    dotenv: "npm:16.4.4"
     eslint: "npm:^8.56.0"
+    execa: "npm:^8.0.1"
+    find-up: "npm:^6.0.0"
     glob: "npm:^10.3.10"
     pino: "npm:^8.18.0"
     tar: "npm:^6.2.0"
@@ -2936,6 +2940,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:16.4.4":
+  version: 16.4.4
+  resolution: "dotenv@npm:16.4.4"
+  checksum: 0946a597f871cfb16039d4f67ff35b1c38d1a2c29a1edbffab2b210e6ba84d0e4d8f16470be74d88121fc0339260f6975deba608f1cdecfe6cf9633db242f67c
+  languageName: node
+  linkType: hard
+
 "eastasianwidth@npm:^0.2.0":
   version: 0.2.0
   resolution: "eastasianwidth@npm:0.2.0"
@@ -3499,6 +3510,16 @@ __metadata:
     locate-path: "npm:^6.0.0"
     path-exists: "npm:^4.0.0"
   checksum: 67c769110ce028bae5ca100af575c3a63456db1aedc3a0bb031a459778c1f5aee60f059a7e5c528b48fa0830cd85b8dff912a0f8bb2aae59934dc662526b9a2c
+  languageName: node
+  linkType: hard
+
+"find-up@npm:^6.0.0":
+  version: 6.3.0
+  resolution: "find-up@npm:6.3.0"
+  dependencies:
+    locate-path: "npm:^7.1.0"
+    path-exists: "npm:^5.0.0"
+  checksum: dc4093945c9cd3bbe9e001842fe8e86c795ef862e0ca0f74fde166a44187c73ea9d2630ba1b7f66759f0d309ac19b5e266faca3ff6ab5d700ec2d658c6eaa397
   languageName: node
   linkType: hard
 
@@ -4260,6 +4281,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"locate-path@npm:^7.1.0":
+  version: 7.2.0
+  resolution: "locate-path@npm:7.2.0"
+  dependencies:
+    p-locate: "npm:^6.0.0"
+  checksum: 7f5bbd5471aaefe7fb787fd04b36cfddcd0067374ac7f557298a075d8c5a9832a192f14bb5a2e1cef80b7dcc3c5627c41717a0059356aa6ca771bdd9249ec79b
+  languageName: node
+  linkType: hard
+
 "lodash.merge@npm:^4.6.2":
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
@@ -4716,6 +4746,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-limit@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "p-limit@npm:4.0.0"
+  dependencies:
+    yocto-queue: "npm:^1.0.0"
+  checksum: 725a77c7f76ba4d55579da9a936c0a5a30794563a23b91dad901641895b5b3ef0abb47daaffba3fd31f856064d15b81d20c30f332ffcabec70e9ff7e90c44909
+  languageName: node
+  linkType: hard
+
 "p-limit@npm:^5.0.0":
   version: 5.0.0
   resolution: "p-limit@npm:5.0.0"
@@ -4731,6 +4770,15 @@ __metadata:
   dependencies:
     p-limit: "npm:^3.0.2"
   checksum: f4a9b5078d1afd6397253c5900377e8c5951915980c74c8f0da4be7742490f648d4fbce7cbea6022b21f8428a7944ca17dbe8ce20884db6ad6eca0d8503897f5
+  languageName: node
+  linkType: hard
+
+"p-locate@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "p-locate@npm:6.0.0"
+  dependencies:
+    p-limit: "npm:^4.0.0"
+  checksum: 1ba4a355b45340443da211a5d5a86819dc15f5db31f31f3e210fd8427239c0001464ae9bf10bd192a40a769ef286a5aa5649dbcf884ba3d1ac376354e38d7413
   languageName: node
   linkType: hard
 
@@ -4756,6 +4804,13 @@ __metadata:
   version: 4.0.0
   resolution: "path-exists@npm:4.0.0"
   checksum: 9050516d1cd243361c2d98b75cdb29d3e584fd644a906bd407c1accb3289d04ac8328f2db4bc00ca88a434842b0c2835aabdd5fb7af942b698e3eef1f3ed4d8f
+  languageName: node
+  linkType: hard
+
+"path-exists@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "path-exists@npm:5.0.0"
+  checksum: 6ecc59d4767d3a0b240326f7d670541c57da087b35c00777c22abc4680000178641fa6f180cad739698e6531b286300396c5da63dc08b328b638cab5365ea3a2
   languageName: node
   linkType: hard
 

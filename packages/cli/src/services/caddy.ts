@@ -1,5 +1,5 @@
 import { join } from "path";
-import type { HostDeployApps } from "./types/config.js";
+import type { HostDeployApps } from "../types/config.js";
 
 export function translate(config: HostDeployApps) {
   return {

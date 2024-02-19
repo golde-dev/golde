@@ -10,5 +10,7 @@ module.exports = {
     }],
     "@typescript-eslint/explicit-module-boundary-types": ["off"],
     "@typescript-eslint/indent": ["off"],
+    "@typescript-eslint/no-require-imports": ["off"],
+    "@typescript-eslint/no-var-requires": ["off"],
   },
 };

@@ -47,6 +47,11 @@ export const createNativeTar = async(
 ) => {
   const paths = await glob(searchPaths);
   logger.debug({ paths }, "Paths included in tar");
-
+  
+  const dir = dirname(tarFile);
+  if (!existsSync(dir)) {
+    logger.debug({ dir }, "Dir not exists, creating");
+    mkdirSync(dir, {recursive: true});
+  }
   execSync(`tar -I "zstd -19 -T0" -cf "${tarFile}" ${paths.join(" ")}`);
 };
