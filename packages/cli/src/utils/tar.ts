@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync } from "fs";
-import logger from "./logger.js";
+import logger from "../logger.js";
 import { glob } from "glob";
 import { dirname } from "path";
 import { c } from "tar";

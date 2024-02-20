@@ -5,7 +5,7 @@ import { existsSync } from "fs";
 import { config } from "dotenv";
 import { pushArtifacts } from "../artifacts.js";
 import type { Config } from "../types/config.js";
-import { getCurrentHash } from "../git.js";
+import { getCurrentHash } from "../utils/git.js";
 import logger from "../logger.js";
 import { cwd } from "process";
 import { join, resolve } from "path";

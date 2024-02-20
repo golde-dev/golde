@@ -14,7 +14,7 @@ export const importDynamic = async <T = unknown>(modulePath: string): Promise<T>
 };
 
 export const inputIsModule = (source: string): boolean => {
-  return source.includes("export ");
+  return source.includes("export "); 
 };
 
 export const packageIsModule = async(dir: string): Promise<boolean | void> => {

@@ -1,6 +1,6 @@
 import { createReadStream, rmSync } from "fs";
-import { createNativeTar } from "./tar.js";
-import { createTar } from "./tar.js";
+import { createNativeTar } from "./utils/tar.js";
+import { createTar } from "./utils/tar.js";
 import s3 from "./s3.js";
 import logger from "./logger.js";
 import { join } from "path";
