@@ -13,8 +13,8 @@
     "packages/*/vitest.setup.ts",
     "packages/*/vite.config.ts",
     "packages/*/vitest.config.ts",
-    "commitlint.config.cjs",
     "vitest.workspace.ts",
     "vitest.config.ts",
+    "commitlint.config.cjs"
   ],
 }

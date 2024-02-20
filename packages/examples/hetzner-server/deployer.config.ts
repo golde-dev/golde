@@ -17,9 +17,6 @@ const config = {
       serverType: "cpx11",
       image: "ubuntu-22.04",
       userData: "",
-      firewall: {
-        type: "ufw"
-      }
     },
     "hetzner-server-2": {
       type: "hCloud",
@@ -29,9 +26,6 @@ const config = {
       install-deployer
     
       `,
-      firewall: {
-        type: "ufw"
-      }
     }
   },
   dns: {
