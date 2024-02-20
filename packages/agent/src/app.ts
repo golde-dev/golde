@@ -12,14 +12,11 @@ process.on("uncaughtException", (error) => {
 const init = async() => {
   const server = await createServer();
 
-  try {
-    await server.listen({
-      port: config.API_PORT,
-    }); 
-  }
-  catch (error) {
-    logger.error(error, "Server failed to listen");
-  }  
+  await server.listen({
+    port: config.API_PORT,
+  });
 };
 
-init();
+init().catch((error: Error) => {
+  logger.error(error, "Server failed to listen");
+});
