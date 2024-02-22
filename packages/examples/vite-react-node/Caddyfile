@@ -1,0 +1,21 @@
+localhost {
+	log {
+		level WARN
+	}
+	handle /api* {
+		reverse_proxy {
+			to localhost:3000
+
+			lb_policy round_robin
+			lb_retries 2
+		}
+	}
+	handle {
+		reverse_proxy {
+			to localhost:4000
+
+			lb_policy round_robin
+			lb_retries 2
+		}
+	}
+}

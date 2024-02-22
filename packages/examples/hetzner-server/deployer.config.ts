@@ -31,15 +31,15 @@ const config = {
   dns: {
     "deployer.dev": {
       type: "cloudflare",
-      records: [
-        {
+      records: {
+        "hetzner-server-1": {
           record: "hetzner-server-1",
           type: "A", 
           value: "{{ servers.hetzner-server-1.ip_address }}",
           ttl: "3600",
           proxied: false, 
         },
-      ]
+      }
     }
   },
 };
