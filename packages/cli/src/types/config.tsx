@@ -1,3 +1,4 @@
+import type { ProvidersConfig } from "../providers/provider";
 
 export type DeployConfig = Record<string, HostDeployApps>;
 
@@ -38,5 +39,7 @@ export interface CaddyConfig {
   branchMapping: Record<string, BranchMapping>;
 }
 
-
-export type Config = Record<string, CaddyConfig>;
+export type Config = {
+  project: string
+  providers: ProvidersConfig
+};

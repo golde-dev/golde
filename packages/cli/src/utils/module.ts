@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-implied-eval */
 
-import { findUp } from "find-up";
+import findUp from "find-up";
 import { readFileSync, rmSync, writeFileSync } from "fs";
 import { basename, dirname, join } from "path";
 import { transpileModule, ScriptTarget, ModuleKind}  from "typescript";

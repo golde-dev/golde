@@ -1,6 +1,12 @@
 
 import {z} from "zod";
 import {pino} from "pino";
+import {config} from "dotenv";
+import {join} from "path";
+
+config({
+  path: join(process.cwd(), ".env"),
+});
 
 const schema = z.object({
   S3_REGION: z.string().default("auto"),
