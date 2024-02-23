@@ -10,7 +10,22 @@ export const providersSchema: JSONSchemaType<ProvidersConfig> = {
       properties: {
         apiKey: {
           type: "string",
-          description: "Cloudflare api key",
+          minLength: 32,
+          maxLength: 32,
+          description: "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/",
+        },
+      },
+      required: ["apiKey"],
+      nullable: true,
+      additionalProperties: false,
+    },
+    hetzner: {
+      type: "object",
+      description: "Hetzner provider config",
+      properties: {
+        apiKey: {
+          type: "string",
+          description: "Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/",
         },
       },
       required: ["apiKey"],

@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { Logger } from "pino";
 import type { Readable } from "stream";
 import { LogCode } from "./constants/logging";
@@ -30,6 +30,26 @@ export class S3 {
     });
   }
 
+  /**
+   * Check api access token by doing head on bucket
+   */
+  public async verifyAccess() {
+    const command = new HeadBucketCommand({
+      Bucket: this.bucket,
+    });
+    try {
+      await this.client.send(command);
+    }
+    catch (error) {
+      this.logger.debug({
+        type: LogCode.S3HeadBucketError,
+        error,
+        bucket: this.bucket,
+      }, "Failed to head bucket");
+      throw error;
+    }
+  }
+
   public async getObject(key: string) {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
@@ -43,7 +63,7 @@ export class S3 {
       };
     }
     catch (error) {
-      this.logger.error({
+      this.logger.debug({
         type: LogCode.S3GetObjectError,
         error,
         key,
@@ -62,7 +82,7 @@ export class S3 {
       await this.client.send(command);
     }
     catch (error) {
-      this.logger.error({
+      this.logger.debug({
         type: LogCode.S3DeleteObjectError,
         error,
         key,
@@ -82,7 +102,7 @@ export class S3 {
       await this.client.send(command);
     }
     catch (error) {
-      this.logger.error({
+      this.logger.debug({
         type: LogCode.S3PutObjectError,
         error,
         key,
