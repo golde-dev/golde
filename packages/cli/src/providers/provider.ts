@@ -14,7 +14,7 @@ export interface ProvidersConfig {
   /**
    * Cloudflare provider config
    */
-  hetzner?: {
+  hcloud?: {
     /**
      * Hetzner API token 
      * @see https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/
@@ -23,6 +23,7 @@ export interface ProvidersConfig {
   }
   /**
    * State provider, only required if not using payed offering
+   * State provider would store build artifacts and state of project
    */
   state?: {
     bucket: string,

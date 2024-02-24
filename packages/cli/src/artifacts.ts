@@ -1,9 +1,10 @@
 import { createReadStream, rmSync } from "fs";
 import { createNativeTar } from "./utils/tar.js";
 import { createTar } from "./utils/tar.js";
-import s3 from "./s3.js";
 import logger from "./logger.js";
 import { join } from "path";
+import type { StateProvider } from "./providers/state.js";
+import type { Context } from "./context.js";
 
 const tarArtifacts = async(searchPaths: string[], tarFilePath: string, tarFn: typeof createNativeTar) => {
   const startTar = Date.now();
@@ -14,11 +15,11 @@ const tarArtifacts = async(searchPaths: string[], tarFilePath: string, tarFn: ty
   logger.info(`Created tar for artifacts: ${tarFilePath} in ${tarDuration}ms`);  
 };
 
-const uploadTar = async(tarFilePath: string, s3Path: string) => {
+const uploadTar = async(state: StateProvider, tarFilePath: string, s3Path: string) => {
   const readStream = createReadStream(tarFilePath);
 
   const startS3 = Date.now();
-  await s3.putObject(s3Path, readStream);
+  await state.putObject(s3Path, readStream);
   const endS3 = Date.now();
 
   const s3Duration = endS3 - startS3;
@@ -28,6 +29,9 @@ const uploadTar = async(tarFilePath: string, s3Path: string) => {
 const artifactsBasePath = "/artifacts";
 
 export const pushArtifacts = async(
+  {
+    state,
+  }: Context,
   searchPaths: string[], 
   app: string,
   version: string,
@@ -52,5 +56,5 @@ export const pushArtifacts = async(
     await tarArtifacts(searchPaths, tarFilePath, createTar);
   }
 
-  await uploadTar(tarFilePath, s3Path);
+  await uploadTar(state, tarFilePath, s3Path);
 };

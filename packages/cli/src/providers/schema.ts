@@ -19,7 +19,7 @@ export const providersSchema: JSONSchemaType<ProvidersConfig> = {
       nullable: true,
       additionalProperties: false,
     },
-    hetzner: {
+    hcloud: {
       type: "object",
       description: "Hetzner provider config",
       properties: {

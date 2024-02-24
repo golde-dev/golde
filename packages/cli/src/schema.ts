@@ -2,6 +2,8 @@ import type { JSONSchemaType } from "ajv";
 import type { Config } from "./types/config";
 import { providersSchema } from "./providers/schema";
 import Ajv from "ajv/dist/2019";
+import { CLIError } from "./error";
+import { ErrorCode } from "./constants/error";
 
 const ajv = new Ajv({
   strict: true, 
@@ -27,6 +29,6 @@ const validate = ajv.compile(schema);
 
 export function validateConfig(config: unknown): asserts config is Config {
   if (!validate(config)) {
-    throw new Error("Failed schema validation", {cause: validate.errors});
+    throw new CLIError("Failed schema validation", ErrorCode.INVALID_CONFIG, validate.errors);
   }
 }

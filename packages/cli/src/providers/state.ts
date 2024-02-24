@@ -4,6 +4,7 @@
 import { S3 } from "@tenacify/core";
 import type { Provider } from "./provider";
 import logger from "../logger";
+import type { Readable } from "stream";
 
 interface StateConfig {
   bucket: string,
@@ -44,6 +45,9 @@ export class StateProvider implements Provider {
       }, "Failed to initialize state provider, please verify config");
       throw error;
     }
+  }
+  public async putObject(key: string, object: Readable | string) {
+    return this.s3.putObject(key, object);
   }
 }
 
