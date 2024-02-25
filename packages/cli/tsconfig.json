@@ -9,6 +9,7 @@
     "tsBuildInfoFile": "./lib/buildInfo.json",
     "types": [
       "node",
+      "iarna__toml"
     ]
   },
   "include": [

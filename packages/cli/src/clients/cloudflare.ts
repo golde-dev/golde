@@ -1,27 +1,27 @@
 import { stringify } from "querystring";
 
-interface CloduflareErrorCause {
+interface CloudflareErrorCause {
   code: string;
   message: string;
   error_chain: unknown[]
 }
 
-interface ClodyflareListResponse<D> {
+interface CloudflareListResponse<D> {
   result?: D;
   success: boolean;
-  errors?: CloduflareErrorCause[];
+  errors?: CloudflareErrorCause[];
   resultInfo?: {
     total_count: number
   }
 }
 
-interface ClodyflareResponse<D> {
+interface CloudflareResponse<D> {
   result?: D;
   success: boolean;
-  errors?: CloduflareErrorCause[];
+  errors?: CloudflareErrorCause[];
 }
 
-interface VerifyToken {
+interface VerifyTokenResult {
   "expires_on": string
   "id": string
   "not_before": string
@@ -29,7 +29,7 @@ interface VerifyToken {
 }
 
 class CloudflareError extends Error {
-  public constructor(message: string, cause?: CloduflareErrorCause[]) {
+  public constructor(message: string, cause?: CloudflareErrorCause[]) {
     super(message, { cause });
   }
 }
@@ -58,13 +58,13 @@ export class CloudflareClient {
         result, 
         success, 
         errors,
-      } = await d.json() as ClodyflareListResponse<T>;
+      } = await d.json() as CloudflareListResponse<T>;
       
       if (success && result) {
         return result;
       }
       else {
-        throw new CloudflareError("Cloudflare error", errors);
+        throw new CloudflareError("Cloudflare request error", errors);
       }
     });
   }
@@ -81,13 +81,13 @@ export class CloudflareClient {
         result, 
         success, 
         errors,
-      } = await d.json() as ClodyflareResponse<T>;
+      } = await d.json() as CloudflareResponse<T>;
       
       if (success && result) {
         return result;
       }
       else {
-        throw new CloudflareError("Cloudflare error", errors);
+        throw new CloudflareError("Cloudflare request error", errors);
       }
     });
   }
@@ -96,7 +96,7 @@ export class CloudflareClient {
    * Verify that user supplied token is active
    */
   public async verifyUserToken(): Promise<void> {
-    const {status} = await this.makeRequest<VerifyToken>("/user/tokens/verify");
+    const {status} = await this.makeRequest<VerifyTokenResult>("/user/tokens/verify");
     if (status !== "active") {
       throw new CloudflareError(`Token is not active: ${status}`);
     }

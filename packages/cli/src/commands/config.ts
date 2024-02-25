@@ -2,7 +2,7 @@ import { existsSync } from "fs";
 import type { Config } from "../types/config";
 import { validateConfig } from "../schema";
 import logger from "../logger";
-import { importDynamic, importTS } from "../utils/module";
+import { importDynamic, importTOML, importTS } from "../utils/module";
 import { resolve } from "path";
 import { envTemplate, fileTemplate, resolveTemplate } from "../utils/template";
 import { ErrorCode } from "../constants/error";
@@ -29,7 +29,11 @@ const getConfig = async(): Promise<{ config: unknown, path: string }> => {
     const { default: deployerConfig } = await importTS<{ default: Config }>(ts);
     return { config: deployerConfig, path: ts };
   }
-
+  const toml = resolve("./deployer.toml");
+  if (existsSync(toml)) {
+    const deployerConfig = importTOML(toml);
+    return { config: deployerConfig, path: toml };
+  }
   throw new CLIError("No config", ErrorCode.NO_CONFIG);
 };
 
@@ -40,7 +44,6 @@ export const getAndValidateContext = async(): Promise<Context> => {
 
     const configWithEnv = resolveTemplate(config, envTemplate);
     logger.debug({ config: configWithEnv }, "Resolved env vars templates in config");
-
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
     logger.debug({ config: configWithEnv }, "Resolved files templates in config");
@@ -56,11 +59,10 @@ export const getAndValidateContext = async(): Promise<Context> => {
     if (error instanceof CLIError) {
       switch (error.code) {
         case ErrorCode.NO_CONFIG:
-          logger.error("Failed to load config, verify location or syntax");
+          logger.error("Failed to find config, verify location or syntax");
           break;
-
         case ErrorCode.ENV_MISSING:
-          logger.error(`File is missing: ${error.cause as string}`);
+          logger.error(`Env variable is missing: ${error.cause as string}`);
           break;
         case ErrorCode.TEMPLATE_ERROR:
           logger.error(`Config template error: ${error.message}`);

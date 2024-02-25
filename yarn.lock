@@ -1349,6 +1349,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iarna/toml@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "@iarna/toml@npm:2.2.5"
+  checksum: fcc9cb6f845510207cb44b47ae617685dec5f227a1d2c48d9e145d747d651414915f7f5c3bdd6c1e05edf5aa2a9e21f8aa1dccbb4fecf64859db45727e252581
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -2681,7 +2688,9 @@ __metadata:
   resolution: "@tenacify/cli@workspace:packages/cli"
   dependencies:
     "@chyzwar/eslint-config": "npm:^0.2.24"
+    "@iarna/toml": "npm:^2.2.5"
     "@tenacify/core": "npm:^0.2.0"
+    "@types/iarna__toml": "npm:^2.0.5"
     "@types/node": "npm:^20.11.19"
     "@types/tar": "npm:^6.1.11"
     "@typescript-eslint/eslint-plugin": "npm:^7.0.2"
@@ -2767,6 +2776,15 @@ __metadata:
   version: 1.0.5
   resolution: "@types/estree@npm:1.0.5"
   checksum: f69e9f41e2acde04d0335cc37c73c48a33bbe93d74e46b00a01f4e3d371dbb7efd4693f3db6f83888c18752050081356361ba85936e7b98ea4b42df865059303
+  languageName: node
+  linkType: hard
+
+"@types/iarna__toml@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "@types/iarna__toml@npm:2.0.5"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 6818b815a6c1159d492e60012f47f7a6e85adacbeb5c4b5c6e990474c55500972d8b103769a5170a7eb1419b4b3314afdf912a292d5e110d02b0a45fa76d4da4
   languageName: node
   linkType: hard
 

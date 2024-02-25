@@ -11,9 +11,9 @@ const ajv = new Ajv({
 });
 
 export const schema: JSONSchemaType<Config> = {
-  "$id": "https://deployer.com/product.schema.json",
-  "title": "Deployer",
-  "description": "schema for deployer config",
+  $id: "https://deployer.com/product.schema.json",
+  title: "Deployer",
+  description: "schema for deployer config",
 
   type: "object",
   properties: { 

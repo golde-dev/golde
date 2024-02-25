@@ -1367,6 +1367,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iarna/toml@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "@iarna/toml@npm:2.2.5"
+  checksum: fcc9cb6f845510207cb44b47ae617685dec5f227a1d2c48d9e145d747d651414915f7f5c3bdd6c1e05edf5aa2a9e21f8aa1dccbb4fecf64859db45727e252581
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -2310,8 +2317,9 @@ __metadata:
 
 "@tenacify/cli@file:../../cli::locator=%40tenacify%2Fvite-react-node%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=23a786&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
+  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=be0efd&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
   dependencies:
+    "@iarna/toml": "npm:^2.2.5"
     "@tenacify/core": "npm:^0.2.0"
     ajv: "npm:^8.12.0"
     commander: "npm:^12.0.0"
@@ -2325,17 +2333,17 @@ __metadata:
     zod: "npm:^3.22.4"
   bin:
     deployer: ./lib/bin/deployer.js
-  checksum: 584e3c94e28b18fe46ce1b2b13969c0d1584680f90a138a694d99cac2be4f6b356c06203a0261be90aeae44aff76ed4fd5054e565b30d06077863e68b229dccc
+  checksum: 6a07571d05b07cea500626ce0d5057ec03b9b405d0f848dc06c9a8aa8823ddb25adc12b08181c340747be684bf2c9e62dd4c7d853a702d7a3fdc38264c772ffd
   languageName: node
   linkType: hard
 
 "@tenacify/core@file:../../core::locator=%40tenacify%2Fvite-react-node%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/core@file:../../core#../../core::hash=4fb7dc&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
+  resolution: "@tenacify/core@file:../../core#../../core::hash=cb79ab&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.515.0"
     pino: "npm:^8.19.0"
-  checksum: 1796629e40d005b02fde7969060f9dbf24ef123568397b08c9f1036d2f7beac593791b44586f01dded5fa594289259db04230c583515240ecfd949707bef75b0
+  checksum: 9583333ad7dc7b9e6e5c4dc8b9cec9ae14870bf05537aebe1c5f1d34ca290afb9b27aa226c5846d10bffc28cae93dd1461d68230e5349877e80eed553cbe7203
   languageName: node
   linkType: hard
 

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-implied-eval */
 
 import findUp from "find-up";
+import parse from "@iarna/toml/parse-string";
 import { readFileSync, rmSync, writeFileSync } from "fs";
 import { basename, dirname, join } from "path";
 import { transpileModule, ScriptTarget, ModuleKind}  from "typescript";
@@ -55,4 +56,9 @@ export const importTS = async<T = unknown>(path: string): Promise<T> => {
   finally {
     rmSync(compiledConfigPath, {force: true});
   }
+};
+
+export const importTOML = (path: string) => {
+  const source = readFileSync(path, {encoding:"utf-8"});
+  return parse(source);
 };
