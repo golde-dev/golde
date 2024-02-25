@@ -20,9 +20,14 @@ export enum ErrorCode {
    * File is missing
    */
   FILE_MISSING = "FILE_MISSING",
-  
+
   /**
    * Template error
    */
   TEMPLATE_ERROR = "TEMPLATE_ERROR",
+  
+  /**
+   * Provider init error
+   */
+  PROVIDER_INIT_ERROR = "PROVIDER_INIT_ERROR",
 }

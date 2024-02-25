@@ -5,7 +5,7 @@ import { config } from "dotenv";
 import logger from "../logger.js";
 import { cwd } from "process";
 import { join } from "path";
-import { getAndValidateConfig } from "../commands/config.js";
+import { getAndValidateContext } from "../commands/config.js";
 
 config({ path: join(cwd(), ".env") });
 
@@ -25,7 +25,7 @@ program
       logger.level = "debug";
     }
 
-    await getAndValidateConfig();
+    await getAndValidateContext();
   });
 
 // program

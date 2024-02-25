@@ -17,6 +17,7 @@ export class CloudflareProvider implements Provider {
     const client = new CloudflareClient(apiKey);
 
     try {
+      logger.debug("Initializing cloudflare provider");
       await client.verifyUserToken();
       return new CloudflareProvider(client);
     }
