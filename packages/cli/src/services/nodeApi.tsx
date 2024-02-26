@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
 import { writeFileSync } from "fs";
 import { join } from "path";
 import type { ReverseProxyApp } from "../types/config.js";

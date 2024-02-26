@@ -2317,7 +2317,7 @@ __metadata:
 
 "@tenacify/cli@file:../../cli::locator=%40tenacify%2Fvite-react-node%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=be0efd&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
+  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=ee11f1&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
   dependencies:
     "@iarna/toml": "npm:^2.2.5"
     "@tenacify/core": "npm:^0.2.0"
@@ -2333,7 +2333,7 @@ __metadata:
     zod: "npm:^3.22.4"
   bin:
     deployer: ./lib/bin/deployer.js
-  checksum: 6a07571d05b07cea500626ce0d5057ec03b9b405d0f848dc06c9a8aa8823ddb25adc12b08181c340747be684bf2c9e62dd4c7d853a702d7a3fdc38264c772ffd
+  checksum: bc7f92742bb15311e9cdda65a50fdaa44d1ee7b9489bdd468c0993dbcfd161e1e0d82547b2b84ed2e0c66bdb85f827fc273ccd4033873195ad96f6a0360eaaaa
   languageName: node
   linkType: hard
 

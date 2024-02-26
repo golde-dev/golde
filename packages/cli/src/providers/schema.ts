@@ -32,6 +32,19 @@ export const providersSchema: JSONSchemaType<ProvidersConfig> = {
       nullable: true,
       additionalProperties: false,
     },
+    deployer: {
+      type: "object",
+      description: "Deployer provider config",
+      properties: {
+        apiKey: {
+          type: "string",
+          description: "Deployer api key",
+        },
+      },
+      required: ["apiKey"],
+      nullable: true,
+      additionalProperties: false,
+    },
     state: {
       type: "object",
       description: "State provider config, only required when not using oss version",

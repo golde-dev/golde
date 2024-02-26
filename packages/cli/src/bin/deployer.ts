@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-
+import logger from "../logger.js";
 import { Command } from "commander";
 import { config } from "dotenv";
-import logger from "../logger.js";
 import { cwd } from "process";
 import { join } from "path";
 import { getAndValidateContext } from "../commands/config.js";
+import { version } from "../../package.json";
 
 config({ path: join(cwd(), ".env") });
 
@@ -14,18 +13,21 @@ const program = new Command();
 program
   .name("deployer")
   .description("CLI to manager deployer")
-  .version("0.8.0");
+  .version(version);
 
 program
-  .command("validate")
+  .command("show")
   .description("validate deployer config")
   .option("-d, --debug", "enable debug mode")
   .action(async function({ debug }: { debug: boolean }) {
     if (debug) {
       logger.level = "debug";
     }
+    const { 
+      config: currentConfig, 
+    } = await getAndValidateContext();
 
-    await getAndValidateContext();
+    logger.info(currentConfig);
   });
 
 // program

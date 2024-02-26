@@ -21,6 +21,9 @@ interface CloudflareResponse<D> {
   errors?: CloudflareErrorCause[];
 }
 
+/**
+ * @see https://developers.cloudflare.com/api/operations/user-api-tokens-verify-token
+ */
 interface VerifyTokenResult {
   "expires_on": string
   "id": string
@@ -29,7 +32,7 @@ interface VerifyTokenResult {
 }
 
 class CloudflareError extends Error {
-  public constructor(message: string, cause?: CloudflareErrorCause[]) {
+  public constructor(message: string, cause?: CloudflareErrorCause[] | Error) {
     super(message, { cause });
   }
 }
@@ -87,7 +90,7 @@ export class CloudflareClient {
         return result;
       }
       else {
-        throw new CloudflareError("Cloudflare request error", errors);
+        throw new CloudflareError("Cloudflare response error", errors);
       }
     });
   }

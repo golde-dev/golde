@@ -56,6 +56,5 @@ export const pushArtifacts = async(
     await tarArtifacts(searchPaths, tarFilePath, createTar);
   }
 
-  // @ts-expect-error to be fixed when state will not be optional
   await uploadTar(state, tarFilePath, s3Path);
 };

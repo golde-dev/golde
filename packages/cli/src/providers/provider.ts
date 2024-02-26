@@ -2,6 +2,15 @@
 
 export interface ProvidersConfig {
   /**
+   * Hetzner cloud provider config
+   */
+  deployer?: {
+    /**
+     * Deployer API token 
+     */
+    apiKey: string
+  }
+  /**
    * Cloudflare provider config
    */
   cloudflare?: {
@@ -12,7 +21,7 @@ export interface ProvidersConfig {
     apiKey: string
   }
   /**
-   * Cloudflare provider config
+   * Hetzner cloud provider config
    */
   hcloud?: {
     /**

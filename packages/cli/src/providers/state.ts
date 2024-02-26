@@ -6,7 +6,7 @@ import type { Provider } from "./provider";
 import logger from "../logger";
 import type { Readable } from "stream";
 
-interface StateConfig {
+export interface StateConfig {
   bucket: string,
   region: string,
   endpoint: string,

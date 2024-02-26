@@ -1,5 +1,8 @@
 import { stringify } from "querystring";
 
+/**
+ * @see https://docs.hetzner.cloud/#locations-get-all-locations
+ */
 interface Location {
   "city": string,
   "country": string,
