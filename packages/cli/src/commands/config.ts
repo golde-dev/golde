@@ -4,7 +4,7 @@ import { validateConfig } from "../schema";
 import logger from "../logger";
 import { importDynamic, importTOML, importTS } from "../utils/module";
 import { resolve } from "path";
-import { envTemplate, fileTemplate, resolveTemplate } from "../utils/template";
+import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "../utils/template";
 import { ErrorCode } from "../constants/error";
 import { CLIError } from "../error";
 import type { Context } from "../context";
@@ -41,17 +41,20 @@ export const getAndValidateContext = async(): Promise<Context> => {
   try {
     const { config, path } = await getConfig();
     logger.debug({ config, path }, "Loaded config");
-
+    
     const configWithEnv = resolveTemplate(config, envTemplate);
     logger.debug({ config: configWithEnv }, "Resolved env vars templates in config");
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
     logger.debug({ config: configWithEnv }, "Resolved files templates in config");
 
-    validateConfig(configWithFiles);
+    const configWithGit = resolveTemplate(configWithFiles, gitTemplate);
+    logger.debug({ config: configWithGit }, "Resolved git templates in config");
+
+    validateConfig(configWithGit);
     logger.debug("Validated config with json schema");
 
-    const context = await initializeContext(configWithFiles);
+    const context = await initializeContext(configWithGit);
     logger.debug("Context initialized");
     return context;
   }
@@ -69,6 +72,9 @@ export const getAndValidateContext = async(): Promise<Context> => {
           break;
         case ErrorCode.FILE_MISSING:
           logger.error(`File is missing: ${error.cause as string}`);
+          break;
+        case ErrorCode.GIT_MISSING:
+          logger.error(`git variable is missing: ${error.cause as string}`);
           break;
         case ErrorCode.INVALID_CONFIG:
           logger.error(error.cause, "Config failed validation");

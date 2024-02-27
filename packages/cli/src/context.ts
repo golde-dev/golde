@@ -9,6 +9,7 @@ import type { Config } from "./types/config";
 
 export interface Context {
   config: Config
+  previousConfig?: Config
   deployer?: DeployerProvider,
   state: StateProvider,
   hcloud?: HCloudProvider,
@@ -59,17 +60,23 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       await deployerProvider?.registerStateProvider(state);
       logger.debug("Using own state provider");
 
+      const previousConfig = await stateProvider.getPreviousConfig();
+
       return {
         ...contextBase,
+        previousConfig,
         state: stateProvider,
       };
     }
     else if (deployerProvider) {
       const stateProviderFromDeployer = await deployerProvider.initStateProvider();
       logger.debug("Created state provider from deployer");
+      
+      const previousConfig = await stateProviderFromDeployer.getPreviousConfig();
 
       return {
         ...contextBase,
+        previousConfig,
         state: stateProviderFromDeployer,
       };
     }

@@ -8,5 +8,6 @@ module.exports = {
     "@typescript-eslint/indent": ["off"],
     "@typescript-eslint/no-require-imports": ["off"],
     "@typescript-eslint/no-var-requires": ["off"],
+    "@typescript-eslint/consistent-indexed-object-style": ["off"],
   },
 };

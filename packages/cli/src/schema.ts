@@ -4,6 +4,7 @@ import { providersSchema } from "./providers/schema";
 import Ajv from "ajv/dist/2019";
 import { CLIError } from "./error";
 import { ErrorCode } from "./constants/error";
+import { dnsSchema } from "./dns/schema";
 
 const ajv = new Ajv({
   strict: true, 
@@ -21,6 +22,8 @@ export const schema: JSONSchemaType<Config> = {
       type: "string",
     },
     providers: providersSchema,
+    
+    dns: {...dnsSchema, nullable: true},
   },
   required: ["providers"],
 };

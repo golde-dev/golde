@@ -15,9 +15,9 @@ program
   .description("CLI to manager deployer")
   .version(version);
 
-program
+  program
   .command("show")
-  .description("validate deployer config")
+  .description("Show configuration")
   .option("-d, --debug", "enable debug mode")
   .action(async function({ debug }: { debug: boolean }) {
     if (debug) {
@@ -28,6 +28,31 @@ program
     } = await getAndValidateContext();
 
     logger.info(currentConfig);
+  });
+
+program
+  .command("validate")
+  .description("Check whether the configuration is valid")
+  .option("-d, --debug", "enable debug mode")
+  .action(async function({ debug }: { debug: boolean }) {
+    if (debug) {
+      logger.level = "debug";
+    }
+    await getAndValidateContext();
+
+    logger.info("Config is valid");
+  });
+
+
+  program
+  .command("plan")
+  .description("Show changes required by the current configuration")
+  .option("-d, --debug", "enable debug mode")
+  .action(async function({ debug }: { debug: boolean }) {
+    if (debug) {
+      logger.level = "debug";
+    }
+    await getAndValidateContext();
   });
 
 // program

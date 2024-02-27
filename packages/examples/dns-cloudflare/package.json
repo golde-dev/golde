@@ -1,0 +1,18 @@
+{
+  "name": "@tenacify/dns-cloudflare",
+  "packageManager": "yarn@4.0.2",
+  "type": "commonjs",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "deployer:show": "deployer show",
+    "deployer:apply": "deployer apply"
+  },
+  "devDependencies": {
+    "@tenacify/cli": "../../cli"
+  },
+  "resolutions": {
+    "@tenacify/core": "../../core"
+  }
+}

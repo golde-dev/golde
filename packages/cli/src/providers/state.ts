@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/class-methods-use-this */
 
-
-
+import logger from "../logger";
 import { S3 } from "@tenacify/core";
 import type { Provider } from "./provider";
-import logger from "../logger";
 import type { Readable } from "stream";
+import type { Config } from "../types/config";
 
 export interface StateConfig {
   bucket: string,
@@ -48,6 +48,10 @@ export class StateProvider implements Provider {
   }
   public async putObject(key: string, object: Readable | string) {
     return this.s3.putObject(key, object);
+  }
+
+  public async getPreviousConfig(): Promise<Config | undefined> {
+    return Promise.resolve(undefined);
   }
 }
 

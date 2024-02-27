@@ -17,6 +17,11 @@ export enum ErrorCode {
   ENV_MISSING = "ENV_MISSING",
 
   /**
+   * git variable missing
+   */
+  GIT_MISSING = "GIT_MISSING",
+
+  /**
    * File is missing
    */
   FILE_MISSING = "FILE_MISSING",

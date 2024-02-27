@@ -8,3 +8,9 @@ export const getBranchName = () => execSync("git rev-parse --abbrev-ref HEAD")
 export const getCurrentHash = () => execSync("git rev-parse HEAD")
   .toString()
   .trim();
+
+  export const getBranchSlug = () => execSync("git rev-parse HEAD")
+  .toString()
+  .trim()
+  .replaceAll(" ", "-")
+  .replaceAll("/", "-");

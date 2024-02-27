@@ -2,9 +2,11 @@
 import { existsSync, readFileSync } from "fs";
 import { CLIError } from "../error";
 import { ErrorCode } from "../constants/error";
+import { getBranchName, getBranchSlug } from "./git";
 
 const templateRe = new RegExp(/(?<={{\s)(.*)(?=\s}})/);
 
+// TODO: add support for embedded templates "{{ env.NODE_ENV }}-something"
 export const resolveTemplate = (value: unknown, onTemplate: (value: string) => string): unknown => {
   if (
     value === undefined ||
@@ -35,7 +37,7 @@ export const resolveTemplate = (value: unknown, onTemplate: (value: string) => s
     throw new CLIError("Set is not permitted", ErrorCode.TEMPLATE_ERROR);
   }
   else if (value instanceof Map) {
-    throw new CLIError("Map is not permitted",  ErrorCode.TEMPLATE_ERROR);
+    throw new CLIError("Map is not permitted", ErrorCode.TEMPLATE_ERROR);
   }
   else if (value instanceof Array) {
     return value.map((val) => resolveTemplate(val, onTemplate));
@@ -45,7 +47,7 @@ export const resolveTemplate = (value: unknown, onTemplate: (value: string) => s
     return Object.keys(record).reduce((current: object, key: string) => {
       return {
         ...current,
-        [key]: resolveTemplate(record[key], onTemplate),
+        [resolveTemplate(key, onTemplate) as string]: resolveTemplate(record[key], onTemplate),
       };
     }, {});
   }
@@ -70,6 +72,27 @@ export const envTemplate = (value: string): string => {
   }
   return value;
 };
+
+const gitRe = new RegExp(/(?<=git.)(.*)/);
+
+export const gitTemplate = (value: string): string => {
+  const match = gitRe.exec(value);
+  if (match) {
+    const [variableName] = match;
+
+    if (variableName === "BRANCH_SLUG") {
+      return getBranchSlug();
+    }
+    else if (variableName === "BRANCH") {
+      return getBranchName();
+    }
+    else {
+      throw new CLIError("git variable is missing", ErrorCode.GIT_MISSING, variableName);
+    }
+  }
+  return value;
+};
+
 const fileRe = new RegExp(/(?<=file\()(.*)(?=\))/);
 
 export const fileTemplate = (value: string): string => {
