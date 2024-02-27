@@ -4,6 +4,7 @@ import type { Provider } from "./provider";
 
 interface CloudflareConfig {
   apiKey: string
+  accountId: string;
 }
 
 export class CloudflareProvider implements Provider {
@@ -13,8 +14,8 @@ export class CloudflareProvider implements Provider {
     this.client = client;
   }
 
-  public static async init({ apiKey }: CloudflareConfig): Promise<CloudflareProvider> {
-    const client = new CloudflareClient(apiKey);
+  public static async init({ apiKey, accountId }: CloudflareConfig): Promise<CloudflareProvider> {
+    const client = new CloudflareClient(apiKey, accountId);
 
     try {
       logger.debug("Initializing cloudflare provider");

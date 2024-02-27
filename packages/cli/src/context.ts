@@ -85,13 +85,9 @@ export const initializeContext = async(config: Config): Promise<Context> => {
     }
   }
   catch (error) {
-    if (error instanceof CLIError) {
-      throw error;
-    }
-    else if (error instanceof Error) {
+    if (error instanceof Error) {
       throw new CLIError(error.message, ErrorCode.PROVIDER_INIT_ERROR, error);
     }
-
     throw error;
   }
 };

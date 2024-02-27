@@ -9,6 +9,7 @@ import { dnsSchema } from "./dns/schema";
 const ajv = new Ajv({
   strict: true, 
   strictSchema: true,
+  allErrors: true,
 });
 
 export const schema: JSONSchemaType<Config> = {

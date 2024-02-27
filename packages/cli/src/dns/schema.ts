@@ -1,5 +1,5 @@
 import type { JSONSchemaType } from "ajv";
-import type { CloudflareDNSRecord, DNSConfig, DNSZoneRecords } from "./dns";
+import type { CloudflareDNSRecord, DNSConfig } from "./dns";
 
 const dnsRecordSchema: JSONSchemaType<CloudflareDNSRecord> =  {
   type: "object",
@@ -25,10 +25,20 @@ export const dnsSchema: JSONSchemaType<DNSConfig> = {
         nullable: true,
         required: [],
         properties: {
-          A: dnsRecordSchema,
-          AAAA: dnsRecordSchema,
+          A: {
+            type: "object",
+            nullable: true,
+            required: [],
+            additionalProperties: dnsRecordSchema,
+          },
+          AAAA: {
+            type: "object",
+            nullable: true,
+            required: [],
+            additionalProperties: dnsRecordSchema,
+          },
         },
-      } as JSONSchemaType<Record<string, DNSZoneRecords>>,
+      },
     },
   },
   required: [],

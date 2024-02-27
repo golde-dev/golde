@@ -4,7 +4,8 @@ import type {Config} from '@tenacify/cli'
 const config: Config = {
   providers: {
     cloudflare: {
-      apiKey: "{{ env.CLOUDFLARE_API_KEY }}"
+      apiKey: "{{ env.CLOUDFLARE_API_KEY }}",
+      accountId: "{{ env.CLOUDFLARE_API_KEY }}"
     },
   },
   dns: {

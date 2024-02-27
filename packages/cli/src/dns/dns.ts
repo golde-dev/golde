@@ -16,6 +16,7 @@ export interface DNSZoneRecords {
     [record: string]: CloudflareDNSRecord
   }
 }
+
 export interface DNSConfig {
   cloudflare?: {
     [zone: string]: DNSZoneRecords

@@ -22,10 +22,7 @@ const config = {
       type: "hCloud",
       serverType: "cpx11",
       image: "ubuntu-22.04",
-      userData: `
-      install-deployer
-    
-      `,
+      userData: ""
     }
   },
   dns: {

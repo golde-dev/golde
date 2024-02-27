@@ -14,8 +14,12 @@ export const providersSchema: JSONSchemaType<ProvidersConfig> = {
           maxLength: 32,
           description: "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/",
         },
+        accountId: {
+          type: "string",
+          description: "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids",
+        },
       },
-      required: ["apiKey"],
+      required: ["apiKey", "accountId"],
       nullable: true,
       additionalProperties: false,
     },
