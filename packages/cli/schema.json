@@ -1,84 +1,160 @@
 {
-  "$id": "https://deployer.com/product.schema.json",
-  "title": "Deployer",
-  "description": "schema for deployer config",
-  "type": "object",
-  "properties": {
-    "project": {
-      "type": "string"
-    },
-    "providers": {
+  "$ref": "#/definitions/my",
+  "definitions": {
+    "my": {
       "type": "object",
       "properties": {
-        "cloudflare": {
+        "project": {
+          "type": "string"
+        },
+        "providers": {
           "type": "object",
-          "description": "Cloudflare provider config",
           "properties": {
-            "apiKey": {
-              "type": "string",
-              "description": "Cloudflare api key @see https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"
+            "cloudflare": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"
+                },
+                "accountId": {
+                  "type": "string",
+                  "description": "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"
+                }
+              },
+              "required": [
+                "apiKey",
+                "accountId"
+              ],
+              "additionalProperties": false,
+              "description": "Cloudflare provider config"
+            },
+            "hcloud": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"
+                }
+              },
+              "required": [
+                "apiKey"
+              ],
+              "additionalProperties": false,
+              "description": "Hetzner provider config"
+            },
+            "deployer": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Deployer api key"
+                }
+              },
+              "required": [
+                "apiKey"
+              ],
+              "additionalProperties": false,
+              "description": "Deployer provider config"
+            },
+            "state": {
+              "type": "object",
+              "properties": {
+                "bucket": {
+                  "type": "string",
+                  "description": "Name of s3 bucket"
+                },
+                "region": {
+                  "type": "string",
+                  "description": "name of region, use auto for R2"
+                },
+                "endpoint": {
+                  "type": "string",
+                  "description": "s3 endpoint"
+                },
+                "accessKeyId": {
+                  "type": "string",
+                  "description": "access key id"
+                },
+                "secretAccessKey": {
+                  "type": "string",
+                  "description": "s3 access key"
+                }
+              },
+              "required": [
+                "bucket",
+                "region",
+                "endpoint",
+                "accessKeyId",
+                "secretAccessKey"
+              ],
+              "additionalProperties": false,
+              "description": "State provider config, only required when not using oss version"
             }
           },
-          "required": [
-            "apiKey"
-          ],
-          "nullable": true,
           "additionalProperties": false
         },
-        "hetzner": {
+        "dns": {
           "type": "object",
-          "description": "Hetzner provider config",
           "properties": {
-            "apiKey": {
-              "type": "string",
-              "description": "Hetzner api key "
+            "cloudflare": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "A": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "ttl": {
+                          "type": "number",
+                          "description": "TTL in seconds"
+                        },
+                        "proxied": {
+                          "type": "boolean"
+                        },
+                        "branch": {
+                          "type": "string"
+                        },
+                        "branchPattern": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "AAAA": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/definitions/my/properties/dns/properties/cloudflare/additionalProperties/properties/A/additionalProperties"
+                    }
+                  }
+                },
+                "required": [
+                  "A",
+                  "AAAA"
+                ],
+                "additionalProperties": false
+              }
             }
           },
-          "required": [
-            "apiKey"
-          ],
-          "nullable": true,
-          "additionalProperties": false
-        },
-        "state": {
-          "type": "object",
-          "description": "State provider config, only required when not using oss version",
-          "properties": {
-            "bucket": {
-              "type": "string",
-              "description": "Name of s3 bucket"
-            },
-            "region": {
-              "type": "string",
-              "description": "name of region, use auto for R2"
-            },
-            "endpoint": {
-              "type": "string",
-              "description": "s3 endpoint"
-            },
-            "accessKeyId": {
-              "type": "string",
-              "description": "access key id"
-            },
-            "secretAccessKey": {
-              "type": "string",
-              "description": "s3 access key"
-            }
-          },
-          "required": [
-            "bucket",
-            "region",
-            "endpoint",
-            "accessKeyId",
-            "secretAccessKey"
-          ],
-          "nullable": true,
           "additionalProperties": false
         }
-      }
+      },
+      "required": [
+        "project",
+        "providers",
+        "dns"
+      ],
+      "additionalProperties": false
     }
   },
-  "required": [
-    "providers"
-  ]
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }

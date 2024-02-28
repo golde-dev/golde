@@ -1,38 +1,22 @@
-import type { JSONSchemaType } from "ajv";
 import type { Config } from "./types/config";
-import { providersSchema } from "./providers/schema";
-import Ajv from "ajv/dist/2019";
 import { CLIError } from "./error";
 import { ErrorCode } from "./constants/error";
 import { dnsSchema } from "./dns/schema";
+import { ZodType, z } from "zod";
+import { providersSchema } from "./providers/schema";
+import { bucketSchema } from "./bucket/schema";
 
-const ajv = new Ajv({
-  strict: true, 
-  strictSchema: true,
-  allErrors: true,
-});
 
-export const schema: JSONSchemaType<Config> = {
-  $id: "https://deployer.com/product.schema.json",
-  title: "Deployer",
-  description: "schema for deployer config",
-
-  type: "object",
-  properties: { 
-    project: {
-      type: "string",
-    },
-    providers: providersSchema,
-    
-    dns: {...dnsSchema, nullable: true},
-  },
-  required: ["providers"],
-};
-
-const validate = ajv.compile(schema);
+export const schema: ZodType<Config> = z.object({
+  project: z.string(),
+  providers: providersSchema,
+  dns: dnsSchema.optional(),
+  buckets: bucketSchema.optional(),
+})
 
 export function validateConfig(config: unknown): asserts config is Config {
-  if (!validate(config)) {
-    throw new CLIError("Failed schema validation", ErrorCode.INVALID_CONFIG, validate.errors);
+  const result = schema.safeParse(config);
+  if (!result.success) {
+    throw new CLIError("Failed schema validation", ErrorCode.INVALID_CONFIG, result.error.format());
   }
 }

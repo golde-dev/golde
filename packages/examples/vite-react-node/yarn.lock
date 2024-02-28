@@ -2424,11 +2424,10 @@ __metadata:
 
 "@tenacify/cli@file:../../cli::locator=%40tenacify%2Fvite-react-node%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=b7c0a4&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
+  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=7ffd6a&locator=%40tenacify%2Fvite-react-node%40workspace%3A."
   dependencies:
     "@iarna/toml": "npm:^2.2.5"
     "@tenacify/core": "npm:^0.2.0"
-    ajv: "npm:^8.12.0"
     commander: "npm:^12.0.0"
     dotenv: "npm:16.4.5"
     execa: "npm:^8.0.1"
@@ -2438,9 +2437,10 @@ __metadata:
     tar: "npm:^6.2.0"
     typescript: "npm:^5.3.3"
     zod: "npm:^3.22.4"
+    zod-to-json-schema: "npm:^3.22.4"
   bin:
     deployer: ./lib/bin/deployer.js
-  checksum: c82e38afb140604f6220769888a3c9595cf883b7c52f122217b85a17fc906631bcca97fae86cce9538f96f369cee31816b173ff8e046259300366c8ab791f9e5
+  checksum: a343ffa4b8e55a103f144bb9bdd357857eb305f56c4abf634b8d608acbac0e286ce5a6112451e1d32499e333d0a07a141599cd9e8eb4867c149c977348b91a8a
   languageName: node
   linkType: hard
 
@@ -2841,7 +2841,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.10.0, ajv@npm:^8.11.0, ajv@npm:^8.12.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.10.0, ajv@npm:^8.11.0":
   version: 8.12.0
   resolution: "ajv@npm:8.12.0"
   dependencies:
@@ -7185,6 +7185,15 @@ __metadata:
   dependencies:
     "@types/yoga-layout": "npm:1.9.2"
   checksum: d0bed2af00223c83282a239c326b95f0ad003bae03f1d5c064c0b8fb0f1a1133c679b5d4778970e226f2a9b7f45c4299e7562452953a93a4e0f6685c8c4473e3
+  languageName: node
+  linkType: hard
+
+"zod-to-json-schema@npm:^3.22.4":
+  version: 3.22.4
+  resolution: "zod-to-json-schema@npm:3.22.4"
+  peerDependencies:
+    zod: ^3.22.4
+  checksum: 218d40b288540653b1d426ca8fc8fa295b92818b7dd516261aecaa888f18f8070bd2d720c3701309de801c450a05841fd6590c01e82401fef4893543aa8527b0
   languageName: node
   linkType: hard
 

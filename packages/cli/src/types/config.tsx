@@ -4,5 +4,6 @@ import type { ProvidersConfig } from "../providers/provider";
 export type Config = {
   project: string
   providers: ProvidersConfig; 
-  dns?: DNSConfig
+  dns?: DNSConfig;
+  buckets?: BucketConfig;
 };

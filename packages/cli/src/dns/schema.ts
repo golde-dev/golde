@@ -1,47 +1,32 @@
-import type { JSONSchemaType } from "ajv";
 import type { CloudflareDNSRecord, DNSConfig } from "./dns";
+import { ZodType, z } from "zod";
 
-const dnsRecordSchema: JSONSchemaType<CloudflareDNSRecord> =  {
-  type: "object",
-  properties: {
-    value: {type: "string"},
-    ttl: {type: "number", nullable: true},
-    proxied: {type: "boolean", nullable: true},
-    branch: {type: "string", nullable: true},
-    branchPattern: {type: "string", nullable: true},
-  },
-  required: ["value"],
-};
+const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
+  .object({
+    value: z.string(),
+    ttl: z
+      .number()
+      .optional()
+      .describe("TTL in seconds"),
+    proxied: z.boolean().optional(),
+    branch: z.string().optional(),
+    branchPattern: z.string().optional()
+  })
+  .strict()
+  .refine(
+    data => data.branchPattern && data.branch,
+    'Cannot use both branchPattern and branch',
+  );
 
 
-export const dnsSchema: JSONSchemaType<DNSConfig> = {
-  type: "object",
-  properties: {
-    cloudflare: {
-      type: "object",
-      nullable: true,
-      propertyNames: {type: "string"},
-      required: [],
-      additionalProperties: {
-        type: "object",
-        nullable: true,
-        required: [],
-        properties: {
-          A: {
-            type: "object",
-            nullable: true,
-            required: [],
-            additionalProperties: dnsRecordSchema,
-          },
-          AAAA: {
-            type: "object",
-            nullable: true,
-            required: [],
-            additionalProperties: dnsRecordSchema,
-          },
-        },
-      },
-    },
-  },
-  required: [],
-};
+export const dnsSchema: ZodType<DNSConfig> = z
+  .object({
+    cloudflare: z
+      .record(
+        z.object({
+          A: z.record(cloudflareDNSRecord).optional(),
+          AAAA: z.record(cloudflareDNSRecord).optional()
+        }))
+      .optional()
+  });
+
