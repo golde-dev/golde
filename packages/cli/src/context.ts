@@ -6,10 +6,12 @@ import { DeployerProvider } from "./providers/deployer";
 import { HCloudProvider } from "./providers/hcloud";
 import { StateProvider } from "./providers/state";
 import type { Config } from "./types/config";
+import { State } from "./types/state";
 
 export interface Context {
-  config: Config
   previousConfig?: Config
+  previousState: State;
+  config: Config
   deployer?: DeployerProvider,
   state: StateProvider,
   hcloud?: HCloudProvider,
@@ -18,6 +20,7 @@ export interface Context {
 
 export const initializeContext = async(config: Config): Promise<Context> => {
   const {
+    project,
     providers: {
       deployer,
       state,
@@ -36,10 +39,10 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       cloudflareProvider,
     ] = await Promise.all([
       deployer
-        ? DeployerProvider.init(deployer)
+        ? DeployerProvider.init(project, deployer)
         : undefined,
       state
-        ? StateProvider.init(state)
+        ? StateProvider.init(project, state)
         : undefined,
       hcloud
         ? HCloudProvider.init(hcloud)
@@ -60,11 +63,15 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       await deployerProvider?.registerStateProvider(state);
       logger.debug("Using own state provider");
 
-      const previousConfig = await stateProvider.getPreviousConfig();
+      const {
+        previousConfig,
+        previousState,
+      } = await stateProvider.getPreviousConfig();
 
       return {
         ...contextBase,
         previousConfig,
+        previousState,
         state: stateProvider,
       };
     }
@@ -72,11 +79,15 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       const stateProviderFromDeployer = await deployerProvider.initStateProvider();
       logger.debug("Created state provider from deployer");
       
-      const previousConfig = await stateProviderFromDeployer.getPreviousConfig();
+      const {
+        previousConfig,
+        previousState,
+      } = await stateProviderFromDeployer.getPreviousConfig();
 
       return {
         ...contextBase,
         previousConfig,
+        previousState,
         state: stateProviderFromDeployer,
       };
     }

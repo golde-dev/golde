@@ -15,13 +15,15 @@ export interface StateConfig {
 }
 
 export class StateProvider implements Provider {
+  private readonly project: string;
   private readonly s3: S3;
 
-  private constructor(s3: S3) {
+  private constructor(project: string, s3: S3) {
+    this.project = project;
     this.s3 = s3;
   }
 
-  public static async init({ bucket, region, endpoint, accessKeyId, secretAccessKey }: StateConfig): Promise<StateProvider> {
+  public static async init(project: string, { bucket, region, endpoint, accessKeyId, secretAccessKey }: StateConfig): Promise<StateProvider> {
     const s3 = new S3({
       bucket,
       logger,
@@ -32,7 +34,7 @@ export class StateProvider implements Provider {
     });
     try {
       await s3.verifyAccess();
-      return new StateProvider(s3);
+      return new StateProvider(project, s3);
     }
     catch (error) {
       logger.error({

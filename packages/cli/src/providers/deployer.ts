@@ -7,22 +7,24 @@ import type { StateConfig} from "./state";
 import { StateProvider } from "./state";
 
 interface DeployerConfig {
-  apiKey: string
+  apiKey: string;
 }
 
 export class DeployerProvider implements Provider {
+  private readonly project: string;
   private readonly client: DeployerClient;
 
-  private constructor(client: DeployerClient) {
+  private constructor(project: string, client: DeployerClient, ) {
     this.client = client;
+    this.project = project;
   }
 
-  public static async init({ apiKey }: DeployerConfig): Promise<DeployerProvider> {
+  public static async init(project: string, { apiKey }: DeployerConfig): Promise<DeployerProvider> {
     const client = new DeployerClient(apiKey);
 
     try {
       await client.verifyUserToken();
-      return new DeployerProvider(client);
+      return new DeployerProvider(project, client);
     }
     catch (error) {
       logger.error({
@@ -44,7 +46,12 @@ export class DeployerProvider implements Provider {
    * Create state provider based on s3 details provided by deployer
    */
   public async initStateProvider() {
-    const stateConfig = await this.client.getStateConfig();
-    return StateProvider.init(stateConfig);
+    const {
+      project,
+      client,
+    } = this;
+    
+    const stateConfig = await client.getStateConfig();
+    return StateProvider.init(project, stateConfig);
   }
 }

@@ -31,6 +31,23 @@ program
     logger.info(currentConfig);
   });
 
+  program
+  .command("state")
+  .description("Show current state")
+  .option("-d, --debug", "enable debug mode")
+  .option("-c, --config", "location of config file")
+  .action(async function({ debug, config }: { debug: boolean, config: string }) {
+    if (debug) {
+      logger.level = "debug";
+    }
+    const { 
+      config: currentConfig, 
+    } = await getAndValidateContext(config);
+
+    logger.info(currentConfig);
+  });
+
+
 program
   .command("validate")
   .description("Check whether the configuration is valid")
@@ -56,6 +73,7 @@ program
       logger.level = "debug";
     }
     await getAndValidateContext(config);
+    
   });
 
 // program
