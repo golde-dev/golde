@@ -1,6 +1,7 @@
 
+import { HostDeployApps } from "./caddy.js";
 import { systemNodeApi } from "./nodeApi.js";
-import type { HostDeployApps } from "../types/config.js";
+
 
 
 export function translate(config: HostDeployApps) {

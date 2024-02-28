@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import { join } from "path";
-import type { ReverseProxyApp } from "../types/config.js";
+import { ReverseProxyApp } from "./caddy";
 
 
 export const systemNodeApi = (

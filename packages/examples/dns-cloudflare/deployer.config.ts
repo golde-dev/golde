@@ -23,7 +23,7 @@ const config: Config = {
             proxied: false, 
           },
           "{{ git.BRANCH_SLUG }}-dns-cloudflare": {
-            branchPattern: "feature/*",
+            branchPattern: "feature/examples-dns-cloudflare*",
             value: "",
             ttl: 3600,
             proxied: false, 

@@ -7,6 +7,11 @@ export enum ErrorCode {
   NO_CONFIG = "NO_CONFIG",
 
   /**
+   * Thrown when config file is missing
+   */
+  NO_CUSTOM_CONFIG = "NO_CUSTOM_CONFIG",
+
+  /**
    * When config fail to validate
    */
   INVALID_CONFIG = "INVALID_CONFIG",

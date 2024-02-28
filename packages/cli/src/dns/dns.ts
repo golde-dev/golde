@@ -1,11 +1,13 @@
 
 export interface BaseDNSRecord {
-  ttl: number;
+  branchPattern?: string;
+  branch?: string;
+  ttl?: number;
   value: string;
 }
 
 export interface CloudflareDNSRecord extends BaseDNSRecord{
-  proxied: boolean;
+  proxied?: boolean;
 }
 
 export interface DNSZoneRecords {
@@ -20,5 +22,15 @@ export interface DNSZoneRecords {
 export interface DNSConfig {
   cloudflare?: {
     [zone: string]: DNSZoneRecords
+  }
+}
+
+export interface DNSZoneState {
+  
+}
+
+export interface DNSState {
+  cloudflare?: {
+    [zone: string]: DNSZoneState
   }
 }

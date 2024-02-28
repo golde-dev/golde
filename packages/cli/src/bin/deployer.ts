@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { config } from "dotenv";
 import { cwd } from "process";
 import { join } from "path";
-import { getAndValidateContext } from "../commands/config.js";
+import { getAndValidateContext } from "../config.js";
 import { version } from "../../package.json";
 
 config({ path: join(cwd(), ".env") });
@@ -19,13 +19,14 @@ program
   .command("show")
   .description("Show configuration")
   .option("-d, --debug", "enable debug mode")
-  .action(async function({ debug }: { debug: boolean }) {
+  .option("-c, --config", "location of config file")
+  .action(async function({ debug, config }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
     const { 
       config: currentConfig, 
-    } = await getAndValidateContext();
+    } = await getAndValidateContext(config);
 
     logger.info(currentConfig);
   });
@@ -34,11 +35,12 @@ program
   .command("validate")
   .description("Check whether the configuration is valid")
   .option("-d, --debug", "enable debug mode")
-  .action(async function({ debug }: { debug: boolean }) {
+  .option("-c, --config", "location of config file")
+  .action(async function({ debug, config }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
-    await getAndValidateContext();
+    await getAndValidateContext(config);
 
     logger.info("Config is valid");
   });
@@ -48,11 +50,12 @@ program
   .command("plan")
   .description("Show changes required by the current configuration")
   .option("-d, --debug", "enable debug mode")
-  .action(async function({ debug }: { debug: boolean }) {
+  .option("-c, --config", "location of config file")
+  .action(async function({ debug, config }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
-    await getAndValidateContext();
+    await getAndValidateContext(config);
   });
 
 // program

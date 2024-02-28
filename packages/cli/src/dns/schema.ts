@@ -4,11 +4,13 @@ import type { CloudflareDNSRecord, DNSConfig } from "./dns";
 const dnsRecordSchema: JSONSchemaType<CloudflareDNSRecord> =  {
   type: "object",
   properties: {
-    ttl: {type: "number"},
     value: {type: "string"},
-    proxied: {type: "boolean"},
+    ttl: {type: "number", nullable: true},
+    proxied: {type: "boolean", nullable: true},
+    branch: {type: "string", nullable: true},
+    branchPattern: {type: "string", nullable: true},
   },
-  required: ["ttl", "proxied", "value"],
+  required: ["value"],
 };
 
 
