@@ -10,15 +10,16 @@ import { State } from "./types/state";
 
 export interface Context {
   previousConfig?: Config
-  previousState: State;
-  config: Config
+  previousState?: State;
+  currentConfig: Config;
+  currentState: State
   deployer?: DeployerProvider,
   state: StateProvider,
   hcloud?: HCloudProvider,
   cloudflare?: CloudflareProvider,
 }
 
-export const initializeContext = async(config: Config): Promise<Context> => {
+export const initializeContext = async(currentConfig: Config): Promise<Context> => {
   const {
     project,
     providers: {
@@ -27,7 +28,7 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       hcloud,
       cloudflare,
     },
-  } = config;
+  } = currentConfig;
 
   logger.debug("Start context initialization");
 
@@ -53,7 +54,8 @@ export const initializeContext = async(config: Config): Promise<Context> => {
     ]);
 
     const contextBase = {
-      config,
+      currentConfig,
+      currentState: {},
       deployer: deployerProvider,
       cloudflare: cloudflareProvider,
       hcloud: hcloudProvider,
@@ -64,9 +66,9 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       logger.debug("Using own state provider");
 
       const {
-        previousConfig,
-        previousState,
-      } = await stateProvider.getPreviousConfig();
+        config: previousConfig,
+        state: previousState,
+      } = await stateProvider.getPreviousConfig() ?? {};
 
       return {
         ...contextBase,
@@ -80,9 +82,9 @@ export const initializeContext = async(config: Config): Promise<Context> => {
       logger.debug("Created state provider from deployer");
       
       const {
-        previousConfig,
-        previousState,
-      } = await stateProviderFromDeployer.getPreviousConfig();
+        config: previousConfig,
+        state: previousState,
+      } = await stateProviderFromDeployer.getPreviousConfig() ?? {};
 
       return {
         ...contextBase,

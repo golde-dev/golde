@@ -25,7 +25,7 @@ program
       logger.level = "debug";
     }
     const { 
-      config: currentConfig, 
+      currentConfig, 
     } = await getAndValidateContext(config);
 
     logger.info(currentConfig);
@@ -41,7 +41,7 @@ program
       logger.level = "debug";
     }
     const { 
-      config: currentConfig, 
+      currentConfig, 
     } = await getAndValidateContext(config);
 
     logger.info(currentConfig);

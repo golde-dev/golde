@@ -2,8 +2,8 @@ import { Config } from "./types/config";
 import { State } from "./types/state";
 
 export async function plan(
-  config: Config, 
-  state: State, 
+  currentConfig: Config, 
+  currentState: State, 
   previousConfig: Config, 
   previousState: State
 ) {

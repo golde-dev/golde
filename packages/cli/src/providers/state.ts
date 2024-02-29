@@ -5,6 +5,7 @@ import { S3 } from "@tenacify/core";
 import type { Provider } from "./provider";
 import type { Readable } from "stream";
 import type { Config } from "../types/config";
+import { State } from "../types/state";
 
 export interface StateConfig {
   bucket: string,
@@ -12,6 +13,11 @@ export interface StateConfig {
   endpoint: string,
   accessKeyId: string,
   secretAccessKey: string,
+}
+
+interface ConfigState {
+  config?: Config;
+  state?: State;
 }
 
 export class StateProvider implements Provider {
@@ -52,7 +58,7 @@ export class StateProvider implements Provider {
     return this.s3.putObject(key, object);
   }
 
-  public async getPreviousConfig(): Promise<Config | undefined> {
+  public async getPreviousConfig(): Promise<ConfigState | undefined> {
     return Promise.resolve(undefined);
   }
 }
