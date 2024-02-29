@@ -6,7 +6,7 @@ import { DeployerProvider } from "./providers/deployer";
 import { HCloudProvider } from "./providers/hcloud";
 import { StateProvider } from "./providers/state";
 import type { Config } from "./types/config";
-import { State } from "./types/state";
+import type { State } from "./types/state";
 
 export interface Context {
   previousConfig?: Config

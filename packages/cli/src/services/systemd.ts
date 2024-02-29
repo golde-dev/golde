@@ -1,5 +1,5 @@
 
-import { HostDeployApps } from "./caddy.js";
+import type { HostDeployApps } from "./caddy.js";
 import { systemNodeApi } from "./nodeApi.js";
 
 

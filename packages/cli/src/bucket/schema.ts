@@ -1,4 +1,5 @@
-import { ZodType, z } from "zod";
+import type { ZodType} from "zod";
+import { z } from "zod";
 
 export const bucketSchema: ZodType<BucketConfig> = z
   .object({
@@ -10,11 +11,11 @@ export const bucketSchema: ZodType<BucketConfig> = z
             "eeur", 
             "enam", 
             "weur", 
-            "wnam"
+            "wnam",
           ]).optional(),
         }))
-      .optional()
+      .optional(),
   })
-  .strict()
+  .strict();
 
 

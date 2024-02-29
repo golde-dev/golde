@@ -1,5 +1,6 @@
 import type { ProvidersConfig } from "./provider";
-import { ZodType, z } from "zod";
+import type { ZodType} from "zod";
+import { z } from "zod";
 
 export const providersSchema: ZodType<ProvidersConfig> = z
   .object({
@@ -10,7 +11,7 @@ export const providersSchema: ZodType<ProvidersConfig> = z
           .describe("Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"),
         accountId: z
           .string()
-          .describe("Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids")
+          .describe("Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"),
       })
       .optional()
       .describe("Cloudflare provider config"),
@@ -49,10 +50,10 @@ export const providersSchema: ZodType<ProvidersConfig> = z
           .describe("s3 access key"),
       })
       .optional()
-      .describe("State provider config, only required when not using oss version")
+      .describe("State provider config, only required when not using oss version"),
   })
   .strict()
   .refine(
-    data => data.deployer || data.state,
-    'Either deployer or state provider need to be configured'
+    data => Boolean(data.deployer ?? data.state),
+    "Either deployer or state provider need to be configured"
   );

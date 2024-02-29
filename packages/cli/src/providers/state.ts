@@ -5,7 +5,7 @@ import { S3 } from "@tenacify/core";
 import type { Provider } from "./provider";
 import type { Readable } from "stream";
 import type { Config } from "../types/config";
-import { State } from "../types/state";
+import type { State } from "../types/state";
 
 export interface StateConfig {
   bucket: string,

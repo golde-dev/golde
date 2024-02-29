@@ -1,5 +1,6 @@
 import type { CloudflareDNSRecord, DNSConfig } from "./dns";
-import { ZodType, z } from "zod";
+import type { ZodType} from "zod";
+import { z } from "zod";
 
 const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
   .object({
@@ -10,12 +11,12 @@ const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
       .describe("TTL in seconds"),
     proxied: z.boolean().optional(),
     branch: z.string().optional(),
-    branchPattern: z.string().optional()
+    branchPattern: z.string().optional(),
   })
   .strict()
   .refine(
     data => data.branchPattern && data.branch,
-    'Cannot use both branchPattern and branch',
+    "Cannot use both branchPattern and branch"
   );
 
 
@@ -25,8 +26,8 @@ export const dnsSchema: ZodType<DNSConfig> = z
       .record(
         z.object({
           A: z.record(cloudflareDNSRecord).optional(),
-          AAAA: z.record(cloudflareDNSRecord).optional()
+          AAAA: z.record(cloudflareDNSRecord).optional(),
         }))
-      .optional()
+      .optional(),
   });
 

@@ -14,7 +14,7 @@ export class DeployerProvider implements Provider {
   private readonly project: string;
   private readonly client: DeployerClient;
 
-  private constructor(project: string, client: DeployerClient, ) {
+  private constructor(project: string, client: DeployerClient ) {
     this.client = client;
     this.project = project;
   }

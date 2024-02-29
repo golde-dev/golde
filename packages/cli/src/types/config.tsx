@@ -1,3 +1,4 @@
+import type { BucketConfig } from "../bucket/bucket";
 import type { DNSConfig } from "../dns/dns";
 import type { ProvidersConfig } from "../providers/provider";
 

@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import { join } from "path";
-import { ReverseProxyApp } from "./caddy";
+import type { ReverseProxyApp } from "./caddy";
 
 
 export const systemNodeApi = (
@@ -8,15 +8,15 @@ export const systemNodeApi = (
   api: string, 
   config: ReverseProxyApp
 ) => {
-const {
-  greenPorts, 
-  bluePorts,
-  root,
-} = config;
+  const {
+    greenPorts, 
+    bluePorts,
+    root,
+  } = config;
 
-const apiRuntime = `dx-${app}-${api}`;
+  const apiRuntime = `dx-${app}-${api}`;
 
-const templateWorker = `
+  const templateWorker = `
 [Unit]
 Description="${apiRuntime}-#%i"
 After=network.target
@@ -52,10 +52,10 @@ LogsDirectory="${apiRuntime}-#%i"
 ConfigurationDirectory="${apiRuntime}-#%i"
 `;
 
-writeFileSync(`./generated/${apiRuntime}-green@.service`, templateWorker);
-writeFileSync(`./generated/${apiRuntime}-blue@.service`, templateWorker);
+  writeFileSync(`./generated/${apiRuntime}-green@.service`, templateWorker);
+  writeFileSync(`./generated/${apiRuntime}-blue@.service`, templateWorker);
 
-const targetGreen = `
+  const targetGreen = `
 [Unit]
 Description="${apiRuntime} green workers"
 Wants=${greenPorts.map(p => `${apiRuntime}-green@${p}.service`).join(" ")}
@@ -64,7 +64,7 @@ Wants=${greenPorts.map(p => `${apiRuntime}-green@${p}.service`).join(" ")}
 WantedBy=multi-user.target
 `;
 
-const targetBlue = `
+  const targetBlue = `
 [Unit]
 Description="${apiRuntime} blue workers"
 Wants=${bluePorts.map(p => `${apiRuntime}-blue@${p}.service`).join(" ")}
@@ -73,6 +73,6 @@ Wants=${bluePorts.map(p => `${apiRuntime}-blue@${p}.service`).join(" ")}
 WantedBy=multi-user.target
 `;
 
-writeFileSync(`./generated/${apiRuntime}-green.target`, targetGreen);
-writeFileSync(`./generated/${apiRuntime}-blue.target`, targetBlue);
+  writeFileSync(`./generated/${apiRuntime}-green.target`, targetGreen);
+  writeFileSync(`./generated/${apiRuntime}-blue.target`, targetBlue);
 }; 

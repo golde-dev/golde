@@ -30,7 +30,7 @@ const errorSerializer = (error: Error) => {
       ...rest,
     };
   }
- else {
+  else {
     return {
       ...rest,
       cause,

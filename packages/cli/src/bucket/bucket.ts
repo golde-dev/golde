@@ -5,9 +5,9 @@ type CloudflareRegion =
   | "eeur"  /** Eastern Europe */ 
   | "enam"  /** Eastern North America */ 
   | "weur"  /** Western Europe */ 
-  | "wnam"  /** Western North America */ 
+  | "wnam";  /** Western North America */ 
 
-interface BucketConfig {
+export interface BucketConfig {
   cloudflare?: {
     [name: string]: {
       location?: CloudflareRegion

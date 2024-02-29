@@ -60,5 +60,5 @@ export const importTS = async<T = unknown>(path: string): Promise<T> => {
 
 export const importTOML = (path: string) => {
   const source = readFileSync(path, {encoding:"utf-8"});
-  return parse(source);
+  return parse(source) as unknown;
 };

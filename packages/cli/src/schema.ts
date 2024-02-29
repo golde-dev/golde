@@ -2,7 +2,8 @@ import type { Config } from "./types/config";
 import { CLIError } from "./error";
 import { ErrorCode } from "./constants/error";
 import { dnsSchema } from "./dns/schema";
-import { ZodType, z } from "zod";
+import type { ZodType} from "zod";
+import { z } from "zod";
 import { providersSchema } from "./providers/schema";
 import { bucketSchema } from "./bucket/schema";
 
@@ -13,7 +14,7 @@ export const schema: ZodType<Config> = z
     providers: providersSchema,
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),
-  }).strict()
+  }).strict();
 
 export function validateConfig(config: unknown): asserts config is Config {
   const result = schema.safeParse(config);

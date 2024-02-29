@@ -1,4 +1,4 @@
-import { DNSState } from "../dns/dns";
+import type { DNSState } from "../dns/dns";
 
 export interface State {
   dns?: DNSState

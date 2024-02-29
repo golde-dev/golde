@@ -5,6 +5,7 @@ import { cwd } from "process";
 import { join } from "path";
 import { getAndValidateContext } from "../config.js";
 import { version } from "../../package.json";
+import { planChanges } from "../plan.js";
 
 config({ path: join(cwd(), ".env") });
 
@@ -15,34 +16,34 @@ program
   .description("CLI to manager deployer")
   .version(version);
 
-  program
+program
   .command("show")
   .description("Show configuration")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
-  .action(async function({ debug, config }: { debug: boolean, config: string }) {
+  .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
     const { 
       currentConfig, 
-    } = await getAndValidateContext(config);
+    } = await getAndValidateContext(configPath);
 
     logger.info(currentConfig);
   });
 
-  program
+program
   .command("state")
   .description("Show current state")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
-  .action(async function({ debug, config }: { debug: boolean, config: string }) {
+  .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
     const { 
       currentConfig, 
-    } = await getAndValidateContext(config);
+    } = await getAndValidateContext(configPath);
 
     logger.info(currentConfig);
   });
@@ -53,29 +54,41 @@ program
   .description("Check whether the configuration is valid")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
-  .action(async function({ debug, config }: { debug: boolean, config: string }) {
+  .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
-    await getAndValidateContext(config);
+    await getAndValidateContext(configPath);
 
     logger.info("Config is valid");
   });
 
 
-  program
+program
   .command("plan")
-  .description("Show changes required by the current configuration")
+  .description("Plan changes required by the current configuration")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
-  .action(async function({ debug, config }: { debug: boolean, config: string }) {
+  .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
     }
-    await getAndValidateContext(config);
-    
+    const context = await getAndValidateContext(configPath);
+    const plan = await planChanges(context);
   });
 
+program
+  .command("apply")
+  .description("Apply changes required by the current configuration")
+  .option("-d, --debug", "enable debug mode")
+  .option("-c, --config", "location of config file")
+  .option("-y, --yes", "apply plan without prompting")
+  .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
+    if (debug) {
+      logger.level = "debug";
+    }
+    await getAndValidateContext(configPath);
+  });
 // program
 //   .command("push")
 //   .description("push artifacts and config")

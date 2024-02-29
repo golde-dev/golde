@@ -1,16 +1,20 @@
-import { Config } from "./types/config";
-import { State } from "./types/state";
+import type { Context } from "./context";
 
-export async function plan(
-  currentConfig: Config, 
-  currentState: State, 
-  previousConfig: Config, 
-  previousState: State
+export async function planChanges(
+  context: Context
 ) {
+  const {
+    currentConfig,
+    currentState,
+    previousConfig,
+    previousState,
+  } = context;
+
   console.log({
-    config, 
-    state,
-    previousConfig, 
-    previousState
-  })
+    currentConfig,
+    currentState,
+    previousConfig,
+    previousState,
+  });
+  return Promise.resolve({});
 }
