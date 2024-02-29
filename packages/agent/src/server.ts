@@ -3,6 +3,7 @@ import fastify from "fastify";
 import logger from "./logger.js";
 import healthcheck from "./routes/healthcheck";
 import type {FastifyServer} from "./types/Server";
+import { exit } from "process";
 
 
 export const createServer = async(): Promise<FastifyServer> => {
@@ -19,20 +20,20 @@ export const createServer = async(): Promise<FastifyServer> => {
     server.after((err: Error | null) => {
       if (err) {
         logger.error(err, "Handle errors after middleware");
-        process.exit(1); 
+        exit(1); 
       }
     });
     server.ready((err: Error | null) => {
       if (err) {
         logger.error(err, "Handle errors ready middleware");
-        process.exit(1);
+        exit(1);
       }
     });
     
     return server;
   }
   catch (error) {
-    logger.error(error, "Failed to init server");
-    process.exit(1);
+    logger.error(error, "Failed to init server, exiting");
+    exit(1);
   }
 };

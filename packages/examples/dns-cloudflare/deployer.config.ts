@@ -2,6 +2,7 @@ import type {Config} from '@tenacify/cli'
 
 
 const config: Config = {
+  project: "example-dns-cloudflare",
   providers: {
     cloudflare: {
       apiKey: "{{ env.CLOUDFLARE_API_KEY }}",
@@ -20,7 +21,7 @@ const config: Config = {
           "dev-dns-cloudflare": {
             value: "",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
           "{{ git.BRANCH_SLUG }}-dns-cloudflare": {
             branchPattern: "feature/examples-dns-cloudflare*",
