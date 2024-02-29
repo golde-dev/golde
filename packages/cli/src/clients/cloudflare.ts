@@ -44,10 +44,15 @@ interface Zone {
  * @see https://developers.cloudflare.com/api/operations/dns-records-for-a-zone-create-dns-record
  */
 interface ZoneRecordRequest {
+  /**
+   * IP address 
+   * @example: 198.51.100.4 
+   * @example: 198.51.100.4,198.51.100.5
+   */
   content: string
   name: string;
-  proxied?: boolean;
   type: string;
+  proxied?: boolean;
   comment?: string;
   tags?: string[]
   /**
@@ -55,8 +60,26 @@ interface ZoneRecordRequest {
    */
   ttl?: number;
 }
+
 interface ZoneRecord {
   id: string;
+  content: string,
+  name: string,
+  proxied: boolean,
+  type: "A",
+  comment: string,
+  created_on: string,
+  locked: boolean,
+  meta: {
+    "auto_added": boolean;
+    "source": string;
+  },
+  modified_on: string,
+  proxiable: boolean,
+  tags: string[],
+  ttl: 3600,
+  zone_id: string,
+  zone_name: string
 }
 
 /**
@@ -225,6 +248,31 @@ export class CloudflareClient {
       `/zones/${zoneId}/dns_records`,
       "POST",
       JSON.stringify(config)
+    );
+  }
+
+  /**
+   * Update dns record for zone
+   */
+  public async updateZoneRecord(zoneName: string, recordId: string,config: ZoneRecordRequest): Promise<ZoneRecord> {
+    const zoneId = await this.getZoneId(zoneName);
+  
+    return this.makeRequest<ZoneRecord>(
+      `/zones/${zoneId}/dns_records/${recordId}`,
+      "PATCH",
+      JSON.stringify(config)
+    );
+  }
+
+  /**
+   * Delete dns record for zone
+   */
+  public async deleteZoneRecord(zoneName: string, recordId: string): Promise<void> {
+    const zoneId = await this.getZoneId(zoneName);
+    
+    return this.makeRequest(
+      `/zones/${zoneId}/dns_records/${recordId}`,
+      "DELETE"
     );
   }
 }

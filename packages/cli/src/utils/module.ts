@@ -24,6 +24,7 @@ export const packageIsModule = async(dir: string): Promise<boolean | void> => {
     const {type} = require(packagePath) as {type: string};
     return type === "module";
   }
+  return false;
 };
 
 export const importTS = async<T = unknown>(path: string): Promise<T> => {

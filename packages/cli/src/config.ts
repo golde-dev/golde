@@ -7,8 +7,6 @@ import { resolve, extname } from "path";
 import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template";
 import { ErrorCode } from "./constants/error";
 import { CLIError } from "./error";
-import type { Context } from "./context";
-import { initializeContext } from "./context";
 
 const loadConfig = async(path: string): Promise<{ config: unknown, path: string }> => {
   logger.debug(path, "Loading config");
@@ -35,7 +33,7 @@ const loadConfig = async(path: string): Promise<{ config: unknown, path: string 
   }
 };
 
-const getConfig = async(path?: string): Promise<{ config: unknown, path: string }> => {
+const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: string }> => {
   if (path) {
     if (existsSync(resolve(path))) {
       return loadConfig(path);
@@ -60,9 +58,9 @@ const getConfig = async(path?: string): Promise<{ config: unknown, path: string 
   throw new CLIError("No config", ErrorCode.NO_CONFIG);
 };
 
-export const getAndValidateContext = async(configPath?: string): Promise<Context> => {
+export const getConfig = async(configPath?: string): Promise<Config> => {
   try {
-    const { config, path } = await getConfig(configPath);
+    const { config, path } = await getConfigRaw(configPath);
     logger.debug({ config, path }, "Loaded config");
 
     const configWithEnv = resolveTemplate(config, envTemplate);
@@ -77,9 +75,7 @@ export const getAndValidateContext = async(configPath?: string): Promise<Context
     validateConfig(configWithGit);
     logger.debug("Validated config with json schema");
 
-    const context = await initializeContext(configWithGit);
-    logger.debug("Context initialized");
-    return context;
+    return configWithGit;
   }
   catch (error) {
     if (error instanceof CLIError) {
@@ -105,9 +101,6 @@ export const getAndValidateContext = async(configPath?: string): Promise<Context
         case ErrorCode.INVALID_CONFIG:
           logger.error(error.cause, "Config failed validation");
           break;
-        case ErrorCode.PROVIDER_INIT_ERROR:
-          logger.error(`Providers initialization failed: ${error.message}`);
-          break;
         default:
           logger.error(`Configuration error: ${error.message}`);
       }
@@ -115,6 +108,6 @@ export const getAndValidateContext = async(configPath?: string): Promise<Context
     else {
       logger.error(error, "Unknown error");
     }
-    process.exit(1);
+    return process.exit(1);
   }
 };

@@ -11,15 +11,16 @@ import type { State } from "./types/state";
 export interface Context {
   previousConfig?: Config
   previousState?: State;
-  currentConfig: Config;
-  currentState: State
-  deployer?: DeployerProvider,
-  state: StateProvider,
-  hcloud?: HCloudProvider,
-  cloudflare?: CloudflareProvider,
+  nextConfig: Config;
+  nextState: State;
+  
+  deployer?: DeployerProvider;
+  state: StateProvider;
+  hcloud?: HCloudProvider;
+  cloudflare?: CloudflareProvider;
 }
 
-export const initializeContext = async(currentConfig: Config): Promise<Context> => {
+export const initializeContext = async(nextConfig: Config): Promise<Context> => {
   const {
     project,
     providers: {
@@ -28,7 +29,7 @@ export const initializeContext = async(currentConfig: Config): Promise<Context> 
       hcloud,
       cloudflare,
     },
-  } = currentConfig;
+  } = nextConfig;
 
   logger.debug("Start context initialization");
 
@@ -54,8 +55,8 @@ export const initializeContext = async(currentConfig: Config): Promise<Context> 
     ]);
 
     const contextBase = {
-      currentConfig,
-      currentState: {},
+      nextConfig,
+      nextState: {},
       deployer: deployerProvider,
       cloudflare: cloudflareProvider,
       hcloud: hcloudProvider,
@@ -69,6 +70,8 @@ export const initializeContext = async(currentConfig: Config): Promise<Context> 
         config: previousConfig,
         state: previousState,
       } = await stateProvider.getPreviousConfig() ?? {};
+
+      logger.debug("Context initialized");
 
       return {
         ...contextBase,
@@ -86,6 +89,8 @@ export const initializeContext = async(currentConfig: Config): Promise<Context> 
         state: previousState,
       } = await stateProviderFromDeployer.getPreviousConfig() ?? {};
 
+      logger.debug("Context initialized");
+      
       return {
         ...contextBase,
         previousConfig,
@@ -99,8 +104,8 @@ export const initializeContext = async(currentConfig: Config): Promise<Context> 
   }
   catch (error) {
     if (error instanceof Error) {
-      throw new CLIError(error.message, ErrorCode.PROVIDER_INIT_ERROR, error);
+      logger.error(`Providers initialization failed: ${error.message}`);
     }
-    throw error;
+    return process.exit(1);
   }
 };

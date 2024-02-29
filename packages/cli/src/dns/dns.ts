@@ -1,4 +1,8 @@
 
+export type RecordType = 
+  "A" | "AAAA" | "CAA" | "CNAME" | "DKIM" | "DMARC" | "DNSKEY" | "DS" | "MX" | "NS" | "PTR" | "SOA" | "SPF" | "SRV" | "SVCB" | "TXT"; 
+
+
 export interface BaseDNSRecord {
   branchPattern?: string;
   branch?: string;
@@ -8,16 +12,11 @@ export interface BaseDNSRecord {
 
 export interface CloudflareDNSRecord extends BaseDNSRecord{
   proxied?: boolean;
+  comment?: string;
+  tags?: string;
 }
 
-export interface DNSZoneRecords {
-  A?: {
-    [record: string]: CloudflareDNSRecord
-  },
-  AAAA?: {
-    [record: string]: CloudflareDNSRecord
-  }
-}
+export type DNSZoneRecords = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
 
 export interface DNSConfig {
   cloudflare?: {
@@ -25,9 +24,7 @@ export interface DNSConfig {
   }
 }
 
-export interface DNSZoneState {
-  
-}
+export type DNSZoneState = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
 
 export interface DNSState {
   cloudflare?: {

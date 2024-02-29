@@ -1,7 +1,7 @@
 {
-  "$ref": "#/definitions/my",
+  "$ref": "#/definitions/deployer",
   "definitions": {
-    "my": {
+    "deployer": {
       "type": "object",
       "properties": {
         "project": {
@@ -101,46 +101,65 @@
               "type": "object",
               "additionalProperties": {
                 "type": "object",
-                "properties": {
-                  "A": {
-                    "type": "object",
-                    "additionalProperties": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "not": {}
+                    },
+                    {
                       "type": "object",
-                      "properties": {
-                        "value": {
-                          "type": "string"
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "ttl": {
+                            "type": "number",
+                            "description": "TTL in seconds"
+                          },
+                          "proxied": {
+                            "type": "boolean"
+                          },
+                          "branch": {
+                            "type": "string"
+                          },
+                          "branchPattern": {
+                            "type": "string"
+                          }
                         },
-                        "ttl": {
-                          "type": "number",
-                          "description": "TTL in seconds"
-                        },
-                        "proxied": {
-                          "type": "boolean"
-                        },
-                        "branch": {
-                          "type": "string"
-                        },
-                        "branchPattern": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "value"
-                      ],
-                      "additionalProperties": false
+                        "required": [
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
-                  },
-                  "AAAA": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "$ref": "#/definitions/my/properties/dns/properties/cloudflare/additionalProperties/properties/A/additionalProperties"
-                    }
+                  ]
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "buckets": {
+          "type": "object",
+          "properties": {
+            "cloudflare": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "enum": [
+                      "apac",
+                      "eeur",
+                      "enam",
+                      "weur",
+                      "wnam"
+                    ]
                   }
                 },
-                "required": [
-                  "A",
-                  "AAAA"
-                ],
                 "additionalProperties": false
               }
             }
@@ -150,8 +169,7 @@
       },
       "required": [
         "project",
-        "providers",
-        "dns"
+        "providers"
       ],
       "additionalProperties": false
     }

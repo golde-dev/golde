@@ -1,7 +1,5 @@
-
-
-import { DeployerClient } from "../clients/deployer";
 import logger from "../logger";
+import { DeployerClient } from "../clients/deployer";
 import type { Provider } from "./provider";
 import type { StateConfig} from "./state";
 import { StateProvider } from "./state";

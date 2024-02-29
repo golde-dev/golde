@@ -39,11 +39,6 @@ export enum ErrorCode {
   /**
    * Provider init error
    */
-  PROVIDER_INIT_ERROR = "PROVIDER_INIT_ERROR",
-
-  /**
-   * Provider init error
-   */
   STATE_OR_DEPLOYER_MISSING = "STATE_OR_DEPLOYER_MISSING",
 
   /**

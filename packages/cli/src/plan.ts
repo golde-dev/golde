@@ -4,15 +4,15 @@ export async function planChanges(
   context: Context
 ) {
   const {
-    currentConfig,
-    currentState,
+    nextConfig,
+    nextState,
     previousConfig,
     previousState,
   } = context;
 
   console.log({
-    currentConfig,
-    currentState,
+    nextConfig,
+    nextState,
     previousConfig,
     previousState,
   });

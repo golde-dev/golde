@@ -3,9 +3,10 @@ import { Command } from "commander";
 import { config } from "dotenv";
 import { cwd } from "process";
 import { join } from "path";
-import { getAndValidateContext } from "../config.js";
+import { getConfig } from "../config.js";
 import { version } from "../../package.json";
 import { planChanges } from "../plan.js";
+import { initializeContext } from "../context.js";
 
 config({ path: join(cwd(), ".env") });
 
@@ -25,11 +26,13 @@ program
     if (debug) {
       logger.level = "debug";
     }
-    const { 
-      currentConfig, 
-    } = await getAndValidateContext(configPath);
+    const loadedConfig = await getConfig(configPath);
 
-    logger.info(currentConfig);
+    const {
+      nextConfig,
+    } = await initializeContext(loadedConfig);
+
+    logger.info(nextConfig, "Config");
   });
 
 program
@@ -41,11 +44,12 @@ program
     if (debug) {
       logger.level = "debug";
     }
-    const { 
-      currentConfig, 
-    } = await getAndValidateContext(configPath);
+    const loadedConfig = await getConfig(configPath);
+    const {
+      previousState,
+    } = await initializeContext(loadedConfig);
 
-    logger.info(currentConfig);
+    logger.info(previousState, "Current state");
   });
 
 
@@ -58,7 +62,8 @@ program
     if (debug) {
       logger.level = "debug";
     }
-    await getAndValidateContext(configPath);
+    const loadedConfig = await getConfig(configPath);
+    await initializeContext(loadedConfig);
 
     logger.info("Config is valid");
   });
@@ -73,8 +78,11 @@ program
     if (debug) {
       logger.level = "debug";
     }
-    const context = await getAndValidateContext(configPath);
+    const loadedConfig = await getConfig(configPath);
+    const context = await initializeContext(loadedConfig);
     const plan = await planChanges(context);
+
+    logger.info(plan, "Execution plan");
   });
 
 program
@@ -87,31 +95,8 @@ program
     if (debug) {
       logger.level = "debug";
     }
-    await getAndValidateContext(configPath);
+    await getConfig(configPath);
   });
-// program
-//   .command("push")
-//   .description("push artifacts and config")
-//   .option("-d, --debug", "enable debug mode")
-//   .option("-p, --path <path>", "path for build artifacts", "/tmp")
-//   .action(async function({ debug, path }: { debug: boolean, path: string }) {
-//     if (debug) {
-//       logger.level = "debug";
-//     }
-//     const deployerConfig = await getConfig();
 
-
-//     const version = getCurrentHash();
-//     const fullPath = resolve(path);
-
-//     await Promise.all(Object.entries(deployerConfig).map(async([appName, appConfig]) => {
-//       if (appConfig.type === "caddy") {
-//         const {
-//           artifactsPaths,
-//         } = appConfig;
-//         await pushArtifacts(artifactsPaths, appName, version, fullPath);
-//       }
-//     }));
-//   });
 
 program.parse();

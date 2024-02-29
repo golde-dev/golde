@@ -1,5 +1,6 @@
 import type { ZodType} from "zod";
 import { z } from "zod";
+import type { BucketConfig } from "./bucket";
 
 export const bucketSchema: ZodType<BucketConfig> = z
   .object({
