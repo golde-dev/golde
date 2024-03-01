@@ -11,6 +11,7 @@
   "references": [
     {"path": "./packages/cli"},
     {"path": "./packages/core"},
+    {"path": "./packages/docs"},
     {"path": "./packages/agent"},
   ]
 }
