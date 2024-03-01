@@ -16,11 +16,11 @@ export interface CloudflareDNSRecord extends BaseDNSRecord{
   tags?: string;
 }
 
-export type DNSZoneRecords = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
+export type CloudflareZoneRecords = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
 
 export interface DNSConfig {
   cloudflare?: {
-    [zone: string]: DNSZoneRecords
+    [zone: string]: CloudflareZoneRecords
   }
 }
 

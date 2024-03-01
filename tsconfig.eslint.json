@@ -13,6 +13,7 @@
     "packages/*/vitest.setup.ts",
     "packages/*/vite.config.ts",
     "packages/*/vitest.config.ts",
+    "runner.config.ts",
     "vitest.workspace.ts",
     "vitest.config.ts",
     "commitlint.config.cjs"

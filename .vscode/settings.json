@@ -5,6 +5,7 @@
     "hcloud",
     "healthcheck",
     "Hetzner",
+    "moderndash",
     "pino",
     "Tunables"
   ]

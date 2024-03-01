@@ -5,8 +5,7 @@ import { dnsSchema } from "./dns/schema";
 import type { ZodType} from "zod";
 import { z } from "zod";
 import { providersSchema } from "./providers/schema";
-import { bucketSchema } from "./bucket/schema";
-
+import { bucketSchema } from "./buckets/schema";
 
 export const schema: ZodType<Config> = z
   .object({

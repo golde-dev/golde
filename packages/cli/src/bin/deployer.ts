@@ -5,7 +5,7 @@ import { cwd } from "process";
 import { join } from "path";
 import { getConfig } from "../config.js";
 import { version } from "../../package.json";
-import { planChanges } from "../plan.js";
+import { createPlan } from "../plan.js";
 import { initializeContext } from "../context.js";
 
 config({ path: join(cwd(), ".env") });
@@ -80,7 +80,7 @@ program
     }
     const loadedConfig = await getConfig(configPath);
     const context = await initializeContext(loadedConfig);
-    const plan = await planChanges(context);
+    const plan = await createPlan(context);
 
     logger.info(plan, "Execution plan");
   });

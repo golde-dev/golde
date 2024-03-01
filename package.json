@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "start": "runner start",
     "lint": "eslint . --ext .ts,.js,.tsx",
     "lint:fix": "eslint . --ext .ts,.js,.tsx --fix",
     "build": "tsc --build",

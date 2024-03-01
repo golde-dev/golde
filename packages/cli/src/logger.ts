@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
 import type { DestinationStream, LoggerOptions} from "pino";
 import { pino, transport, stdSerializers} from "pino";
 

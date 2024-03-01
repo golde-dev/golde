@@ -1,10 +1,10 @@
 import { createReadStream, rmSync } from "fs";
-import { createNativeTar } from "./utils/tar.js";
-import { createTar } from "./utils/tar.js";
-import logger from "./logger.js";
+import { createNativeTar } from "./tar.js";
+import { createTar } from "./tar.js";
+import logger from "../logger.js";
 import { join } from "path";
-import type { StateProvider } from "./providers/state.js";
-import type { Context } from "./context.js";
+import type { StateProvider } from "../providers/state.js";
+import type { Context } from "../context.js";
 
 const tarArtifacts = async(searchPaths: string[], tarFilePath: string, tarFn: typeof createNativeTar) => {
   const startTar = Date.now();
