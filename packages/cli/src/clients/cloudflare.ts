@@ -1,5 +1,7 @@
 import { stringify } from "querystring";
 import logger from "../logger";
+import { decMemoize } from "moderndash";
+
 
 interface CloudflareErrorCause {
   code: string;
@@ -196,24 +198,7 @@ export class CloudflareClient {
     }
   }
 
-  /**
-   * Get list of zones that account have access to
-   * TODO: add memo
-   */
-  public async getZones(query?: object) {
-    return this.makeListRequest<Zone[]>("/zones", query);
-  }
 
-  /**
-   * Gen zone id by zone name
-   */
-  public async getZoneId(name: string): Promise<string> {
-    const [zone] = await this.getZones({ name });
-    if (zone) {
-      return zone.id;
-    }
-    throw new CloudflareError(`Account do not have access to zone: ${name}`);
-  }
 
   /**
    * Create bucket in r2
@@ -236,6 +221,26 @@ export class CloudflareClient {
       `/accounts/${this.accountId}/r2/buckets/${name}`,
       "DELETE"
     );
+  }
+
+  /**
+   * Get list of zones that account have access to
+   */
+  @decMemoize()
+  public async getZones(query?: object) {
+    return this.makeListRequest<Zone[]>("/zones", query);
+  }
+  
+  /**
+   * Gen zone id by zone name
+   */
+  public async getZoneId(name: string): Promise<string> {
+    const [zone] = await this.getZones({ name });
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (zone) {
+      return zone.id;
+    }
+    throw new CloudflareError(`Account do not have access to zone: ${name}`);
   }
 
   /**
