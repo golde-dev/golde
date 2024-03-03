@@ -1,15 +1,41 @@
 import type { Context } from "../context";
+import { PlanError, PlanErrorCode } from "../error";
 import type { Plan } from "../types/plan";
-import { isEmpty } from "moderndash";
+import { createCloudflareDNSPlan } from "./cloudflare";
 
-export const createDNSPlan = (context: Context): Plan[] => {
+export const createDNSPlan = async(context: Context): Promise<Plan[]> => {
   const {
-    previousConfig, 
-    nextConfig, 
+    previousConfig: {
+      dns: prevDNSConfig,
+    } = {}, 
+    previousState: {
+      dns: prevDNSState,
+    } = {},
+    nextConfig: {
+      dns: nextDNSConfig,
+    }, 
+    nextState: {
+      dns: nextDNSState,
+    } = {},
+    cloudflare,
   } = context;
 
-  if (isEmpty(previousConfig?.dns) && isEmpty(nextConfig.dns)) {
-    return [];
+  const plan: Plan[] = [];
+
+  if (Boolean(prevDNSConfig?.cloudflare) || Boolean(nextDNSConfig?.cloudflare)) {
+    if (!cloudflare) {
+      throw new PlanError("Cloudflare provider is required when using cloudflare dns", PlanErrorCode.PROVIDER_MISSING);
+    }
+
+    plan.push(...createCloudflareDNSPlan(
+      cloudflare, 
+      prevDNSConfig?.cloudflare,
+      prevDNSState?.cloudflare,
+      nextDNSConfig?.cloudflare,
+      nextDNSState?.cloudflare
+    ));
+    
   }
-  return [];
+  
+  return Promise.resolve(plan);
 }; 

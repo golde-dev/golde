@@ -1,6 +1,5 @@
 import logger from "./logger";
-import { ErrorCode } from "./constants/error";
-import { CLIError } from "./error";
+import { ContextError, ContextErrorCode } from "./error";
 import { CloudflareProvider } from "./providers/cloudflare";
 import { DeployerProvider } from "./providers/deployer";
 import { HCloudProvider } from "./providers/hcloud";
@@ -99,7 +98,7 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
       };
     }
     else {
-      throw new CLIError("Missing deployer or state config", ErrorCode.STATE_OR_DEPLOYER_MISSING);
+      throw new ContextError("Missing deployer or state config", ContextErrorCode.STATE_OR_DEPLOYER_MISSING);
     }
   }
   catch (error) {

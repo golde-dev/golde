@@ -74,6 +74,7 @@ program
   .description("Plan changes required by the current configuration")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
+  .option("-p, --prune", "remove branch based resources")
   .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";
@@ -91,6 +92,7 @@ program
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
   .option("-y, --yes", "apply plan without prompting")
+  .option("-p, --prune", "remove branch based resources")
   .action(async function({ debug, config: configPath }: { debug: boolean, config: string }) {
     if (debug) {
       logger.level = "debug";

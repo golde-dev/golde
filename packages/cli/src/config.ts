@@ -5,8 +5,7 @@ import logger from "./logger";
 import { importDynamic, importTOML, importTS } from "./utils/module";
 import { resolve, extname } from "path";
 import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template";
-import { ErrorCode } from "./constants/error";
-import { CLIError } from "./error";
+import { ConfigError, ConfigErrorCode } from "./error";
 
 const loadConfig = async(path: string): Promise<{ config: unknown, path: string }> => {
   logger.debug(path, "Loading config");
@@ -39,7 +38,7 @@ const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: stri
       return loadConfig(path);
     }
     else {
-      throw new CLIError("Custom config missing", ErrorCode.NO_CUSTOM_CONFIG, path);
+      throw new ConfigError("Custom config missing", ConfigErrorCode.NO_CUSTOM_CONFIG, path);
     }
   }
   const possiblePaths = [
@@ -55,7 +54,7 @@ const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: stri
       return loadConfig(configPath);
     }
   }
-  throw new CLIError("No config", ErrorCode.NO_CONFIG);
+  throw new ConfigError("No config", ConfigErrorCode.NO_CONFIG);
 };
 
 export const getConfig = async(configPath?: string): Promise<Config> => {
@@ -78,27 +77,27 @@ export const getConfig = async(configPath?: string): Promise<Config> => {
     return configWithGit;
   }
   catch (error) {
-    if (error instanceof CLIError) {
+    if (error instanceof ConfigError) {
       switch (error.code) {
-        case ErrorCode.NO_CONFIG:
+        case ConfigErrorCode.NO_CONFIG:
           logger.error("Failed to find config, verify location or syntax");
           break;
-        case ErrorCode.NO_CUSTOM_CONFIG:
+        case ConfigErrorCode.NO_CUSTOM_CONFIG:
           logger.error(`Failed to find config on path: ${error.cause as string}`);
           break;
-        case ErrorCode.ENV_MISSING:
+        case ConfigErrorCode.ENV_MISSING:
           logger.error(`Env variable is missing: ${error.cause as string}`);
           break;
-        case ErrorCode.TEMPLATE_ERROR:
+        case ConfigErrorCode.TEMPLATE_ERROR:
           logger.error(`Config template error: ${error.message}`);
           break;
-        case ErrorCode.FILE_MISSING:
+        case ConfigErrorCode.FILE_MISSING:
           logger.error(`File is missing: ${error.cause as string}`);
           break;
-        case ErrorCode.GIT_MISSING:
+        case ConfigErrorCode.GIT_MISSING:
           logger.error(`git variable is missing: ${error.cause as string}`);
           break;
-        case ErrorCode.INVALID_CONFIG:
+        case ConfigErrorCode.INVALID_CONFIG:
           logger.error(error.cause, "Config failed validation");
           break;
         default:

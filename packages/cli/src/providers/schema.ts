@@ -4,6 +4,14 @@ import { z } from "zod";
 
 export const providersSchema: ZodType<ProvidersConfig> = z
   .object({
+    deployer: z
+      .object({
+        apiKey: z
+          .string()
+          .describe("Deployer api key"),
+      })
+      .optional()
+      .describe("Deployer provider config"),
     cloudflare: z
       .object({
         apiKey: z
@@ -15,6 +23,17 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       })
       .optional()
       .describe("Cloudflare provider config"),
+    namecheap: z
+      .object({
+        apiKey: z
+          .string()
+          .describe("Namecheap api keyhttps://www.namecheap.com/support/api/intro/"),
+        apiUser: z
+          .string()
+          .describe("Your Namecheap account username will act as API username"),
+      })
+      .optional()
+      .describe("Hetzner provider config"),
     hcloud: z
       .object({
         apiKey: z
@@ -23,14 +42,6 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       })
       .optional()
       .describe("Hetzner provider config"),
-    deployer: z
-      .object({
-        apiKey: z
-          .string()
-          .describe("Deployer api key"),
-      })
-      .optional()
-      .describe("Deployer provider config"),
     state: z
       .object({
         bucket: z

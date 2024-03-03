@@ -28,7 +28,7 @@ export class DeployerProvider implements Provider {
       logger.error({
         error,
         apiKey: "<redacted>",
-      }, "Failed to initialize deployer provider, check your apiKey and key policy");
+      }, "Failed to initialize deployer provider, check your apiKey");
       throw error;
     }
   }

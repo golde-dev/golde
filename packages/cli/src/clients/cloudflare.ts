@@ -79,7 +79,7 @@ interface ZoneRecord {
   modified_on: string,
   proxiable: boolean,
   tags: string[],
-  ttl: 3600,
+  ttl: number,
   zone_id: string,
   zone_name: string
 }

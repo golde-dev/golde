@@ -1,16 +1,25 @@
-import { isEmpty } from "moderndash";
 import type { Context } from "../context";
+import { PlanError, PlanErrorCode } from "../error";
 import type { Plan } from "../types/plan";
 
-export const createBucketsPlan = (context: Context): Plan[] => {
+export const createBucketsPlan = async(context: Context): Promise<Plan[]> => {
   const {
-    previousConfig, 
-    nextConfig, 
+    previousConfig: {
+      buckets: prevBucketsConfig,
+    } = {}, 
+    nextConfig: {
+      buckets: nextBucketsConfig,
+    }, 
+    cloudflare,
   } = context;
 
-  if (isEmpty(previousConfig?.buckets) && isEmpty(nextConfig.buckets)) {
-    return [];
+  const plan: Plan[] = [];
+
+  if (Boolean(prevBucketsConfig?.cloudflare) || Boolean(nextBucketsConfig?.cloudflare)) {
+    if (!cloudflare) {
+      throw new PlanError("Cloudflare provider is required when using cloudflare buckets", PlanErrorCode.PROVIDER_MISSING);
+    }
   }
 
-  return [];
+  return Promise.resolve(plan);
 };

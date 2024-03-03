@@ -4,30 +4,66 @@ export type RecordType =
 
 
 export interface BaseDNSRecord {
+  /**
+   * Pattern of related git branch
+   */
   branchPattern?: string;
+  /**
+   * Name of related git branch
+   */
   branch?: string;
+  /**
+   * Time to live in seconds
+   */
   ttl?: number;
+  /**
+   * IP address or value
+   */
   value: string;
+}
+
+export type ZoneRecords = Partial<Record<RecordType, Record<string, BaseDNSRecord>>>;
+
+export interface DNSZones {
+  [zone: string]: ZoneRecords
+}
+
+export interface DNSZonesState {
+  [zone: string]: ZoneRecords
 }
 
 export interface CloudflareDNSRecord extends BaseDNSRecord{
   proxied?: boolean;
   comment?: string;
-  tags?: string;
+  tags?: string[];
 }
 
 export type CloudflareZoneRecords = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
 
-export interface DNSConfig {
-  cloudflare?: {
-    [zone: string]: CloudflareZoneRecords
-  }
+export interface CloudflareDNSZones {
+  [zone: string]: CloudflareZoneRecords
 }
 
-export type DNSZoneState = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
+export interface DNSConfig {
+  cloudflare?: CloudflareDNSZones;
+  namecheap?: DNSZones;
+}
+
+export interface CloudflareDNSRecordState extends BaseDNSRecord {
+  id: string;
+  ttl: number;
+  proxied: boolean;
+  zone_id: string;
+  modified_on: string;
+  created_on: string;
+}
+
+export type CloudflareZoneRecordsState = Partial<Record<RecordType, Record<string, CloudflareDNSRecordState>>>;
+export interface CloudflareZonesState {
+  [zone: string]: CloudflareZoneRecordsState
+}
 
 export interface DNSState {
-  cloudflare?: {
-    [zone: string]: DNSZoneState
-  }
+  cloudflare?: CloudflareZonesState;
+  namecheap?: DNSZonesState;
 }

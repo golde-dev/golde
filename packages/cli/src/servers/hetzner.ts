@@ -1,11 +1,11 @@
 
 
-interface HetznerServerConfig {
+export interface HCloudServerConfig {
   type: string;
 }
 
 export interface ServersConfig {
-  hetzner?: {
-    [hostname: string]: HetznerServerConfig
+  hcloud?: {
+    [hostname: string]: HCloudServerConfig
   }
 }

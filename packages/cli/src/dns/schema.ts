@@ -1,25 +1,8 @@
-import type { CloudflareDNSRecord, DNSConfig, RecordType } from "./dns";
+import type { BaseDNSRecord, CloudflareDNSRecord, DNSConfig, RecordType } from "./dns";
 import type { ZodType} from "zod";
 import { z } from "zod";
 
-const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
-  .object({
-    value: z.string(),
-    ttl: z
-      .number()
-      .optional()
-      .describe("TTL in seconds"),
-    proxied: z.boolean().optional(),
-    branch: z.string().optional(),
-    branchPattern: z.string().optional(),
-  })
-  .strict()
-  .refine(
-    data => !(data.branchPattern && data.branch),
-    "Cannot use both branchPattern and branch"
-  );
-
-const recordTypeUnionSchema: ZodType<RecordType> = z.union([
+const recordTypeSchema: ZodType<RecordType> = z.union([
   z.literal("A"), 
   z.literal("AAAA"), 
   z.literal("CAA"), 
@@ -38,17 +21,70 @@ const recordTypeUnionSchema: ZodType<RecordType> = z.union([
   z.literal("TXT"), 
 ]);
 
-const recordsForTypeSchema = z
+/**
+ * Regular dns record used by many dns providers
+ */
+const dnsRecord: ZodType<BaseDNSRecord> = z
+  .object({
+    value: z.string(),
+    ttl: z
+      .number()
+      .optional()
+      .describe("TTL in seconds"),
+    branch: z.string().optional(),
+    branchPattern: z.string().optional(),
+  })
+  .strict()
+  .refine(
+    data => !(data.branchPattern && data.branch),
+    "Cannot use both branchPattern and branch"
+  );
+
+const dnsRecords = z
+  .record(dnsRecord)
+  .optional();
+  
+const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
+  .object({
+    value: z.string(),
+    ttl: z
+      .number()
+      .optional()
+      .describe("TTL in seconds"),
+    proxied: z.boolean().optional(),
+    comment: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    branch: z.string().optional(),
+    branchPattern: z.string().optional(),
+  })
+  .strict()
+  .refine(
+    data => !(data.branchPattern && data.branch),
+    "Cannot use both branchPattern and branch"
+  );
+
+
+const cloudflareRecords = z
   .record(cloudflareDNSRecord)
   .optional();
+
+
 
 export const dnsSchema: ZodType<DNSConfig> = z
   .object({
     cloudflare: z
       .record(
         z.record(
-          recordTypeUnionSchema, 
-          recordsForTypeSchema
+          recordTypeSchema, 
+          cloudflareRecords
+        )
+      )
+      .optional(),
+    namecheap: z
+      .record(
+        z.record(
+          recordTypeSchema, 
+          dnsRecords
         )
       )
       .optional(),

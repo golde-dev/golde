@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { existsSync, readFileSync } from "fs";
-import { CLIError } from "../error";
-import { ErrorCode } from "../constants/error";
+import { ConfigError, ConfigErrorCode } from "../error";
 import { getBranchName, getBranchSlug } from "./git";
 
 const templateRe = new RegExp(/(?<={{\s)(.*)(?=\s}})/);
@@ -28,16 +27,16 @@ export const resolveTemplate = (value: unknown, onTemplate: (value: string) => s
     }
   }
   else if (typeof value === "symbol") {
-    throw new CLIError("Symbols are not permitted", ErrorCode.TEMPLATE_ERROR);
+    throw new ConfigError("Symbols are not permitted", ConfigErrorCode.TEMPLATE_ERROR);
   }
   else if (typeof value === "function") {
-    throw new CLIError("Functions are not permitted", ErrorCode.TEMPLATE_ERROR);
+    throw new ConfigError("Functions are not permitted", ConfigErrorCode.TEMPLATE_ERROR);
   }
   else if (value instanceof Set) {
-    throw new CLIError("Set is not permitted", ErrorCode.TEMPLATE_ERROR);
+    throw new ConfigError("Set is not permitted", ConfigErrorCode.TEMPLATE_ERROR);
   }
   else if (value instanceof Map) {
-    throw new CLIError("Map is not permitted", ErrorCode.TEMPLATE_ERROR);
+    throw new ConfigError("Map is not permitted", ConfigErrorCode.TEMPLATE_ERROR);
   }
   else if (value instanceof Array) {
     return value.map((val) => resolveTemplate(val, onTemplate));
@@ -67,7 +66,7 @@ export const envTemplate = (value: string): string => {
       return process.env[variableName]!;
     }
     else {
-      throw new CLIError("Env variable is missing", ErrorCode.ENV_MISSING, variableName);
+      throw new ConfigError("Env variable is missing", ConfigErrorCode.ENV_MISSING, variableName);
     }
   }
   return value;
@@ -87,7 +86,7 @@ export const gitTemplate = (value: string): string => {
       return getBranchName();
     }
     else {
-      throw new CLIError("git variable is missing", ErrorCode.GIT_MISSING, variableName);
+      throw new ConfigError("git variable is missing", ConfigErrorCode.GIT_MISSING, variableName);
     }
   }
   return value;
@@ -104,7 +103,7 @@ export const fileTemplate = (value: string): string => {
       return readFileSync(fileName, { encoding: "utf8" });
     }
     else {
-      throw new CLIError("Template file is missing", ErrorCode.FILE_MISSING, fileName);
+      throw new ConfigError("Template file is missing", ConfigErrorCode.FILE_MISSING, fileName);
     }
   }
   return value;

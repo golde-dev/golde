@@ -25,6 +25,20 @@ export interface ProvidersConfig {
     accountId: string;
   }
   /**
+   * Namecheap provider config
+   */
+  namecheap?: {
+    /**
+     * Hetzner API key
+     * @see https://www.namecheap.com/support/api/intro/
+     */
+    apiKey: string
+    /**
+     * Your Namecheap account username will act as API username
+     */
+    apiUser: string
+  }
+  /**
    * Hetzner cloud provider config
    */
   hcloud?: {
