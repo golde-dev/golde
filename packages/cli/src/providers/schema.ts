@@ -14,7 +14,7 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       .describe("Deployer provider config"),
     cloudflare: z
       .object({
-        apiKey: z
+        apiToken: z
           .string()
           .describe("Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"),
         accountId: z

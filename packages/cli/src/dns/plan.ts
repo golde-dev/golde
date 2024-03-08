@@ -3,7 +3,7 @@ import { PlanError, PlanErrorCode } from "../error";
 import type { Plan } from "../types/plan";
 import { createCloudflareDNSPlan } from "./cloudflare";
 
-export const createDNSPlan = async(context: Context): Promise<Plan[]> => {
+export const createDNSPlan = async(context: Context): Promise<Plan> => {
   const {
     previousConfig: {
       dns: prevDNSConfig,
@@ -13,14 +13,11 @@ export const createDNSPlan = async(context: Context): Promise<Plan[]> => {
     } = {},
     nextConfig: {
       dns: nextDNSConfig,
-    }, 
-    nextState: {
-      dns: nextDNSState,
-    } = {},
+    },
     cloudflare,
   } = context;
 
-  const plan: Plan[] = [];
+  const plan: Plan = [];
 
   if (Boolean(prevDNSConfig?.cloudflare) || Boolean(nextDNSConfig?.cloudflare)) {
     if (!cloudflare) {
@@ -31,10 +28,8 @@ export const createDNSPlan = async(context: Context): Promise<Plan[]> => {
       cloudflare, 
       prevDNSConfig?.cloudflare,
       prevDNSState?.cloudflare,
-      nextDNSConfig?.cloudflare,
-      nextDNSState?.cloudflare
+      nextDNSConfig?.cloudflare
     ));
-    
   }
   
   return Promise.resolve(plan);

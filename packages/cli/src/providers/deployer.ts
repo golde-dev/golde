@@ -2,7 +2,9 @@ import logger from "../logger";
 import { DeployerClient } from "../clients/deployer";
 import type { Provider } from "./provider";
 import type { StateConfig} from "./state";
-import { StateProvider } from "./state";
+import type { ConfigState } from "../types/config";
+import { openAsBlob } from "fs";
+import { getArtifactKey } from "../utils/artifacts";
 
 interface DeployerConfig {
   apiKey: string;
@@ -35,21 +37,33 @@ export class DeployerProvider implements Provider {
 
   /**
    * If user use custom state provider we need to register with deployer
+   * Deployer need to know how to access state of project
    */
   public async registerStateProvider(stateConfig: StateConfig) {
-    await this.client.registerStateConfig(stateConfig);
+    await this.client.registerManagedStateConfig(this.project, stateConfig);
   } 
 
   /**
-   * Create state provider based on s3 details provided by deployer
+   * Get previous config for project
    */
-  public async initStateProvider() {
-    const {
-      project,
-      client,
-    } = this;
-    
-    const stateConfig = await client.getStateConfig();
-    return StateProvider.init(project, stateConfig);
+  public async getManagedStateConfig(): Promise<StateConfig | undefined> {
+    return this.client.getManagedStateConfig(this.project);
+  }
+
+  /**
+   * Get previous config for project 
+   */
+  public async getCurrentState(): Promise<ConfigState | undefined> {
+    return this.client.getCurrentState(this.project);
+  }
+
+  /**
+   * Upload artifact via deployer api, using worker storage
+   */
+  public async uploadArtefact(path: string, key: string): Promise<void> {
+    const blob = await openAsBlob(path);
+    const artifactKey = getArtifactKey(this.project, key);
+
+    return this.client.uploadArtifact(artifactKey, blob);
   }
 }

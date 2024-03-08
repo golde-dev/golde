@@ -18,7 +18,7 @@ export interface ProvidersConfig {
      * Cloudflare API token 
      * @see https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
      */
-    apiKey: string;
+    apiToken: string;
     /**
      * Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
      */

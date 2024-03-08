@@ -38,7 +38,7 @@ const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: stri
       return loadConfig(path);
     }
     else {
-      throw new ConfigError("Custom config missing", ConfigErrorCode.NO_CUSTOM_CONFIG, path);
+      throw new ConfigError(`Failed to find custom config at path: ${path}`, ConfigErrorCode.NO_CUSTOM_CONFIG, path);
     }
   }
   const possiblePaths = [
@@ -54,7 +54,7 @@ const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: stri
       return loadConfig(configPath);
     }
   }
-  throw new ConfigError("No config", ConfigErrorCode.NO_CONFIG);
+  throw new ConfigError("Failed to find config, please verify the location or syntax", ConfigErrorCode.NO_CONFIG);
 };
 
 export const getConfig = async(configPath?: string): Promise<Config> => {
@@ -80,7 +80,7 @@ export const getConfig = async(configPath?: string): Promise<Config> => {
     if (error instanceof ConfigError) {
       switch (error.code) {
         case ConfigErrorCode.NO_CONFIG:
-          logger.error("Failed to find config, verify location or syntax");
+          logger.error("Failed to find config, please verify the location or syntax");
           break;
         case ConfigErrorCode.NO_CUSTOM_CONFIG:
           logger.error(`Failed to find config on path: ${error.cause as string}`);

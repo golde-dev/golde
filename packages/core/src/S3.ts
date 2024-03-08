@@ -72,6 +72,29 @@ export class S3 {
       throw error;
     }
   }
+  public async getJSONObject<T extends object>(key: string): Promise<T | undefined> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+    try {
+      const response = await this.client.send(command);
+      const text = await response.Body?.transformToString();
+      if (!text) {
+        return undefined;
+      }
+      return JSON.parse(text) as T;
+    }
+    catch (error) {
+      this.logger.debug({
+        type: LogCode.S3GetObjectError,
+        error,
+        key,
+        bucket: this.bucket,
+      }, "Failed to get object");
+      throw error;
+    }
+  }
   
   public async deleteObject(key: string) {
     const command = new DeleteObjectCommand({

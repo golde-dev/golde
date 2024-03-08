@@ -2,7 +2,7 @@ import type { Context } from "../context";
 import { PlanError, PlanErrorCode } from "../error";
 import type { Plan } from "../types/plan";
 
-export const createBucketsPlan = async(context: Context): Promise<Plan[]> => {
+export const createBucketsPlan = async(context: Context): Promise<Plan> => {
   const {
     previousConfig: {
       buckets: prevBucketsConfig,
@@ -13,7 +13,7 @@ export const createBucketsPlan = async(context: Context): Promise<Plan[]> => {
     cloudflare,
   } = context;
 
-  const plan: Plan[] = [];
+  const plan: Plan = [];
 
   if (Boolean(prevBucketsConfig?.cloudflare) || Boolean(nextBucketsConfig?.cloudflare)) {
     if (!cloudflare) {

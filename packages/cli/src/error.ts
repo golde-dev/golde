@@ -66,6 +66,11 @@ export enum PlanErrorCode {
    * Provider is missing
    */
   PROVIDER_MISSING = "PROVIDER_MISSING",
+
+  /**
+   * State is missing
+   */
+  STATE_MISSING = "STATE_MISSING",
 }
 
 export class PlanError extends Error {

@@ -18,6 +18,18 @@ program
   .version(version);
 
 program
+  .command("init")
+  .description("Initialize new configuration")
+  .option("-d, --debug", "enable debug mode")
+  .action(async function({ debug }: { debug: boolean }) {
+    if (debug) {
+      logger.level = "debug";
+    }
+
+    logger.info("Config created");
+  });
+
+program
   .command("show")
   .description("Show configuration")
   .option("-d, --debug", "enable debug mode")

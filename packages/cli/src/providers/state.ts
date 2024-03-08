@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/class-methods-use-this */
 
 import logger from "../logger";
 import { S3 } from "@tenacify/core";
 import type { Provider } from "./provider";
-import type { Readable } from "stream";
-import type { Config } from "../types/config";
-import type { State } from "../types/state";
+import type { ConfigState } from "../types/config";
+import { createReadStream } from "fs";
+import { getArtifactKey } from "../utils/artifacts";
 
 export interface StateConfig {
   bucket: string,
@@ -15,13 +14,10 @@ export interface StateConfig {
   secretAccessKey: string,
 }
 
-interface ConfigState {
-  config?: Config;
-  state?: State;
-}
+const getStateKey = (project: string) => `/${project}/state/current.json`;
 
 export class StateProvider implements Provider {
-  private readonly project: string;
+  private readonly project: string = "new-project";
   private readonly s3: S3;
 
   private constructor(project: string, s3: S3) {
@@ -54,12 +50,21 @@ export class StateProvider implements Provider {
       throw error;
     }
   }
-  public async putObject(key: string, object: Readable | string) {
-    return this.s3.putObject(key, object);
+
+  /**
+   * Upload file to s3 artifact store for project
+   */
+  public async uploadArtefact(path: string, key: string) {
+    const readable = createReadStream(path);
+    const artifactKey = getArtifactKey(this.project, key);
+
+    return this.s3.putObject(artifactKey, readable);
   }
 
-  public async getPreviousConfig(): Promise<ConfigState | undefined> {
-    return Promise.resolve(undefined);
+  public async getCurrentState(): Promise<ConfigState | undefined> {
+    const stateKey = getStateKey(this.project);
+    
+    return this.s3.getJSONObject<ConfigState>(stateKey);
   }
 }
 

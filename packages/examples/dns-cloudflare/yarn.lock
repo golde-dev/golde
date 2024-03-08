@@ -1319,7 +1319,7 @@ __metadata:
 
 "@tenacify/cli@file:../../cli::locator=%40tenacify%2Fdns-cloudflare%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=2a810c&locator=%40tenacify%2Fdns-cloudflare%40workspace%3A."
+  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=740b69&locator=%40tenacify%2Fdns-cloudflare%40workspace%3A."
   dependencies:
     "@iarna/toml": "npm:^2.2.5"
     "@tenacify/core": "npm:^0.2.0"
@@ -1328,6 +1328,7 @@ __metadata:
     execa: "npm:^8.0.1"
     find-up: "npm:^5.0.0"
     glob: "npm:^10.3.10"
+    moderndash: "npm:^3.10.0"
     pino: "npm:^8.19.0"
     tar: "npm:^6.2.0"
     typescript: "npm:^5.3.3"
@@ -1335,7 +1336,7 @@ __metadata:
     zod-to-json-schema: "npm:^3.22.4"
   bin:
     deployer: ./lib/bin/deployer.js
-  checksum: a3941ae930fb9562a011418de0709ccfbbcc77220c1724845cd932d91a6319ae158b08e759cc9905425e6745518a2cfcb68a76b735835583138916da11109766
+  checksum: 2da6b43aec37643748ac6eede84bb97461f13baa44d79f1aa8e0de5af04bba324a7e16f5f5b0335a77a1bbbc190868f924fcd38cc04883ac1a25282a6ed6c6ac
   languageName: node
   linkType: hard
 
@@ -1612,6 +1613,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hotscript@npm:1.0.13":
+  version: 1.0.13
+  resolution: "hotscript@npm:1.0.13"
+  checksum: deaa528857a5fd0f3f2a5d2d003fa360ea14ebeae2d8909c1f04fe2cc7bff5982438122e26c1343d2c11d1b0deba8438d605772b73e015a446b67306ea4ce347
+  languageName: node
+  linkType: hard
+
 "human-signals@npm:^5.0.0":
   version: 5.0.0
   resolution: "human-signals@npm:5.0.0"
@@ -1738,6 +1746,15 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 07b56b61a8f094a5e28d2507886930f35687cc1998f1d4c44abcfd55e4e65d92479434a8614db49db3c5eb7ec843597f5815576a1e8d8db32ac29c7fc2efd7db
+  languageName: node
+  linkType: hard
+
+"moderndash@npm:^3.10.0":
+  version: 3.11.0
+  resolution: "moderndash@npm:3.11.0"
+  dependencies:
+    hotscript: "npm:1.0.13"
+  checksum: d7d7a4eda21cca844013a6429f5836470959f94d89e5b829391db51302242022975dc1b6d6b88f586663e68ded32d2321403ab4af1802b40fb5ed91b33bb527a
   languageName: node
   linkType: hard
 

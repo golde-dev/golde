@@ -7,12 +7,14 @@ import type { Plan } from "./types/plan";
 
 export async function createPlan(
   context: Context
-): Promise<Plan[]> {
-  const plan: Plan[] = [];      
+): Promise<Plan> {
+  const plan: Plan = [];      
 
   try {
     plan.push(...await createDNSPlan(context));
     plan.push(...await createBucketsPlan(context));
+
+    logger.info(plan, "Plan");
   }
   catch (error) {
     if (error instanceof PlanError) {

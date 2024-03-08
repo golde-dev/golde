@@ -6,9 +6,16 @@ import { z } from "zod";
 import { providersSchema } from "./providers/schema";
 import { bucketSchema } from "./buckets/schema";
 
+const projectNameSchema = z
+  .string()
+  .regex(
+    /^[A-Za-z0-9_@./#&+-]*$/, 
+    "Projects name may include alphanumeric characters and the following special symbols: -, _, @, ., /, #, &, +."
+  );
+
 export const schema: ZodType<Config> = z
   .object({
-    project: z.string(),
+    project: projectNameSchema,
     providers: providersSchema,
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),

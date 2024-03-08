@@ -45,13 +45,15 @@ interface Zone {
 /**
  * @see https://developers.cloudflare.com/api/operations/dns-records-for-a-zone-create-dns-record
  */
-interface ZoneRecordRequest {
+export interface ZoneRecordRequest {
   /**
    * IP address 
-   * @example: 198.51.100.4 
-   * @example: 198.51.100.4,198.51.100.5
+   * @example: 198.51.100.4
    */
-  content: string
+  content: string;
+  /**
+   * name of record, @ for root
+   */
   name: string;
   type: string;
   proxied?: boolean;
@@ -104,12 +106,12 @@ class CloudflareError extends Error {
 }
 
 export class CloudflareClient {
-  private readonly apiKey: string;
+  private readonly apiToken: string;
   private readonly accountId: string;
   private readonly baseUrl = "https://api.cloudflare.com/client/v4";
 
-  public constructor(apiKey: string, accountId: string) {
-    this.apiKey = apiKey;
+  public constructor(apiToken: string, accountId: string) {
+    this.apiToken = apiToken;
     this.accountId = accountId;
   }
 
@@ -119,20 +121,20 @@ export class CloudflareClient {
       per_page: 10000,
       ...extraQuery,
     });
-
+    
     return fetch(`${this.baseUrl}/${path}?${query}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
+        "Authorization": `Bearer ${this.apiToken}`,
         "Content-Type": "application/json",
       },
-    }).then(async({ ok, json, status }) => {
-      if (ok) {
+    }).then(async(r) => {
+      if (r.ok) {
         const {
           result,
           success,
           errors,
-        } = await json() as CloudflareListResponse<T>;
+        } = await r.json() as CloudflareListResponse<T>;
 
         if (success && result) {
           return result;
@@ -141,7 +143,7 @@ export class CloudflareClient {
           throw new CloudflareError("Cloudflare request error", errors);
         }
       }
-      throw new CloudflareError(`Cloudflare request error, status: ${status}`);
+      throw new CloudflareError(`Cloudflare request error, status: ${r.status}`);
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 
@@ -152,22 +154,22 @@ export class CloudflareClient {
     });
   }
 
-  private async makeRequest<T>(path: string, method = "GET", body?: BodyInit): Promise<T> {
+  private async makeRequest<T>(path: string, method = "GET", body?: object): Promise<T> {
     const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       method,
-      body,
+      body: JSON.stringify(body),
       headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
+        "Authorization": `Bearer ${this.apiToken}`,
         "Content-Type": "application/json",
       },
-    }).then(async({ ok, json, status }) => {
-      if (ok) {
+    }).then(async(r) => {
+      if (r.ok) {
         const {
           result,
           success,
           errors,
-        } = await json() as CloudflareResponse<T>;
+        } = await r.json() as CloudflareResponse<T>;
 
         if (success && result) {
           return result;
@@ -176,7 +178,7 @@ export class CloudflareClient {
           throw new CloudflareError("Cloudflare response error", errors);
         }
       }
-      throw new CloudflareError(`Cloudflare request error, status: ${status}`);
+      throw new CloudflareError(`Cloudflare request error, status: ${r.status}`);
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 
@@ -193,12 +195,11 @@ export class CloudflareClient {
    */
   public async verifyUserToken(): Promise<void> {
     const { status } = await this.makeRequest<VerifyTokenResult>("/user/tokens/verify");
+
     if (status !== "active") {
       throw new CloudflareError(`Token is not active: ${status}`);
     }
   }
-
-
 
   /**
    * Create bucket in r2
@@ -208,7 +209,7 @@ export class CloudflareClient {
     return this.makeRequest<Bucket>(
       `/accounts/${this.accountId}/r2/buckets`,
       "POST",
-      JSON.stringify(config)
+      config
     );
   }
 
@@ -252,7 +253,7 @@ export class CloudflareClient {
     return this.makeRequest<ZoneRecord>(
       `/zones/${zoneId}/dns_records`,
       "POST",
-      JSON.stringify(config)
+      config
     );
   }
 
@@ -265,7 +266,7 @@ export class CloudflareClient {
     return this.makeRequest<ZoneRecord>(
       `/zones/${zoneId}/dns_records/${recordId}`,
       "PATCH",
-      JSON.stringify(config)
+      config
     );
   }
 

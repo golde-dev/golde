@@ -12,9 +12,8 @@ export interface Context {
   previousState?: State;
   nextConfig: Config;
   nextState: State;
-  
   deployer?: DeployerProvider;
-  state: StateProvider;
+  state: DeployerProvider | StateProvider;
   hcloud?: HCloudProvider;
   cloudflare?: CloudflareProvider;
 }
@@ -68,7 +67,7 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
       const {
         config: previousConfig,
         state: previousState,
-      } = await stateProvider.getPreviousConfig() ?? {};
+      } = await stateProvider.getCurrentState() ?? {};
 
       logger.debug("Context initialized");
 
@@ -80,13 +79,10 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
       };
     }
     else if (deployerProvider) {
-      const stateProviderFromDeployer = await deployerProvider.initStateProvider();
-      logger.debug("Created state provider from deployer");
-      
       const {
         config: previousConfig,
         state: previousState,
-      } = await stateProviderFromDeployer.getPreviousConfig() ?? {};
+      } = await deployerProvider.getCurrentState() ?? {};
 
       logger.debug("Context initialized");
       
@@ -94,7 +90,7 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
         ...contextBase,
         previousConfig,
         previousState,
-        state: stateProviderFromDeployer,
+        state: deployerProvider,
       };
     }
     else {

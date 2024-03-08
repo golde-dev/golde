@@ -15,7 +15,12 @@
     "test": "vitest --run",
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest",
-    "generateSchema": "node ./lib/bin/schema.js"
+    "generateSchema": "node ./lib/bin/schema.js",
+    "pkg": "pkg ./lib/bin/deployer.js --out-path"
+  },
+  "pkg": {
+    "scripts": "",
+    "outputPath": "dist"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -40,6 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "@vitest/coverage-v8": "^1.3.1",
+    "@yao-pkg/pkg": "^5.11.4",
     "eslint": "^8.57.0",
     "vitest": "^1.3.1"
   }
