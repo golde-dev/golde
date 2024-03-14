@@ -2,7 +2,8 @@
 import logger from "../logger";
 import { S3 } from "@tenacify/core";
 import type { Provider } from "./provider";
-import type { ConfigState } from "../types/config";
+import { NoSuchKey } from "@aws-sdk/client-s3";
+import type { ConfigLock, ConfigState } from "../types/config";
 import { createReadStream } from "fs";
 import { getArtifactKey } from "../utils/artifacts";
 
@@ -15,6 +16,16 @@ export interface StateConfig {
 }
 
 const getStateKey = (project: string) => `/${project}/state/current.json`;
+const getLockKey = (project: string) => `/${project}/state/lock.json`;
+
+async function notFoundAsUndefined<T>(promise: Promise<T>): Promise<T | undefined> {
+  return promise.catch((error) => {
+    if (error instanceof NoSuchKey) {
+      return undefined;
+    }
+    throw error;
+  });
+}
 
 export class StateProvider implements Provider {
   private readonly project: string = "new-project";
@@ -61,10 +72,14 @@ export class StateProvider implements Provider {
     return this.s3.putObject(artifactKey, readable);
   }
 
-  public async getCurrentState(): Promise<ConfigState | undefined> {
+  public async getState(): Promise<ConfigState | undefined> {
     const stateKey = getStateKey(this.project);
-    
-    return this.s3.getJSONObject<ConfigState>(stateKey);
+    return notFoundAsUndefined(this.s3.getJSONObject<ConfigState>(stateKey));
+  }
+
+  public async getLock(): Promise<ConfigLock | undefined> {
+    const lockKey = getLockKey(this.project);
+    return notFoundAsUndefined(this.s3.getJSONObject<ConfigLock>(lockKey));
   }
 }
 

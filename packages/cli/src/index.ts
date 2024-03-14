@@ -1,1 +1,5 @@
-export type {Config} from "./types/config.js";
+export type {
+  Config,
+  ConfigState,
+  ConfigLock,
+} from "./types/config.js";

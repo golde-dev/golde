@@ -15,5 +15,9 @@ export type Config = {
 export interface ConfigState {
   config?: Config;
   state?: State;
-  previous: string;
+  previous: string | null;
+}
+export interface ConfigLock {
+  branch: string;
+  createdAt: string;
 }

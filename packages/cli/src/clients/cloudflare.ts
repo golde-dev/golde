@@ -170,7 +170,7 @@ export class CloudflareClient {
           success,
           errors,
         } = await r.json() as CloudflareResponse<T>;
-
+ 
         if (success && result) {
           return result;
         }

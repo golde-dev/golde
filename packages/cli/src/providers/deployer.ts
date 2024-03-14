@@ -4,7 +4,6 @@ import type { Provider } from "./provider";
 import type { StateConfig} from "./state";
 import type { ConfigState } from "../types/config";
 import { openAsBlob } from "fs";
-import { getArtifactKey } from "../utils/artifacts";
 
 interface DeployerConfig {
   apiKey: string;
@@ -54,7 +53,7 @@ export class DeployerProvider implements Provider {
    * Get previous config for project 
    */
   public async getCurrentState(): Promise<ConfigState | undefined> {
-    return this.client.getCurrentState(this.project);
+    return this.client.getState(this.project);
   }
 
   /**
@@ -62,8 +61,6 @@ export class DeployerProvider implements Provider {
    */
   public async uploadArtefact(path: string, key: string): Promise<void> {
     const blob = await openAsBlob(path);
-    const artifactKey = getArtifactKey(this.project, key);
-
-    return this.client.uploadArtifact(artifactKey, blob);
+    return this.client.uploadArtifact(this.project, key, blob);
   }
 }

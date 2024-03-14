@@ -2,10 +2,28 @@ import type { StateConfig } from "../providers/state";
 import logger from "../logger";
 import type { ConfigState } from "../types/config";
 
+interface DeployerErrorCause {
+  status: number;
+  statusText: string
+}
+
 class DeployerError extends Error {
-  public constructor(message: string, cause?: Error) {
+  public cause?: DeployerErrorCause;
+
+  public constructor(message: string, cause?: DeployerErrorCause) {
     super(message, { cause });
   }
+}
+
+async function notFoundAsUndefined<T>(promise: Promise<T>): Promise<T | undefined> {
+  return promise.catch((error) => {
+    if (error instanceof DeployerError) {
+      if (error.cause?.status === 404) {
+        return undefined;
+      }
+    }
+    throw error;
+  });
 }
 
 export class DeployerClient {
@@ -29,7 +47,10 @@ export class DeployerClient {
       if (r.ok) {
         return await r.json() as T;
       }
-      throw new DeployerError(`Deployer request failed with status code ${r.status}`);
+      throw new DeployerError("Deployer request failed", {
+        status: r.status,
+        statusText: r.statusText,
+      });
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 
@@ -51,7 +72,10 @@ export class DeployerClient {
       },
     }).then((r) => {
       if (!r.ok) {
-        throw new DeployerError(`Deployer request failed with status code ${r.status}`);
+        throw new DeployerError("Deployer request failed", {
+          status: r.status,
+          statusText: r.statusText,
+        });
       }
     }).finally(() => {
       const end = Date.now();
@@ -70,29 +94,33 @@ export class DeployerClient {
     }
   }
 
-  public async getCurrentState(project: string): Promise<ConfigState | undefined> {
-    return this.makeRequest<ConfigState | undefined>(`/state/${project}`);
+  public async getState(project: string): Promise<ConfigState | undefined> {
+    return notFoundAsUndefined(this.makeRequest<ConfigState>(`/projects/${project}/state`));
+  }
+
+  public async getStateLock(project: string): Promise<ConfigState | undefined> {
+    return notFoundAsUndefined(this.makeRequest<ConfigState>(`/projects/${project}/lock`));
   }
 
   public async getManagedStateConfig(project: string): Promise<StateConfig | undefined> {
-    return this.makeRequest<StateConfig | undefined>(`/state-config/${project}`);
+    return this.makeRequest<StateConfig | undefined>(`/projects/${project}/state-config`);
   }
 
   public async registerManagedStateConfig(project: string, stateConfig: StateConfig): Promise<void> {
     await this.makeRequest(
-      `/state-config/${project}`, 
+      `/projects/${project}/state-config`, 
       "POST", 
       stateConfig
     );
   }
   
-  public async uploadArtifact(key: string, body: Blob): Promise<void> {
+  public async uploadArtifact(project: string, key: string, body: Blob): Promise<void> {
     const form = new FormData();
     form.set("key", key);
     form.set("body", body);
 
     await this.makeFileRequest(
-      "/artifacts", 
+      `/projects/${project}/artifacts`, 
       "POST", 
       form
     );

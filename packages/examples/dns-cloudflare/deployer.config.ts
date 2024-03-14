@@ -1,6 +1,5 @@
 import type {Config} from '@tenacify/cli'
 
-
 const config: Config = {
   project: "example-dns-cloudflare",
   providers: {
@@ -21,7 +20,7 @@ const config: Config = {
             ttl: 3600,
             proxied: false, 
           },
-          "dev-dns-cloudflare": {
+          "dns-cloudflare-dev": {
             value: "",
             ttl: 3600,
             proxied: false,
