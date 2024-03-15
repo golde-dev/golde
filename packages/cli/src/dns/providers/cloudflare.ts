@@ -1,10 +1,10 @@
 import { isEqual } from "moderndash";
-import type { ZoneRecordRequest } from "../clients/cloudflare";
-import { PlanError, PlanErrorCode } from "../error";
-import logger from "../logger";
-import type { CloudflareProvider } from "../providers/cloudflare";
-import { Type, type ExecutionUnit, type Plan } from "../types/plan";
-import type { CloudflareDNSRecordState, CloudflareDNSZones, CloudflareZonesState, RecordType } from "./dns";
+import type { ZoneRecordRequest } from "../../clients/cloudflare";
+import { PlanError, PlanErrorCode } from "../../error";
+import logger from "../../logger";
+import type { CloudflareProvider } from "../../providers/cloudflare";
+import { Type, type ExecutionUnit, type Plan } from "../../types/plan";
+import type { CloudflareDNSRecordState, CloudflareDNSZones, CloudflareZonesState, RecordType } from "../types";
 
 const getRecords = (config?: CloudflareDNSZones, state?: CloudflareZonesState)  => {
   const flatRecords: Record<string, [zone: string, ZoneRecordRequest, CloudflareDNSRecordState | undefined]> = {};

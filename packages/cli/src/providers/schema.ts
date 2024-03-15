@@ -1,4 +1,4 @@
-import type { ProvidersConfig } from "./provider";
+import type { ProvidersConfig } from "./types";
 import type { ZodType} from "zod";
 import { z } from "zod";
 
@@ -44,6 +44,9 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       .describe("Hetzner provider config"),
     state: z
       .object({
+        type: z
+          .enum(["s3"])
+          .describe("Type of state provider, only s3 is supported at the moment"),
         bucket: z
           .string()
           .describe("Name of s3 bucket"),

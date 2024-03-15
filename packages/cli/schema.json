@@ -5,15 +5,30 @@
       "type": "object",
       "properties": {
         "project": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_@./#&+-]*$"
         },
         "providers": {
           "type": "object",
           "properties": {
-            "cloudflare": {
+            "deployer": {
               "type": "object",
               "properties": {
                 "apiKey": {
+                  "type": "string",
+                  "description": "Deployer api key"
+                }
+              },
+              "required": [
+                "apiKey"
+              ],
+              "additionalProperties": false,
+              "description": "Deployer provider config"
+            },
+            "cloudflare": {
+              "type": "object",
+              "properties": {
+                "apiToken": {
                   "type": "string",
                   "description": "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"
                 },
@@ -23,11 +38,30 @@
                 }
               },
               "required": [
-                "apiKey",
+                "apiToken",
                 "accountId"
               ],
               "additionalProperties": false,
               "description": "Cloudflare provider config"
+            },
+            "namecheap": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Namecheap api keyhttps://www.namecheap.com/support/api/intro/"
+                },
+                "apiUser": {
+                  "type": "string",
+                  "description": "Your Namecheap account username will act as API username"
+                }
+              },
+              "required": [
+                "apiKey",
+                "apiUser"
+              ],
+              "additionalProperties": false,
+              "description": "Hetzner provider config"
             },
             "hcloud": {
               "type": "object",
@@ -42,20 +76,6 @@
               ],
               "additionalProperties": false,
               "description": "Hetzner provider config"
-            },
-            "deployer": {
-              "type": "object",
-              "properties": {
-                "apiKey": {
-                  "type": "string",
-                  "description": "Deployer api key"
-                }
-              },
-              "required": [
-                "apiKey"
-              ],
-              "additionalProperties": false,
-              "description": "Deployer provider config"
             },
             "state": {
               "type": "object",
@@ -120,6 +140,53 @@
                           },
                           "proxied": {
                             "type": "boolean"
+                          },
+                          "comment": {
+                            "type": "string"
+                          },
+                          "tags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "branch": {
+                            "type": "string"
+                          },
+                          "branchPattern": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "namecheap": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "not": {}
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "ttl": {
+                            "type": "number",
+                            "description": "TTL in seconds"
                           },
                           "branch": {
                             "type": "string"

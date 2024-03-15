@@ -82,7 +82,7 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
       const {
         config: previousConfig,
         state: previousState,
-      } = await deployerProvider.getCurrentState() ?? {};
+      } = await deployerProvider.getState() ?? {};
 
       logger.debug("Context initialized");
       

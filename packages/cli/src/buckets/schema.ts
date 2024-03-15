@@ -1,13 +1,13 @@
 import type { ZodType} from "zod";
 import { z } from "zod";
-import type { BucketConfig } from "./bucket";
+import type { BucketsConfig } from "./types";
 
-export const bucketSchema: ZodType<BucketConfig> = z
+export const bucketSchema: ZodType<BucketsConfig> = z
   .object({
     cloudflare: z
       .record(
         z.object({
-          location: z.enum([
+          locationHint: z.enum([
             "apac", 
             "eeur", 
             "enam", 

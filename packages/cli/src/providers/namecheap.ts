@@ -1,6 +1,6 @@
 import { NameCheapClient } from "../clients/namecheap";
 import logger from "../logger";
-import type { Provider } from "./provider";
+import type { Provider } from "./types";
 
 interface NameCheapConfig {
   apiKey: string;

@@ -102,14 +102,14 @@ export class DeployerClient {
     return notFoundAsUndefined(this.makeRequest<ConfigState>(`/projects/${project}/lock`));
   }
 
-  public async getManagedStateConfig(project: string): Promise<StateConfig | undefined> {
+  public async getStateConfig(project: string): Promise<StateConfig | undefined> {
     return this.makeRequest<StateConfig | undefined>(`/projects/${project}/state-config`);
   }
 
-  public async registerManagedStateConfig(project: string, stateConfig: StateConfig): Promise<void> {
+  public async changeStateConfig(project: string, stateConfig: StateConfig): Promise<void> {
     await this.makeRequest(
       `/projects/${project}/state-config`, 
-      "POST", 
+      "PUT", 
       stateConfig
     );
   }

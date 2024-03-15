@@ -1,6 +1,6 @@
 import logger from "../logger";
 import { DeployerClient } from "../clients/deployer";
-import type { Provider } from "./provider";
+import type { Provider } from "./types";
 import type { StateConfig} from "./state";
 import type { ConfigState } from "../types/config";
 import { openAsBlob } from "fs";
@@ -39,20 +39,20 @@ export class DeployerProvider implements Provider {
    * Deployer need to know how to access state of project
    */
   public async registerStateProvider(stateConfig: StateConfig) {
-    await this.client.registerManagedStateConfig(this.project, stateConfig);
+    await this.client.changeStateConfig(this.project, stateConfig);
   } 
 
   /**
    * Get previous config for project
    */
   public async getManagedStateConfig(): Promise<StateConfig | undefined> {
-    return this.client.getManagedStateConfig(this.project);
+    return this.client.getStateConfig(this.project);
   }
 
   /**
    * Get previous config for project 
    */
-  public async getCurrentState(): Promise<ConfigState | undefined> {
+  public async getState(): Promise<ConfigState | undefined> {
     return this.client.getState(this.project);
   }
 

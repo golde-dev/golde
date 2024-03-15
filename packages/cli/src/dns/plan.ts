@@ -1,7 +1,7 @@
 import type { Context } from "../context";
 import { PlanError, PlanErrorCode } from "../error";
 import type { Plan } from "../types/plan";
-import { createCloudflareDNSPlan } from "./cloudflare";
+import { createCloudflareDNSPlan } from "./providers/cloudflare";
 
 export const createDNSPlan = async(context: Context): Promise<Plan> => {
   const {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class */
 
 export interface ProvidersConfig {
   /**
@@ -49,10 +48,11 @@ export interface ProvidersConfig {
     apiKey: string
   }
   /**
-   * State provider, only required if not using payed offering
+   * State provider, only required if not using managed solution
    * State provider would store build artifacts and state of project
    */
   state?: {
+    type: "s3",
     bucket: string,
     region: string,
     endpoint: string,
@@ -61,6 +61,7 @@ export interface ProvidersConfig {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export abstract class Provider {
   public static init: <T>(config: unknown) => Promise<T>;
 }

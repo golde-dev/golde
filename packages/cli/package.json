@@ -16,11 +16,10 @@
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest",
     "generateSchema": "node ./lib/bin/schema.js",
-    "pkg": "pkg ./lib/bin/deployer.js --out-path"
+    "pkg": "pkg ./lib/bin/deployer.js"
   },
   "pkg": {
-    "scripts": "",
-    "outputPath": "dist"
+    "outputPath": "./dist"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -30,6 +29,7 @@
     "execa": "^8.0.1",
     "find-up": "^5.0.0",
     "glob": "^10.3.10",
+    "inquirer": "^9.2.16",
     "moderndash": "^3.10.0",
     "pino": "^8.19.0",
     "tar": "^6.2.0",

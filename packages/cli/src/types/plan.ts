@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum Type {
-  Create = "create",
-  Delete = "delete",
+  Create = "Create",
+  Delete = "Delete",
   Update = "Update",
 }
 

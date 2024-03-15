@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createCloudflareDNSPlan } from "../cloudflare";
-import type { CloudflareProvider } from "../../providers/cloudflare";
+import type { CloudflareProvider } from "../../../providers/cloudflare";
 
 describe("createCloudflareDNSPlan", () => {
 

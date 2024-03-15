@@ -228,7 +228,7 @@ export class CloudflareClient {
    * Get list of zones that account have access to
    */
   @decMemoize()
-  public async getZones(query?: object) {
+  public async getZones(query?: object): Promise<Zone[]> {
     return this.makeListRequest<Zone[]>("/zones", query);
   }
   

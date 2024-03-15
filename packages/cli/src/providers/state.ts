@@ -1,13 +1,14 @@
 
 import logger from "../logger";
 import { S3 } from "@tenacify/core";
-import type { Provider } from "./provider";
+import type { Provider } from "./types";
 import { NoSuchKey } from "@aws-sdk/client-s3";
 import type { ConfigLock, ConfigState } from "../types/config";
 import { createReadStream } from "fs";
 import { getArtifactKey } from "../utils/artifacts";
 
 export interface StateConfig {
+  type: "s3",
   bucket: string,
   region: string,
   endpoint: string,

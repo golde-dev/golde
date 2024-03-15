@@ -7,6 +7,7 @@ import { getConfig } from "../config.js";
 import { version } from "../../package.json";
 import { createPlan } from "../plan.js";
 import { initializeContext } from "../context.js";
+import { initConfig } from "../init.js";
 
 config({ path: join(cwd(), ".env") });
 
@@ -25,7 +26,7 @@ program
     if (debug) {
       logger.level = "debug";
     }
-
+    await initConfig();
     logger.info("Config created");
   });
 

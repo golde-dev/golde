@@ -1,8 +1,8 @@
 import type { ZoneRecordRequest } from "../clients/cloudflare";
 import { CloudflareClient } from "../clients/cloudflare";
-import type { CloudflareDNSRecordState } from "../dns/dns";
+import type { CloudflareDNSRecordState } from "../dns/types";
 import logger from "../logger";
-import type { Provider } from "./provider";
+import type { Provider } from "./types";
 
 interface CloudflareConfig {
   apiToken: string

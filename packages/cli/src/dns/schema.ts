@@ -1,4 +1,4 @@
-import type { BaseDNSRecord, CloudflareDNSRecord, DNSConfig, RecordType } from "./dns";
+import type { BaseDNSRecord, CloudflareDNSRecord, DNSConfig, RecordType } from "./types";
 import type { ZodType} from "zod";
 import { z } from "zod";
 

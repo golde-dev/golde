@@ -1,6 +1,6 @@
-import type { BucketConfig } from "../buckets/bucket";
-import type { DNSConfig } from "../dns/dns";
-import type { ProvidersConfig } from "../providers/provider";
+import type { BucketsConfig } from "../buckets/types";
+import type { DNSConfig } from "../dns/types";
+import type { ProvidersConfig } from "../providers/types";
 import type { ServersConfig } from "../servers/hetzner";
 import type { State } from "./state";
 
@@ -8,13 +8,13 @@ export type Config = {
   project: string
   providers: ProvidersConfig; 
   dns?: DNSConfig;
-  buckets?: BucketConfig;
+  buckets?: BucketsConfig;
   servers?: ServersConfig;
 };
 
 export interface ConfigState {
-  config?: Config;
-  state?: State;
+  config: Config;
+  state: State;
   previous: string | null;
 }
 export interface ConfigLock {

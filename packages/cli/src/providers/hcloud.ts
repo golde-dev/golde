@@ -1,6 +1,6 @@
 import { HCloudClient } from "../clients/hcloud";
 import logger from "../logger";
-import type { Provider } from "./provider";
+import type { Provider } from "./types";
 
 interface HCloudConfig {
   apiKey: string
