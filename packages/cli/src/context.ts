@@ -20,7 +20,7 @@ export interface Context {
 
 export const initializeContext = async(nextConfig: Config): Promise<Context> => {
   const {
-    project,
+    name,
     providers: {
       deployer,
       state,
@@ -39,10 +39,10 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
       cloudflareProvider,
     ] = await Promise.all([
       deployer
-        ? DeployerProvider.init(project, deployer)
+        ? DeployerProvider.init(name, deployer)
         : undefined,
       state
-        ? StateProvider.init(project, state)
+        ? StateProvider.init(name, state)
         : undefined,
       hcloud
         ? HCloudProvider.init(hcloud)

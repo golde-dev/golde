@@ -1,7 +1,7 @@
 import type {Config} from '@tenacify/cli'
 
 const config: Config = {
-  project: "example-dns-cloudflare",
+  name: "example-dns-cloudflare",
   providers: {
     deployer: {
       apiKey: "{{ env.DEPLOYER_API_KEY }}",

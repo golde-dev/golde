@@ -9,6 +9,14 @@ interface DeployerConfig {
   apiKey: string;
 }
 
+export const getDeployerConfig = (): DeployerConfig | void => {
+  if (process.env.DEPLOYER_API_KEY) { 
+    return {
+      apiKey: process.env.DEPLOYER_API_KEY,
+    };
+  }
+};
+
 export class DeployerProvider implements Provider {
   private readonly project: string;
   private readonly client: DeployerClient;
@@ -18,7 +26,7 @@ export class DeployerProvider implements Provider {
     this.project = project;
   }
 
-  public static async init(project: string, { apiKey }: DeployerConfig): Promise<DeployerProvider> {
+  public static async init(project: string, {apiKey}: DeployerConfig): Promise<DeployerProvider> {
     const client = new DeployerClient(apiKey);
 
     try {
@@ -32,6 +40,13 @@ export class DeployerProvider implements Provider {
       }, "Failed to initialize deployer provider, check your apiKey");
       throw error;
     }
+  }
+
+  /**
+   * Create project in deployer
+   */
+  public async createProject() {
+    await this.client.createProject(this.project);
   }
 
   /**

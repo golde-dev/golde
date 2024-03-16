@@ -5,7 +5,7 @@ import type { ServersConfig } from "../servers/hetzner";
 import type { State } from "./state";
 
 export type Config = {
-  project: string
+  name: string
   providers: ProvidersConfig; 
   dns?: DNSConfig;
   buckets?: BucketsConfig;

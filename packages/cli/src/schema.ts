@@ -16,7 +16,7 @@ export const projectNameSchema = z
 
 export const schema: ZodType<Config> = z
   .object({
-    project: projectNameSchema,
+    name: projectNameSchema,
     providers: providersSchema,
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),

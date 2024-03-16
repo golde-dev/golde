@@ -1,6 +1,6 @@
 import {execSync} from "child_process";
 import {describe, expect, it, vi} from "vitest";
-import { getBranchSlug } from "../git";
+import {getBranchSlug} from "../git";
 
 vi.mock("child_process");
 

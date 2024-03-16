@@ -2,7 +2,10 @@ import { input, select } from "@inquirer/prompts";
 import { projectNameSchema } from "./schema";
 import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "path";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { DeployerProvider, getDeployerConfig } from "./providers/deployer";
+import logger from "./logger";
+import { DeployerError } from "./clients/deployer";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
@@ -17,12 +20,14 @@ const validate = (value: string, schema: ZodSchema): boolean | string => {
 };
 
 interface PackageJSON {
+  name: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
 }
 
 const getProjectType = () => {
   const projectInfo = {
+    name: "",
     isNPMPackage: false,
     isTSPackage: false,
   };
@@ -31,7 +36,8 @@ const getProjectType = () => {
     const source = JSON.parse(
       readFileSync(packagePath, {encoding:"utf-8"})
     ) as PackageJSON;
-
+    
+    projectInfo.name = source.name;
     projectInfo.isNPMPackage = true;
     projectInfo.isTSPackage = Boolean(
       source.dependencies?.typescript ??
@@ -42,17 +48,57 @@ const getProjectType = () => {
 };
 
 
+function createJSConfig(projectName: string) {
+
+  const config = 
+`
+
+const config = {
+  name: "${projectName}",
+  providers: {
+    deployer: {
+      apiKey: "{{ env.DEPLOYER_API_KEY }}",
+    },
+  },
+};
+
+export default config;
+`;
+
+  writeFileSync("./deployer.config.js", config);
+}
+
+function createTSConfig(projectName: string) {
+
+  const config = 
+`
+import type {Config} from '@tenacify/cli'
+
+const config: Config = {
+  name: "${projectName}",
+  providers: {
+    deployer: {
+      apiKey: "{{ env.DEPLOYER_API_KEY }}",
+    },
+  },
+};
+export default config;
+`;
+
+  writeFileSync("./deployer.config.ts", config);
+}
+
 export async function initConfig() {
   const {
+    name,
     isNPMPackage,
     isTSPackage,
   } = getProjectType();
-
-  try {
-
   
-    const projectName = await input({ 
+  try {
+    const projectName = await input({
       message: "Enter project name ",
+      default: name,
       validate: (value: string) => validate(value, projectNameSchema),
     });
   
@@ -79,10 +125,34 @@ export async function initConfig() {
       ],
     });
 
-    console.log({
-      projectName,
-      configType,
-    });
+    switch (configType) {
+      case "deployer.config.js":
+        createJSConfig(projectName);
+        break;
+      case "deployer.config.ts":
+        createTSConfig(projectName);  
+        break;
+    }
+
+    const deployerConfig = getDeployerConfig();
+    if (deployerConfig) {
+      try {
+        const deployer = await DeployerProvider.init(projectName, deployerConfig);
+        await deployer.createProject();
+      } 
+      catch (error) {
+        if (error instanceof DeployerError) {
+          if (error.cause?.status === 409) {
+            logger.error(`Project: ${projectName} already exists`);
+          }
+          else {
+            logger.error({
+              error,
+            }, "Failed to create project in deployer");
+          }
+        }
+      } 
+    }
   }
   catch (error) {
     if (error instanceof Error) {

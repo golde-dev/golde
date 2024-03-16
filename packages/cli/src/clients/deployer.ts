@@ -7,7 +7,7 @@ interface DeployerErrorCause {
   statusText: string
 }
 
-class DeployerError extends Error {
+export class DeployerError extends Error {
   public cause?: DeployerErrorCause;
 
   public constructor(message: string, cause?: DeployerErrorCause) {
@@ -93,7 +93,13 @@ export class DeployerClient {
       throw new DeployerError(`Token status is not active: ${status}`);
     }
   }
-
+  
+  public async createProject(project: string): Promise<void> {
+    return this.makeRequest("/projects", "POST", {
+      name: project,
+    });
+  }
+  
   public async getState(project: string): Promise<ConfigState | undefined> {
     return notFoundAsUndefined(this.makeRequest<ConfigState>(`/projects/${project}/state`));
   }

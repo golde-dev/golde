@@ -7,7 +7,7 @@ describe("validateConfig", () => {
   describe("project", () => {
     it("should throw an error if the config is invalid", () => {
       const invalidConfig: Config = {
-        project: "invalid project name",
+        name: "invalid project name",
         providers: {
           deployer: {
             apiKey: "valid_api_key",

@@ -1,6 +1,6 @@
 {
-  "name": "@tenacify/dns-cloudflare",
-  "packageManager": "yarn@4.0.2",
+  "name": "@tenacify/example-dns-cloudflare",
+  "packageManager": "yarn@4.1.1",
   "type": "commonjs",
   "workspaces": [
     "packages/*"
