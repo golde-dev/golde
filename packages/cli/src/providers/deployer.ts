@@ -1,20 +1,21 @@
 import logger from "../logger";
+import { openAsBlob } from "fs";
 import { DeployerClient } from "../clients/deployer";
 import type { Provider } from "./types";
 import type { StateConfig} from "./state";
 import type { ConfigState } from "../types/config";
-import { openAsBlob } from "fs";
 
 interface DeployerConfig {
   apiKey: string;
 }
 
 export const getDeployerConfig = (): DeployerConfig | void => {
-  if (process.env.DEPLOYER_API_KEY) { 
-    return {
-      apiKey: process.env.DEPLOYER_API_KEY,
-    };
+  if (!process.env.DEPLOYER_API_KEY) { 
+    return;
   }
+  return {
+    apiKey: process.env.DEPLOYER_API_KEY,
+  };
 };
 
 export class DeployerProvider implements Provider {
@@ -55,7 +56,7 @@ export class DeployerProvider implements Provider {
    */
   public async registerStateProvider(stateConfig: StateConfig) {
     await this.client.changeStateConfig(this.project, stateConfig);
-  } 
+  }
 
   /**
    * Get previous config for project

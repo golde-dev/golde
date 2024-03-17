@@ -1,7 +1,7 @@
 import logger from "./logger";
 import { ContextError, ContextErrorCode } from "./error";
 import { CloudflareProvider } from "./providers/cloudflare";
-import { DeployerProvider } from "./providers/deployer";
+import { DeployerProvider, getDeployerConfig } from "./providers/deployer";
 import { HCloudProvider } from "./providers/hcloud";
 import { StateProvider } from "./providers/state";
 import type { Config } from "./types/config";
@@ -22,7 +22,7 @@ export const initializeContext = async(nextConfig: Config): Promise<Context> => 
   const {
     name,
     providers: {
-      deployer,
+      deployer = getDeployerConfig(),
       state,
       hcloud,
       cloudflare,

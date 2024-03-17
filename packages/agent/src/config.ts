@@ -2,7 +2,6 @@
 import { z } from "zod";
 import {pino} from "pino";
 
-
 const schema = z.object({
   API_LOG_PRETTY: z.string().transform(Boolean),
   API_LOG_LEVEL: z.string(),

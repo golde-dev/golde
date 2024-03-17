@@ -3464,6 +3464,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^1.4.0"
     conventional-changelog-conventionalcommits: "npm:^7.0.2"
     eslint: "npm:^8.57.0"
+    eslint-plugin-jest: "npm:^27.9.0"
     husky: "npm:^9.0.11"
     lint-staged: "npm:^15.2.2"
     typescript: "npm:^5.4.2"

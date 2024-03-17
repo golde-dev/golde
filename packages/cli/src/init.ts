@@ -1,10 +1,10 @@
+import logger from "./logger";
 import { input, select } from "@inquirer/prompts";
 import { projectNameSchema } from "./schema";
 import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "path";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { DeployerProvider, getDeployerConfig } from "./providers/deployer";
-import logger from "./logger";
 import { DeployerError } from "./clients/deployer";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
@@ -88,6 +88,23 @@ export default config;
   writeFileSync("./deployer.config.ts", config);
 }
 
+function createJSONConfig(projectName: string) {
+  const config = 
+`
+{
+  "$schema": "https://tenacify.dev/schemas/deployer.config.schema.json",
+  "name": "${projectName}",
+  "providers": {
+    "deployer": {
+      "apiKey": "{{ env.DEPLOYER_API_KEY }}"
+    }
+  }
+}
+`;
+
+  writeFileSync("./deployer.config.json", config);
+}
+
 export async function initConfig() {
   const {
     name,
@@ -95,6 +112,8 @@ export async function initConfig() {
     isTSPackage,
   } = getProjectType();
   
+  const deployerConfig = getDeployerConfig();
+
   try {
     const projectName = await input({
       message: "Enter project name ",
@@ -119,6 +138,10 @@ export async function initConfig() {
           value: "deployer.config.ts",
         },
         {
+          name: "deployer.config.json",
+          value: "deployer.config.json",
+        },
+        {
           name: "deployer.toml",
           value: "deployer.toml",
         },
@@ -132,9 +155,11 @@ export async function initConfig() {
       case "deployer.config.ts":
         createTSConfig(projectName);  
         break;
+      case "deployer.config.json":
+        createJSONConfig(projectName);  
+        break;
     }
 
-    const deployerConfig = getDeployerConfig();
     if (deployerConfig) {
       try {
         const deployer = await DeployerProvider.init(projectName, deployerConfig);
