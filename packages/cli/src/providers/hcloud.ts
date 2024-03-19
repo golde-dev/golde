@@ -1,5 +1,6 @@
 import { HCloudClient } from "../clients/hcloud";
 import logger from "../logger";
+import type { HCloudServerConfig, HCloudServerState } from "../servers/types";
 import type { Provider } from "./types";
 
 interface HCloudConfig {
@@ -27,6 +28,10 @@ export class HCloudProvider implements Provider {
       }, "Failed to initialize HCloud provider, check your apiKey and key policy");
       throw error;
     }
+  }
+
+  public async createServer(config: HCloudServerConfig): Promise<HCloudServerState> {
+    
   }
 }
 

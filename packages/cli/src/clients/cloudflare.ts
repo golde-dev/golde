@@ -99,8 +99,13 @@ interface Bucket {
   name: string;
 }
 
+interface ErrorCause {
+  status: number;
+  statusText: string
+}
+
 class CloudflareError extends Error {
-  public constructor(message: string, cause?: CloudflareErrorCause[] | Error) {
+  public constructor(message: string, cause?: CloudflareErrorCause[] | ErrorCause) {
     super(message, { cause });
   }
 }
@@ -143,7 +148,10 @@ export class CloudflareClient {
           throw new CloudflareError("Cloudflare request error", errors);
         }
       }
-      throw new CloudflareError(`Cloudflare request error, status: ${r.status}`);
+      throw new CloudflareError("Cloudflare request error", {
+        status: r.status,
+        statusText: r.statusText,
+      });
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 
@@ -178,7 +186,10 @@ export class CloudflareClient {
           throw new CloudflareError("Cloudflare response error", errors);
         }
       }
-      throw new CloudflareError(`Cloudflare request error, status: ${r.status}`);
+      throw new CloudflareError("Cloudflare request error", {
+        status: r.status,
+        statusText: r.statusText,
+      });
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 

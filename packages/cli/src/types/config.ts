@@ -1,7 +1,7 @@
 import type { BucketsConfig } from "../buckets/types";
 import type { DNSConfig } from "../dns/types";
 import type { ProvidersConfig } from "../providers/types";
-import type { ServersConfig } from "../servers/hetzner";
+import type { ServersConfig } from "../servers/types";
 import type { State } from "./state";
 
 export type Config = {

@@ -1,5 +1,5 @@
 import { z, type ZodType } from "zod";
-import type { HCloudServerConfig, ServersConfig } from "./hetzner";
+import type { HCloudServerConfig, ServersConfig } from "./types";
 
 export const hCloudServerSchema: ZodType<HCloudServerConfig> = z.object({
   type: z.string(),

@@ -21,8 +21,8 @@
     "*.{js,ts,tsx}": "yarn lint:fix"
   },
   "devDependencies": {
-    "@chyzwar/eslint-config": "^0.2.24",
-    "@chyzwar/runner": "^0.4.25",
+    "@chyzwar/eslint-config": "^0.2.25",
+    "@chyzwar/runner": "^0.4.26",
     "@commitlint/cli": "^19.2.0",
     "@commitlint/config-conventional": "^19.1.0",
     "@lerna-lite/cli": "^3.3.1",

@@ -25,7 +25,7 @@
     "pino-pretty": "^10.3.1"
   },
   "devDependencies": {
-    "@chyzwar/eslint-config": "^0.2.24",
+    "@chyzwar/eslint-config": "^0.2.25",
     "@types/node": "^20.11.28",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
