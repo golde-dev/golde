@@ -1,47 +1,190 @@
+import logger from "../logger";
 import { stringify } from "querystring";
 
 /**
  * @see https://docs.hetzner.cloud/#locations-get-all-locations
  */
 interface Location {
-  "city": string,
-  "country": string,
-  "description": string,
-  "id": number,
-  "latitude": number
-  "longitude": number,
-  "name": string,
-  "network_zone": string
+  city: string,
+  country: string,
+  description: string,
+  id: number,
+  latitude: number;
+  longitude: number;
+  name: string;
+  network_zone: string;
 }
 
-interface ErrorResult {
-  error: {
+/**
+ * @see https://docs.hetzner.cloud/#datacenters-get-a-datacenter 
+ */
+interface Datacenter {
+  description: string;
+  id: number;
+  location: Location;
+  name: string;
+  server_types: {
+    available: number[];
+    available_for_migration: number[];
+    supported: number[];
+  }
+}
+
+interface Image {
+  architecture: "arm" | "x86";
+  bound_to: number | null,
+  created: string,
+  created_from: {
+    id: number,
+    name: string
+  } | null,
+  deleted: string | null,
+  deprecated: string | null,
+  description: string;
+  disk_size: number;
+  id: number,
+  image_size: number | null;
+  labels: Record<string, string>;
+  name: string,
+  os_flavor: "alma" | "centos" | "debian" | "fedora" | "rocky" | "ubuntu" | "unknown",
+  os_version: string | null,
+  protection: {
+    delete: boolean
+  },
+  rapid_deploy: boolean,
+  status: "available" | "creating" | "unavailable";
+  type: "app" | "backup" | "snapshot" | "system" | "temporary"
+}
+
+interface ServerType {
+  architecture: "arm" | "x86";
+  cores: number;
+  cpu_type: string;
+  deprecated: boolean;
+  description: string;
+  disk: number;
+  included_traffic: number;
+  memory: number;
+  name: string;
+  prices: {
+    location: string;
+    price_hourly: {
+      gross: number;
+      net: number;
+    };
+    price_monthly: {
+      gross: number;
+      net: number;
+    };
+  }[];
+  storage_type: "local" | "network";
+}
+
+interface ISO {
+  architecture: "arm" | "x86" | null;
+  deprecation: {
+    announced: string;
+    unavailable_after: string
+  } | null;
+  description: string;
+  id: number;
+  name: string | null;
+  type: "private" | "public" | null;
+}
+
+interface PlacementGroup {
+  id: number;
+  name: string;
+  labels: Record<string, string>;
+  servers: number[];
+  type: "spread";
+}
+
+interface Server {
+  backup_window: string | null
+  created: string;
+  datacenter: Datacenter;
+  id: number;
+  image: Image;
+  included_traffic: number | null;
+  ingoing_traffic: number | null;
+  iso: ISO | null;
+  labels: Record<string, string>;
+  load_balancers?: number[];
+  locked: boolean;
+  name: string;
+  outgoing_traffic: number | null;
+  placement_group: PlacementGroup | null;
+  primary_disk_size: number;
+  server_type: ServerType;
+}
+
+interface ResultBase {
+  error?: {
     code: string;
     message: string; 
     details: ErrorDetails
   }
+  meta?: object
 }
 
-export interface ErrorDetails {
+interface LocationsResponse extends ResultBase {
+  locations: Location
+}
+
+/**
+ * Create server request
+ * @see https://docs.hetzner.cloud/#servers-create-a-server
+ */
+interface CreateServerRequest {
+  automount?: boolean,
+  datacenter?: string,
+  firewalls?: {
+    firewall: number
+  }[];
+  image: string;
+  labels?: Record<string, string>,
+  location?: string,
+  name: string,
+  networks?: number[]
+  placement_group?: number
+  public_net?: {
+    enable_ipv4?: boolean,
+    enable_ipv6?: boolean,
+    ipv4?: string | null,
+    ipv6?: string | null
+  };
+  server_type: string;
+  ssh_keys?: string[];
+  start_after_create?: true,
+  user_data?: string;
+  volumes?: number[];
+}
+
+interface CreateServerResponse extends ResultBase {
+  server: Server
+}
+
+interface ErrorDetails {
   code: string;
   message: string;
   details: ErrorDetails
 }
 
-export interface HCloudErrorCause {
+interface ErrorCause {
   code: string;
   message: string; 
   details: ErrorDetails
 }
 
-export interface ErrorCause {
+interface FetchErrorCause {
   status: number;
   statusText: string
 }
 
 
 export class HCloudError extends Error {
-  public constructor(message: string, cause: ErrorCause | HCloudErrorCause) {
+  public constructor(message: string, cause: ErrorCause | FetchErrorCause) {
     super(message, {cause});
   }
 }
@@ -54,25 +197,35 @@ export class HCloudClient {
     this.apiKey = apiKey;
   }
 
-  private async makeRequest<T extends object>(path: string, body?: BodyInit): Promise<T> {
+  private async makeRequest<T extends ResultBase>(path: string, method = "GET", body?: BodyInit): Promise<Omit<T, "error" | "meta">> {
+    const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       body,
+      method,
       headers: {
         "Authorization": `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
       },
-    }).then(d => {
-      const result = d.json() as ErrorResult | T;
+    }).then(async d => {
       if (!d.ok) {
         throw new HCloudError("Request failed", {
           status: d.status,
           statusText: d.statusText,
         });
       }
-      if ("error" in result) {
-        throw new HCloudError("Request failed", result.error);
+      const {error, meta: _, ...rest} = await d.json() as T;
+      if (error) {
+        throw new HCloudError("Request failed", error);
       }
-      return result;
+      return rest;
+    }).finally(() => {
+      const end = Date.now();
+      logger.debug({ 
+        path,
+        method,
+        body,
+        time: end - start,
+      }, "Completed hetzner request");
     });
   }
 
@@ -80,10 +233,20 @@ export class HCloudClient {
     await this.getLocations();
   }
 
-  public async getLocations(): Promise<Location[]> {
+  public async getLocations() {
     const query = stringify({
       per_page: 200,
     });
-    return this.makeRequest<Location[]>(`/locations?${query}`);
+    return this.makeRequest<LocationsResponse>(
+      `/locations?${query}`
+    );
+  }
+
+  public async createServer(config: CreateServerRequest) {
+    return this.makeRequest<CreateServerResponse>(
+      "/servers", 
+      "POST",
+      JSON.stringify(config)
+    );
   }
 }

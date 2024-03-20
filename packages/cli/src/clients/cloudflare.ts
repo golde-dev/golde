@@ -3,25 +3,25 @@ import logger from "../logger";
 import { decMemoize } from "moderndash";
 
 
-interface CloudflareErrorCause {
+interface ErrorCause {
   code: string;
   message: string;
   error_chain: unknown[]
 }
 
-interface CloudflareListResponse<D> {
+interface ListResponse<D> {
   result?: D;
   success: boolean;
-  errors?: CloudflareErrorCause[];
+  errors?: ErrorCause[];
   resultInfo?: {
     total_count: number
   }
 }
 
-interface CloudflareResponse<D> {
+interface Response<D> {
   result?: D;
   success: boolean;
-  errors?: CloudflareErrorCause[];
+  errors?: ErrorCause[];
 }
 
 /**
@@ -65,7 +65,7 @@ export interface ZoneRecordRequest {
   ttl?: number;
 }
 
-interface ZoneRecord {
+export interface ZoneRecord {
   id: string;
   content: string,
   name: string,
@@ -93,19 +93,20 @@ interface BucketRequest {
   locationHint?: "apac" | "eeur" | "enam" | "weur" | "wnam"
   name: string;
 }
+
 interface Bucket {
   creation_date: string;
   location: "apac" | "eeur" | "enam" | "weur" | "wnam"
   name: string;
 }
 
-interface ErrorCause {
+interface FetchErrorCause {
   status: number;
   statusText: string
 }
 
 class CloudflareError extends Error {
-  public constructor(message: string, cause?: CloudflareErrorCause[] | ErrorCause) {
+  public constructor(message: string, cause?: ErrorCause[] | FetchErrorCause) {
     super(message, { cause });
   }
 }
@@ -134,24 +135,25 @@ export class CloudflareClient {
         "Content-Type": "application/json",
       },
     }).then(async(r) => {
-      if (r.ok) {
-        const {
-          result,
-          success,
-          errors,
-        } = await r.json() as CloudflareListResponse<T>;
-
-        if (success && result) {
-          return result;
-        }
-        else {
-          throw new CloudflareError("Cloudflare request error", errors);
-        }
+      if (!r.ok) {
+        throw new CloudflareError("Cloudflare request error", {
+          status: r.status,
+          statusText: r.statusText,
+        });
       }
-      throw new CloudflareError("Cloudflare request error", {
-        status: r.status,
-        statusText: r.statusText,
-      });
+
+      const {
+        result,
+        success,
+        errors,
+      } = await r.json() as ListResponse<T>;
+
+      if (success && result) {
+        return result;
+      }
+      else {
+        throw new CloudflareError("Cloudflare request error", errors);
+      }
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 
@@ -172,24 +174,25 @@ export class CloudflareClient {
         "Content-Type": "application/json",
       },
     }).then(async(r) => {
-      if (r.ok) {
-        const {
-          result,
-          success,
-          errors,
-        } = await r.json() as CloudflareResponse<T>;
- 
-        if (success && result) {
-          return result;
-        }
-        else {
-          throw new CloudflareError("Cloudflare response error", errors);
-        }
+      if (!r.ok) {
+        throw new CloudflareError("Cloudflare request error", {
+          status: r.status,
+          statusText: r.statusText,
+        });
       }
-      throw new CloudflareError("Cloudflare request error", {
-        status: r.status,
-        statusText: r.statusText,
-      });
+      
+      const {
+        result,
+        success,
+        errors,
+      } = await r.json() as Response<T>;
+ 
+      if (success && result) {
+        return result;
+      }
+      else {
+        throw new CloudflareError("Cloudflare response error", errors);
+      }
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 

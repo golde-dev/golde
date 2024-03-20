@@ -31,7 +31,11 @@ export class HCloudProvider implements Provider {
   }
 
   public async createServer(config: HCloudServerConfig): Promise<HCloudServerState> {
-    
+    // @ts-expect-error TODO: fix this
+    const result = await this.client.createServer(config);
+    return {
+      id: result.server.id,
+    };
   }
 }
 

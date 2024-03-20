@@ -17,6 +17,7 @@ export interface ConfigState {
   state: State;
   previous: string | null;
 }
+
 export interface ConfigLock {
   branch: string;
   createdAt: string;

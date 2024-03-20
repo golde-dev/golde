@@ -11,7 +11,7 @@ export interface ServersConfig {
 }
 
 export interface HCloudServerState {
-  type: string;
+  id: number;
 }
 
 

@@ -9,5 +9,14 @@ module.exports = {
     "@typescript-eslint/no-require-imports": ["off"],
     "@typescript-eslint/no-var-requires": ["off"],
     "@typescript-eslint/consistent-indexed-object-style": ["off"],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+      },
+    ],
   },
 };
