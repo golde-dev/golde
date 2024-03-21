@@ -100,6 +100,9 @@ interface PlacementGroup {
   type: "spread";
 }
 
+/**
+ * @see https://docs.hetzner.cloud/#servers-create-a-server
+ */
 interface Server {
   backup_window: string | null
   created: string;
@@ -116,7 +119,49 @@ interface Server {
   outgoing_traffic: number | null;
   placement_group: PlacementGroup | null;
   primary_disk_size: number;
+  private_net: {
+    alias_ips: string[];
+    ip: string;
+    mac_address: string;
+    network: number;
+  }[];
+  protection: {
+    delete: boolean;
+    rebuild: false
+  };
+  public_net: {
+    firewalls: {
+      id: number;
+      status: "applied" | "pending";
+    }[];
+    floating_ips: number[];
+    ipv4: {
+      ip: string;
+      blocked: boolean;
+      dns_ptr: string | null;
+    } | null;
+    ipv6: {
+      ip: string;
+      blocked: boolean;
+      dns_ptr: {
+        dns_ptr: string;
+        ip: string;
+      }[] | null;
+    } | null;
+  };
+  rescue_enabled: boolean;
   server_type: ServerType;
+  status: 
+  | "deleting" 
+  | "initializing" 
+  | "migrating" 
+  | "off" 
+  | "rebuilding" 
+  | "running" 
+  | "starting" 
+  | "stopping" 
+  | "unknown"
+  volumes?: number[];
 }
 
 interface ResultBase {

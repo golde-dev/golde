@@ -3,9 +3,8 @@ import { existsSync, readFileSync } from "fs";
 import { ConfigError, ConfigErrorCode } from "../error";
 import { getBranchName, getBranchSlug } from "./git";
 
-const templateRe = new RegExp(/(?<={{\s)(.*)(?=\s}})/);
+const templateRe = new RegExp(/{{(.*?)}}/g);
 
-// TODO: add support for embedded templates "{{ env.NODE_ENV }}-something"
 export const resolveTemplate = (value: unknown, onTemplate: (value: string) => string): unknown => {
   if (
     value === undefined ||
@@ -17,14 +16,9 @@ export const resolveTemplate = (value: unknown, onTemplate: (value: string) => s
     return value;
   }
   else if (typeof value === "string") {
-    const match = templateRe.exec(value);
-    if (match) {
-      const [template] = match;
-      return onTemplate(template);
-    }
-    else {
-      return value;
-    }
+    return value.replaceAll(templateRe, (match) => 
+      onTemplate(match.replace("{{", "").replace("}}", "").trim())
+    );
   }
   else if (typeof value === "symbol") {
     throw new ConfigError("Symbols are not permitted", ConfigErrorCode.TEMPLATE_ERROR);

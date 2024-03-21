@@ -22,7 +22,7 @@ describe("validateConfig", () => {
 
     it("should not throw an error if the config is valid", () => {
       const validConfig = {
-        project: "valid_project_name",
+        name: "valid_project_name",
         providers: {
           deployer: {
             apiKey: "valid_api_key",

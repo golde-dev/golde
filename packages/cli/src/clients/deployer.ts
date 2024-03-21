@@ -11,7 +11,8 @@ export class DeployerError extends Error {
   public cause?: DeployerErrorCause;
 
   public constructor(message: string, cause?: DeployerErrorCause) {
-    super(message, { cause });
+    super(message);
+    this.cause = cause;
   }
 }
 
@@ -36,7 +37,7 @@ export class DeployerClient {
 
   private async makeRequest<T>(path: string, method = "GET", body?: object): Promise<T> {
     const start = Date.now();
-    return fetch(`${this.baseUrl}/${path}`, {
+    return fetch(`${this.baseUrl}${path}`, {
       method,
       body: JSON.stringify(body),
       headers: {
@@ -44,13 +45,13 @@ export class DeployerClient {
         "Content-Type": "application/json",
       },
     }).then(async(r) => {
-      if (r.ok) {
-        return await r.json() as T;
+      if (!r.ok) {
+        throw new DeployerError("Deployer request failed", {
+          status: r.status,
+          statusText: r.statusText,
+        });
       }
-      throw new DeployerError("Deployer request failed", {
-        status: r.status,
-        statusText: r.statusText,
-      });
+      return await r.json() as T;
     }).finally(() => {
       const end = Date.now();
       logger.debug({ 

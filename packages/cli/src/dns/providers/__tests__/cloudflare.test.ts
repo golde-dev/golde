@@ -41,7 +41,7 @@ describe("createCloudflareDNSPlan", () => {
         "dependencies": [],
         "executor": mockProvider.createZoneRecord,
         "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
-        "type": "create",
+        "type": "Create",
       },
     ]);
   });
@@ -83,7 +83,7 @@ describe("createCloudflareDNSPlan", () => {
         "dependencies":  [],
         "executor": mockProvider.deleteZoneRecord,
         "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
-        "type": "delete",
+        "type": "Delete",
       },
     ]);
   });
@@ -144,7 +144,7 @@ describe("createCloudflareDNSPlan", () => {
         "dependencies": [],
         "executor": mockProvider.updateZoneRecord,
         "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
-        "type": "create",
+        "type": "Create",
       },
     ]);
   });
