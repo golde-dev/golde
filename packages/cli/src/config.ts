@@ -70,7 +70,7 @@ export const getConfig = async(configPath?: string): Promise<Config> => {
 
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate);
     logger.debug({ config: configWithGit }, "Resolved git templates in config");
-
+    
     validateConfig(configWithGit);
     logger.debug("Validated config with json schema");
 

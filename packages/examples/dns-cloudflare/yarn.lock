@@ -1447,7 +1447,7 @@ __metadata:
 
 "@tenacify/cli@file:../../cli::locator=%40tenacify%2Fexample-dns-cloudflare%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=8b8bae&locator=%40tenacify%2Fexample-dns-cloudflare%40workspace%3A."
+  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=6f60a3&locator=%40tenacify%2Fexample-dns-cloudflare%40workspace%3A."
   dependencies:
     "@iarna/toml": "npm:^2.2.5"
     "@inquirer/prompts": "npm:^4.3.0"
@@ -1465,7 +1465,7 @@ __metadata:
     zod-to-json-schema: "npm:^3.22.4"
   bin:
     deployer: ./lib/bin/deployer.js
-  checksum: 10c2/e050100080437ab6bf5b40c629a9315cf4ac740de5c55666999628f09064b6540e1281d22b52b0f39520c23cd68cc7ebc54ef7d98abe776c28809ff834433363
+  checksum: 10c2/8e841a0050efc2763b258e6bd51220a57f84f0724c0dae80a0632724935b5177112caf324282fa5e4f25402c36a46a0672440ceafd39a0b4f2a0f352c38fadb8
   languageName: node
   linkType: hard
 

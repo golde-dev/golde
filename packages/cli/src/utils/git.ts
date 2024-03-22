@@ -9,7 +9,7 @@ export const getCurrentHash = () => execSync("git rev-parse HEAD")
   .toString()
   .trim();
 
-export const getBranchSlug = () => execSync("git rev-parse HEAD")
+export const getBranchSlug = () => execSync("git rev-parse --abbrev-ref HEAD")
   .toString()
   .trim()
   .replaceAll(" ", "-")

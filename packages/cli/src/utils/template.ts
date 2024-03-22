@@ -16,9 +16,9 @@ export const resolveTemplate = (value: unknown, onTemplate: (value: string) => s
     return value;
   }
   else if (typeof value === "string") {
-    return value.replaceAll(templateRe, (match) => 
-      onTemplate(match.replace("{{", "").replace("}}", "").trim())
-    );
+    return value.replaceAll(templateRe, (match) => {
+      return onTemplate(match.replace("{{", "").replace("}}", "").trim());
+    });
   }
   else if (typeof value === "symbol") {
     throw new ConfigError("Symbols are not permitted", ConfigErrorCode.TEMPLATE_ERROR);
@@ -63,7 +63,7 @@ export const envTemplate = (value: string): string => {
       throw new ConfigError("Env variable is missing", ConfigErrorCode.ENV_MISSING, variableName);
     }
   }
-  return value;
+  return `{{ ${value} }}`;
 };
 
 const gitRe = new RegExp(/(?<=git.)(.*)/);
@@ -83,7 +83,7 @@ export const gitTemplate = (value: string): string => {
       throw new ConfigError("git variable is missing", ConfigErrorCode.GIT_MISSING, variableName);
     }
   }
-  return value;
+  return `{{ ${value} }}`;
 };
 
 const fileRe = new RegExp(/(?<=file\()(.*)(?=\))/);
@@ -100,5 +100,5 @@ export const fileTemplate = (value: string): string => {
       throw new ConfigError("Template file is missing", ConfigErrorCode.FILE_MISSING, fileName);
     }
   }
-  return value;
+  return `{{ ${value} }}`;
 };
