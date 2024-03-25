@@ -76,5 +76,6 @@ export const createServer = async(): Promise<FastifyServer> => {
     defaultLogger.error("Failed to init server, exiting", error, () => {
       exit(1);
     });
+    return exit(1);
   }
 };

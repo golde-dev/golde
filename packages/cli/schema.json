@@ -4,8 +4,9 @@
     "deployer": {
       "type": "object",
       "properties": {
-        "project": {
+        "name": {
           "type": "string",
+          "minLength": 2,
           "pattern": "^[A-Za-z0-9_@./#&+-]*$"
         },
         "providers": {
@@ -80,6 +81,13 @@
             "state": {
               "type": "object",
               "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "s3"
+                  ],
+                  "description": "Type of state provider, only s3 is supported at the moment"
+                },
                 "bucket": {
                   "type": "string",
                   "description": "Name of s3 bucket"
@@ -102,6 +110,7 @@
                 }
               },
               "required": [
+                "type",
                 "bucket",
                 "region",
                 "endpoint",
@@ -216,7 +225,7 @@
               "additionalProperties": {
                 "type": "object",
                 "properties": {
-                  "location": {
+                  "locationHint": {
                     "type": "string",
                     "enum": [
                       "apac",
@@ -235,7 +244,7 @@
         }
       },
       "required": [
-        "project",
+        "name",
         "providers"
       ],
       "additionalProperties": false

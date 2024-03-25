@@ -6,6 +6,12 @@ spawnTask("build",
   ]
 );
 
+spawnTask("generateSchema", 
+  "yarn", [
+    "generateSchema", 
+  ]
+);
+
 spawnTask("bundle", 
   "yarn", [
     "esbuild", 
@@ -26,6 +32,7 @@ spawnTask("pkg",
 
 seriesTask("dist", [
   "build",
+  "generateSchema",
   "bundle",
   "pkg",
 ]);
