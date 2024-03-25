@@ -69,7 +69,6 @@ const cloudflareRecords = z
   .optional();
 
 
-
 export const dnsSchema: ZodType<DNSConfig> = z
   .object({
     cloudflare: z

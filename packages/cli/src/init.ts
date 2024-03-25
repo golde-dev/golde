@@ -2,7 +2,7 @@ import logger from "./logger";
 import { input, select } from "@inquirer/prompts";
 import { projectNameSchema } from "./schema";
 import { ZodError, type ZodSchema } from "zod";
-import { resolve } from "path";
+import { resolve } from "node:path";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { DeployerProvider, getDeployerConfig } from "./providers/deployer";
 import { DeployerError } from "./clients/deployer";
@@ -171,9 +171,9 @@ export async function initConfig() {
             logger.error(`Project: ${projectName} already exists`);
           }
           else {
-            logger.error({
+            logger.error("Failed to create project in deployer", {
               error,
-            }, "Failed to create project in deployer");
+            });
           }
         }
       } 

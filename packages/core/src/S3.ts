@@ -1,5 +1,5 @@
 import { DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import type { Logger } from "pino";
+import type { Logger } from "winston";
 import type { Readable } from "stream";
 import { LogCode } from "./constants/logging";
 
@@ -41,11 +41,14 @@ export class S3 {
       await this.client.send(command);
     }
     catch (error) {
-      this.logger.debug({
-        type: LogCode.S3HeadBucketError,
-        error,
-        bucket: this.bucket,
-      }, "Failed to head bucket");
+      this.logger.debug(
+        "Failed to head bucket",
+        {
+          type: LogCode.S3HeadBucketError,
+          error,
+          bucket: this.bucket,
+        } 
+      );
       throw error;
     }
   }
@@ -63,12 +66,14 @@ export class S3 {
       };
     }
     catch (error) {
-      this.logger.debug({
-        type: LogCode.S3GetObjectError,
-        error,
-        key,
-        bucket: this.bucket,
-      }, "Failed to get object");
+      this.logger.debug("Failed to get object",
+        {
+          type: LogCode.S3GetObjectError,
+          error,
+          key,
+          bucket: this.bucket,
+        } 
+      );
       throw error;
     }
   }
@@ -86,12 +91,15 @@ export class S3 {
       return JSON.parse(text) as T;
     }
     catch (error) {
-      this.logger.debug({
-        type: LogCode.S3GetObjectError,
-        error,
-        key,
-        bucket: this.bucket,
-      }, "Failed to get object");
+      this.logger.debug(
+        "Failed to get object",
+        {
+          type: LogCode.S3GetObjectError,
+          error,
+          key,
+          bucket: this.bucket,
+        }
+      );
       throw error;
     }
   }
@@ -105,12 +113,15 @@ export class S3 {
       await this.client.send(command);
     }
     catch (error) {
-      this.logger.debug({
-        type: LogCode.S3DeleteObjectError,
-        error,
-        key,
-        bucket: this.bucket,
-      }, "Failed to delete object");
+      this.logger.debug(
+        "Failed to delete object",
+        {
+          type: LogCode.S3DeleteObjectError,
+          error,
+          key,
+          bucket: this.bucket,
+        } 
+      );
       throw error;
     }
   }
@@ -125,12 +136,15 @@ export class S3 {
       await this.client.send(command);
     }
     catch (error) {
-      this.logger.debug({
-        type: LogCode.S3PutObjectError,
-        error,
-        key,
-        bucket: this.bucket,
-      }, "Failed to put object");
+      this.logger.debug(
+        "Failed to put object",
+        {
+          type: LogCode.S3PutObjectError,
+          error,
+          key,
+          bucket: this.bucket,
+        } 
+      );
       throw error;
     }
   }

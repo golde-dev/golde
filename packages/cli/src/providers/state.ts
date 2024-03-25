@@ -20,7 +20,7 @@ const getStateKey = (project: string) => `/${project}/state/current.json`;
 const getLockKey = (project: string) => `/${project}/state/lock.json`;
 
 async function notFoundAsUndefined<T>(promise: Promise<T>): Promise<T | undefined> {
-  return promise.catch((error) => {
+  return promise.catch((error: unknown) => {
     if (error instanceof NoSuchKey) {
       return undefined;
     }
@@ -51,14 +51,16 @@ export class StateProvider implements Provider {
       return new StateProvider(project, s3);
     }
     catch (error) {
-      logger.error({
-        error,
-        bucket,
-        region,
-        endpoint,
-        accessKeyId: "<redacted>",
-        secretAccessKey: "<redacted>",
-      }, "Failed to initialize state provider, please verify config");
+      logger.error("Failed to initialize state provider, please verify config",
+        {
+          error,
+          bucket,
+          region,
+          endpoint,
+          accessKeyId: "<redacted>",
+          secretAccessKey: "<redacted>",
+        } 
+      );
       throw error;
     }
   }

@@ -9,6 +9,5 @@ module.exports = {
       allowFunctionsWithoutTypeParameters: true,
     }],
     "@typescript-eslint/explicit-module-boundary-types": ["off"],
-    "@typescript-eslint/indent": ["off"],
   },
 };

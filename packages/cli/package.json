@@ -8,6 +8,7 @@
     "deployer": "./lib/bin/deployer.js"
   },
   "scripts": {
+    "dist": "runner dist",
     "lint": "eslint . --ext .ts,.js,.tsx",
     "lint:fix": "eslint . --ext .ts,.js,.tsx --fix",
     "build": "tsc --build",
@@ -15,11 +16,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest",
-    "generateSchema": "node ./lib/bin/schema.js",
-    "pkg": "pkg ./lib/bin/deployer.js"
-  },
-  "pkg": {
-    "outputPath": "./dist"
+    "generateSchema": "node ./lib/bin/schema.js"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -31,21 +28,21 @@
     "find-up": "^5.0.0",
     "glob": "^10.3.10",
     "moderndash": "^3.11.1",
-    "pino": "^8.19.0",
-    "tar": "^6.2.0",
-    "typescript": "^5.4.2",
+    "tar": "^6.2.1",
+    "typescript": "^5.4.3",
+    "winston": "3.12.0",
     "zod": "^3.22.4",
-    "zod-to-json-schema": "^3.22.4"
+    "zod-to-json-schema": "^3.22.5"
   },
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.25",
+    "@chyzwar/runner": "^0.4.26",
     "@types/iarna__toml": "^2.0.5",
-    "@types/node": "^20.11.28",
+    "@types/node": "^20.11.30",
     "@types/tar": "^6.1.11",
-    "@typescript-eslint/eslint-plugin": "^7.2.0",
-    "@typescript-eslint/parser": "^7.2.0",
     "@vitest/coverage-v8": "^1.4.0",
     "@yao-pkg/pkg": "^5.11.5",
+    "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "vitest": "^1.4.0"
   }

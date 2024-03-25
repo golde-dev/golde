@@ -2,7 +2,7 @@ import { rmSync } from "fs";
 import { createNativeTar } from "./tar.js";
 import { createTar } from "./tar.js";
 import logger from "../logger.js";
-import { join } from "path";
+import { join } from "node:path";
 import type { StateProvider } from "../providers/state.js";
 import type { Context } from "../context.js";
 import type { DeployerProvider } from "../providers/deployer.js";

@@ -25,10 +25,13 @@ export class CloudflareProvider implements Provider {
       return new CloudflareProvider(client);
     }
     catch (error) {
-      logger.error({
-        error,
-        apiKey: "<redacted>",
-      }, "Failed to initialize cloudflare provider, check your apiKey and key policy");
+      logger.error(
+        "Failed to initialize cloudflare provider, check your apiKey and key policy",
+        {
+          error,
+          apiKey: "<redacted>",
+        } 
+      );
       throw error;
     }
   }

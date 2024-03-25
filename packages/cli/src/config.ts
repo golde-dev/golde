@@ -3,7 +3,7 @@ import type { Config } from "./types/config";
 import { validateConfig } from "./schema";
 import logger from "./logger";
 import { importDynamic, importTOML, importTS } from "./utils/module";
-import { resolve, extname } from "path";
+import { resolve, extname } from "node:path";
 import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template";
 import { ConfigError, ConfigErrorCode } from "./error";
 
@@ -60,16 +60,16 @@ const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: stri
 export const getConfig = async(configPath?: string): Promise<Config> => {
   try {
     const { config, path } = await getConfigRaw(configPath);
-    logger.debug({ config, path }, "Loaded config");
+    logger.debug( "Loaded config", { config, path });
 
     const configWithEnv = resolveTemplate(config, envTemplate);
-    logger.debug({ config: configWithEnv }, "Resolved env vars templates in config");
+    logger.debug("Resolved env vars templates in config", { config: configWithEnv } );
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
-    logger.debug({ config: configWithEnv }, "Resolved files templates in config");
+    logger.debug("Resolved files templates in config", { config: configWithEnv });
 
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate);
-    logger.debug({ config: configWithGit }, "Resolved git templates in config");
+    logger.debug("Resolved git templates in config",{ config: configWithGit });
     
     validateConfig(configWithGit);
     logger.debug("Validated config with json schema");
@@ -98,14 +98,14 @@ export const getConfig = async(configPath?: string): Promise<Config> => {
           logger.error(`git variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error(error.cause, "Config failed validation");
+          logger.error("Config failed validation", error.cause);
           break;
         default:
           logger.error(`Configuration error: ${error.message}`);
       }
     }
     else {
-      logger.error(error, "Unknown error");
+      logger.error("Unknown error", error);
     }
     return process.exit(1);
   }

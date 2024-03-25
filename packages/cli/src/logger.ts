@@ -1,47 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type { DestinationStream, LoggerOptions} from "pino";
-import { pino, transport, stdSerializers} from "pino";
+import { createLogger, format, transports } from "winston";
 
-const transportPretty = transport({
-  targets: [
-    {  
-      target: "pino-pretty",
-      options: { 
-        colorize: true, 
-      },
-    },
-  ],
-}) as DestinationStream;
+const logger = createLogger({
+  format: format.combine(
+    format.prettyPrint(),
+    format.cli()
+  ),
+  transports: [new transports.Console()],
+});
 
-/**
- * Users of CLI do not care about stacktraces
- * Include cause that is not another error, pino already handle error causes
- */
-const errorSerializer = (error: Error) => {
-  const {stack, ...rest} = stdSerializers.err(error);
-
-  const {
-    cause,
-  } = error;
-
-  if (cause instanceof Error) {
-    return {
-      ...rest,
-    };
-  }
-  else {
-    return {
-      ...rest,
-      cause,
-    };
-  }
-};
-
-const options: LoggerOptions = {
-  errorKey: "error", 
-  serializers: {
-    err: errorSerializer,
-  },
-};
-
-export default pino(options, transportPretty);
+export default logger;

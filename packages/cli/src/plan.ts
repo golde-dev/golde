@@ -14,14 +14,14 @@ export async function createPlan(
     plan.push(...await createDNSPlan(context));
     plan.push(...await createBucketsPlan(context));
 
-    logger.info(plan, "Plan");
+    logger.info("Plan", plan);
   }
   catch (error) {
     if (error instanceof PlanError) {
       logger.error(`Failed to plan changes: ${error.message}`);
     }
     else {
-      logger.error(error, "Unknown plan error");
+      logger.error("Unknown plan error", error);
     }
     return process.exit(1);
   }

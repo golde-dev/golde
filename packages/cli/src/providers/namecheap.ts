@@ -22,10 +22,13 @@ export class NameCheapProvider implements Provider {
       return new NameCheapProvider(client);
     }
     catch (error) {
-      logger.error({
-        error,
-        apiKey: "<redacted>",
-      }, "Failed to initialize Namecheap provider, check your apiKey, apiUser");
+      logger.error(
+        "Failed to initialize Namecheap provider, check your apiKey, apiUser",
+        {
+          error,
+          apiKey: "<redacted>",
+        } 
+      );
       throw error;
     }
   }

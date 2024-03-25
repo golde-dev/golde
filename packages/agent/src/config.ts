@@ -1,6 +1,6 @@
-
+import { exit } from "process";
+import { createLogger, format } from "winston";
 import { z } from "zod";
-import {pino} from "pino";
 
 const schema = z.object({
   API_LOG_PRETTY: z.string().transform(Boolean),
@@ -14,10 +14,14 @@ const schema = z.object({
 });
 
 const result = schema.safeParse(process.env);
-
 if (!result.success) {
-  pino().error(result.error.format(), "Invalid environment variables:");
-  process.exit(1);
+  createLogger({
+    format: format.combine(
+      format.json()
+    ),
+  }).error("Invalid environment variables:", result.error.format());
+
+  exit(1);
 }
 
 export default result.data;

@@ -2,7 +2,7 @@ import logger from "../logger.js";
 import { Command } from "commander";
 import { config } from "dotenv";
 import { cwd } from "process";
-import { join } from "path";
+import { join } from "node:path";
 import { getConfig } from "../config.js";
 import { version } from "../../package.json";
 import { createPlan } from "../plan.js";
@@ -45,7 +45,7 @@ program
       nextConfig,
     } = await initializeContext(loadedConfig);
 
-    logger.info(nextConfig, "Config");
+    logger.info("Config", nextConfig);
   });
 
 program
@@ -62,7 +62,7 @@ program
       previousState,
     } = await initializeContext(loadedConfig);
 
-    logger.info(previousState, "Current state");
+    logger.info("Current state", previousState);
   });
 
 
@@ -96,7 +96,7 @@ program
     const context = await initializeContext(loadedConfig);
     const plan = await createPlan(context);
 
-    logger.info(plan, "Execution plan");
+    logger.info("Execution plan", plan);
   });
 
 program

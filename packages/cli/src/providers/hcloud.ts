@@ -22,10 +22,13 @@ export class HCloudProvider implements Provider {
       return new HCloudProvider(client);
     }
     catch (error) {
-      logger.error({
-        error,
-        apiKey: "<redacted>",
-      }, "Failed to initialize HCloud provider, check your apiKey and key policy");
+      logger.error(
+        "Failed to initialize HCloud provider, check your apiKey and key policy",
+        {
+          error,
+          apiKey: "<redacted>",
+        } 
+      );
       throw error;
     }
   }

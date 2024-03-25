@@ -35,10 +35,13 @@ export class DeployerProvider implements Provider {
       return new DeployerProvider(project, client);
     }
     catch (error) {
-      logger.error({
-        error,
-        apiKey: "<redacted>",
-      }, "Failed to initialize deployer provider, check your apiKey");
+      logger.error(
+        "Failed to initialize deployer provider, check your apiKey",
+        {
+          error,
+          apiKey: "<redacted>",
+        }
+      );
       throw error;
     }
   }

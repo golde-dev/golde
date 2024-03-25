@@ -48,10 +48,13 @@ export const createCloudflareDNSPlan = (
   prevState?: CloudflareZonesState,
   nextConfig?: CloudflareDNSZones
 ): Plan => {
-  logger.debug({
-    prevConfig,
-    nextConfig,
-  }, "Planning for cloudflare dns changes");
+  logger.debug(
+    "Planning for cloudflare dns changes",
+    {
+      prevConfig,
+      nextConfig,
+    }
+  );
 
   const prevRecords = getRecords(prevConfig, prevState);
   const nextRecords = getRecords(nextConfig, prevState);

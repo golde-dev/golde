@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-implied-eval */
 
 import findUp from "find-up";
 import parse from "@iarna/toml/parse-string";
 import { readFileSync, rmSync, writeFileSync } from "fs";
-import { basename, dirname, join } from "path";
+import { basename, dirname, join } from "node:path";
 import { transpileModule, ScriptTarget, ModuleKind}  from "typescript";
 
 /**

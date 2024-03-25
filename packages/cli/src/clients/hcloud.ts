@@ -265,12 +265,14 @@ export class HCloudClient {
       return rest;
     }).finally(() => {
       const end = Date.now();
-      logger.debug({ 
-        path,
-        method,
-        body,
-        time: end - start,
-      }, "Completed hetzner request");
+      logger.debug("Completed hetzner request", 
+        { 
+          path,
+          method,
+          body,
+          time: end - start,
+        } 
+      );
     });
   }
 

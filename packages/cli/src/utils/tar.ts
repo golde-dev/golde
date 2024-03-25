@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from "fs";
 import logger from "../logger.js";
 import { glob } from "glob";
-import { dirname } from "path";
+import { dirname } from "node:path";
 import { c } from "tar";
 import { execSync } from "child_process";
 
@@ -21,11 +21,11 @@ export const createTar = async(
   tarFile: string
 ) => {
   const paths = await glob(searchPaths);
-  logger.debug({ paths }, "Paths included in tar");
+  logger.debug("Paths included in tar", { paths });
 
   const dir = dirname(tarFile);
   if (!existsSync(dir)) {
-    logger.debug({ dir }, "Dir not exists, creating");
+    logger.debug("Dir not exists, creating", { dir });
     mkdirSync(dir, {recursive: true});
   }
 
@@ -46,11 +46,11 @@ export const createNativeTar = async(
   tarFile: string
 ) => {
   const paths = await glob(searchPaths);
-  logger.debug({ paths }, "Paths included in tar");
+  logger.debug("Paths included in tar", { paths });
   
   const dir = dirname(tarFile);
   if (!existsSync(dir)) {
-    logger.debug({ dir }, "Dir not exists, creating");
+    logger.debug("Dir not exists, creating", { dir });
     mkdirSync(dir, {recursive: true});
   }
   execSync(`tar -I "zstd -19 -T0" -cf "${tarFile}" ${paths.join(" ")}`);

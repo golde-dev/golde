@@ -156,11 +156,13 @@ export class CloudflareClient {
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug({ 
-        path,
-        query,
-        time: end - start,
-      }, "Completed cloudflare list request");
+      logger.debug("Completed cloudflare list request", 
+        { 
+          path,
+          query,
+          time: end - start,
+        } 
+      );
     });
   }
 
@@ -195,12 +197,14 @@ export class CloudflareClient {
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug({ 
-        path,
-        method,
-        body,
-        time: end - start,
-      }, "Completed cloudflare request");
+      logger.debug("Completed cloudflare request", 
+        { 
+          path,
+          method,
+          body,
+          time: end - start,
+        } 
+      );
     });
   }
 
@@ -219,7 +223,7 @@ export class CloudflareClient {
    * Create bucket in r2
    */
   public async createBucket(config: BucketRequest): Promise<Bucket> {
-    logger.debug(config, "Creating r2 bucket");
+    logger.debug("Creating r2 bucket", config );
     return this.makeRequest<Bucket>(
       `/accounts/${this.accountId}/r2/buckets`,
       "POST",

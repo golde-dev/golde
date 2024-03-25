@@ -1,17 +1,37 @@
-import type {DestinationStream} from "pino";
-import { pino, transport} from "pino";
 import config from "./config.js";
+import type { LeveledLogMethod, Logger} from "winston";
+import { createLogger, format, transports } from "winston";
 
 const {
   API_LOG_PRETTY,
 } = config;
 
-const transportPretty = transport({
-  targets: [
-    {  target: "pino-pretty",  options: { colorize: true }},
-  ],
-}) as DestinationStream;
+const levels = {
+  fatal: 0,
+  error: 1,
+  warn: 2,
+  info: 3,
+  trace: 4,
+  debug: 5,
+};
 
-export default API_LOG_PRETTY
-  ? pino(transportPretty)
-  : pino();
+export type CustomLogger = Logger & Record<keyof typeof levels, LeveledLogMethod>;
+
+export default API_LOG_PRETTY 
+  ? createLogger({
+    levels,
+    level: "info",
+    format: format.combine(
+      format.colorize(),
+      format.prettyPrint()
+    ),
+    transports: [new transports.Console()],
+  }) as CustomLogger
+  : createLogger({
+    levels,
+    level: "info",
+    format: format.combine(
+      format.json()
+    ),
+    transports: [new transports.Console()],
+  }) as CustomLogger;

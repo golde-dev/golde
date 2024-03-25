@@ -17,7 +17,7 @@ export class DeployerError extends Error {
 }
 
 async function notFoundAsUndefined<T>(promise: Promise<T>): Promise<T | undefined> {
-  return promise.catch((error) => {
+  return promise.catch((error: unknown) => {
     if (error instanceof DeployerError) {
       if (error.cause?.status === 404) {
         return undefined;
@@ -54,12 +54,14 @@ export class DeployerClient {
       return await r.json() as T;
     }).finally(() => {
       const end = Date.now();
-      logger.debug({ 
-        path,
-        method,
-        body,
-        time: end - start,
-      }, "Deployer request");
+      logger.debug("Deployer request", 
+        { 
+          path,
+          method,
+          body,
+          time: end - start,
+        } 
+      );
     });
   }
 
@@ -80,11 +82,13 @@ export class DeployerClient {
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug({ 
-        path,
-        method,
-        time: end - start,
-      }, "Deployer request");
+      logger.debug( "Deployer request",
+        { 
+          path,
+          method,
+          time: end - start,
+        }
+      );
     });
   }
 

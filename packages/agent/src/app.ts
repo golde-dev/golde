@@ -6,7 +6,7 @@ import {createServer} from "./server.js";
  * Handle exceptions
  */
 process.on("uncaughtException", (error) => {
-  logger.error({error}, "uncaughtException");
+  logger.error("uncaughtException", {error});
 });
 
 const init = async() => {
@@ -17,6 +17,6 @@ const init = async() => {
   });
 };
 
-init().catch((error: Error) => {
-  logger.error(error, "Server failed to listen");
+init().catch((error: unknown) => {
+  logger.error("Server failed to listen", error);
 });

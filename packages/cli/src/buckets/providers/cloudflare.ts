@@ -9,7 +9,6 @@ export const createCloudflareBucketsPlan = (
   prevState?: CloudflareBucketsState,
   nextConfig?: CloudflareBuckets
 ): Plan => {
-
   
   console.log({
     cloudflare, 
