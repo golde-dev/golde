@@ -3532,6 +3532,7 @@ __metadata:
   resolution: "@tenacify/agent@workspace:packages/agent"
   dependencies:
     "@chyzwar/eslint-config": "npm:^0.2.25"
+    "@chyzwar/runner": "npm:^0.4.26"
     "@fastify/helmet": "npm:^11.1.1"
     "@fastify/sensible": "npm:5.5.0"
     "@types/node": "npm:^20.11.30"
@@ -3539,6 +3540,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^7.3.1"
     "@vitest/coverage-v8": "npm:^1.4.0"
     "@yao-pkg/pkg": "npm:^5.11.5"
+    esbuild: "npm:^0.20.2"
     eslint: "npm:^8.57.0"
     fastify: "npm:^4.26.2"
     fastify-plugin: "npm:^4.5.1"
@@ -3573,7 +3575,7 @@ __metadata:
     tar: "npm:^6.2.1"
     typescript: "npm:^5.4.3"
     vitest: "npm:^1.4.0"
-    winston: "npm:3.12.0"
+    winston: "npm:^3.12.0"
     zod: "npm:^3.22.4"
     zod-to-json-schema: "npm:^3.22.5"
   bin:
@@ -13392,7 +13394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"winston@npm:3.12.0, winston@npm:^3.12.0":
+"winston@npm:^3.12.0":
   version: 3.12.0
   resolution: "winston@npm:3.12.0"
   dependencies:

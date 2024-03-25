@@ -1465,7 +1465,7 @@ __metadata:
 
 "@tenacify/cli@file:../../cli::locator=%40tenacify%2Fexample-dns-cloudflare%40workspace%3A.":
   version: 0.2.0
-  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=b90f7c&locator=%40tenacify%2Fexample-dns-cloudflare%40workspace%3A."
+  resolution: "@tenacify/cli@file:../../cli#../../cli::hash=e42e93&locator=%40tenacify%2Fexample-dns-cloudflare%40workspace%3A."
   dependencies:
     "@iarna/toml": "npm:^2.2.5"
     "@inquirer/prompts": "npm:^4.3.0"
@@ -1478,12 +1478,12 @@ __metadata:
     moderndash: "npm:^3.11.1"
     tar: "npm:^6.2.1"
     typescript: "npm:^5.4.3"
-    winston: "npm:3.12.0"
+    winston: "npm:^3.12.0"
     zod: "npm:^3.22.4"
     zod-to-json-schema: "npm:^3.22.5"
   bin:
     deployer: ./lib/bin/deployer.js
-  checksum: 10c2/be465c411e21b11003ffae12e023b26e1d01b319255a86276e54d38072f07e6dc4a12edd567ff282be8511f34c4564a773c5a7ac8ff491f7df755219896955f7
+  checksum: 10c2/ee8d44cf98cedc19c7fe8b2e7af4046ccf07e57240e84aced0d90d88e3de5e9e5ab9c08d93188419bf73a5f7e09c541e737616378a6c15d42f43e383a0097c38
   languageName: node
   linkType: hard
 
@@ -2445,7 +2445,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"winston@npm:3.12.0, winston@npm:^3.12.0":
+"winston@npm:^3.12.0":
   version: 3.12.0
   resolution: "winston@npm:3.12.0"
   dependencies:
