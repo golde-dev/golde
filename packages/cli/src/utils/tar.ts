@@ -5,12 +5,6 @@ import { dirname } from "node:path";
 import { c } from "tar";
 import { execSync } from "child_process";
 
-declare module "tar" {
-  interface CreateOptions {
-    brotli: boolean;
-  }
-}
-
 /**
  * Create tar file for selected dir path
  * Use brotli

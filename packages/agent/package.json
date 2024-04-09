@@ -17,19 +17,19 @@
     "@fastify/sensible": "5.5.0",
     "fastify": "^4.26.2",
     "fastify-plugin": "^4.5.1",
-    "winston": "^3.12.0"
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.25",
     "@chyzwar/runner": "^0.4.26",
-    "@types/node": "^20.11.30",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
+    "@types/node": "^20.12.6",
+    "@typescript-eslint/eslint-plugin": "^7.6.0",
+    "@typescript-eslint/parser": "^7.6.0",
     "@vitest/coverage-v8": "^1.4.0",
     "@yao-pkg/pkg": "^5.11.5",
     "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.3",
+    "typescript": "^5.4.4",
     "vitest": "^1.4.0"
   }
 }

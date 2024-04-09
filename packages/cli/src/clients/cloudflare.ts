@@ -254,8 +254,7 @@ export class CloudflareClient {
    * Gen zone id by zone name
    */
   public async getZoneId(name: string): Promise<string> {
-    const [zone] = await this.getZones({ name });
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const [zone] = await this.getZones({ name }) as (Zone | undefined)[] ;
     if (zone) {
       return zone.id;
     }

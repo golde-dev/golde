@@ -3,7 +3,7 @@ import { input, select } from "@inquirer/prompts";
 import { projectNameSchema } from "./schema";
 import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "node:path";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { DeployerProvider, getDeployerConfig } from "./providers/deployer";
 import { DeployerError } from "./clients/deployer";
 
