@@ -82,7 +82,7 @@ export class DeployerClient {
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug( "Deployer request",
+      logger.debug("Deployer request",
         { 
           path,
           method,
