@@ -22,14 +22,14 @@
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.25",
     "@chyzwar/runner": "^0.4.26",
-    "@types/node": "^20.12.6",
+    "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^7.6.0",
-    "@vitest/coverage-v8": "^1.4.0",
+    "@vitest/coverage-v8": "^1.5.0",
     "@yao-pkg/pkg": "^5.11.5",
     "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.4",
-    "vitest": "^1.4.0"
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
   }
 }
