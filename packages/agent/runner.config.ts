@@ -12,20 +12,35 @@ spawnTask("bundle",
     "lib/app.js", 
     "--platform=node", 
     "--bundle", 
-    "--outfile=dist/app.js",
+    "--outfile=dist/agent.js",
   ]
 );
 
 spawnTask("pkg", 
   "yarn", [
     "pkg", 
-    "dist/app.js", 
+    "dist/agent.js", 
     "--out-path=dist",
   ]
 );
 
-seriesTask("dist", [
+spawnTask("sea", 
+  "yarn", [
+    "sea", 
+    "dist/agent.js", 
+    "dist/agent",
+  ]
+);
+
+seriesTask("dist:pkg", [
   "build",
   "bundle",
   "pkg",
+]);
+
+
+seriesTask("dist:sea", [
+  "build",
+  "bundle",
+  "sea",
 ]);

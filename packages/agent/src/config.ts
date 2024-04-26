@@ -2,10 +2,21 @@ import { exit } from "process";
 import { createLogger, format } from "winston";
 import { z } from "zod";
 
+const defaultLogLevel = "info";
+const defaultPretty = "false";
+const defaultPort = "4111";
+
 const schema = z.object({
-  API_LOG_PRETTY: z.string().transform(Boolean),
-  API_LOG_LEVEL: z.string(),
-  API_PORT: z.string().transform(Number),
+  API_LOG_PRETTY: z
+    .string()
+    .transform(Boolean)
+    .default(defaultPretty),
+  API_LOG_LEVEL: z
+    .string()
+    .default(defaultLogLevel),
+  API_PORT: z.string()
+    .transform(Number)
+    .default(defaultPort),
   S3_REGION: z.string().default("auto"),
   S3_ENDPOINT: z.string(),
   S3_BUCKET: z.string(),
