@@ -1,15 +1,27 @@
-import { DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import type { Logger } from "winston";
-import type { Readable } from "stream";
-import { LogCode } from "./constants/logging";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadBucketCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import type { Readable } from "node:stream";
+import { Logger } from "../logger.ts";
+
+export enum LogCode {
+  S3GetObjectError = "S3GetObjectError",
+  S3DeleteObjectError = "S3DeleteObjectError",
+  S3PutObjectError = "S3CreateObjectError",
+  S3HeadBucketError = "S3HeadBucketError",
+}
 
 interface S3Options {
   logger: Logger;
-  bucket: string
+  bucket: string;
   region: string;
   endpoint: string;
   accessKeyId: string;
-  secretAccessKey: string
+  secretAccessKey: string;
 }
 
 export class S3 {
@@ -17,7 +29,10 @@ export class S3 {
   private readonly client: S3Client;
   private readonly logger: Logger;
 
-  public constructor({logger, bucket, region, endpoint, accessKeyId, secretAccessKey}: S3Options)  {
+  public constructor(
+    { logger, bucket, region, endpoint, accessKeyId, secretAccessKey }:
+      S3Options,
+  ) {
     this.logger = logger;
     this.bucket = bucket;
     this.client = new S3Client({
@@ -39,15 +54,14 @@ export class S3 {
     });
     try {
       await this.client.send(command);
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.debug(
         "Failed to head bucket",
         {
           type: LogCode.S3HeadBucketError,
           error,
           bucket: this.bucket,
-        } 
+        },
       );
       throw error;
     }
@@ -64,20 +78,19 @@ export class S3 {
         stream: response.Body?.transformToWebStream(),
         type: response.ContentType,
       };
-    }
-    catch (error) {
-      this.logger.debug("Failed to get object",
-        {
-          type: LogCode.S3GetObjectError,
-          error,
-          key,
-          bucket: this.bucket,
-        } 
-      );
+    } catch (error) {
+      this.logger.debug("Failed to get object", {
+        type: LogCode.S3GetObjectError,
+        error,
+        key,
+        bucket: this.bucket,
+      });
       throw error;
     }
   }
-  public async getJSONObject<T extends object>(key: string): Promise<T | undefined> {
+  public async getJSONObject<T extends object>(
+    key: string,
+  ): Promise<T | undefined> {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
@@ -89,8 +102,7 @@ export class S3 {
         return undefined;
       }
       return JSON.parse(text) as T;
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.debug(
         "Failed to get object",
         {
@@ -98,12 +110,12 @@ export class S3 {
           error,
           key,
           bucket: this.bucket,
-        }
+        },
       );
       throw error;
     }
   }
-  
+
   public async deleteObject(key: string) {
     const command = new DeleteObjectCommand({
       Bucket: this.bucket,
@@ -111,8 +123,7 @@ export class S3 {
     });
     try {
       await this.client.send(command);
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.debug(
         "Failed to delete object",
         {
@@ -120,13 +131,13 @@ export class S3 {
           error,
           key,
           bucket: this.bucket,
-        } 
+        },
       );
       throw error;
     }
   }
-  
-  public async  putObject(key: string, body: Readable | string) {
+
+  public async putObject(key: string, body: Readable | string) {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
@@ -134,8 +145,7 @@ export class S3 {
     });
     try {
       await this.client.send(command);
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.debug(
         "Failed to put object",
         {
@@ -143,7 +153,7 @@ export class S3 {
           error,
           key,
           bucket: this.bucket,
-        } 
+        },
       );
       throw error;
     }

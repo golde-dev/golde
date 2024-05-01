@@ -1,39 +1,34 @@
-import { validateConfig } from "../schema";
-import { ConfigError } from "../error";
-import { describe, expect, it } from "vitest";
-import type { Config } from "../types/config";
+import { validateConfig } from "../schema.ts";
+import { ConfigError } from "../error.ts";
+import { assertEquals, assertThrows } from "@std/assert";
+import type { Config } from "../types/config.ts";
 
-describe("validateConfig", () => {
-  describe("project", () => {
-    it("should throw an error if the config is invalid", () => {
-      const invalidConfig: Config = {
-        name: "invalid project name",
-        providers: {
-          deployer: {
-            apiKey: "valid_api_key",
-          },
+Deno.test("validateConfig for project", async (t) => {
+  await t.step("should throw an error if the config is invalid", () => {
+    const invalidConfig: Config = {
+      name: "invalid project name",
+      providers: {
+        deployer: {
+          apiKey: "valid_api_key",
         },
-      };
+      },
+    };
 
-      expect(() => {
-        validateConfig(invalidConfig); 
-      }).toThrow(ConfigError);
-    });
+    assertThrows(() => {
+      validateConfig(invalidConfig);
+    }, ConfigError);
+  });
 
-    it("should not throw an error if the config is valid", () => {
-      const validConfig = {
-        name: "valid_project_name",
-        providers: {
-          deployer: {
-            apiKey: "valid_api_key",
-          },
+  await t.step("should not throw an error if the config is valid", () => {
+    const validConfig = {
+      name: "valid_project_name",
+      providers: {
+        deployer: {
+          apiKey: "valid_api_key",
         },
-      };
+      },
+    };
 
-      expect(() => {
-        validateConfig(validConfig); 
-      }).not.toThrow();
-    });
-
+    assertEquals(validateConfig(validConfig), undefined);
   });
 });

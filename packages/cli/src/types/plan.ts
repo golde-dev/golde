@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// deno-lint-ignore-file no-explicit-any
 
 export enum Type {
   Create = "Create",
@@ -6,10 +6,12 @@ export enum Type {
   Update = "Update",
 }
 
-export interface ExecutionUnit<T extends (...args: any) => any = (...args: any) => any> {
+export interface ExecutionUnit<
+  T extends (...args: any[]) => any = (...args: any) => any,
+> {
   type: Type;
-  executor: T
-  args: Parameters<T>
+  executor: T;
+  args: Parameters<T>;
   path: string;
   dependencies: string[];
 }

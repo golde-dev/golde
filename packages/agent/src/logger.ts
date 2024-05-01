@@ -1,37 +1,32 @@
-import config from "./config.js";
-import type { LeveledLogMethod, Logger} from "winston";
-import { createLogger, format, transports } from "winston";
+import {
+  ConsoleHandler,
+  debug,
+  error,
+  formatters,
+  info,
+  LevelName,
+  setup,
+  warn,
+} from "@std/log";
 
-const {
-  API_LOG_PRETTY,
-} = config;
+function setLevel(level: LevelName): void {
+  setup({
+    handlers: {
+      default: new ConsoleHandler(level, {
+        formatter: formatters.jsonFormatter,
+        useColors: false,
+      }),
+    },
+  });
+}
 
-const levels = {
-  fatal: 0,
-  error: 1,
-  warn: 2,
-  info: 3,
-  trace: 4,
-  debug: 5,
+setLevel("INFO");
+
+export const logger = {
+  info,
+  error,
+  debug,
+  warn,
 };
 
-export type CustomLogger = Logger & Record<keyof typeof levels, LeveledLogMethod>;
-
-export default API_LOG_PRETTY 
-  ? createLogger({
-    levels,
-    level: "info",
-    format: format.combine(
-      format.colorize(),
-      format.prettyPrint()
-    ),
-    transports: [new transports.Console()],
-  }) as CustomLogger
-  : createLogger({
-    levels,
-    level: "info",
-    format: format.combine(
-      format.json()
-    ),
-    transports: [new transports.Console()],
-  }) as CustomLogger;
+export type Logger = typeof logger;

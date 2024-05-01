@@ -1,12 +1,10 @@
-import { stringify } from "querystring";
-import logger from "../logger";
-import { decMemoize } from "moderndash";
-
+import { stringify } from "node:querystring";
+import { logger } from "../logger.ts";
 
 interface ErrorCause {
   code: string;
   message: string;
-  error_chain: unknown[]
+  error_chain: unknown[];
 }
 
 interface ListResponse<D> {
@@ -14,8 +12,8 @@ interface ListResponse<D> {
   success: boolean;
   errors?: ErrorCause[];
   resultInfo?: {
-    total_count: number
-  }
+    total_count: number;
+  };
 }
 
 interface Response<D> {
@@ -28,10 +26,10 @@ interface Response<D> {
  * @see https://developers.cloudflare.com/api/operations/user-api-tokens-verify-token
  */
 interface VerifyTokenResult {
-  expires_on: string
-  id: string
-  not_before: string
-  status: "active" | "disabled" | "expired"
+  expires_on: string;
+  id: string;
+  not_before: string;
+  status: "active" | "disabled" | "expired";
 }
 
 /**
@@ -47,7 +45,7 @@ interface Zone {
  */
 export interface ZoneRecordRequest {
   /**
-   * IP address 
+   * IP address
    * @example: 198.51.100.4
    */
   content: string;
@@ -58,7 +56,7 @@ export interface ZoneRecordRequest {
   type: string;
   proxied?: boolean;
   comment?: string;
-  tags?: string[]
+  tags?: string[];
   /**
    * Number of seconds
    */
@@ -67,42 +65,42 @@ export interface ZoneRecordRequest {
 
 export interface ZoneRecord {
   id: string;
-  content: string,
-  name: string,
-  proxied: boolean,
-  type: "A",
-  comment: string,
-  created_on: string,
-  locked: boolean,
+  content: string;
+  name: string;
+  proxied: boolean;
+  type: "A";
+  comment: string;
+  created_on: string;
+  locked: boolean;
   meta: {
     "auto_added": boolean;
     "source": string;
-  },
-  modified_on: string,
-  proxiable: boolean,
-  tags: string[],
-  ttl: number,
-  zone_id: string,
-  zone_name: string
+  };
+  modified_on: string;
+  proxiable: boolean;
+  tags: string[];
+  ttl: number;
+  zone_id: string;
+  zone_name: string;
 }
 
 /**
  * @see https://developers.cloudflare.com/api/operations/r2-create-bucket
  */
 interface BucketRequest {
-  locationHint?: "apac" | "eeur" | "enam" | "weur" | "wnam"
+  locationHint?: "apac" | "eeur" | "enam" | "weur" | "wnam";
   name: string;
 }
 
 interface Bucket {
   creation_date: string;
-  location: "apac" | "eeur" | "enam" | "weur" | "wnam"
+  location: "apac" | "eeur" | "enam" | "weur" | "wnam";
   name: string;
 }
 
 interface FetchErrorCause {
   status: number;
-  statusText: string
+  statusText: string;
 }
 
 class CloudflareError extends Error {
@@ -121,20 +119,23 @@ export class CloudflareClient {
     this.accountId = accountId;
   }
 
-  private async makeListRequest<T>(path: string, extraQuery?: object): Promise<T> {
+  private makeListRequest<T>(
+    path: string,
+    extraQuery?: object,
+  ): Promise<T> {
     const start = Date.now();
     const query = stringify({
       per_page: 10000,
       ...extraQuery,
     });
-    
+
     return fetch(`${this.baseUrl}/${path}?${query}`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${this.apiToken}`,
         "Content-Type": "application/json",
       },
-    }).then(async(r) => {
+    }).then(async (r) => {
       if (!r.ok) {
         throw new CloudflareError("Cloudflare request error", {
           status: r.status,
@@ -150,23 +151,24 @@ export class CloudflareClient {
 
       if (success && result) {
         return result;
-      }
-      else {
+      } else {
         throw new CloudflareError("Cloudflare request error", errors);
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Completed cloudflare list request", 
-        { 
-          path,
-          query,
-          time: end - start,
-        } 
-      );
+      logger.debug("Completed cloudflare list request", {
+        path,
+        query,
+        time: end - start,
+      });
     });
   }
 
-  private async makeRequest<T>(path: string, method = "GET", body?: object): Promise<T> {
+  private makeRequest<T>(
+    path: string,
+    method = "GET",
+    body?: object,
+  ): Promise<T> {
     const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       method,
@@ -175,36 +177,33 @@ export class CloudflareClient {
         "Authorization": `Bearer ${this.apiToken}`,
         "Content-Type": "application/json",
       },
-    }).then(async(r) => {
+    }).then(async (r) => {
       if (!r.ok) {
         throw new CloudflareError("Cloudflare request error", {
           status: r.status,
           statusText: r.statusText,
         });
       }
-      
+
       const {
         result,
         success,
         errors,
       } = await r.json() as Response<T>;
- 
+
       if (success && result) {
         return result;
-      }
-      else {
+      } else {
         throw new CloudflareError("Cloudflare response error", errors);
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Completed cloudflare request", 
-        { 
-          path,
-          method,
-          body,
-          time: end - start,
-        } 
-      );
+      logger.debug("Completed cloudflare request", {
+        path,
+        method,
+        body,
+        time: end - start,
+      });
     });
   }
 
@@ -212,7 +211,9 @@ export class CloudflareClient {
    * Verify that user supplied token is active
    */
   public async verifyUserToken(): Promise<void> {
-    const { status } = await this.makeRequest<VerifyTokenResult>("/user/tokens/verify");
+    const { status } = await this.makeRequest<VerifyTokenResult>(
+      "/user/tokens/verify",
+    );
 
     if (status !== "active") {
       throw new CloudflareError(`Token is not active: ${status}`);
@@ -222,39 +223,39 @@ export class CloudflareClient {
   /**
    * Create bucket in r2
    */
-  public async createBucket(config: BucketRequest): Promise<Bucket> {
-    logger.debug("Creating r2 bucket", config );
+  public createBucket(config: BucketRequest): Promise<Bucket> {
+    logger.debug("Creating r2 bucket", config);
     return this.makeRequest<Bucket>(
       `/accounts/${this.accountId}/r2/buckets`,
       "POST",
-      config
+      config,
     );
   }
 
   /**
    * Delete bucket in R2
    */
-  public async deleteBucket(name: string): Promise<void> {
+  public deleteBucket(name: string): Promise<void> {
     logger.debug(name, "Deleting r2 bucket");
     return this.makeRequest(
       `/accounts/${this.accountId}/r2/buckets/${name}`,
-      "DELETE"
+      "DELETE",
     );
   }
 
   /**
    * Get list of zones that account have access to
    */
-  @decMemoize()
-  public async getZones(query?: object): Promise<Zone[]> {
+  // @decMemoize()
+  public getZones(query?: object): Promise<Zone[]> {
     return this.makeListRequest<Zone[]>("/zones", query);
   }
-  
+
   /**
    * Gen zone id by zone name
    */
   public async getZoneId(name: string): Promise<string> {
-    const [zone] = await this.getZones({ name }) as (Zone | undefined)[] ;
+    const [zone] = await this.getZones({ name }) as (Zone | undefined)[];
     if (zone) {
       return zone.id;
     }
@@ -264,38 +265,48 @@ export class CloudflareClient {
   /**
    * Create dns record for zone
    */
-  public async createZoneRecord(zoneName: string, config: ZoneRecordRequest): Promise<ZoneRecord> {
+  public async createZoneRecord(
+    zoneName: string,
+    config: ZoneRecordRequest,
+  ): Promise<ZoneRecord> {
     const zoneId = await this.getZoneId(zoneName);
 
     return this.makeRequest<ZoneRecord>(
       `/zones/${zoneId}/dns_records`,
       "POST",
-      config
+      config,
     );
   }
 
   /**
    * Update dns record for zone
    */
-  public async updateZoneRecord(zoneName: string, recordId: string,config: ZoneRecordRequest): Promise<ZoneRecord> {
+  public async updateZoneRecord(
+    zoneName: string,
+    recordId: string,
+    config: ZoneRecordRequest,
+  ): Promise<ZoneRecord> {
     const zoneId = await this.getZoneId(zoneName);
-  
+
     return this.makeRequest<ZoneRecord>(
       `/zones/${zoneId}/dns_records/${recordId}`,
       "PATCH",
-      config
+      config,
     );
   }
 
   /**
    * Delete dns record for zone
    */
-  public async deleteZoneRecord(zoneName: string, recordId: string): Promise<void> {
+  public async deleteZoneRecord(
+    zoneName: string,
+    recordId: string,
+  ): Promise<void> {
     const zoneId = await this.getZoneId(zoneName);
-    
+
     return this.makeRequest(
       `/zones/${zoneId}/dns_records/${recordId}`,
-      "DELETE"
+      "DELETE",
     );
   }
 }

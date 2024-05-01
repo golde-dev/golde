@@ -22,7 +22,7 @@ jobs:
       run: yarn install
 
     - name: Run build
-      run: yarn build
+      run: yarn dist
 
     - name: Run test
       run: yarn test

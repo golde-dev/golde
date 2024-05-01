@@ -1,22 +1,32 @@
-import config from "./config.js";
-import logger from "./logger.js";
-import {createServer} from "./server.js";
+import config from "./config.ts";
+import { logger } from "./logger.ts";
+import { createServer } from "./server.ts";
 
-/**
- * Handle exceptions
- */
-process.on("uncaughtException", (error) => {
-  logger.error("uncaughtException", {error});
-});
+const init = () => {
+  return new Promise<{ hostname: string; port: number }>((resolve, reject) => {
+    const { fetch } = createServer();
 
-const init = async() => {
-  const server = await createServer();
-
-  await server.listen({
-    port: config.API_PORT,
+    try {
+      Deno.serve(
+        {
+          port: config.API_PORT,
+          key: config.API_KEY,
+          cert: config.API_CERT,
+          onListen: resolve,
+        },
+        fetch,
+      );
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
-init().catch((error: unknown) => {
-  logger.error("Server failed to listen", error);
-});
+const scheme = "https";
+init()
+  .then(({ hostname, port }) => {
+    logger.info(`Server listening on ${scheme}://${hostname}:${port}`);
+  })
+  .catch((error: unknown) => {
+    logger.error("Server failed to listen", error);
+  });

@@ -1,8 +1,7 @@
-import type { Context } from "./context";
-import type { Plan } from "./types/plan";
+import type { Context } from "./context.ts";
+import type { Plan } from "./types/plan.ts";
 
-
-export function applyPlan(context: Context, plan: Plan): void {
+export function applyPlan(_: Context, plan: Plan): void {
   for (const unit of plan) {
     console.log(`Applying ${unit.type} ${unit.path}`);
   }

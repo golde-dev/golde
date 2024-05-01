@@ -1,15 +1,14 @@
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ReverseProxyApp } from "./caddy";
-
+import type { ReverseProxyApp } from "./caddy.ts";
 
 export const systemNodeApi = (
-  app: string, 
-  api: string, 
-  config: ReverseProxyApp
+  app: string,
+  api: string,
+  config: ReverseProxyApp,
 ) => {
   const {
-    greenPorts, 
+    greenPorts,
     bluePorts,
     root,
   } = config;
@@ -58,7 +57,7 @@ ConfigurationDirectory="${apiRuntime}-#%i"
   const targetGreen = `
 [Unit]
 Description="${apiRuntime} green workers"
-Wants=${greenPorts.map(p => `${apiRuntime}-green@${p}.service`).join(" ")}
+Wants=${greenPorts.map((p) => `${apiRuntime}-green@${p}.service`).join(" ")}
 
 [Install]
 WantedBy=multi-user.target
@@ -67,7 +66,7 @@ WantedBy=multi-user.target
   const targetBlue = `
 [Unit]
 Description="${apiRuntime} blue workers"
-Wants=${bluePorts.map(p => `${apiRuntime}-blue@${p}.service`).join(" ")}
+Wants=${bluePorts.map((p) => `${apiRuntime}-blue@${p}.service`).join(" ")}
 
 [Install]
 WantedBy=multi-user.target
@@ -75,4 +74,4 @@ WantedBy=multi-user.target
 
   writeFileSync(`./generated/${apiRuntime}-green.target`, targetGreen);
   writeFileSync(`./generated/${apiRuntime}-blue.target`, targetBlue);
-}; 
+};

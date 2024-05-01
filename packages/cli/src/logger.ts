@@ -1,15 +1,33 @@
-import { createLogger, format, transports } from "winston";
+import {
+  ConsoleHandler,
+  debug,
+  error,
+  formatters,
+  info,
+  LevelName,
+  setup,
+  warn,
+} from "@std/log";
 
-const logger = createLogger({
-  format: format.combine(
-    format.colorize(),
-    format.timestamp(),
-    format.align(),
-    format.printf(({timestamp, level, message, ...rest}) => {
-      return `${timestamp} ${level}: ${message} ${JSON.stringify(rest, null, 2)}`;
-    })
-  ),
-  transports: [new transports.Console()],
-});
+function setLevel(level: LevelName): void {
+  setup({
+    handlers: {
+      default: new ConsoleHandler(level, {
+        formatter: formatters.jsonFormatter,
+        useColors: false,
+      }),
+    },
+  });
+}
 
-export default logger;
+setLevel("INFO");
+
+export const logger = {
+  setLevel,
+  info,
+  error,
+  debug,
+  warn,
+};
+
+export type Logger = typeof logger;

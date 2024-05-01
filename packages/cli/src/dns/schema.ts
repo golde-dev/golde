@@ -1,24 +1,29 @@
-import type { BaseDNSRecord, CloudflareDNSRecord, DNSConfig, RecordType } from "./types";
-import type { ZodType} from "zod";
+import type {
+  BaseDNSRecord,
+  CloudflareDNSRecord,
+  DNSConfig,
+  RecordType,
+} from "./types.ts";
+import type { ZodType } from "zod";
 import { z } from "zod";
 
 const recordTypeSchema: ZodType<RecordType> = z.union([
-  z.literal("A"), 
-  z.literal("AAAA"), 
-  z.literal("CAA"), 
-  z.literal("CNAME"), 
-  z.literal("DKIM"), 
-  z.literal("DMARC"), 
-  z.literal("DNSKEY"), 
-  z.literal("DS"), 
-  z.literal("MX"), 
-  z.literal("NS"), 
-  z.literal("PTR"), 
-  z.literal("SOA"), 
-  z.literal("SPF"), 
-  z.literal("SRV"), 
-  z.literal("SVCB"), 
-  z.literal("TXT"), 
+  z.literal("A"),
+  z.literal("AAAA"),
+  z.literal("CAA"),
+  z.literal("CNAME"),
+  z.literal("DKIM"),
+  z.literal("DMARC"),
+  z.literal("DNSKEY"),
+  z.literal("DS"),
+  z.literal("MX"),
+  z.literal("NS"),
+  z.literal("PTR"),
+  z.literal("SOA"),
+  z.literal("SPF"),
+  z.literal("SRV"),
+  z.literal("SVCB"),
+  z.literal("TXT"),
 ]);
 
 /**
@@ -36,14 +41,14 @@ const dnsRecord: ZodType<BaseDNSRecord> = z
   })
   .strict()
   .refine(
-    data => !(data.branchPattern && data.branch),
-    "Cannot use both branchPattern and branch"
+    (data) => !(data.branchPattern && data.branch),
+    "Cannot use both branchPattern and branch",
   );
 
 const dnsRecords = z
   .record(dnsRecord)
   .optional();
-  
+
 const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
   .object({
     value: z.string(),
@@ -59,33 +64,30 @@ const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
   })
   .strict()
   .refine(
-    data => !(data.branchPattern && data.branch),
-    "Cannot use both branchPattern and branch"
+    (data) => !(data.branchPattern && data.branch),
+    "Cannot use both branchPattern and branch",
   );
-
 
 const cloudflareRecords = z
   .record(cloudflareDNSRecord)
   .optional();
-
 
 export const dnsSchema: ZodType<DNSConfig> = z
   .object({
     cloudflare: z
       .record(
         z.record(
-          recordTypeSchema, 
-          cloudflareRecords
-        )
+          recordTypeSchema,
+          cloudflareRecords,
+        ),
       )
       .optional(),
     namecheap: z
       .record(
         z.record(
-          recordTypeSchema, 
-          dnsRecords
-        )
+          recordTypeSchema,
+          dnsRecords,
+        ),
       )
       .optional(),
   });
-

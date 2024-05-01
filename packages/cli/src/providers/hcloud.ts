@@ -1,10 +1,13 @@
-import { HCloudClient } from "../clients/hcloud";
-import logger from "../logger";
-import type { HCloudServerConfig, HCloudServerState } from "../servers/types";
-import type { Provider } from "./types";
+import { HCloudClient } from "../clients/hcloud.ts";
+import {logger} from "../logger.ts";
+import type { Provider } from "./types.ts";
+import type {
+  HCloudServerConfig,
+  HCloudServerState,
+} from "../servers/types.ts";
 
 interface HCloudConfig {
-  apiKey: string
+  apiKey: string;
 }
 
 export class HCloudProvider implements Provider {
@@ -20,20 +23,21 @@ export class HCloudProvider implements Provider {
     try {
       await client.verifyUserToken();
       return new HCloudProvider(client);
-    }
-    catch (error) {
+    } catch (error) {
       logger.error(
         "Failed to initialize HCloud provider, check your apiKey and key policy",
         {
           error,
           apiKey: "<redacted>",
-        } 
+        },
       );
       throw error;
     }
   }
 
-  public async createServer(config: HCloudServerConfig): Promise<HCloudServerState> {
+  public async createServer(
+    config: HCloudServerConfig,
+  ): Promise<HCloudServerState> {
     // @ts-expect-error TODO: fix this
     const result = await this.client.createServer(config);
     return {
@@ -41,4 +45,3 @@ export class HCloudProvider implements Provider {
     };
   }
 }
-
