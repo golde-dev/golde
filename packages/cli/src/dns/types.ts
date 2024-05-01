@@ -1,7 +1,20 @@
-
-export type RecordType = 
-  "A" | "AAAA" | "CAA" | "CNAME" | "DKIM" | "DMARC" | "DNSKEY" | "DS" | "MX" | "NS" | "PTR" | "SOA" | "SPF" | "SRV" | "SVCB" | "TXT"; 
-
+export type RecordType =
+  | "A"
+  | "AAAA"
+  | "CAA"
+  | "CNAME"
+  | "DKIM"
+  | "DMARC"
+  | "DNSKEY"
+  | "DS"
+  | "MX"
+  | "NS"
+  | "PTR"
+  | "SOA"
+  | "SPF"
+  | "SRV"
+  | "SVCB"
+  | "TXT";
 
 export interface BaseDNSRecord {
   /**
@@ -22,26 +35,30 @@ export interface BaseDNSRecord {
   value: string;
 }
 
-export type ZoneRecords = Partial<Record<RecordType, Record<string, BaseDNSRecord>>>;
+export type ZoneRecords = Partial<
+  Record<RecordType, Record<string, BaseDNSRecord>>
+>;
 
 export interface DNSZones {
-  [zone: string]: ZoneRecords
+  [zone: string]: ZoneRecords;
 }
 
 export interface DNSZonesState {
-  [zone: string]: ZoneRecords
+  [zone: string]: ZoneRecords;
 }
 
-export interface CloudflareDNSRecord extends BaseDNSRecord{
+export interface CloudflareDNSRecord extends BaseDNSRecord {
   proxied?: boolean;
   comment?: string;
   tags?: string[];
 }
 
-export type CloudflareZoneRecords = Partial<Record<RecordType, Record<string, CloudflareDNSRecord>>>;
+export type CloudflareZoneRecords = Partial<
+  Record<RecordType, Record<string, CloudflareDNSRecord>>
+>;
 
 export interface CloudflareDNSZones {
-  [zone: string]: CloudflareZoneRecords
+  [zone: string]: CloudflareZoneRecords;
 }
 
 export interface DNSConfig {
@@ -58,9 +75,11 @@ export interface CloudflareDNSRecordState extends BaseDNSRecord {
   created_on: string;
 }
 
-export type CloudflareZoneRecordsState = Partial<Record<RecordType, Record<string, CloudflareDNSRecordState>>>;
+export type CloudflareZoneRecordsState = Partial<
+  Record<RecordType, Record<string, CloudflareDNSRecordState>>
+>;
 export interface CloudflareZonesState {
-  [zone: string]: CloudflareZoneRecordsState
+  [zone: string]: CloudflareZoneRecordsState;
 }
 
 export interface DNSState {

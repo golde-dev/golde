@@ -1,9 +1,9 @@
-import type { Context } from "../context";
-import { PlanError, PlanErrorCode } from "../error";
-import type { Plan } from "../types/plan";
-import { createCloudflareBucketsPlan } from "./providers/cloudflare";
+import type { Context } from "../context.ts";
+import { PlanError, PlanErrorCode } from "../error.ts";
+import type { Plan } from "../types/plan.ts";
+import { createCloudflareBucketsPlan } from "./providers/cloudflare.ts";
 
-export const createBucketsPlan = async(context: Context): Promise<Plan> => {
+export const createBucketsPlan = (context: Context): Promise<Plan> => {
   const {
     previousConfig: {
       buckets: prevBucketsConfig,
@@ -13,21 +13,27 @@ export const createBucketsPlan = async(context: Context): Promise<Plan> => {
     } = {},
     nextConfig: {
       buckets: nextBucketsConfig,
-    }, 
+    },
     cloudflare,
   } = context;
 
   const plan: Plan = [];
 
-  if (Boolean(prevBucketsConfig?.cloudflare) || Boolean(nextBucketsConfig?.cloudflare)) {
+  if (
+    Boolean(prevBucketsConfig?.cloudflare) ||
+    Boolean(nextBucketsConfig?.cloudflare)
+  ) {
     if (!cloudflare) {
-      throw new PlanError("Cloudflare provider is required when using cloudflare buckets", PlanErrorCode.PROVIDER_MISSING);
+      throw new PlanError(
+        "Cloudflare provider is required when using cloudflare buckets",
+        PlanErrorCode.PROVIDER_MISSING,
+      );
     }
     plan.push(...createCloudflareBucketsPlan(
-      cloudflare, 
+      cloudflare,
       prevBucketsConfig?.cloudflare,
       prevBucketsState?.cloudflare,
-      nextBucketsConfig?.cloudflare
+      nextBucketsConfig?.cloudflare,
     ));
   }
 

@@ -1,19 +1,18 @@
-import logger from "./logger";
+import { logger } from "./logger.ts";
 import { input, select } from "@inquirer/prompts";
-import { projectNameSchema } from "./schema";
+import { projectNameSchema } from "./schema.ts";
 import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "node:path";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { DeployerProvider, getDeployerConfig } from "./providers/deployer";
-import { DeployerError } from "./clients/deployer";
+import { DeployerProvider, getDeployerConfig } from "./providers/deployer.ts";
+import { DeployerError } from "./clients/deployer.ts";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
     schema.parse(value);
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof ZodError) {
-      return error.issues.map(({message}) => message).join(",");
+      return error.issues.map(({ message }) => message).join(",");
     }
   }
   return true;
@@ -34,24 +33,21 @@ const getProjectType = () => {
   const packagePath = resolve("./package.json");
   if (existsSync(packagePath)) {
     const source = JSON.parse(
-      readFileSync(packagePath, {encoding:"utf-8"})
+      readFileSync(packagePath, { encoding: "utf-8" }),
     ) as PackageJSON;
-    
+
     projectInfo.name = source.name;
     projectInfo.isNPMPackage = true;
     projectInfo.isTSPackage = Boolean(
       source.dependencies?.typescript ??
-      source.devDependencies?.typescript
+        source.devDependencies?.typescript,
     );
   }
   return projectInfo;
 };
 
-
 function createJSConfig(projectName: string) {
-
-  const config = 
-`
+  const config = `
 
 const config = {
   name: "${projectName}",
@@ -69,9 +65,7 @@ export default config;
 }
 
 function createTSConfig(projectName: string) {
-
-  const config = 
-`
+  const config = `
 import type {Config} from '@tenacify/cli'
 
 const config: Config = {
@@ -89,8 +83,7 @@ export default config;
 }
 
 function createJSONConfig(projectName: string) {
-  const config = 
-`
+  const config = `
 {
   "$schema": "https://tenacify.dev/schemas/deployer.config.schema.json",
   "name": "${projectName}",
@@ -111,7 +104,7 @@ export async function initConfig() {
     isNPMPackage,
     isTSPackage,
   } = getProjectType();
-  
+
   const deployerConfig = getDeployerConfig();
 
   try {
@@ -120,14 +113,14 @@ export async function initConfig() {
       default: name,
       validate: (value: string) => validate(value, projectNameSchema),
     });
-  
+
     const configType = await select({
       message: "Select config format",
-      default: isTSPackage 
+      default: isTSPackage
         ? "deployer.config.ts"
-        : isNPMPackage 
-          ? "deployer.config.js"
-          : "deployer.toml",
+        : isNPMPackage
+        ? "deployer.config.js"
+        : "deployer.toml",
       choices: [
         {
           name: "deployer.config.js",
@@ -153,36 +146,36 @@ export async function initConfig() {
         createJSConfig(projectName);
         break;
       case "deployer.config.ts":
-        createTSConfig(projectName);  
+        createTSConfig(projectName);
         break;
       case "deployer.config.json":
-        createJSONConfig(projectName);  
+        createJSONConfig(projectName);
         break;
     }
 
     if (deployerConfig) {
       try {
-        const deployer = await DeployerProvider.init(projectName, deployerConfig);
+        const deployer = await DeployerProvider.init(
+          projectName,
+          deployerConfig,
+        );
         await deployer.createProject();
-      } 
-      catch (error) {
+      } catch (error) {
         if (error instanceof DeployerError) {
           if (error.cause?.status === 409) {
             logger.error(`Project: ${projectName} already exists`);
-          }
-          else {
+          } else {
             logger.error("Failed to create project in deployer", {
               error,
             });
           }
         }
-      } 
+      }
     }
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes("User force closed the prompt")) {
-        process.exit(0);
+        Deno.exit(0);
       }
     }
   }

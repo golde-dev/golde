@@ -1,10 +1,10 @@
-import type { StateConfig } from "../providers/state";
-import logger from "../logger";
-import type { ConfigState } from "../types/config";
+import type { StateConfig } from "../providers/state.ts";
+import { logger } from "../logger.ts";
+import type { ConfigState } from "../types/config.ts";
 
 interface DeployerErrorCause {
   status: number;
-  statusText: string
+  statusText: string;
 }
 
 export class DeployerError extends Error {
@@ -16,7 +16,9 @@ export class DeployerError extends Error {
   }
 }
 
-async function notFoundAsUndefined<T>(promise: Promise<T>): Promise<T | undefined> {
+function notFoundAsUndefined<T>(
+  promise: Promise<T>,
+): Promise<T | undefined> {
   return promise.catch((error: unknown) => {
     if (error instanceof DeployerError) {
       if (error.cause?.status === 404) {
@@ -35,7 +37,11 @@ export class DeployerClient {
     this.apiKey = apiKey;
   }
 
-  private async makeRequest<T>(path: string, method = "GET", body?: object): Promise<T> {
+  private makeRequest<T>(
+    path: string,
+    method = "GET",
+    body?: object,
+  ): Promise<T> {
     const start = Date.now();
     return fetch(`${this.baseUrl}${path}`, {
       method,
@@ -44,7 +50,7 @@ export class DeployerClient {
         "Authorization": `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
       },
-    }).then(async(r) => {
+    }).then(async (r) => {
       if (!r.ok) {
         throw new DeployerError("Deployer request failed", {
           status: r.status,
@@ -54,18 +60,20 @@ export class DeployerClient {
       return await r.json() as T;
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Deployer request", 
-        { 
-          path,
-          method,
-          body,
-          time: end - start,
-        } 
-      );
+      logger.debug("Deployer request", {
+        path,
+        method,
+        body,
+        time: end - start,
+      });
     });
   }
 
-  private async makeFileRequest(path: string, method: "POST", body: FormData): Promise<void> {
+  private makeFileRequest(
+    path: string,
+    method: "POST",
+    body: FormData,
+  ): Promise<void> {
     const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       method,
@@ -82,58 +90,73 @@ export class DeployerClient {
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Deployer request",
-        { 
-          path,
-          method,
-          time: end - start,
-        }
-      );
+      logger.debug("Deployer request", {
+        path,
+        method,
+        time: end - start,
+      });
     });
   }
 
   public async verifyUserToken(): Promise<void> {
-    const { status } = await this.makeRequest<{status: string}>("/verify-token");
+    const { status } = await this.makeRequest<{ status: string }>(
+      "/verify-token",
+    );
     if (status !== "active") {
       throw new DeployerError(`Token status is not active: ${status}`);
     }
   }
-  
-  public async createProject(project: string): Promise<void> {
+
+  public createProject(project: string): Promise<void> {
     return this.makeRequest("/projects", "POST", {
       name: project,
     });
   }
-  
-  public async getState(project: string): Promise<ConfigState | undefined> {
-    return notFoundAsUndefined(this.makeRequest<ConfigState>(`/projects/${project}/state`));
-  }
 
-  public async getStateLock(project: string): Promise<ConfigState | undefined> {
-    return notFoundAsUndefined(this.makeRequest<ConfigState>(`/projects/${project}/lock`));
-  }
-
-  public async getStateConfig(project: string): Promise<StateConfig | undefined> {
-    return this.makeRequest<StateConfig | undefined>(`/projects/${project}/state-config`);
-  }
-
-  public async changeStateConfig(project: string, stateConfig: StateConfig): Promise<void> {
-    await this.makeRequest(
-      `/projects/${project}/state-config`, 
-      "PUT", 
-      stateConfig
+  public getState(project: string): Promise<ConfigState | undefined> {
+    return notFoundAsUndefined(
+      this.makeRequest<ConfigState>(`/projects/${project}/state`),
     );
   }
-  
-  public async uploadArtifact(project: string, key: string, body: Blob): Promise<void> {
+
+  public getStateLock(project: string): Promise<ConfigState | undefined> {
+    return notFoundAsUndefined(
+      this.makeRequest<ConfigState>(`/projects/${project}/lock`),
+    );
+  }
+
+  public getStateConfig(
+    project: string,
+  ): Promise<StateConfig | undefined> {
+    return this.makeRequest<StateConfig | undefined>(
+      `/projects/${project}/state-config`,
+    );
+  }
+
+  public async changeStateConfig(
+    project: string,
+    stateConfig: StateConfig,
+  ): Promise<void> {
+    await this.makeRequest(
+      `/projects/${project}/state-config`,
+      "PUT",
+      stateConfig,
+    );
+  }
+
+  public async uploadArtifact(
+    project: string,
+    key: string,
+    body: Blob,
+  ): Promise<void> {
     const form = new FormData();
     form.set("key", key);
     form.set("body", body);
 
     await this.makeFileRequest(
-      `/projects/${project}/artifacts`, 
-      "POST", 
-      form
+      `/projects/${project}/artifacts`,
+      "POST",
+      form,
     );
   }
 }

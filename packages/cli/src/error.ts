@@ -1,4 +1,3 @@
-
 export enum ConfigErrorCode {
   /**
    * Thrown when config file is missing
@@ -38,9 +37,9 @@ export enum ConfigErrorCode {
 
 export class ConfigError extends Error {
   public code: ConfigErrorCode;
-  
+
   public constructor(message: string, code: ConfigErrorCode, cause?: unknown) {
-    super(message, {cause});
+    super(message, { cause });
     this.code = code;
   }
 }
@@ -54,9 +53,9 @@ export enum ContextErrorCode {
 
 export class ContextError extends Error {
   public code: ContextErrorCode;
-  
+
   public constructor(message: string, code: ContextErrorCode, cause?: unknown) {
-    super(message, {cause});
+    super(message, { cause });
     this.code = code;
   }
 }
@@ -75,9 +74,9 @@ export enum PlanErrorCode {
 
 export class PlanError extends Error {
   public code: PlanErrorCode;
-  
+
   public constructor(message: string, code: PlanErrorCode, cause?: unknown) {
-    super(message, {cause});
+    super(message, { cause });
     this.code = code;
   }
 }

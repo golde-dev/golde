@@ -1,6 +1,3 @@
-
-
-
-export async function login(): Promise<void> {
+export function login(): Promise<void> {
   return Promise.resolve();
 }

@@ -1,59 +1,61 @@
-import { describe, expect, it, vi } from "vitest";
-import { createCloudflareDNSPlan } from "../cloudflare";
-import type { CloudflareProvider } from "../../../providers/cloudflare";
+import { assertEquals } from "@std/assert";
+import { createCloudflareDNSPlan } from "../cloudflare.ts";
+import type { CloudflareProvider } from "../../../providers/cloudflare.ts";
+import { Type } from "../../../types/plan.ts";
 
-describe("createCloudflareDNSPlan", () => {
-
-
+Deno.test("createCloudflareDNSPlan", async (t) => {
   const mockProvider = {
-    updateZoneRecord: vi.fn(),
-    createZoneRecord: vi.fn(),
-    deleteZoneRecord: vi.fn(),
+    updateZoneRecord: () => {},
+    createZoneRecord: () => {},
+    deleteZoneRecord: () => {},
   } as unknown as CloudflareProvider;
 
-  it("add new records", () => {
+  await t.step("add new records", () => {
     const nextConfig = {
       "deployer.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.1",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
         },
       },
     };
-    
-    expect(createCloudflareDNSPlan(mockProvider, undefined, undefined, nextConfig)).toEqual([
-      {
-        "args": [
-          "deployer.dev",
-          {
-            "comment": undefined,
-            "content": "20.10.10.1",
-            "name": "dns-cloudflare",
-            "proxied": false,
-            "tags": undefined,
-            "ttl": 3600,
-            "type": "A",
-          },
-        ],
-        "dependencies": [],
-        "executor": mockProvider.createZoneRecord,
-        "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
-        "type": "Create",
-      },
-    ]);
+
+    assertEquals(
+      createCloudflareDNSPlan(mockProvider, undefined, undefined, nextConfig),
+      [
+        {
+          "args": [
+            "deployer.dev",
+            {
+              "comment": undefined,
+              "content": "20.10.10.1",
+              "name": "dns-cloudflare",
+              "proxied": false,
+              "tags": undefined,
+              "ttl": 3600,
+              "type": "A",
+            },
+          ],
+          "dependencies": [],
+          "executor": mockProvider.createZoneRecord,
+          "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
+          "type": Type.Create,
+        },
+      ],
+    );
   });
 
-  it("delete records", () => {
+  await t.step("delete records", () => {
     const prevConfig = {
       "deployer.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.1",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
         },
       },
@@ -68,34 +70,37 @@ describe("createCloudflareDNSPlan", () => {
             modified_on: "",
             created_on: "",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
         },
       },
     };
     const nextConfig = undefined;
-    expect(createCloudflareDNSPlan(mockProvider, prevConfig, prevState, nextConfig)).toEqual( [
-      {
-        "args":  [
-          "deployer.dev",
-          "cloudflare id",
-        ],
-        "dependencies":  [],
-        "executor": mockProvider.deleteZoneRecord,
-        "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
-        "type": "Delete",
-      },
-    ]);
+    assertEquals(
+      createCloudflareDNSPlan(mockProvider, prevConfig, prevState, nextConfig),
+      [
+        {
+          "args": [
+            "deployer.dev",
+            "cloudflare id",
+          ],
+          "dependencies": [],
+          "executor": mockProvider.deleteZoneRecord,
+          "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
+          "type": Type.Delete,
+        },
+      ],
+    );
   });
 
-  it("update records", () => {
+  await t.step("update records", () => {
     const prevConfig = {
       "deployer.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.1",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
         },
       },
@@ -110,7 +115,7 @@ describe("createCloudflareDNSPlan", () => {
             modified_on: "",
             created_on: "",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
         },
       },
@@ -121,31 +126,34 @@ describe("createCloudflareDNSPlan", () => {
           "dns-cloudflare": {
             value: "20.10.10.10",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
           },
         },
       },
     };
-    expect(createCloudflareDNSPlan(mockProvider, prevConfig, prevState, nextConfig)).toEqual([
-      {
-        "args": [
-          "deployer.dev",
-          "cloudflare id",
-          {
-            "comment": undefined,
-            "content": "20.10.10.10",
-            "name": "dns-cloudflare",
-            "proxied": false,
-            "tags": undefined,
-            "ttl": 3600,
-            "type": "A",
-          },
-        ],
-        "dependencies": [],
-        "executor": mockProvider.updateZoneRecord,
-        "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
-        "type": "Create",
-      },
-    ]);
+    assertEquals(
+      createCloudflareDNSPlan(mockProvider, prevConfig, prevState, nextConfig),
+      [
+        {
+          "args": [
+            "deployer.dev",
+            "cloudflare id",
+            {
+              "comment": undefined,
+              "content": "20.10.10.10",
+              "name": "dns-cloudflare",
+              "proxied": false,
+              "tags": undefined,
+              "ttl": 3600,
+              "type": "A",
+            },
+          ],
+          "dependencies": [],
+          "executor": mockProvider.updateZoneRecord,
+          "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
+          "type": Type.Create,
+        },
+      ],
+    );
   });
 });

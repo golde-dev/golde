@@ -1,14 +1,14 @@
-import logger from "../logger";
-import { stringify } from "querystring";
+import { logger } from "../logger.ts";
+import { stringify } from "node:querystring";
 
 /**
  * @see https://docs.hetzner.cloud/#locations-get-all-locations
  */
 interface Location {
-  city: string,
-  country: string,
-  description: string,
-  id: number,
+  city: string;
+  country: string;
+  description: string;
+  id: number;
   latitude: number;
   longitude: number;
   name: string;
@@ -16,7 +16,7 @@ interface Location {
 }
 
 /**
- * @see https://docs.hetzner.cloud/#datacenters-get-a-datacenter 
+ * @see https://docs.hetzner.cloud/#datacenters-get-a-datacenter
  */
 interface Datacenter {
   description: string;
@@ -27,33 +27,40 @@ interface Datacenter {
     available: number[];
     available_for_migration: number[];
     supported: number[];
-  }
+  };
 }
 
 interface Image {
   architecture: "arm" | "x86";
-  bound_to: number | null,
-  created: string,
+  bound_to: number | null;
+  created: string;
   created_from: {
-    id: number,
-    name: string
-  } | null,
-  deleted: string | null,
-  deprecated: string | null,
+    id: number;
+    name: string;
+  } | null;
+  deleted: string | null;
+  deprecated: string | null;
   description: string;
   disk_size: number;
-  id: number,
+  id: number;
   image_size: number | null;
   labels: Record<string, string>;
-  name: string,
-  os_flavor: "alma" | "centos" | "debian" | "fedora" | "rocky" | "ubuntu" | "unknown",
-  os_version: string | null,
+  name: string;
+  os_flavor:
+    | "alma"
+    | "centos"
+    | "debian"
+    | "fedora"
+    | "rocky"
+    | "ubuntu"
+    | "unknown";
+  os_version: string | null;
   protection: {
-    delete: boolean
-  },
-  rapid_deploy: boolean,
+    delete: boolean;
+  };
+  rapid_deploy: boolean;
   status: "available" | "creating" | "unavailable";
-  type: "app" | "backup" | "snapshot" | "system" | "temporary"
+  type: "app" | "backup" | "snapshot" | "system" | "temporary";
 }
 
 interface ServerType {
@@ -84,7 +91,7 @@ interface ISO {
   architecture: "arm" | "x86" | null;
   deprecation: {
     announced: string;
-    unavailable_after: string
+    unavailable_after: string;
   } | null;
   description: string;
   id: number;
@@ -104,7 +111,7 @@ interface PlacementGroup {
  * @see https://docs.hetzner.cloud/#servers-create-a-server
  */
 interface Server {
-  backup_window: string | null
+  backup_window: string | null;
   created: string;
   datacenter: Datacenter;
   id: number;
@@ -127,7 +134,7 @@ interface Server {
   }[];
   protection: {
     delete: boolean;
-    rebuild: false
+    rebuild: false;
   };
   public_net: {
     firewalls: {
@@ -151,30 +158,30 @@ interface Server {
   };
   rescue_enabled: boolean;
   server_type: ServerType;
-  status: 
-  | "deleting" 
-  | "initializing" 
-  | "migrating" 
-  | "off" 
-  | "rebuilding" 
-  | "running" 
-  | "starting" 
-  | "stopping" 
-  | "unknown"
+  status:
+    | "deleting"
+    | "initializing"
+    | "migrating"
+    | "off"
+    | "rebuilding"
+    | "running"
+    | "starting"
+    | "stopping"
+    | "unknown";
   volumes?: number[];
 }
 
 interface ResultBase {
   error?: {
     code: string;
-    message: string; 
-    details: ErrorDetails
-  }
-  meta?: object
+    message: string;
+    details: ErrorDetails;
+  };
+  meta?: object;
 }
 
 interface LocationsResponse extends ResultBase {
-  locations: Location
+  locations: Location;
 }
 
 /**
@@ -182,55 +189,54 @@ interface LocationsResponse extends ResultBase {
  * @see https://docs.hetzner.cloud/#servers-create-a-server
  */
 interface CreateServerRequest {
-  automount?: boolean,
-  datacenter?: string,
+  automount?: boolean;
+  datacenter?: string;
   firewalls?: {
-    firewall: number
+    firewall: number;
   }[];
   image: string;
-  labels?: Record<string, string>,
-  location?: string,
-  name: string,
-  networks?: number[]
-  placement_group?: number
+  labels?: Record<string, string>;
+  location?: string;
+  name: string;
+  networks?: number[];
+  placement_group?: number;
   public_net?: {
-    enable_ipv4?: boolean,
-    enable_ipv6?: boolean,
-    ipv4?: string | null,
-    ipv6?: string | null
+    enable_ipv4?: boolean;
+    enable_ipv6?: boolean;
+    ipv4?: string | null;
+    ipv6?: string | null;
   };
   server_type: string;
   ssh_keys?: string[];
-  start_after_create?: true,
+  start_after_create?: true;
   user_data?: string;
   volumes?: number[];
 }
 
 interface CreateServerResponse extends ResultBase {
-  server: Server
+  server: Server;
 }
 
 interface ErrorDetails {
   code: string;
   message: string;
-  details: ErrorDetails
+  details: ErrorDetails;
 }
 
 interface ErrorCause {
   code: string;
-  message: string; 
-  details: ErrorDetails
+  message: string;
+  details: ErrorDetails;
 }
 
 interface FetchErrorCause {
   status: number;
-  statusText: string
+  statusText: string;
 }
-
 
 export class HCloudError extends Error {
   public constructor(message: string, cause: ErrorCause | FetchErrorCause) {
-    super(message, {cause});
+    super(message, { cause });
   }
 }
 
@@ -242,7 +248,11 @@ export class HCloudClient {
     this.apiKey = apiKey;
   }
 
-  private async makeRequest<T extends ResultBase>(path: string, method = "GET", body?: BodyInit): Promise<Omit<T, "error" | "meta">> {
+  private makeRequest<T extends ResultBase>(
+    path: string,
+    method = "GET",
+    body?: BodyInit,
+  ): Promise<Omit<T, "error" | "meta">> {
     const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       body,
@@ -251,28 +261,26 @@ export class HCloudClient {
         "Authorization": `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
       },
-    }).then(async d => {
+    }).then(async (d) => {
       if (!d.ok) {
         throw new HCloudError("Request failed", {
           status: d.status,
           statusText: d.statusText,
         });
       }
-      const {error, meta: _, ...rest} = await d.json() as T;
+      const { error, meta: _, ...rest } = await d.json() as T;
       if (error) {
         throw new HCloudError("Request failed", error);
       }
       return rest;
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Completed hetzner request", 
-        { 
-          path,
-          method,
-          body,
-          time: end - start,
-        } 
-      );
+      logger.debug("Completed hetzner request", {
+        path,
+        method,
+        body,
+        time: end - start,
+      });
     });
   }
 
@@ -280,20 +288,20 @@ export class HCloudClient {
     await this.getLocations();
   }
 
-  public async getLocations() {
+  public getLocations() {
     const query = stringify({
       per_page: 200,
     });
     return this.makeRequest<LocationsResponse>(
-      `/locations?${query}`
+      `/locations?${query}`,
     );
   }
 
-  public async createServer(config: CreateServerRequest) {
+  public createServer(config: CreateServerRequest) {
     return this.makeRequest<CreateServerResponse>(
-      "/servers", 
+      "/servers",
       "POST",
-      JSON.stringify(config)
+      JSON.stringify(config),
     );
   }
 }

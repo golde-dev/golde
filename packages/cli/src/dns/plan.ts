@@ -1,13 +1,13 @@
-import type { Context } from "../context";
-import { PlanError, PlanErrorCode } from "../error";
-import type { Plan } from "../types/plan";
-import { createCloudflareDNSPlan } from "./providers/cloudflare";
+import type { Context } from "../context.ts";
+import { PlanError, PlanErrorCode } from "../error.ts";
+import type { Plan } from "../types/plan.ts";
+import { createCloudflareDNSPlan } from "./providers/cloudflare.ts";
 
-export const createDNSPlan = async(context: Context): Promise<Plan> => {
+export const createDNSPlan = (context: Context): Promise<Plan> => {
   const {
     previousConfig: {
       dns: prevDNSConfig,
-    } = {}, 
+    } = {},
     previousState: {
       dns: prevDNSState,
     } = {},
@@ -19,18 +19,23 @@ export const createDNSPlan = async(context: Context): Promise<Plan> => {
 
   const plan: Plan = [];
 
-  if (Boolean(prevDNSConfig?.cloudflare) || Boolean(nextDNSConfig?.cloudflare)) {
+  if (
+    Boolean(prevDNSConfig?.cloudflare) || Boolean(nextDNSConfig?.cloudflare)
+  ) {
     if (!cloudflare) {
-      throw new PlanError("Cloudflare provider is required when using cloudflare dns", PlanErrorCode.PROVIDER_MISSING);
+      throw new PlanError(
+        "Cloudflare provider is required when using cloudflare dns",
+        PlanErrorCode.PROVIDER_MISSING,
+      );
     }
 
     plan.push(...createCloudflareDNSPlan(
-      cloudflare, 
+      cloudflare,
       prevDNSConfig?.cloudflare,
       prevDNSState?.cloudflare,
-      nextDNSConfig?.cloudflare
+      nextDNSConfig?.cloudflare,
     ));
   }
-  
+
   return Promise.resolve(plan);
-}; 
+};

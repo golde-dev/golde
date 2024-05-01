@@ -1,20 +1,19 @@
-
 export interface ProvidersConfig {
   /**
    * Hetzner cloud provider config
    */
   deployer?: {
     /**
-     * Deployer API token 
+     * Deployer API token
      */
-    apiKey: string
-  }
+    apiKey: string;
+  };
   /**
    * Cloudflare provider config
    */
   cloudflare?: {
     /**
-     * Cloudflare API token 
+     * Cloudflare API token
      * @see https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
      */
     apiToken: string;
@@ -22,7 +21,7 @@ export interface ProvidersConfig {
      * Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
      */
     accountId: string;
-  }
+  };
   /**
    * Namecheap provider config
    */
@@ -31,34 +30,34 @@ export interface ProvidersConfig {
      * Hetzner API key
      * @see https://www.namecheap.com/support/api/intro/
      */
-    apiKey: string
+    apiKey: string;
     /**
      * Your Namecheap account username will act as API username
      */
-    apiUser: string
-  }
+    apiUser: string;
+  };
   /**
    * Hetzner cloud provider config
    */
   hcloud?: {
     /**
-     * Hetzner API token 
+     * Hetzner API token
      * @see https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/
      */
-    apiKey: string
-  }
+    apiKey: string;
+  };
   /**
    * State provider, only required if not using managed solution
    * State provider would store build artifacts and state of project
    */
   state?: {
-    type: "s3",
-    bucket: string,
-    region: string,
-    endpoint: string,
-    accessKeyId: string,
-    secretAccessKey: string,
-  }
+    type: "s3";
+    bucket: string;
+    region: string;
+    endpoint: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class

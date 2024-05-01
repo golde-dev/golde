@@ -1,5 +1,5 @@
-import type { ProvidersConfig } from "./types";
-import type { ZodType} from "zod";
+import type { ProvidersConfig } from "./types.ts";
+import type { ZodType } from "zod";
 import { z } from "zod";
 
 export const providersSchema: ZodType<ProvidersConfig> = z
@@ -16,10 +16,14 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       .object({
         apiToken: z
           .string()
-          .describe("Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"),
+          .describe(
+            "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/",
+          ),
         accountId: z
           .string()
-          .describe("Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"),
+          .describe(
+            "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids",
+          ),
       })
       .optional()
       .describe("Cloudflare provider config"),
@@ -27,7 +31,9 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       .object({
         apiKey: z
           .string()
-          .describe("Namecheap api keyhttps://www.namecheap.com/support/api/intro/"),
+          .describe(
+            "Namecheap api keyhttps://www.namecheap.com/support/api/intro/",
+          ),
         apiUser: z
           .string()
           .describe("Your Namecheap account username will act as API username"),
@@ -38,7 +44,9 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       .object({
         apiKey: z
           .string()
-          .describe("Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"),
+          .describe(
+            "Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/",
+          ),
       })
       .optional()
       .describe("Hetzner provider config"),
@@ -46,7 +54,9 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       .object({
         type: z
           .enum(["s3"])
-          .describe("Type of state provider, only s3 is supported at the moment"),
+          .describe(
+            "Type of state provider, only s3 is supported at the moment",
+          ),
         bucket: z
           .string()
           .describe("Name of s3 bucket"),
@@ -64,10 +74,12 @@ export const providersSchema: ZodType<ProvidersConfig> = z
           .describe("s3 access key"),
       })
       .optional()
-      .describe("State provider config, only required when not using oss version"),
+      .describe(
+        "State provider config, only required when not using oss version",
+      ),
   })
   .strict()
   .refine(
-    data => Boolean(data.deployer ?? data.state),
-    "Either deployer or state provider need to be configured"
+    (data) => Boolean(data.deployer ?? data.state),
+    "Either deployer or state provider need to be configured",
   );

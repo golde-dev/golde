@@ -40,30 +40,11 @@ jobs:
     - name: Install
       run: yarn install
       
-    - name: Run build
-      run: yarn build
+    - name: Run dist
+      run: yarn dist
 
     - name: Run test
       run: yarn test
 
     - name: Run lint
       run: yarn lint
-    
-    - name: "Version and publish"
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "Set git user"
-        git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor}}@users.noreply.github.com"
-
-        echo "Version"
-        yarn lerna version \
-          --conventional-commits \
-          --yes
-        
-        echo "Publish"
-        yarn lerna publish from-git \
-          --loglevel debug \
-          --yes

@@ -1,46 +1,47 @@
-import logger from "../logger";
-import { openAsBlob } from "fs";
-import { DeployerClient } from "../clients/deployer";
-import type { Provider } from "./types";
-import type { StateConfig} from "./state";
-import type { ConfigState } from "../types/config";
+import { logger } from "../logger.ts";
+import { DeployerClient } from "../clients/deployer.ts";
+import type { Provider } from "./types.ts";
+import type { StateConfig } from "./state.ts";
+import type { ConfigState } from "../types/config.ts";
 
 interface DeployerConfig {
   apiKey: string;
 }
 
 export const getDeployerConfig = (): DeployerConfig | void => {
-  if (!process.env.DEPLOYER_API_KEY) { 
-    return;
+  const apiKey = Deno.env.get("DEPLOYER_API_KEY");
+  if (apiKey) {
+    return {
+      apiKey,
+    };
   }
-  return {
-    apiKey: process.env.DEPLOYER_API_KEY,
-  };
 };
 
 export class DeployerProvider implements Provider {
   private readonly project: string;
   private readonly client: DeployerClient;
 
-  private constructor(project: string, client: DeployerClient ) {
+  private constructor(project: string, client: DeployerClient) {
     this.client = client;
     this.project = project;
   }
 
-  public static async init(project: string, {apiKey}: DeployerConfig): Promise<DeployerProvider> {
+  public static async init(
+    project: string,
+    { apiKey }: DeployerConfig,
+  ): Promise<DeployerProvider> {
     const client = new DeployerClient(apiKey);
 
     try {
       await client.verifyUserToken();
       return new DeployerProvider(project, client);
-    }
-    catch (error) {
+    } catch (error) {
       logger.error(
         "Failed to initialize deployer provider, check your apiKey",
         {
           error,
           apiKey: "<redacted>",
-        }
+        },
       );
       throw error;
     }
@@ -64,14 +65,14 @@ export class DeployerProvider implements Provider {
   /**
    * Get previous config for project
    */
-  public async getManagedStateConfig(): Promise<StateConfig | undefined> {
+  public getManagedStateConfig(): Promise<StateConfig | undefined> {
     return this.client.getStateConfig(this.project);
   }
 
   /**
-   * Get previous config for project 
+   * Get previous config for project
    */
-  public async getState(): Promise<ConfigState | undefined> {
+  public getState(): Promise<ConfigState | undefined> {
     return this.client.getState(this.project);
   }
 
@@ -79,7 +80,9 @@ export class DeployerProvider implements Provider {
    * Upload artifact via deployer api, using worker storage
    */
   public async uploadArtefact(path: string, key: string): Promise<void> {
-    const blob = await openAsBlob(path);
+    const fileBytes = await Deno.readFile(path);
+    const blob = new Blob([fileBytes]);
+
     return this.client.uploadArtifact(this.project, key, blob);
   }
 }

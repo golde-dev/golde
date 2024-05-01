@@ -1,49 +1,59 @@
-import { existsSync } from "fs";
-import type { Config } from "./types/config";
-import { validateConfig } from "./schema";
-import logger from "./logger";
-import { importDynamic, importTOML, importTS } from "./utils/module";
-import { resolve, extname } from "node:path";
-import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template";
-import { ConfigError, ConfigErrorCode } from "./error";
+import { existsSync } from "node:fs";
+import type { Config } from "./types/config.ts";
+import { validateConfig } from "./schema.ts";
+import { logger } from "./logger.ts";
+import { dynamicImport } from "@x/imports";
+import { extname, resolve } from "node:path";
+import { ConfigError, ConfigErrorCode } from "./error.ts";
+import {
+  envTemplate,
+  fileTemplate,
+  gitTemplate,
+  resolveTemplate,
+} from "./utils/template.ts";
 
-const loadConfig = async(path: string): Promise<{ config: unknown, path: string }> => {
+const loadConfig = async (
+  path: string,
+): Promise<{ config: unknown; path: string }> => {
   logger.debug(path, "Loading config");
 
   switch (extname(path)) {
     case ".cjs":
-      return { config: require(path), path };
     case ".json":
-      return { config: require(path), path };
-    case ".js": {
-      const { default: deployerConfig } = await importDynamic<{ default: Config }>(path);
-      return { config: deployerConfig, path };
-    }
+    case ".js":
     case ".ts": {
-      const { default: deployerConfig } = await importTS<{ default: Config }>(path);
-      return { config: deployerConfig, path };
+      const { default: config } = await dynamicImport(path, { force: true });
+      return { config, path };
     }
     case ".toml": {
-      const deployerConfig = importTOML(path);
-      return { config: deployerConfig, path };
+      const decoder = new TextDecoder("utf-8");
+      const tomlConfig = decoder.decode(
+        Deno.readFileSync(path),
+      );
+      return { config: tomlConfig, path };
     }
-    default: 
+    default:
       throw new Error("Unknown extension");
   }
 };
 
-const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: string }> => {
+const getConfigRaw = (
+  path?: string,
+): Promise<{ config: unknown; path: string }> => {
   if (path) {
     if (existsSync(resolve(path))) {
       return loadConfig(path);
-    }
-    else {
-      throw new ConfigError(`Failed to find custom config at path: ${path}`, ConfigErrorCode.NO_CUSTOM_CONFIG, path);
+    } else {
+      throw new ConfigError(
+        `Failed to find custom config at path: ${path}`,
+        ConfigErrorCode.NO_CUSTOM_CONFIG,
+        path,
+      );
     }
   }
   const possiblePaths = [
     resolve("./deployer.config.cjs"),
-    resolve("./deployer.config.json"), 
+    resolve("./deployer.config.json"),
     resolve("./deployer.config.js"),
     resolve("./deployer.config.ts"),
     resolve("./deployer.toml"),
@@ -54,36 +64,46 @@ const getConfigRaw = async(path?: string): Promise<{ config: unknown, path: stri
       return loadConfig(configPath);
     }
   }
-  throw new ConfigError("Failed to find config, please verify the location or syntax", ConfigErrorCode.NO_CONFIG);
+  throw new ConfigError(
+    "Failed to find config, please verify the location or syntax",
+    ConfigErrorCode.NO_CONFIG,
+  );
 };
 
-export const getConfig = async(configPath?: string): Promise<Config> => {
+export const getConfig = async (configPath?: string): Promise<Config> => {
   try {
     const { config, path } = await getConfigRaw(configPath);
-    logger.debug( "Loaded config", { config, path });
+    logger.debug("Loaded config", { config, path });
 
     const configWithEnv = resolveTemplate(config, envTemplate);
-    logger.debug("Resolved env vars templates in config", { config: configWithEnv } );
+    logger.debug("Resolved env vars templates in config", {
+      config: configWithEnv,
+    });
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
-    logger.debug("Resolved files templates in config", { config: configWithEnv });
+    logger.debug("Resolved files templates in config", {
+      config: configWithEnv,
+    });
 
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate);
-    logger.debug("Resolved git templates in config",{ config: configWithGit });
-    
+    logger.debug("Resolved git templates in config", { config: configWithGit });
+
     validateConfig(configWithGit);
     logger.debug("Validated config with json schema");
 
     return configWithGit;
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof ConfigError) {
       switch (error.code) {
         case ConfigErrorCode.NO_CONFIG:
-          logger.error("Failed to find config, please verify the location or syntax");
+          logger.error(
+            "Failed to find config, please verify the location or syntax",
+          );
           break;
         case ConfigErrorCode.NO_CUSTOM_CONFIG:
-          logger.error(`Failed to find config on path: ${error.cause as string}`);
+          logger.error(
+            `Failed to find config on path: ${error.cause as string}`,
+          );
           break;
         case ConfigErrorCode.ENV_MISSING:
           logger.error(`Env variable is missing: ${error.cause as string}`);
@@ -103,10 +123,9 @@ export const getConfig = async(configPath?: string): Promise<Config> => {
         default:
           logger.error(`Configuration error: ${error.message}`);
       }
-    }
-    else {
+    } else {
       logger.error("Unknown error", error);
     }
-    return process.exit(1);
+    return Deno.exit(1);
   }
 };

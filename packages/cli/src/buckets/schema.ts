@@ -1,6 +1,6 @@
-import type { ZodType} from "zod";
+import type { ZodType } from "zod";
 import { z } from "zod";
-import type { BucketsConfig } from "./types";
+import type { BucketsConfig } from "./types.ts";
 
 export const bucketSchema: ZodType<BucketsConfig> = z
   .object({
@@ -8,15 +8,14 @@ export const bucketSchema: ZodType<BucketsConfig> = z
       .record(
         z.object({
           locationHint: z.enum([
-            "apac", 
-            "eeur", 
-            "enam", 
-            "weur", 
+            "apac",
+            "eeur",
+            "enam",
+            "weur",
             "wnam",
           ]).optional(),
-        }))
+        }),
+      )
       .optional(),
   })
   .strict();
-
-

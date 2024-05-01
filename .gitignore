@@ -9,6 +9,7 @@ lib
 generated
 
 # misc
+.astro
 .env
 .eslintcache
 

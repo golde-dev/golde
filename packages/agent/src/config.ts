@@ -1,6 +1,8 @@
-import { exit } from "process";
-import { createLogger, format } from "winston";
 import { z } from "zod";
+import { load } from "@std/dotenv";
+import { defaultCrt, defaultKey } from "./constants/certs.ts";
+
+await load({ export: true });
 
 const defaultLogLevel = "info";
 const defaultPretty = "false";
@@ -17,22 +19,25 @@ const schema = z.object({
   API_PORT: z.string()
     .transform(Number)
     .default(defaultPort),
-  S3_REGION: z.string().default("auto"),
-  S3_ENDPOINT: z.string(),
-  S3_BUCKET: z.string(),
-  S3_API_KEY: z.string(),
-  S3_API_SECRET: z.string(),
+  API_KEY: z.string(),
+  API_CERT: z.string(),
 });
 
-const result = schema.safeParse(process.env);
-if (!result.success) {
-  createLogger({
-    format: format.combine(
-      format.json()
-    ),
-  }).error("Invalid environment variables:", result.error.format());
+const apiKeyPath = Deno.env.get("API_KEY");
+const apiCertPath = Deno.env.get("API_CERT");
 
-  exit(1);
+const result = schema.safeParse({
+  API_LOG_PRETTY: Deno.env.get("API_LOG_PRETTY"),
+  API_LOG_LEVEL: Deno.env.get("API_LOG_LEVEL"),
+  API_PORT: Deno.env.get("API_PORT"),
+  API_KEY: apiKeyPath ? Deno.readTextFileSync(apiKeyPath) : defaultKey,
+  API_CERT: apiCertPath ? Deno.readTextFileSync(apiCertPath) : defaultCrt,
+});
+
+if (!result.success) {
+  console.error("Invalid environment variables:", result.error.format());
+
+  Deno.exit(1);
 }
 
 export default result.data;
