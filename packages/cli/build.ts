@@ -10,7 +10,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
       name: `@deployer/${name}`,
       version,
       description: "Your package.",
-      license: "MIT",
+      license: "Apache-2.0",
       os: [os],
       cpu: [cpu],
       repository: {
@@ -26,6 +26,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
   );
   const packagePath = `dist/npm/@deployer/${name}`;
   const packageJSONPath = `${packagePath}/package.json`;
+  const licensePath = `${packagePath}/License`;
   const packageBinPath = `${packagePath}/bin`;
   const packageBinExecPath = name.includes("windows")
     ? `${packageBinPath}/${name}.exe`
@@ -46,6 +47,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
     binDistPath,
     packageBinExecPath,
   );
+  Deno.copyFileSync("../../License", licensePath);
 };
 
 createBinPackage("cli-linux-x64", "linux", "x64");
@@ -72,7 +74,7 @@ await build({
     version,
     bin: "bin/cli.js",
     description: "Your package.",
-    license: "MIT",
+    license: "Apache-2.0",
     repository: {
       type: "git",
       url: "git+https://github.com/username/repo.git",
@@ -91,8 +93,8 @@ await build({
   postBuild() {
     Deno.mkdirSync("dist/npm/@deployer/cli/bin", { recursive: true });
     Deno.copyFileSync("bin/cli.js", "dist/npm/@deployer/cli/bin/cli.js");
-    Deno.copyFileSync("License.md", "dist/npm/@deployer/cli/LICENSE");
     Deno.copyFileSync("Readme.md", "dist/npm/@deployer/cli/README.md");
     Deno.copyFileSync("schema.json", "dist/npm/@deployer/cli/schema.json");
+    Deno.copyFileSync("../../License", "dist/npm/@deployer/cli/License");
   },
 });

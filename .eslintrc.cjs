@@ -8,7 +8,6 @@ module.exports = {
     },
     useJSXTextNode: true,
     project: [
-      "./tsconfig.eslint.json",
       "./packages/*/tsconfig.json",
     ],
     tsconfigRootDir: __dirname,

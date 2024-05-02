@@ -1,19 +1,24 @@
 {
 	"folders": [
 		{
-			"path": "packages/cli"
+			"path": "packages/cli",
+			"name": "CLI"
 		},
 		{
-			"path": "packages/agent"
+			"path": "packages/agent",
+			"name": "Agent"
 		},
 		{
-			"path": "packages/examples"
+			"path": "packages/examples",
+			"name": "Examples"
 		},
 		{
-			"path": "packages/docs"
+			"path": "packages/docs",
+			"name": "Docs"
 		},
 		{
-			"path": "."
+			"path": ".",
+			"name": "Root"
 		}
 	],
 	"settings": {}
