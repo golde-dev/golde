@@ -1,4 +1,4 @@
-import type {Config} from '@tenacify/cli'
+import type {Config} from '@deployer/cli'
 
 const config: Config = {
   name: "example-dns-cloudflare",

@@ -10,9 +10,6 @@
     "deployer:apply": "deployer apply"
   },
   "devDependencies": {
-    "@tenacify/cli": "../../cli"
-  },
-  "resolutions": {
-    "@tenacify/core": "../../core"
+    "@deployer/cli": "*"
   }
 }

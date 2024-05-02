@@ -1,4 +1,4 @@
-import {spawnTask, parallelTask} from "@chyzwar/runner";
+import {spawnTask, parallelTask, seriesTask} from "@chyzwar/runner";
 
 spawnTask("start:docs", 
   "yarn", ["dev"], 
@@ -83,4 +83,47 @@ parallelTask("lint", [
   "lint:agent", 
   "lint:cli",
   "lint:rest",
+]);
+
+spawnTask("publish:cli",
+  "deno", ["task", "publish"],
+  {
+    cwd: "./packages/cli",
+  }
+);
+spawnTask("publish:cli:local",
+  "deno", ["task", "publish", "--local"],
+  {
+    cwd: "./packages/cli",
+  }
+);
+
+spawnTask("publish:agent",
+  "deno", ["task", "publish"],
+  {
+    cwd: "./packages/agent",
+  }
+);
+
+spawnTask("publish:agent:local",
+  "deno", ["task", "publish", "--local"],
+  {
+    cwd: "./packages/agent",
+  }
+);
+
+parallelTask("publish", [
+  "publish:cli",
+  "publish:agent",
+]);
+
+parallelTask("publish:local", [
+  "publish:cli:local",
+  "publish:agent:local",
+]);
+
+seriesTask("local", [
+  "dist:agent",
+  "dist:cli",
+  "publish:local",
 ]);
