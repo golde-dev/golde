@@ -19,10 +19,10 @@ program
   .command("init")
   .description("Initialize new configuration")
   .option("-d, --debug", "enable debug mode")
-  .action(async function ({ debug }: { debug: boolean }) {
-    if (debug) {
-      logger.setLevel("DEBUG");
-    }
+  .option("-j, --json", "log output as json")
+  .action(async function ({ debug, json }: { debug: boolean; json: boolean }) {
+    logger.configure(debug ? "DEBUG" : "INFO", json);
+
     await initConfig();
     logger.info("Config created");
   });
@@ -32,13 +32,17 @@ program
   .description("Show configuration")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
+  .option("-j, --json", "log output as json")
   .action(
     async function (
-      { debug, config: configPath }: { debug: boolean; config: string },
+      { debug, json, config: configPath }: {
+        debug: boolean;
+        config: string;
+        json: boolean;
+      },
     ) {
-      if (debug) {
-        logger.setLevel("DEBUG");
-      }
+      logger.configure(debug ? "DEBUG" : "INFO", json);
+
       const loadedConfig = await getConfig(configPath);
 
       const {
@@ -54,13 +58,17 @@ program
   .description("Show current state")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
+  .option("-j, --json", "log output as json")
   .action(
     async function (
-      { debug, config: configPath }: { debug: boolean; config: string },
+      { debug, json, config: configPath }: {
+        debug: boolean;
+        config: string;
+        json: boolean;
+      },
     ) {
-      if (debug) {
-        logger.setLevel("DEBUG");
-      }
+      logger.configure(debug ? "DEBUG" : "INFO", json);
+
       const loadedConfig = await getConfig(configPath);
       const {
         previousState,
@@ -75,13 +83,17 @@ program
   .description("Check whether the configuration is valid")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
+  .option("-j, --json", "log output as json")
   .action(
     async function (
-      { debug, config: configPath }: { debug: boolean; config: string },
+      { debug, json, config: configPath }: {
+        debug: boolean;
+        config: string;
+        json: boolean;
+      },
     ) {
-      if (debug) {
-        logger.setLevel("DEBUG");
-      }
+      logger.configure(debug ? "DEBUG" : "INFO", json);
+
       const loadedConfig = await getConfig(configPath);
       await initializeContext(loadedConfig);
 
@@ -94,14 +106,18 @@ program
   .description("Plan changes required by the current configuration")
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
+  .option("-j, --json", "log output as json")
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { debug, config: configPath }: { debug: boolean; config: string },
+      { debug, json, config: configPath }: {
+        debug: boolean;
+        config: string;
+        json: boolean;
+      },
     ) {
-      if (debug) {
-        logger.setLevel("DEBUG");
-      }
+      logger.configure(debug ? "DEBUG" : "INFO", json);
+
       const loadedConfig = await getConfig(configPath);
       const context = await initializeContext(loadedConfig);
       const plan = await createPlan(context);
@@ -116,14 +132,18 @@ program
   .option("-d, --debug", "enable debug mode")
   .option("-c, --config", "location of config file")
   .option("-y, --yes", "apply plan without prompting")
+  .option("-j, --json", "log output as json")
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { debug, config: configPath }: { debug: boolean; config: string },
+      { debug, json, config: configPath }: {
+        debug: boolean;
+        config: string;
+        json: boolean;
+      },
     ) {
-      if (debug) {
-        logger.setLevel("DEBUG");
-      }
+      logger.configure(debug ? "DEBUG" : "INFO", json);
+
       await getConfig(configPath);
     },
   );

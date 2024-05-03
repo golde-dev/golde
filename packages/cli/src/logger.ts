@@ -3,27 +3,41 @@ import {
   debug,
   error,
   formatters,
+  getLevelName,
   info,
   LevelName,
+  LogLevel,
+  LogRecord,
   setup,
   warn,
 } from "@std/log";
 
-function setLevel(level: LevelName): void {
+const {
+  jsonFormatter,
+} = formatters;
+
+function prettyFormatter(logRecord: LogRecord) {
+  const { msg, args, level } = logRecord;
+  return `${getLevelName(level as LogLevel)} | ${msg} ${
+    args.map((arg: unknown) => JSON.stringify(arg, null, 2)).join(" ")
+  }`;
+}
+
+function configure(level: LevelName, jsonFormat: boolean = false): void {
   setup({
     handlers: {
       default: new ConsoleHandler(level, {
-        formatter: formatters.jsonFormatter,
+        formatter: jsonFormat ? jsonFormatter : prettyFormatter,
         useColors: false,
       }),
     },
   });
 }
 
-setLevel("INFO");
+configure("INFO");
 
 export const logger = {
-  setLevel,
+  configure,
   info,
   error,
   debug,
