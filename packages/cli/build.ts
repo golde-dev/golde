@@ -1,8 +1,19 @@
 import { build, emptyDir } from "@deno/dnt";
+import { parseArgs } from "@std/cli/parse-args";
 
 await emptyDir("./dist/npm");
 
-const { version } = JSON.parse(Deno.readTextFileSync("deno.jsonc"));
+const { local } = parseArgs(Deno.args, {
+  boolean: ["local"],
+});
+
+let { version } = JSON.parse(
+  Deno.readTextFileSync("deno.jsonc"),
+);
+
+if (local) {
+  version = `${version}-${Date.now()}`;
+}
 
 const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
   const cliPackageSON = JSON.stringify(
@@ -73,7 +84,7 @@ await build({
     name: "@deployer/cli",
     version,
     bin: {
-      deployer: "bin/cli.mjs",
+      deployer: "bin/cli.cjs",
     },
     type: "module",
     description: "Your package.",
@@ -95,7 +106,7 @@ await build({
   },
   postBuild() {
     Deno.mkdirSync("dist/npm/@deployer/cli/bin", { recursive: true });
-    Deno.copyFileSync("bin/cli.mjs", "dist/npm/@deployer/cli/bin/cli.mjs");
+    Deno.copyFileSync("bin/cli.cjs", "dist/npm/@deployer/cli/bin/cli.cjs");
     Deno.copyFileSync("Readme.md", "dist/npm/@deployer/cli/README.md");
     Deno.copyFileSync("schema.json", "dist/npm/@deployer/cli/schema.json");
     Deno.copyFileSync("../../License", "dist/npm/@deployer/cli/License");

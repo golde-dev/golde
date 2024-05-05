@@ -4,7 +4,9 @@
   "tasks": {
     "start": "deno run --watch --allow-net --allow-read --allow-env src/agent.ts",
     "dist": "deno task compile",
+    "dist:local": "deno task compile",
     "publish": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run publish.ts",
+    "publish:local": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run publish.ts --local",
     "compile": "deno task compile:linux_x86 && deno task compile:linux_arm",
     "compile:linux_x86": "deno compile --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu --output dist/bin/agent-linux-x64 src/agent.ts",
     "compile:linux_arm": "deno compile --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-unknown-linux-gnu --output dist/bin/agent-linux-arm64 src/agent.ts"
