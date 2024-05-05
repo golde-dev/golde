@@ -15,6 +15,10 @@ const packages = [
   "cli-darwin-arm64",
 ];
 
+const examples = [
+  "dns-cloudflare",
+];
+
 if (local) {
   publishLocal();
 } else {
@@ -42,30 +46,7 @@ async function startVerdaccio() {
 async function publishNPMPackage(
   pkg: string,
   registry: string,
-  force: boolean = false,
 ) {
-  if (force) {
-    const { version } = JSON.parse(
-      Deno.readTextFileSync(`dist/npm/@deployer/${pkg}/package.json`),
-    );
-    console.log(`Un-publishing @deployer/${pkg}@${version}`);
-
-    const p = await new Deno.Command("npm", {
-      args: [
-        "unpublish",
-        `@deployer/${pkg}@${version}`,
-        "--registry",
-        registry,
-        "--force",
-      ],
-    }).output();
-
-    const td = new TextDecoder();
-
-    console.log(td.decode(p.stdout).trim());
-    console.error(td.decode(p.stderr).trim());
-  }
-
   const command = new Deno.Command("npm", {
     args: ["publish", "--registry", registry],
     cwd: `dist/npm/@deployer/${pkg}`,
@@ -94,6 +75,40 @@ async function publishNPMPackage(
   return await process.status;
 }
 
+async function updateExample(example: string, registry: string) {
+  const { hostname } = new URL(registry);
+  await new Deno.Command("yarn", {
+    args: ["config", "set", "npmRegistryServer", registry],
+    cwd: `../examples/${example}`,
+  }).output();
+  await new Deno.Command("yarn", {
+    args: [
+      "config",
+      "set",
+      "unsafeHttpWhitelist",
+      "--json",
+      `["${hostname}"]`,
+    ],
+    cwd: `../examples/${example}`,
+  }).output();
+
+  const o = await new Deno.Command("yarn", {
+    args: ["up", "@deployer/*"],
+    cwd: `../examples/${example}`,
+  }).output();
+  console.log(new TextDecoder().decode(o.stdout));
+  console.error(new TextDecoder().decode(o.stderr));
+
+  await new Deno.Command("yarn", {
+    args: ["config", "unset", "npmRegistryServer"],
+    cwd: `../examples/${example}`,
+  }).output();
+  await new Deno.Command("yarn", {
+    args: ["config", "unset", "unsafeHttpWhitelist"],
+    cwd: `../examples/${example}`,
+  }).output();
+}
+
 function publish() {
   console.log("Publishing to remote registry");
 }
@@ -105,9 +120,12 @@ async function publishLocal() {
   try {
     for (const pkg of packages) {
       console.log(`Publishing ${pkg}`);
-      await publishNPMPackage(pkg, localRegistry, true);
+      await publishNPMPackage(pkg, localRegistry);
     }
-    publish();
+    for (const example of examples) {
+      console.log(`Updating ${example}`);
+      await updateExample(example, localRegistry);
+    }
   } finally {
     console.log("Stopping Verdaccio");
     stopVerdaccio?.();

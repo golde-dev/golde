@@ -44,6 +44,25 @@ parallelTask("dist", [
   "dist:docs",
 ]);
 
+spawnTask("dist:agent:local", 
+  "deno", ["task", "dist:local"], 
+  {
+    cwd: "./packages/agent",
+  }
+);
+
+spawnTask("dist:cli:local", 
+  "deno", ["task", "dist:local"], 
+  {
+    cwd: "./packages/cli",
+  }
+);
+
+parallelTask("dist:local", [
+  "dist:agent:local", 
+  "dist:cli:local",
+]);
+
 spawnTask("test:agent", 
   "deno", ["test"], 
   {

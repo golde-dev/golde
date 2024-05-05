@@ -10,6 +10,6 @@
     "deployer:apply": "deployer apply"
   },
   "devDependencies": {
-    "@deployer/cli": "^0.2.0"
+    "@deployer/cli": "0.2.0-1714907983282"
   }
 }

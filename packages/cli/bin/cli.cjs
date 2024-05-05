@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
-import process from "node:process";
+const { spawnSync } = require("node:child_process");
 
 function getExePath() {
   const { arch, platform } = process;
