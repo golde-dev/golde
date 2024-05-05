@@ -72,7 +72,10 @@ await build({
   package: {
     name: "@deployer/cli",
     version,
-    bin: "bin/cli.js",
+    bin: {
+      deployer: "bin/cli.mjs",
+    },
+    type: "module",
     description: "Your package.",
     license: "Apache-2.0",
     repository: {
@@ -83,16 +86,16 @@ await build({
       url: "https://github.com/username/repo/issues",
     },
     optionalDependencies: {
-      "@deployer/cli-linux-x86_64": version,
-      "@deployer/cli-linux-aarch64": version,
-      "@deployer/cli-windows-x86_64": version,
-      "@deployer/cli-apple-aarch64": version,
-      "@deployer/cli-apple-x86_64": version,
+      "@deployer/cli-linux-x64": version,
+      "@deployer/cli-linux-arm64": version,
+      "@deployer/cli-win32-x64": version,
+      "@deployer/cli-darwin-arm64": version,
+      "@deployer/cli-darwin-x64": version,
     },
   },
   postBuild() {
     Deno.mkdirSync("dist/npm/@deployer/cli/bin", { recursive: true });
-    Deno.copyFileSync("bin/cli.js", "dist/npm/@deployer/cli/bin/cli.js");
+    Deno.copyFileSync("bin/cli.mjs", "dist/npm/@deployer/cli/bin/cli.mjs");
     Deno.copyFileSync("Readme.md", "dist/npm/@deployer/cli/README.md");
     Deno.copyFileSync("schema.json", "dist/npm/@deployer/cli/schema.json");
     Deno.copyFileSync("../../License", "dist/npm/@deployer/cli/License");
