@@ -17,6 +17,8 @@ const packages = [
 
 const examples = [
   "dns-cloudflare",
+  "service-vite-react-node",
+  "service-vite-react",
 ];
 
 if (local) {

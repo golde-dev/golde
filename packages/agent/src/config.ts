@@ -4,9 +4,9 @@ import { defaultCrt, defaultKey } from "./constants/certs.ts";
 
 await load({ export: true });
 
-const defaultLogLevel = "info";
+const defaultLogLevel = "INFO";
 const defaultPretty = "false";
-const defaultPort = "4111";
+const defaultPort = "4422";
 
 const schema = z.object({
   API_LOG_PRETTY: z

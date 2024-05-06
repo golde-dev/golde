@@ -1,0 +1,14 @@
+
+[Unit]
+Description="deployer"
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/opt/deployer/agent upgrade
+EnvironmentFile=/opt/deployer/.env
+Restart=always
+PrivateTmp=yes
+User=root

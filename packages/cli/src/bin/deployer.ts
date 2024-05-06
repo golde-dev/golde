@@ -5,6 +5,7 @@ import { getConfig } from "../config.ts";
 import { createPlan } from "../plan.ts";
 import { initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
+import { LevelName } from "@std/log";
 
 await load({ export: true });
 
@@ -18,30 +19,34 @@ program
 program
   .command("init")
   .description("Initialize new configuration")
-  .option("-d, --debug", "enable debug mode")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-j, --json", "log output as json")
-  .action(async function ({ debug, json }: { debug: boolean; json: boolean }) {
-    logger.configure(debug ? "DEBUG" : "INFO", json);
+  .action(
+    async function (
+      { logLevel, json }: { logLevel: LevelName; json: boolean },
+    ) {
+      logger.configure(logLevel, json);
 
-    await initConfig();
-    logger.info("Config created");
-  });
+      await initConfig();
+      logger.info("Config created");
+    },
+  );
 
 program
   .command("show")
   .description("Show configuration")
-  .option("-d, --debug", "enable debug mode")
-  .option("-c, --config", "location of config file")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { debug, json, config: configPath }: {
-        debug: boolean;
+      { logLevel, json, config: configPath }: {
+        logLevel: LevelName;
         config: string;
         json: boolean;
       },
     ) {
-      logger.configure(debug ? "DEBUG" : "INFO", json);
+      logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath);
 
@@ -56,18 +61,18 @@ program
 program
   .command("state")
   .description("Show current state")
-  .option("-d, --debug", "enable debug mode")
-  .option("-c, --config", "location of config file")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { debug, json, config: configPath }: {
-        debug: boolean;
+      { logLevel, json, config: configPath }: {
+        logLevel: LevelName;
         config: string;
         json: boolean;
       },
     ) {
-      logger.configure(debug ? "DEBUG" : "INFO", json);
+      logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath);
       const {
@@ -81,18 +86,18 @@ program
 program
   .command("validate")
   .description("Check whether the configuration is valid")
-  .option("-d, --debug", "enable debug mode")
-  .option("-c, --config", "location of config file")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { debug, json, config: configPath }: {
-        debug: boolean;
+      { logLevel, json, config: configPath }: {
+        logLevel: LevelName;
         config: string;
         json: boolean;
       },
     ) {
-      logger.configure(debug ? "DEBUG" : "INFO", json);
+      logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath);
       await initializeContext(loadedConfig);
@@ -104,19 +109,19 @@ program
 program
   .command("plan")
   .description("Plan changes required by the current configuration")
-  .option("-d, --debug", "enable debug mode")
-  .option("-c, --config", "location of config file")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { debug, json, config: configPath }: {
-        debug: boolean;
+      { logLevel, json, config: configPath }: {
+        logLevel: LevelName;
         config: string;
         json: boolean;
       },
     ) {
-      logger.configure(debug ? "DEBUG" : "INFO", json);
+      logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath);
       const context = await initializeContext(loadedConfig);
@@ -129,20 +134,20 @@ program
 program
   .command("apply")
   .description("Apply changes required by the current configuration")
-  .option("-d, --debug", "enable debug mode")
-  .option("-c, --config", "location of config file")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
   .option("-y, --yes", "apply plan without prompting")
   .option("-j, --json", "log output as json")
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { debug, json, config: configPath }: {
-        debug: boolean;
+      { logLevel, json, config: configPath }: {
+        logLevel: LevelName;
         config: string;
         json: boolean;
       },
     ) {
-      logger.configure(debug ? "DEBUG" : "INFO", json);
+      logger.configure(logLevel, json);
 
       await getConfig(configPath);
     },
