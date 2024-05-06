@@ -13,96 +13,137 @@ export interface UnitSection {
 export interface ServiceSection {
   /**
   Type=
-  Configures the process start-up type for this service unit. One of simple, exec,
-  forking, oneshot, dbus, notify or idle:
+    Configures the mechanism via which the service notifies the manager that the service
+    start-up has finished. One of simple, exec, forking, oneshot, dbus, notify,
+    notify-reload, or idle:
 
-  •   If set to simple (the default if ExecStart= is specified but neither Type= nor
-      BusName= are), the service manager will consider the unit started immediately
-      after the main service process has been forked off. It is expected that the
-      process configured with ExecStart= is the main process of the service. In this
-      mode, if the process offers functionality to other processes on the system, its
-      communication channels should be installed before the service is started up (e.g.
-      sockets set up by systemd, via socket activation), as the service manager will
-      immediately proceed starting follow-up units, right after creating the main
-      service process, and before executing the service's binary. Note that this means
-      systemctl start command lines for simple services will report success even if the
-      service's binary cannot be invoked successfully (for example because the selected
-      User= doesn't exist, or the service binary is missing).
+    •   If set to simple (the default if ExecStart= is specified but neither Type= nor
+        BusName= are), the service manager will consider the unit started immediately
+        after the main service process has been forked off (i.e. immediately after fork(),
+        and before various process attributes have been configured and in particular
+        before the new process has called execve() to invoke the actual service binary).
+        Typically, Type=exec is the better choice, see below.
 
-  •   The exec type is similar to simple, but the service manager will consider the unit
-      started immediately after the main service binary has been executed. The service
-      manager will delay starting of follow-up units until that point. (Or in other
-      words: simple proceeds with further jobs right after fork() returns, while exec
-      will not proceed before both fork() and execve() in the service process
-      succeeded.) Note that this means systemctl start command lines for exec services
-      will report failure when the service's binary cannot be invoked successfully (for
-      example because the selected User= doesn't exist, or the service binary is
-      missing).
+        It is expected that the process configured with ExecStart= is the main process of
+        the service. In this mode, if the process offers functionality to other processes
+        on the system, its communication channels should be installed before the service
+        is started up (e.g. sockets set up by systemd, via socket activation), as the
+        service manager will immediately proceed starting follow-up units, right after
+        creating the main service process, and before executing the service's binary. Note
+        that this means systemctl start command lines for simple services will report
+        success even if the service's binary cannot be invoked successfully (for example
+        because the selected User= doesn't exist, or the service binary is missing).
 
-  •   If set to forking, it is expected that the process configured with ExecStart= will
-      call fork() as part of its start-up. The parent process is expected to exit when
-      start-up is complete and all communication channels are set up. The child
-      continues to run as the main service process, and the service manager will
-      consider the unit started when the parent process exits. This is the behavior of
-      traditional UNIX services. If this setting is used, it is recommended to also use
-      the PIDFile= option, so that systemd can reliably identify the main process of the
-      service. systemd will proceed with starting follow-up units as soon as the parent
-      process exits.
+    •   The exec type is similar to simple, but the service manager will consider the unit
+        started immediately after the main service binary has been executed. The service
+        manager will delay starting of follow-up units until that point. (Or in other
+        words: simple proceeds with further jobs right after fork() returns, while exec
+        will not proceed before both fork() and execve() in the service process
+        succeeded.) Note that this means systemctl start command lines for exec services
+        will report failure when the service's binary cannot be invoked successfully (for
+        example because the selected User= doesn't exist, or the service binary is
+        missing).
 
-  •   Behavior of oneshot is similar to simple; however, the service manager will
-      consider the unit up after the main process exits. It will then start follow-up
-      units.  RemainAfterExit= is particularly useful for this type of service.
-      Type=oneshot is the implied default if neither Type= nor ExecStart= are specified.
-      Note that if this option is used without RemainAfterExit= the service will never
-      enter "active" unit state, but directly transition from "activating" to
-      "deactivating" or "dead" since no process is configured that shall run
-      continously. In particular this means that after a service of this type ran (and
-      which has RemainAfterExit= not set) it will not show up as started afterwards, but
-      as dead.
+    •   If set to forking, the manager will consider the unit started immediately after
+        the binary that forked off by the manager exits.  The use of this type is
+        discouraged, use notify, notify-reload, or dbus instead.
 
-  •   Behavior of dbus is similar to simple; however, it is expected that the service
-      acquires a name on the D-Bus bus, as configured by BusName=. systemd will proceed
-      with starting follow-up units after the D-Bus bus name has been acquired. Service
-      units with this option configured implicitly gain dependencies on the dbus.socket
-      unit. This type is the default if BusName= is specified.
+        It is expected that the process configured with ExecStart= will call fork() as
+        part of its start-up. The parent process is expected to exit when start-up is
+        complete and all communication channels are set up. The child continues to run as
+        the main service process, and the service manager will consider the unit started
+        when the parent process exits. This is the behavior of traditional UNIX services.
+        If this setting is used, it is recommended to also use the PIDFile= option, so
+        that systemd can reliably identify the main process of the service. The manager
+        will proceed with starting follow-up units after the parent process exits.
 
-  •   Behavior of notify is similar to exec; however, it is expected that the service
-      sends a notification message via sd_notify(3) or an equivalent call when it has
-      finished starting up. systemd will proceed with starting follow-up units after
-      this notification message has been sent. If this option is used, NotifyAccess=
-      (see below) should be set to open access to the notification socket provided by
-      systemd. If NotifyAccess= is missing or set to none, it will be forcibly set to
-      main
-  .
+    •   Behavior of oneshot is similar to simple; however, the service manager will
+        consider the unit up after the main process exits. It will then start follow-up
+        units.  RemainAfterExit= is particularly useful for this type of service.
+        Type=oneshot is the implied default if neither Type= nor ExecStart= are specified.
+        Note that if this option is used without RemainAfterExit= the service will never
+        enter "active" unit state, but will directly transition from "activating" to
+        "deactivating" or "dead", since no process is configured that shall run
+        continuously. In particular this means that after a service of this type ran (and
+        which has RemainAfterExit= not set) it will not show up as started afterwards, but
+        as dead.
 
-  •   Behavior of idle is very similar to simple; however, actual execution of the
-      service program is delayed until all active jobs are dispatched. This may be used
-      to avoid interleaving of output of shell services with the status output on the
-      console. Note that this type is useful only to improve console output, it is not
-      useful as a general unit ordering tool, and the effect of this service type is
-      subject to a 5s timeout, after which the service program is invoked anyway.
+    •   Behavior of dbus is similar to simple; however, units of this type must have the
+        BusName= specified and the service manager will consider the unit up when the
+        specified bus name has been acquired. This type is the default if BusName= is
+        specified.
 
-  It is generally recommended to use Type=simple for long-running services whenever
-  possible, as it is the simplest and fastest option. However, as this service type
-  won't propagate service start-up failures and doesn't allow ordering of other units
-  against completion of initialization of the service (which for example is useful if
-  clients need to connect to the service through some form of IPC, and the IPC channel
-  is only established by the service itself — in contrast to doing this ahead of time
-  through socket or bus activation or similar), it might not be sufficient for many
-  cases. If so, notify or dbus (the latter only in case the service provides a D-Bus
-  interface) are the preferred options as they allow service program code to precisely
-  schedule when to consider the service started up successfully and when to proceed with
-  follow-up units. The notify service type requires explicit support in the service
-  codebase (as sd_notify() or an equivalent API needs to be invoked by the service at
-  the appropriate time) — if it's not supported, then forking is an alternative: it
-  supports the traditional UNIX service start-up protocol. Finally, exec might be an
-  option for cases where it is enough to ensure the service binary is invoked, and where
-  the service binary itself executes no or little initialization on its own (and its
-  initialization is unlikely to fail). Note that using any type other than simple
-  possibly delays the boot process, as the service manager needs to wait for service
-  initialization to complete. It is hence recommended not to needlessly use any types
-  other than simple. (Also note it is generally not recommended to use idle or oneshot
-  for long-running services.)
+        Service units with this option configured implicitly gain dependencies on the
+        dbus.socket unit. A service unit of this type is considered to be in the
+        activating state until the specified bus name is acquired. It is considered
+        activated while the bus name is taken. Once the bus name is released the service
+        is considered being no longer functional which has the effect that the service
+        manager attempts to terminate any remaining processes belonging to the service.
+        Services that drop their bus name as part of their shutdown logic thus should be
+        prepared to receive a SIGTERM (or whichever signal is configured in KillSignal=)
+        as result.
+
+    •   Behavior of notify is similar to exec; however, it is expected that the service
+        sends a "READY=1" notification message via sd_notify(3) or an equivalent call when
+        it has finished starting up. systemd will proceed with starting follow-up units
+        after this notification message has been sent. If this option is used,
+        NotifyAccess= (see below) should be set to open access to the notification socket
+        provided by systemd. If NotifyAccess= is missing or set to none, it will be
+        forcibly set to main.
+
+        If the service supports reloading, and uses a signal to start the reload, using
+        notify-reload instead is recommended.
+
+    •   Behavior of notify-reload is similar to notify, with one difference: the SIGHUP
+        UNIX process signal is sent to the service's main process when the service is
+        asked to reload and the manager will wait for a notification about the reload
+        being finished.
+
+        When initiating the reload process the service is expected to reply with a
+        notification message via sd_notify(3) that contains the "RELOADING=1" field in
+        combination with "MONOTONIC_USEC=" set to the current monotonic time (i.e.
+        CLOCK_MONOTONIC in clock_gettime(2)) in μs, formatted as decimal string. Once
+        reloading is complete another notification message must be sent, containing
+        "READY=1". Using this service type and implementing this reload protocol is an
+        efficient alternative to providing an ExecReload= command for reloading of the
+        service's configuration.
+
+        The signal to send can be tweaked via ReloadSignal=, see below.
+
+    •   Behavior of idle is very similar to simple; however, actual execution of the
+        service program is delayed until all active jobs are dispatched. This may be used
+        to avoid interleaving of output of shell services with the status output on the
+        console. Note that this type is useful only to improve console output, it is not
+        useful as a general unit ordering tool, and the effect of this service type is
+        subject to a 5s timeout, after which the service program is invoked anyway.
+
+    It is recommended to use Type=exec for long-running services, as it ensures that
+    process setup errors (e.g. errors such as a missing service executable, or missing
+    user) are properly tracked. However, as this service type won't propagate the failures
+    in the service's own startup code (as opposed to failures in the preparatory steps the
+    service manager executes before execve()) and doesn't allow ordering of other units
+    against completion of initialization of the service code itself (which for example is
+    useful if clients need to connect to the service through some form of IPC, and the IPC
+    channel is only established by the service itself — in contrast to doing this ahead of
+    time through socket or bus activation or similar), it might not be sufficient for many
+    cases. If so, notify, notify-reload, or dbus (the latter only in case the service
+    provides a D-Bus interface) are the preferred options as they allow service program
+    code to precisely schedule when to consider the service started up successfully and
+    when to proceed with follow-up units. The notify/notify-reload service types require
+    explicit support in the service codebase (as sd_notify() or an equivalent API needs to
+    be invoked by the service at the appropriate time) — if it's not supported, then
+    forking is an alternative: it supports the traditional heavy-weight UNIX service
+    start-up protocol. Note that using any type other than simple possibly delays the boot
+    process, as the service manager needs to wait for at least some service initialization
+    to complete. (Also note it is generally not recommended to use idle or oneshot for
+    long-running services.)
+
+    Note that various service settings (e.g.  User=, Group= through libc NSS) might result
+    in "hidden" blocking IPC calls to other services when used. Sometimes it might be
+    advisable to use the simple service type to ensure that the service manager's
+    transaction logic is not affected by such potentially slow operations and hidden
+    dependencies, as this is the only service type where the service manager will not wait
+    for such service execution setup operations to complete before proceeding.
   */
   Type?:
     | "simple"
@@ -113,6 +154,28 @@ export interface ServiceSection {
     | "notify"
     | "forking"
     | "idle";
+
+  /**
+  ExitType=
+    Specifies when the manager should consider the service to be finished. One of main or
+    cgroup:
+
+    •   If set to main (the default), the service manager will consider the unit stopped
+        when the main process, which is determined according to the Type=, exits.
+        Consequently, it cannot be used with Type=oneshot.
+
+    •   If set to cgroup, the service will be considered running as long as at least one
+        process in the cgroup has not exited.
+
+    It is generally recommended to use ExitType=main when a service has a known forking
+    model and a main process can reliably be determined.  ExitType= cgroup is meant for
+    applications whose forking model is not known ahead of time and which might not have a
+    specific main process. It is well suited for transient or automatically generated
+    services, such as graphical applications inside of a desktop environment.
+
+    Added in version 250.
+  */
+  ExitType?: "main" | "cgroup";
 
   /**
   RemainAfterExit=
@@ -146,21 +209,27 @@ export interface ServiceSection {
     enforced: the file may not be a symlink to a file owned by a different user (neither
     directly nor indirectly), and the PID file must refer to a process already belonging
     to the service.
+
+    Note that PID files should be avoided in modern projects. Use Type=notify,
+    Type=notify-reload or Type=simple where possible, which does not require use of PID
+    files to determine the main process of a service and avoids needless forking.
   */
   PIDFile?: string;
 
   /**
   BusName=
-    Takes a D-Bus bus name that this service is reachable as. This option is mandatory for
-    services where Type= is set to dbus.
+    Takes a D-Bus destination name that this service shall use. This option is mandatory
+    for services where Type= is set to dbus. It is recommended to always set this property
+    if known to make it easy to map the service name to the D-Bus destination. In
+    particular, systemctl service-log-level/service-log-target verbs make use of this.
   */
   BusName?: string;
 
   /**
   ExecStart=
-    Commands with their arguments that are executed when this service is started. The
-    value is split into zero or more command lines according to the rules described below
-    (see section "Command Lines" below).
+    Commands that are executed when this service is started. The value is split into zero
+    or more command lines according to the rules described in the section "Command Lines"
+    below.
 
     Unless Type= is oneshot, exactly one command must be given. When Type=oneshot is used,
     zero or more commands may be specified. Commands may be specified by providing
@@ -170,111 +239,6 @@ export interface ServiceSection {
     have no effect. If no ExecStart= is specified, then the service must have
     RemainAfterExit=yes and at least one ExecStop= line set. (Services lacking both
     ExecStart= and ExecStop= are not valid.)
-
-    For each of the specified commands, the first argument must be either an absolute path
-    to an executable or a simple file name without any slashes. Optionally, this filename
-    may be prefixed with a number of special characters:
-
-    Table 1. Special executable prefixes
-    ┌───────┬──────────────────────────────────┐
-    │Prefix │ Effect                           │
-    ├───────┼──────────────────────────────────┤
-    │"@"    │ If the executable path is        │
-    │       │ prefixed with "@", the second    │
-    │       │ specified token will be passed   │
-    │       │ as "argv[0]" to the executed     │
-    │       │ process (instead of the actual   │
-    │       │ filename), followed by the       │
-    │       │ further arguments specified.     │
-    ├───────┼──────────────────────────────────┤
-    │"-"    │ If the executable path is        │
-    │       │ prefixed with "-", an exit code  │
-    │       │ of the command normally          │
-    │       │ considered a failure (i.e.       │
-    │       │ non-zero exit status or abnormal │
-    │       │ exit due to signal) is recorded, │
-    │       │ but has no further effect and is │
-    │       │ considered equivalent to         │
-    │       │ success.                         │
-    ├───────┼──────────────────────────────────┤
-    │":"    │ If the executable path is        │
-    │       │ prefixed with ":", environment   │
-    │       │ variable substitution (as        │
-    │       │ described by the "Command Lines" │
-    │       │ section below) is not applied.   │
-    ├───────┼──────────────────────────────────┤
-    │"+"    │ If the executable path is        │
-    │       │ prefixed with "+" then the       │
-    │       │ process is executed with full    │
-    │       │ privileges. In this mode         │
-    │       │ privilege restrictions           │
-    │       │ configured with User=, Group=,   │
-    │       │ CapabilityBoundingSet= or the    │
-    │       │ various file system namespacing  │
-    │       │ options (such as                 │
-    │       │ PrivateDevices=, PrivateTmp=)    │
-    │       │ are not applied to the invoked   │
-    │       │ command line (but still affect   │
-    │       │ any other ExecStart=, ExecStop=, │
-    │       │ ... lines).                      │
-    ├───────┼──────────────────────────────────┤
-    │"!"    │ Similar to the "+" character     │
-    │       │ discussed above this permits     │
-    │       │ invoking command lines with      │
-    │       │ elevated privileges. However,    │
-    │       │ unlike "+" the "!" character     │
-    │       │ exclusively alters the effect of │
-    │       │ User=, Group= and                │
-    │       │ SupplementaryGroups=, i.e. only  │
-    │       │ the stanzas that affect user and │
-    │       │ group credentials. Note that     │
-    │       │ this setting may be combined     │
-    │       │ with DynamicUser=, in which case │
-    │       │ a dynamic user/group pair is     │
-    │       │ allocated before the command is  │
-    │       │ invoked, but credential changing │
-    │       │ is left to the executed process  │
-    │       │ itself.                          │
-    ├───────┼──────────────────────────────────┤
-    │"!!"   │ This prefix is very similar to   │
-    │       │ "!", however it only has an      │
-    │       │ effect on systems lacking        │
-    │       │ support for ambient process      │
-    │       │ capabilities, i.e. without       │
-    │       │ support for                      │
-    │       │ AmbientCapabilities=. It's       │
-    │       │ intended to be used for unit     │
-    │       │ files that take benefit of       │
-    │       │ ambient capabilities to run      │
-    │       │ processes with minimal           │
-    │       │ privileges wherever possible     │
-    │       │ while remaining compatible with  │
-    │       │ systems that lack ambient        │
-    │       │ capabilities support. Note that  │
-    │       │ when "!!" is used, and a system  │
-    │       │ lacking ambient capability       │
-    │       │ support is detected any          │
-    │       │ configured SystemCallFilter= and │
-    │       │ CapabilityBoundingSet= stanzas   │
-    │       │ are implicitly modified, in      │
-    │       │ order to permit spawned          │
-    │       │ processes to drop credentials    │
-    │       │ and capabilities themselves,     │
-    │       │ even if this is configured to    │
-    │       │ not be allowed. Moreover, if     │
-    │       │ this prefix is used and a system │
-    │       │ lacking ambient capability       │
-    │       │ support is detected              │
-    │       │ AmbientCapabilities= will be     │
-    │       │ skipped and not be applied. On   │
-    │       │ systems supporting ambient       │
-    │       │ capabilities, "!!" has no effect │
-    │       │ and is redundant.                │
-    └───────┴──────────────────────────────────┘
-    "@", "-", ":", and one of "+"/"!"/"!!"  may be used together and they can appear in
-    any order. However, only one of "+", "!", "!!"  may be used at a time. Note that these
-    prefixes are also supported for the other command line settings, i.e.  ExecStartPre=,
-    ExecStartPost=, ExecReload=, ExecStop= and ExecStopPost=.
 
     If more than one command is specified, the commands are invoked sequentially in the
     order they appear in the unit file. If one of the commands fails (and is not prefixed
@@ -301,7 +265,8 @@ export interface ServiceSection {
     been invoked successfully, as determined by Type= (i.e. the process has been started
     for Type=simple or Type=idle, the last ExecStart= process exited successfully for
     Type=oneshot, the initial process exited successfully for Type=forking, "READY=1" is
-    sent for Type=notify, or the BusName= has been taken for Type=dbus).
+    sent for Type=notify/Type=notify-reload, or the BusName= has been taken for
+    Type=dbus).
 
     Note that ExecStartPre= may not be used to start long-running processes. All processes
     forked off by processes invoked via ExecStartPre= will be killed before the next
@@ -311,6 +276,9 @@ export interface ServiceSection {
     ExecStartPost= fail (and are not prefixed with "-", see above) or time out before the
     service is fully up, execution continues with commands specified in ExecStopPost=, the
     commands in ExecStop= are skipped.
+
+    Note that the execution of ExecStartPost= is taken into account for the purpose of
+    Before=/After= ordering constraints.
   */
   ExecStartPre?: string | string[];
   /**
@@ -320,7 +288,7 @@ export interface ServiceSection {
 
   /**
   ExecCondition=
-    Optional commands that are executed before the command(s) in ExecStartPre=. Syntax is
+    Optional commands that are executed before the commands in ExecStartPre=. Syntax is
     the same as for ExecStart=, except that multiple command lines are allowed and the
     commands are executed one after the other, serially.
 
@@ -330,7 +298,7 @@ export interface ServiceSection {
     ExecCondition= command exits with 255 or abnormally (e.g. timeout, killed by a signal,
     etc.), the unit will be considered failed (and remaining commands will be skipped).
     Exit code of 0 or those matching SuccessExitStatus= will continue execution to the
-    next command(s).
+    next commands.
 
     The same recommendations about not running long-running processes in ExecStartPre=
     also applies to ExecCondition=.  ExecCondition= will also run the commands in
@@ -349,13 +317,17 @@ export interface ServiceSection {
     One additional, special environment variable is set: if known, $MAINPID is set to the
     main process of the daemon, and may be used for command lines like the following:
 
-        /bin/kill -HUP $MAINPID
+        ExecReload=kill -HUP $MAINPID
 
-    Note however that reloading a daemon by sending a signal (as with the example line
+    Note however that reloading a daemon by enqueuing a signal (as with the example line
     above) is usually not a good choice, because this is an asynchronous operation and
-    hence not suitable to order reloads of multiple services against each other. It is
-    strongly recommended to set ExecReload= to a command that not only triggers a
-    configuration reload of the daemon, but also synchronously waits for it to complete.
+    hence not suitable when ordering reloads of multiple services against each other. It
+    is thus strongly recommended to either use Type=notify-reload in place of ExecReload=,
+    or to set ExecReload= to a command that not only triggers a configuration reload of
+    the daemon, but also synchronously waits for it to complete. For example, dbus-
+    broker(1) uses the following:
+
+        ExecReload=busctl call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus ReloadConfig
   */
   ExecReload?: string | string[];
 
@@ -420,6 +392,9 @@ export interface ServiceSection {
     result code of the service, as well as the main process' exit code and status, set in
     the $SERVICE_RESULT, $EXIT_CODE and $EXIT_STATUS environment variables, see
     systemd.exec(5) for details.
+
+    Note that the execution of ExecStopPost= is taken into account for the purpose of
+    Before=/After= ordering constraints.
   */
   ExecStopPost?: string | string[];
 
@@ -432,21 +407,46 @@ export interface ServiceSection {
   RestartSec?: string;
 
   /**
+  RestartSteps=
+    Configures the number of steps to take to increase the interval of auto-restarts from
+    RestartSec= to RestartMaxDelaySec=. Takes a positive integer or 0 to disable it.
+    Defaults to 0.
+
+    This setting is effective only if RestartMaxDelaySec= is also set.
+
+    Added in version 254.
+  */
+  RestartSteps?: number;
+
+  /**
+  RestartMaxDelaySec=
+    Configures the longest time to sleep before restarting a service as the interval goes
+    up with RestartSteps=. Takes a value in the same format as RestartSec=, or "infinity"
+    to disable the setting. Defaults to "infinity".
+
+    This setting is effective only if RestartSteps= is also set.
+
+    Added in version 254.
+  */
+  RestartMaxDelaySec?: "infinity" | number;
+
+  /**
   TimeoutStartSec=
     Configures the time to wait for start-up. If a daemon service does not signal start-up
     completion within the configured time, the service will be considered failed and will
-    be shut down again. Takes a unit-less value in seconds, or a time span value such as
-    "5min 20s". Pass "infinity" to disable the timeout logic. Defaults to
-    DefaultTimeoutStartSec= from the manager configuration file, except when Type=oneshot
-    is used, in which case the timeout is disabled by default (see systemd-
-    system.conf(5)).
+    be shut down again. The precise action depends on the TimeoutStartFailureMode= option.
+    Takes a unit-less value in seconds, or a time span value such as "5min 20s". Pass
+    "infinity" to disable the timeout logic. Defaults to DefaultTimeoutStartSec= set in
+    the manager, except when Type=oneshot is used, in which case the timeout is disabled
+    by default (see systemd-system.conf(5)).
 
-    If a service of Type=notify sends "EXTEND_TIMEOUT_USEC=...", this may cause the start
-    time to be extended beyond TimeoutStartSec=. The first receipt of this message must
-    occur before TimeoutStartSec= is exceeded, and once the start time has exended beyond
-    TimeoutStartSec=, the service manager will allow the service to continue to start,
-    provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the interval specified
-    until the service startup status is finished by "READY=1". (see sd_notify(3)).
+    If a service of Type=notify/Type=notify-reload sends "EXTEND_TIMEOUT_USEC=...", this
+    may cause the start time to be extended beyond TimeoutStartSec=. The first receipt of
+    this message must occur before TimeoutStartSec= is exceeded, and once the start time
+    has extended beyond TimeoutStartSec=, the service manager will allow the service to
+    continue to start, provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the
+    interval specified until the service startup status is finished by "READY=1". (see
+    sd_notify(3)).
   */
   TimeoutStartSec?: string;
 
@@ -455,19 +455,20 @@ export interface ServiceSection {
     This option serves two purposes. First, it configures the time to wait for each
     ExecStop= command. If any of them times out, subsequent ExecStop= commands are skipped
     and the service will be terminated by SIGTERM. If no ExecStop= commands are specified,
-    the service gets the SIGTERM immediately. Second, it configures the time to wait for
-    the service itself to stop. If it doesn't terminate in the specified time, it will be
-    forcibly terminated by SIGKILL (see KillMode= in systemd.kill(5)). Takes a unit-less
-    value in seconds, or a time span value such as "5min 20s". Pass "infinity" to disable
-    the timeout logic. Defaults to DefaultTimeoutStopSec= from the manager configuration
-    file (see systemd-system.conf(5)).
+    the service gets the SIGTERM immediately. This default behavior can be changed by the
+    TimeoutStopFailureMode= option. Second, it configures the time to wait for the service
+    itself to stop. If it doesn't terminate in the specified time, it will be forcibly
+    terminated by SIGKILL (see KillMode= in systemd.kill(5)). Takes a unit-less value in
+    seconds, or a time span value such as "5min 20s". Pass "infinity" to disable the
+    timeout logic. Defaults to DefaultTimeoutStopSec= from the manager configuration file
+    (see systemd-system.conf(5)).
 
-    If a service of Type=notify sends "EXTEND_TIMEOUT_USEC=...", this may cause the stop
-    time to be extended beyond TimeoutStopSec=. The first receipt of this message must
-    occur before TimeoutStopSec= is exceeded, and once the stop time has exended beyond
-    TimeoutStopSec=, the service manager will allow the service to continue to stop,
-    provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the interval specified,
-    or terminates itself (see sd_notify(3)).
+    If a service of Type=notify/Type=notify-reload sends "EXTEND_TIMEOUT_USEC=...", this
+    may cause the stop time to be extended beyond TimeoutStopSec=. The first receipt of
+    this message must occur before TimeoutStopSec= is exceeded, and once the stop time has
+    extended beyond TimeoutStopSec=, the service manager will allow the service to
+    continue to stop, provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the
+    interval specified, or terminates itself (see sd_notify(3)).
   */
   TimeoutStopSec?: string;
 
@@ -488,13 +489,13 @@ export interface ServiceSection {
     DefaultTimeoutAbortSec= from the manager configuration file (see systemd-
     system.conf(5)).
 
-    If a service of Type=notify handles SIGABRT itself (instead of relying on the kernel
-    to write a core dump) it can send "EXTEND_TIMEOUT_USEC=..."  to extended the abort
-    time beyond TimeoutAbortSec=. The first receipt of this message must occur before
-    TimeoutAbortSec= is exceeded, and once the abort time has exended beyond
-    TimeoutAbortSec=, the service manager will allow the service to continue to abort,
-    provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the interval specified,
-    or terminates itself (see sd_notify(3)).
+    If a service of Type=notify/Type=notify-reload handles SIGABRT itself (instead of
+    relying on the kernel to write a core dump) it can send "EXTEND_TIMEOUT_USEC=..."  to
+    extended the abort time beyond TimeoutAbortSec=. The first receipt of this message
+    must occur before TimeoutAbortSec= is exceeded, and once the abort time has extended
+    beyond TimeoutAbortSec=, the service manager will allow the service to continue to
+    abort, provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the interval
+    specified, or terminates itself (see sd_notify(3)).
   */
   TimeoutAbortSec?: string;
 
@@ -506,6 +507,29 @@ export interface ServiceSection {
   TimeoutSec?: string;
 
   /**
+  TimeoutStartFailureMode=, TimeoutStopFailureMode=
+    These options configure the action that is taken in case a daemon service does not
+    signal start-up within its configured TimeoutStartSec=, respectively if it does not
+    stop within TimeoutStopSec=. Takes one of terminate, abort and kill. Both options
+    default to terminate.
+
+    If terminate is set the service will be gracefully terminated by sending the signal
+    specified in KillSignal= (defaults to SIGTERM, see systemd.kill(5)). If the service
+    does not terminate the FinalKillSignal= is sent after TimeoutStopSec=. If abort is
+    set, WatchdogSignal= is sent instead and TimeoutAbortSec= applies before sending
+    FinalKillSignal=. This setting may be used to analyze services that fail to start-up
+    or shut-down intermittently. By using kill the service is immediately terminated by
+    sending FinalKillSignal= without any further timeout. This setting can be used to
+    expedite the shutdown of failing services.
+  */
+  TimeoutStartFailureMode?: "terminate" | "abort" | "kill";
+
+  /**
+   * @see {@link ServiceSection.TimeoutStartFailureMode}
+   */
+  TimeoutStopFailureMode?: "terminate" | "abort" | "kill";
+
+  /**
   RuntimeMaxSec=
     Configures a maximum time for the service to run. If this is used and the service has
     been active for longer than the specified time it is terminated and put into a failure
@@ -513,15 +537,23 @@ export interface ServiceSection {
     they terminate immediately after activation completed. Pass "infinity" (the default)
     to configure no runtime limit.
 
-    If a service of Type=notify sends "EXTEND_TIMEOUT_USEC=...", this may cause the
-    runtime to be extended beyond RuntimeMaxSec=. The first receipt of this message must
-    occur before RuntimeMaxSec= is exceeded, and once the runtime has exended beyond
-    RuntimeMaxSec=, the service manager will allow the service to continue to run,
-    provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the interval specified
-    until the service shutdown is achieved by "STOPPING=1" (or termination). (see
-    sd_notify(3)).
+    If a service of Type=notify/Type=notify-reload sends "EXTEND_TIMEOUT_USEC=...", this
+    may cause the runtime to be extended beyond RuntimeMaxSec=. The first receipt of this
+    message must occur before RuntimeMaxSec= is exceeded, and once the runtime has
+    extended beyond RuntimeMaxSec=, the service manager will allow the service to continue
+    to run, provided the service repeats "EXTEND_TIMEOUT_USEC=..."  within the interval
+    specified until the service shutdown is achieved by "STOPPING=1" (or termination).
+    (see sd_notify(3)).
   */
-  RuntimeMaxSec?: string;
+  RuntimeMaxSec?: number | "infinity";
+
+  /**
+  RuntimeRandomizedExtraSec=
+    This option modifies RuntimeMaxSec= by increasing the maximum runtime by an evenly
+    distributed duration between 0 and the specified value (in seconds). If RuntimeMaxSec=
+    is unspecified, then this feature will be disabled.
+  */
+  RuntimeRandomizedExtraSec?: number;
 
   /**
   WatchdogSec=
@@ -556,22 +588,30 @@ export interface ServiceSection {
     Takes one of no, on-success, on-failure, on-abnormal, on-watchdog, on-abort, or
     always. If set to no (the default), the service will not be restarted. If set to
     on-success, it will be restarted only when the service process exits cleanly. In this
-    context, a clean exit means an exit code of 0, or one of the signals SIGHUP, SIGINT,
-    SIGTERM or SIGPIPE, and additionally, exit statuses and signals specified in
-    SuccessExitStatus=. If set to on-failure, the service will be restarted when the
-    process exits with a non-zero exit code, is terminated by a signal (including on core
-    dump, but excluding the aforementioned four signals), when an operation (such as
-    service reload) times out, and when the configured watchdog timeout is triggered. If
-    set to on-abnormal, the service will be restarted when the process is terminated by a
-    signal (including on core dump, excluding the aforementioned four signals), when an
-    operation times out, or when the watchdog timeout is triggered. If set to on-abort,
-    the service will be restarted only if the service process exits due to an uncaught
-    signal not specified as a clean exit status. If set to on-watchdog, the service will
-    be restarted only if the watchdog timeout for the service expires. If set to always,
-    the service will be restarted regardless of whether it exited cleanly or not, got
-    terminated abnormally by a signal, or hit a timeout.
+    context, a clean exit means any of the following:
 
-    Table 2. Exit causes and the effect of the Restart= settings on them
+    •   exit code of 0;
+
+    •   for types other than Type=oneshot, one of the signals SIGHUP, SIGINT, SIGTERM, or
+        SIGPIPE;
+
+    •   exit statuses and signals specified in SuccessExitStatus=.
+
+    If set to on-failure, the service will be restarted when the process exits with a
+    non-zero exit code, is terminated by a signal (including on core dump, but excluding
+    the aforementioned four signals), when an operation (such as service reload) times
+    out, and when the configured watchdog timeout is triggered. If set to on-abnormal, the
+    service will be restarted when the process is terminated by a signal (including on
+    core dump, excluding the aforementioned four signals), when an operation times out, or
+    when the watchdog timeout is triggered. If set to on-abort, the service will be
+    restarted only if the service process exits due to an uncaught signal not specified as
+    a clean exit status. If set to on-watchdog, the service will be restarted only if the
+    watchdog timeout for the service expires. If set to always, the service will be
+    restarted regardless of whether it exited cleanly or not, got terminated abnormally by
+    a signal, or hit a timeout. Note that Type=oneshot services will never be restarted on
+    a clean exit status, i.e.  always and on-success are rejected for them.
+
+    Table 1. Exit causes and the effect of the Restart= settings
     ┌──────────────┬────┬────────┬────────────┬────────────┬─────────────┬──────────┬─────────────┐
     │Restart       │ no │ always │ on-success │ on-failure │ on-abnormal │ on-abort │ on-watchdog │
     │settings/Exit │    │        │            │            │             │          │             │
@@ -598,13 +638,12 @@ export interface ServiceSection {
     below).
 
     Note that service restart is subject to unit start rate limiting configured with
-    StartLimitIntervalSec= and StartLimitBurst=, see systemd.unit(5) for details. A
-    restarted service enters the failed state only after the start limits are reached.
+    StartLimitIntervalSec= and StartLimitBurst=, see systemd.unit(5) for details.
 
     Setting this to on-failure is the recommended choice for long-running services, in
     order to increase reliability by attempting automatic recovery from errors. For
     services that shall be able to terminate on their own choice (and avoid immediate
-    restarting), on-abnormal is an alternative choice.
+    restarting), on-abnormal is an alternative choice.}
   */
   Restart?:
     | "no"
@@ -616,29 +655,57 @@ export interface ServiceSection {
     | "on-watchdog";
 
   /**
+  RestartMode=
+    Takes a string value that specifies how a service should restart:
+
+    •   If set to normal (the default), the service restarts by going through a
+        failed/inactive state.
+
+    •   If set to direct, the service transitions to the activating state directly during
+        auto-restart, skipping failed/inactive state.  ExecStopPost= is invoked.
+        OnSuccess= and OnFailure= are skipped.
+
+    This option is useful in cases where a dependency can fail temporarily but we don't
+    want these temporary failures to make the dependent units fail. When this option is
+    set to direct, dependent units are not notified of these temporary failures.
+
+    Added in version 254.
+  */
+  RestartMode?: "normal" | "direct";
+
+  /**
   SuccessExitStatus=
     Takes a list of exit status definitions that, when returned by the main service
     process, will be considered successful termination, in addition to the normal
-    successful exit code 0 and the signals SIGHUP, SIGINT, SIGTERM, and SIGPIPE. Exit
-    status definitions can be numeric exit codes, termination code names, or termination
-    signal names, separated by spaces. See the Process Exit Codes section in
-    systemd.exec(5) for a list of termination codes names (for this setting only the part
-    without the "EXIT_" or "EX_" prefix should be used). See signal(7) for a list of
-    signal names.
+    successful exit status 0 and, except for Type=oneshot, the signals SIGHUP, SIGINT,
+    SIGTERM, and SIGPIPE. Exit status definitions can be numeric termination statuses,
+    termination status names, or termination signal names, separated by spaces. See the
+    Process Exit Codes section in systemd.exec(5) for a list of termination status names
+    (for this setting only the part without the "EXIT_" or "EX_" prefix should be used).
+    See signal(7) for a list of signal names.
+
+    Note that this setting does not change the mapping between numeric exit statuses and
+    their names, i.e. regardless how this setting is used 0 will still be mapped to
+    "SUCCESS" (and thus typically shown as "0/SUCCESS" in tool outputs) and 1 to "FAILURE"
+    (and thus typically shown as "1/FAILURE"), and so on. It only controls what happens as
+    effect of these exit statuses, and how it propagates to the state of the service as a
+    whole.
 
     This option may appear more than once, in which case the list of successful exit
     statuses is merged. If the empty string is assigned to this option, the list is reset,
     all prior assignments of this option will have no effect.
 
-    Example 1. A service with with the SuccessExitStatus= setting
+    Example 1. A service with the SuccessExitStatus= setting
 
-        SuccessExitStatus=TEMPFAIL 250 SIGUSR1
+        SuccessExitStatus=TEMPFAIL 250 SIGKILL
 
-    Exit codes 75 (TEMPFAIL), 250, and the termination signal SIGKILL are considered clean
-    service terminations.
+    Exit status 75 (TEMPFAIL), 250, and the termination signal SIGKILL are considered
+    clean service terminations.
 
-    Note: systemd-analyze exit-codes may be used to list exit codes and translate between
-    numerical code values and names.
+    Note: systemd-analyze exit-status may be used to list exit statuses and translate
+    between numerical status values and names.
+
+    Added in version 189.
   */
   SuccessExitStatus?: string;
 
@@ -663,6 +730,8 @@ export interface ServiceSection {
     ExecStartPost=, ExecStop=, ExecStopPost= or ExecReload=, but only on the main service
     process, i.e. either the one invoked by ExecStart= or (depending on Type=, PIDFile=,
     ...) the otherwise configured main process.
+
+    Added in version 189.
   */
   RestartPreventExitStatus?: string;
 
@@ -671,6 +740,8 @@ export interface ServiceSection {
     Takes a list of exit status definitions that, when returned by the main service
     process, will force automatic service restarts, regardless of the restart setting
     configured with Restart=. The argument format is similar to RestartPreventExitStatus=.
+
+    Added in version 215.
   */
   RestartForceExitStatus?: string;
 
@@ -693,6 +764,15 @@ export interface ServiceSection {
     option is only useful in conjunction with a socket unit, as described in
     systemd.socket(5) and has no effect on file descriptors which were previously saved in
     the file-descriptor store for example. Defaults to false.
+
+    Note that if the same socket unit is configured to be passed to multiple service units
+    (via the Sockets= setting, see below), and these services have different NonBlocking=
+    configurations, the precise state of O_NONBLOCK depends on the order in which these
+    services are invoked, and will possibly change after service code already took
+    possession of the socket file descriptor, simply because the O_NONBLOCK state of a
+    socket is shared by all file descriptors referencing it. Hence it is essential that
+    all services sharing the same socket use the same NonBlocking= configuration, and do
+    not change the flag in service code either.
   */
   NonBlocking?: boolean;
 
@@ -706,8 +786,8 @@ export interface ServiceSection {
     control processes originating from one of the Exec*= commands are accepted. If all,
     all services updates from all members of the service's control group are accepted.
     This option should be set to open access to the notification socket when using
-    Type=notify or WatchdogSec= (see above). If those options are used but NotifyAccess=
-    is not configured, it will be implicitly set to main.
+    Type=notify/Type=notify-reload or WatchdogSec= (see above). If those options are used
+    but NotifyAccess= is not configured, it will be implicitly set to main.
 
     Note that sd_notify() notifications may be attributed to units correctly only if
     either the sending process is still around at the time PID 1 processes the message, or
@@ -718,6 +798,17 @@ export interface ServiceSection {
     able to properly attribute the message to the unit, and thus will ignore it, even if
     NotifyAccess=all is set for it.
 
+    Hence, to eliminate all race conditions involving lookup of the client's unit and
+    attribution of notifications to units correctly, sd_notify_barrier() may be used. This
+    call acts as a synchronization point and ensures all notifications sent before this
+    call have been picked up by the service manager when it returns successfully. Use of
+    sd_notify_barrier() is needed for clients which are not invoked by the service
+    manager, otherwise this synchronization mechanism is unnecessary for attribution of
+    notifications to the unit.
+  */
+  NotifyAccess?: "none" | "main" | "exec" | "all";
+
+  /**
   Sockets=
     Specifies the name of the socket units this service shall inherit socket file
     descriptors from when the service is started. Normally, it should not be necessary to
@@ -734,49 +825,160 @@ export interface ServiceSection {
     This option may appear more than once, in which case the list of socket units is
     merged. Note that once set, clearing the list of sockets again (for example, by
     assigning the empty string to this option) is not supported.
+  */
+  Sockets?: string | string[];
 
+  /**
   FileDescriptorStoreMax=
     Configure how many file descriptors may be stored in the service manager for the
     service using sd_pid_notify_with_fds(3)'s "FDSTORE=1" messages. This is useful for
     implementing services that can restart after an explicit request or a crash without
     losing state. Any open sockets and other file descriptors which should not be closed
     during the restart may be stored this way. Application state can either be serialized
-    to a file in /run, or better, stored in a memfd_create(2) memory file descriptor.
+    to a file in RuntimeDirectory=, or stored in a memfd_create(2) memory file descriptor.
     Defaults to 0, i.e. no file descriptors may be stored in the service manager. All file
     descriptors passed to the service manager from a specific service are passed back to
-    the service's main process on the next service restart. Any file descriptors passed to
-    the service manager are automatically closed when POLLHUP or POLLERR is seen on them,
-    or when the service is fully stopped and no job is queued or being executed for it. If
-    this option is used, NotifyAccess= (see above) should be set to open access to the
-    notification socket provided by systemd. If NotifyAccess= is not set, it will be
-    implicitly set to main.
+    the service's main process on the next service restart (see sd_listen_fds(3) for
+    details about the precise protocol used and the order in which the file descriptors
+    are passed). Any file descriptors passed to the service manager are automatically
+    closed when POLLHUP or POLLERR is seen on them, or when the service is fully stopped
+    and no job is queued or being executed for it (the latter can be tweaked with
+    FileDescriptorStorePreserve=, see below). If this option is used, NotifyAccess= (see
+    above) should be set to open access to the notification socket provided by systemd. If
+    NotifyAccess= is not set, it will be implicitly set to main.
 
+    The fdstore command of systemd-analyze(1) may be used to list the current contents of
+    a service's file descriptor store.
+
+    Note that the service manager will only pass file descriptors contained in the file
+    descriptor store to the service's own processes, never to other clients via IPC or
+    similar. However, it does allow unprivileged clients to query the list of currently
+    open file descriptors of a service. Sensitive data may hence be safely placed inside
+    the referenced files, but should not be attached to the metadata (e.g. included in
+    filenames) of the stored file descriptors.
+
+    If this option is set to a non-zero value the $FDSTORE environment variable will be
+    set for processes invoked for this service. See systemd.exec(5) for details.
+
+    For further information on the file descriptor store see the File Descriptor Store[1]
+    overview.
+
+    Added in version 219.
+  */
+  FileDescriptorStoreMax?: number;
+
+  /**
+  FileDescriptorStorePreserve=
+    Takes one of no, yes, restart and controls when to release the service's file
+    descriptor store (i.e. when to close the contained file descriptors, if any). If set
+    to no the file descriptor store is automatically released when the service is stopped;
+    if restart (the default) it is kept around as long as the unit is neither inactive nor
+    failed, or a job is queued for the service, or the service is expected to be
+    restarted. If yes the file descriptor store is kept around until the unit is removed
+    from memory (i.e. is not referenced anymore and inactive). The latter is useful to
+    keep entries in the file descriptor store pinned until the service manager exits.
+
+    Use systemctl clean --what=fdstore ...  to release the file descriptor store
+    explicitly.
+
+    Added in version 254.
+  */
+  FileDescriptorStorePreserve?: boolean | "restart";
+
+  /**
   USBFunctionDescriptors=
     Configure the location of a file containing USB FunctionFS[2] descriptors, for
     implementation of USB gadget functions. This is used only in conjunction with a socket
     unit with ListenUSBFunction= configured. The contents of this file are written to the
     ep0 file after it is opened.
 
+    Added in version 227.
+  */
+  USBFunctionDescriptors?: string;
+
+  /**
   USBFunctionStrings=
     Configure the location of a file containing USB FunctionFS strings. Behavior is
     similar to USBFunctionDescriptors= above.
 
+    Added in version 227.
+  */
+  USBFunctionStrings?: string;
+
+  /**
   OOMPolicy=
-    Configure the Out-Of-Memory (OOM) killer policy. On Linux, when memory becomes scarce
-    the kernel might decide to kill a running process in order to free up memory and
-    reduce memory pressure. This setting takes one of continue, stop or kill. If set to
-    continue and a process of the service is killed by the kernel's OOM killer this is
-    logged but the service continues running. If set to stop the event is logged but the
-    service is terminated cleanly by the service manager. If set to kill and one of the
-    service's processes is killed by the OOM killer the kernel is instructed to kill all
-    remaining processes of the service, too. Defaults to the setting DefaultOOMPolicy= in
-    system.conf(5) is set to, except for services where Delegate= is turned on, where it
-    defaults to continue.
+    Configure the out-of-memory (OOM) killing policy for the kernel and the userspace OOM
+    killer systemd-oomd.service(8). On Linux, when memory becomes scarce to the point that
+    the kernel has trouble allocating memory for itself, it might decide to kill a running
+    process in order to free up memory and reduce memory pressure. Note that
+    systemd-oomd.service is a more flexible solution that aims to prevent out-of-memory
+    situations for the userspace too, not just the kernel, by attempting to terminate
+    services earlier, before the kernel would have to act.
+
+    This setting takes one of continue, stop or kill. If set to continue and a process in
+    the unit is killed by the OOM killer, this is logged but the unit continues running.
+    If set to stop the event is logged but the unit is terminated cleanly by the service
+    manager. If set to kill and one of the unit's processes is killed by the OOM killer
+    the kernel is instructed to kill all remaining processes of the unit too, by setting
+    the memory.oom.group attribute to 1; also see kernel page Control Group v2[3].
+
+    Defaults to the setting DefaultOOMPolicy= in systemd-system.conf(5) is set to, except
+    for units where Delegate= is turned on, where it defaults to continue.
 
     Use the OOMScoreAdjust= setting to configure whether processes of the unit shall be
     considered preferred or less preferred candidates for process termination by the Linux
     OOM killer logic. See systemd.exec(5) for details.
+
+    This setting also applies to systemd-oomd.service(8). Similarly to the kernel OOM
+    kills performed by the kernel, this setting determines the state of the unit after
+    systemd-oomd kills a cgroup associated with it.
+
+    Added in version 243.
   */
+  OOMPolicy?: "continue" | "stop" | "kill";
+
+  /**
+  OpenFile=
+  Takes an argument of the form "path[:fd-name:options]", where:
+
+  •   "path" is a path to a file or an AF_UNIX socket in the file system;
+
+  •   "fd-name" is a name that will be associated with the file descriptor; the name may
+      contain any ASCII character, but must exclude control characters and ":", and must
+      be at most 255 characters in length; it is optional and, if not provided, defaults
+      to the file name;
+
+  •   "options" is a comma-separated list of access options; possible values are
+      "read-only", "append", "truncate", "graceful"; if not specified, files will be
+      opened in rw mode; if "graceful" is specified, errors during file/socket opening
+      are ignored. Specifying the same option several times is treated as an error.
+
+  The file or socket is opened by the service manager and the file descriptor is passed
+  to the service. If the path is a socket, we call connect() on it. See sd_listen_fds(3)
+  for more details on how to retrieve these file descriptors.
+
+  This setting is useful to allow services to access files/sockets that they can't
+  access themselves (due to running in a separate mount namespace, not having
+  privileges, ...).
+
+  This setting can be specified multiple times, in which case all the specified paths
+  are opened and the file descriptors passed to the service. If the empty string is
+  assigned, the entire list of open files defined prior to this is reset.
+
+  Added in version 253.
+  */
+  OpenFile?: string | string[];
+
+  /**
+  ReloadSignal=
+    Configures the UNIX process signal to send to the service's main process when asked to
+    reload the service's configuration. Defaults to SIGHUP. This option has no effect
+    unless Type=notify-reload is used, see above.
+
+    Added in version 253.
+  */
+  //  TODO: document signals as union
+  ReloadSignal?: string;
 }
 
 export interface UnitService {
@@ -796,6 +998,9 @@ export const serviceSchema: ZodType<UnitService> = z.object({
      */
     Description: z.string(),
   }),
+  /**
+   * @see {@link ServiceSection}
+   */
   Service: z.object({
     /**
      * @see {@link ServiceSection.Type}
@@ -810,6 +1015,10 @@ export const serviceSchema: ZodType<UnitService> = z.object({
       "forking",
       "idle",
     ]).optional(),
+    /**
+     * @see {@link ServiceSection.ExitType}
+     */
+    ExitType: z.enum(["main", "cgroup"]).optional(),
     /**
      * @see {@link ServiceSection.RemainAfterExit}
      */
@@ -865,11 +1074,19 @@ export const serviceSchema: ZodType<UnitService> = z.object({
     /**
      * @see {@link ServiceSection.TimeoutStartSec}
      */
+    RestartSteps: z.number().optional(),
+    /**
+     * @see {@link ServiceSection.RestartMaxDelaySec}
+     */
+    RestartMaxDelaySec: z.union([z.literal("infinity"), z.number()]).optional(),
     TimeoutStartSec: z.string().optional(),
     TimeoutStopSec: z.string().optional(),
     TimeoutAbortSec: z.string().optional(),
     TimeoutSec: z.string().optional(),
-    RuntimeMaxSec: z.string().optional(),
+    TimeoutStartFailureMode: z.enum(["terminate", "abort", "kill"]).optional(),
+    TimeoutStopFailureMode: z.enum(["terminate", "abort", "kill"]).optional(),
+    RuntimeMaxSec: z.union([z.literal("infinity"), z.number()]).optional(),
+    RuntimeRandomizedExtraSec: z.number().optional(),
     WatchdogSec: z.string().optional(),
     Restart: z.enum([
       "no",
@@ -880,11 +1097,22 @@ export const serviceSchema: ZodType<UnitService> = z.object({
       "on-abort",
       "on-watchdog",
     ]).optional(),
+    RestartMode: z.enum(["normal", "direct"]).optional(),
     SuccessExitStatus: z.string().optional(),
     RestartPreventExitStatus: z.string().optional(),
     RestartForceExitStatus: z.string().optional(),
     RootDirectoryStartOnly: z.boolean().optional(),
     NonBlocking: z.boolean().optional(),
+    NotifyAccess: z.enum(["none", "main", "exec", "all"]).optional(),
+    Sockets: z.union([z.string(), z.array(z.string())]).optional(),
+    FileDescriptorStoreMax: z.number().optional(),
+    FileDescriptorStorePreserve: z.union([z.boolean(), z.enum(["restart"])])
+      .optional(),
+    USBFunctionDescriptors: z.string().optional(),
+    USBFunctionStrings: z.string().optional(),
+    OOMPolicy: z.enum(["continue", "stop", "kill"]).optional(),
+    OpenFile: z.union([z.string(), z.array(z.string())]).optional(),
+    ReloadSignal: z.string().optional(),
   }),
 });
 
@@ -918,6 +1146,14 @@ export class Service {
    */
   public setServiceType(type: ServiceSection["Type"]) {
     this.service.Service.Type = type;
+    return this;
+  }
+  /**
+   * Set service ExitType
+   * @see {@link ServiceSection.ExitType}
+   */
+  public setServiceExitType(exitType: ServiceSection["ExitType"]) {
+    this.service.Service.ExitType = exitType;
     return this;
   }
   /**
@@ -1017,6 +1253,23 @@ export class Service {
     return this;
   }
   /**
+   * Set service RestartSteps
+   * @see {@link ServiceSection.RestartSteps}
+   */
+  public setServiceRestartSteps(restartSteps: number) {
+    this.service.Service.RestartSteps = restartSteps;
+    return this;
+  }
+  /**
+   * Set service RestartMaxDelaySec
+   * @see {@link ServiceSection.RestartMaxDelaySec}
+   */
+  public setServiceRestartMaxDelaySec(restartMaxDelaySec: "infinity" | number) {
+    this.service.Service.RestartMaxDelaySec = restartMaxDelaySec;
+    return this;
+  }
+
+  /**
    * Set service TimeoutStartSec
    * @see {@link ServiceSection.TimeoutStartSec}
    */
@@ -1049,14 +1302,44 @@ export class Service {
     return this;
   }
   /**
-   * Set service RuntimeMaxSec
-   * @see {@link ServiceSection.RuntimeMaxSec}
+   * Set service TimeoutStartFailureMode
+   * @see {@link ServiceSection.TimeoutStartFailureMode}
    */
-  public setServiceRuntimeMaxSec(runtimeMaxSec: string) {
-    this.service.Service.RuntimeMaxSec = runtimeMaxSec;
+  public setServiceTimeoutStartFailureMode(
+    timeoutStartFailureMode: ServiceSection["TimeoutStartFailureMode"],
+  ) {
+    this.service.Service.TimeoutStartFailureMode = timeoutStartFailureMode;
+    return this;
+  }
+  /**
+   * Set service TimeoutStopFailureMode
+   * @see {@link ServiceSection.TimeoutStopFailureMode}
+   */
+  public setServiceTimeoutStopFailureMode(
+    timeoutStopFailureMode: ServiceSection["TimeoutStopFailureMode"],
+  ) {
+    this.service.Service.TimeoutStopFailureMode = timeoutStopFailureMode;
     return this;
   }
 
+  /**
+   * Set service RuntimeMaxSec
+   * @see {@link ServiceSection.RuntimeMaxSec}
+   */
+  public setServiceRuntimeMaxSec(runtimeMaxSec: number | "infinity") {
+    this.service.Service.RuntimeMaxSec = runtimeMaxSec;
+    return this;
+  }
+  /**
+   * Set service RuntimeRandomizedExtraSec
+   * @see {@link ServiceSection.RuntimeRandomizedExtraSec}
+   */
+  public setServiceRuntimeRandomizedExtraSec(
+    runtimeRandomizedExtraSec: number,
+  ) {
+    this.service.Service.RuntimeRandomizedExtraSec = runtimeRandomizedExtraSec;
+    return this;
+  }
   /**
    * Set service WatchdogSec
    * @see {@link ServiceSection.WatchdogSec}
@@ -1071,6 +1354,14 @@ export class Service {
    */
   public setServiceRestart(restart: ServiceSection["Restart"]) {
     this.service.Service.Restart = restart;
+    return this;
+  }
+  /**
+   * Set service RestartMode
+   * @see {@link ServiceSection.RestartMode}
+   */
+  public setServiceRestartMode(restartMode: ServiceSection["RestartMode"]) {
+    this.service.Service.RestartMode = restartMode;
     return this;
   }
   /**
@@ -1111,6 +1402,81 @@ export class Service {
    */
   public setServiceNonBlocking(nonBlocking: boolean) {
     this.service.Service.NonBlocking = nonBlocking;
+    return this;
+  }
+  /**
+   * Set service NotifyAccess
+   * @see {@link ServiceSection.NotifyAccess}
+   */
+  public setServiceNotifyAccess(notifyAccess: ServiceSection["NotifyAccess"]) {
+    this.service.Service.NotifyAccess = notifyAccess;
+    return this;
+  }
+  /**
+   * Set service Sockets
+   * @see {@link ServiceSection.Sockets}
+   */
+  public setServiceSockets(sockets: string | string[]) {
+    this.service.Service.Sockets = sockets;
+    return this;
+  }
+  /**
+   * Set service FileDescriptorStoreMax
+   * @see {@link ServiceSection.FileDescriptorStoreMax}
+   */
+  public setServiceFileDescriptorStoreMax(fileDescriptorStoreMax: number) {
+    this.service.Service.FileDescriptorStoreMax = fileDescriptorStoreMax;
+    return this;
+  }
+  /**
+   * Set service FileDescriptorStorePreserve
+   * @see {@link ServiceSection.FileDescriptorStorePreserve}
+   */
+  public setServiceFileDescriptorStorePreserve(
+    fileDescriptorStorePreserve: ServiceSection["FileDescriptorStorePreserve"],
+  ) {
+    this.service.Service.FileDescriptorStorePreserve =
+      fileDescriptorStorePreserve;
+    return this;
+  }
+  /**
+   * Set service USBFunctionDescriptors
+   * @see {@link ServiceSection.USBFunctionDescriptors}
+   */
+  public setServiceUSBFunctionDescriptors(usbFunctionDescriptors: string) {
+    this.service.Service.USBFunctionDescriptors = usbFunctionDescriptors;
+    return this;
+  }
+  /**
+   * Set service USBFunctionStrings
+   * @see {@link ServiceSection.USBFunctionStrings}
+   */
+  public setServiceUSBFunctionStrings(usbFunctionStrings: string) {
+    this.service.Service.USBFunctionStrings = usbFunctionStrings;
+    return this;
+  }
+  /**
+   * Set service OOMPolicy
+   * @see {@link ServiceSection.OOMPolicy}
+   */
+  public setServiceOOMPolicy(oomPolicy: ServiceSection["OOMPolicy"]) {
+    this.service.Service.OOMPolicy = oomPolicy;
+    return this;
+  }
+  /**
+   * Set service OpenFile
+   * @see {@link ServiceSection.OpenFile}
+   */
+  public setServiceOpenFile(openFile: string | string[]) {
+    this.service.Service.OpenFile = openFile;
+    return this;
+  }
+  /**
+   * Set service ReloadSignal
+   * @see {@link ServiceSection.ReloadSignal}
+   */
+  public setServiceReloadSignal(reloadSignal: string) {
+    this.service.Service.ReloadSignal = reloadSignal;
     return this;
   }
 }

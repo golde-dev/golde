@@ -1,19 +1,30 @@
 interface InitData {
-  [section: string]: Record<string, string[] | string | boolean>;
+  [section: string]: Record<string, string[] | string | boolean | number>;
 }
 
-function readValue(value: string): string | boolean {
+function readValue(value: string): string | boolean | number {
+  const trimmed = value.trim();
   if (
-    value === "true" || value === "yes" || value === "on" || value === "1"
+    trimmed === "true" || trimmed === "yes" || trimmed === "on"
   ) {
     return true;
   }
+  if (trimmed === "1") {
+    console.warn("Ambiguous boolean value: 1, use yes or true instead");
+    return true;
+  }
   if (
-    value === "false" || value === "no" || value === "off" || value === "0"
+    trimmed === "false" || trimmed === "no" || trimmed === "off"
   ) {
     return false;
   }
-  return value;
+  if (trimmed === "0") {
+    console.warn("Ambiguous boolean value: 0, use no or false instead");
+    return false;
+  }
+
+  const numberValue = Number(trimmed);
+  return isFinite(numberValue) ? numberValue : trimmed;
 }
 
 /**
@@ -105,6 +116,7 @@ export class INI {
         if (!currentSection || !rawData) {
           throw new Error(`Invalid ini: ${rawData}`);
         }
+
         const section = iniData[currentSection];
         const parsedValue = readValue(value);
 
