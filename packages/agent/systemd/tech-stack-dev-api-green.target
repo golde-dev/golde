@@ -1,7 +1,0 @@
-
-[Unit]
-Description="tech-stack-dev-api green workers"
-Wants=tech-stack-dev-api-green@3001.service tech-stack-dev-api-green@3002.service tech-stack-dev-api-green@3003.service tech-stack-dev-api-green@3004.service
-
-[Install]
-WantedBy=multi-user.target
