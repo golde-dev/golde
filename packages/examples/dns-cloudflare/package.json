@@ -1,5 +1,5 @@
 {
-  "name": "@tenacify/example-dns-cloudflare",
+  "name": "@deployer/example-dns-cloudflare",
   "packageManager": "yarn@4.1.1",
   "type": "module",
   "workspaces": [
@@ -10,6 +10,6 @@
     "deployer:apply": "deployer apply"
   },
   "devDependencies": {
-    "@deployer/cli": "0.2.0-1714907983282"
+    "@deployer/cli": "*"
   }
 }
