@@ -1,9 +1,10 @@
-import { Service } from "@systemd-js/conf";
+import { create, enable, start } from "@systemd-js/ctl";
+import { createDeployerService } from "./unit.ts";
 
 export function install() {
-  const service = new Service();
+  const service = createDeployerService();
 
-  service
-    .getServiceSection()
-    .setExecStart("/usr/bin/node /path/to/your/app.js");
+  create("deployer-agent", service);
+  enable("deployer-agent", service);
+  start("deployer-agent", service);
 }
