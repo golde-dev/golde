@@ -6,7 +6,7 @@ const scheme = "https";
 
 export function start() {
   const { fetch } = createServer();
-  console.log("start");
+
   try {
     Deno.serve(
       {
@@ -14,7 +14,7 @@ export function start() {
         key: config.API_KEY,
         cert: config.API_CERT,
         onListen: ({ hostname, port }) => {
-          logger.info(`Server listening on ${scheme}://${hostname}:${port}`);
+          logger.info(`Agent listening on ${scheme}://${hostname}:${port}`);
         },
       },
       fetch,
