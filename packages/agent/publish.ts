@@ -17,5 +17,5 @@ function publish() {
 }
 
 function publishLocal() {
-  console.log("Publishing to local registry");
+  console.log("Locally installing agent");
 }
