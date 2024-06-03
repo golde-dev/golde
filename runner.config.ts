@@ -1,5 +1,9 @@
 import {spawnTask, parallelTask, seriesTask} from "@chyzwar/runner";
 
+spawnTask("verdaccio", 
+  "yarn", ["dlx", "verdaccio"]
+);
+
 spawnTask("start:docs", 
   "yarn", ["dev"], 
   {
@@ -142,7 +146,6 @@ parallelTask("publish:local", [
 ]);
 
 seriesTask("local", [
-  "dist:agent",
-  "dist:cli",
+  "dist:local",
   "publish:local",
 ]);

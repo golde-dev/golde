@@ -5,50 +5,50 @@ __metadata:
   version: 8
   cacheKey: 10c2
 
-"@deployer/cli-darwin-arm64@npm:0.2.0-1714907983282":
-  version: 0.2.0-1714907983282
-  resolution: "@deployer/cli-darwin-arm64@npm:0.2.0-1714907983282"
+"@deployer/cli-darwin-arm64@npm:0.2.0-1717373635979":
+  version: 0.2.0-1717373635979
+  resolution: "@deployer/cli-darwin-arm64@npm:0.2.0-1717373635979"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@deployer/cli-darwin-x64@npm:0.2.0-1714907983282":
-  version: 0.2.0-1714907983282
-  resolution: "@deployer/cli-darwin-x64@npm:0.2.0-1714907983282"
+"@deployer/cli-darwin-x64@npm:0.2.0-1717373635979":
+  version: 0.2.0-1717373635979
+  resolution: "@deployer/cli-darwin-x64@npm:0.2.0-1717373635979"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@deployer/cli-linux-arm64@npm:0.2.0-1714907983282":
-  version: 0.2.0-1714907983282
-  resolution: "@deployer/cli-linux-arm64@npm:0.2.0-1714907983282"
+"@deployer/cli-linux-arm64@npm:0.2.0-1717373635979":
+  version: 0.2.0-1717373635979
+  resolution: "@deployer/cli-linux-arm64@npm:0.2.0-1717373635979"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@deployer/cli-linux-x64@npm:0.2.0-1714907983282":
-  version: 0.2.0-1714907983282
-  resolution: "@deployer/cli-linux-x64@npm:0.2.0-1714907983282"
+"@deployer/cli-linux-x64@npm:0.2.0-1717373635979":
+  version: 0.2.0-1717373635979
+  resolution: "@deployer/cli-linux-x64@npm:0.2.0-1717373635979"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@deployer/cli-win32-x64@npm:0.2.0-1714907983282":
-  version: 0.2.0-1714907983282
-  resolution: "@deployer/cli-win32-x64@npm:0.2.0-1714907983282"
+"@deployer/cli-win32-x64@npm:0.2.0-1717373635979":
+  version: 0.2.0-1717373635979
+  resolution: "@deployer/cli-win32-x64@npm:0.2.0-1717373635979"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@deployer/cli@npm:0.2.0-1714907983282":
-  version: 0.2.0-1714907983282
-  resolution: "@deployer/cli@npm:0.2.0-1714907983282"
+"@deployer/cli@npm:0.2.0-1717373635979":
+  version: 0.2.0-1717373635979
+  resolution: "@deployer/cli@npm:0.2.0-1717373635979"
   dependencies:
-    "@deployer/cli-darwin-arm64": "npm:0.2.0-1714907983282"
-    "@deployer/cli-darwin-x64": "npm:0.2.0-1714907983282"
-    "@deployer/cli-linux-arm64": "npm:0.2.0-1714907983282"
-    "@deployer/cli-linux-x64": "npm:0.2.0-1714907983282"
-    "@deployer/cli-win32-x64": "npm:0.2.0-1714907983282"
+    "@deployer/cli-darwin-arm64": "npm:0.2.0-1717373635979"
+    "@deployer/cli-darwin-x64": "npm:0.2.0-1717373635979"
+    "@deployer/cli-linux-arm64": "npm:0.2.0-1717373635979"
+    "@deployer/cli-linux-x64": "npm:0.2.0-1717373635979"
+    "@deployer/cli-win32-x64": "npm:0.2.0-1717373635979"
   dependenciesMeta:
     "@deployer/cli-darwin-arm64":
       optional: true
@@ -62,14 +62,14 @@ __metadata:
       optional: true
   bin:
     deployer: bin/cli.cjs
-  checksum: 10c2/9bc7c9f7697cb78783626c3f1d91287da5c9e3ade2dfa82b09f39eae7566e704644259c16b80afe91329f03943019e10e858de2739dee9ad16fef065695f8e48
+  checksum: 10c2/dd8e9339bce2e44530b0deaebaf1329063c9c451083c865e158870a0338e63309a9c61334f6530f39feab8565a138f9a5be925c13c16d40fb7517b4dfbdc1ae6
   languageName: node
   linkType: hard
 
-"@tenacify/example-dns-cloudflare@workspace:.":
+"@deployer/example-dns-cloudflare@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@tenacify/example-dns-cloudflare@workspace:."
+  resolution: "@deployer/example-dns-cloudflare@workspace:."
   dependencies:
-    "@deployer/cli": "npm:0.2.0-1714907983282"
+    "@deployer/cli": "npm:0.2.0-1717373635979"
   languageName: unknown
   linkType: soft

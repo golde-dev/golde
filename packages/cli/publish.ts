@@ -6,6 +6,7 @@ const { local } = parseArgs(Deno.args, {
 });
 
 const localRegistry = "http://localhost:4873/";
+const resetPostInstall = true;
 const packages = [
   "cli",
   "cli-linux-x64",
@@ -77,7 +78,11 @@ async function publishNPMPackage(
   return await process.status;
 }
 
-async function updateExample(example: string, registry: string) {
+async function updateExample(
+  example: string,
+  registry: string,
+  reset: boolean = false,
+) {
   const { hostname } = new URL(registry);
   await new Deno.Command("yarn", {
     args: ["config", "set", "npmRegistryServer", registry],
@@ -95,7 +100,7 @@ async function updateExample(example: string, registry: string) {
   }).output();
 
   const o = await new Deno.Command("yarn", {
-    args: ["up", "@deployer/*"],
+    args: ["up", "@deployer/*", "--caret"],
     cwd: `../examples/${example}`,
   }).output();
   console.log(new TextDecoder().decode(o.stdout));
@@ -109,6 +114,17 @@ async function updateExample(example: string, registry: string) {
     args: ["config", "unset", "unsafeHttpWhitelist"],
     cwd: `../examples/${example}`,
   }).output();
+
+  if (reset) {
+    await new Deno.Command("git", {
+      args: ["restore", "yarn.lock"],
+      cwd: `../examples/${example}`,
+    }).output();
+    await new Deno.Command("git", {
+      args: ["restore", "package.json"],
+      cwd: `../examples/${example}`,
+    }).output();
+  }
 }
 
 function publish() {
@@ -126,7 +142,11 @@ async function publishLocal() {
     }
     for (const example of examples) {
       console.log(`Updating ${example}`);
-      await updateExample(example, localRegistry);
+      await updateExample(
+        example,
+        localRegistry,
+        resetPostInstall,
+      );
     }
   } finally {
     console.log("Stopping Verdaccio");
