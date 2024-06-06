@@ -1,9 +1,0 @@
-[Unit]
-Description=Monthly Timer for %i service
-
-[Timer]
-OnBootSec=1min
-OnUnitActiveSec=1h
-
-[Install]
-WantedBy=timers.target
