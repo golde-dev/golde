@@ -4,7 +4,7 @@
   "nodeModulesDir": false,
   "tasks": {
     "schema": "deno run --allow-write --allow-read src/bin/schema.ts",
-    "build": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run build.ts",
+    "build": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net build.ts",
     "publish": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts",
     "publish:local": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --local",
     "dist": "deno task schema && deno task compile && deno task build",
