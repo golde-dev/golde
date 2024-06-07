@@ -1,7 +1,7 @@
 {
   "name": "@tenacify/root",
   "packageManager": "yarn@4.1.1",
-  "type": "commonjs",
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
@@ -22,8 +22,8 @@
     "@commitlint/config-conventional": "^19.2.2",
     "@types/node": "^20.12.7",
     "@vitest/coverage-v8": "^1.5.3",
-    "eslint": "^8.57.0",
-    "eslint-plugin-jest": "^28.3.0",
+    "eslint": "^9.4.0",
+    "globals": "^15.4.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "typescript": "^5.4.5",

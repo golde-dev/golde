@@ -1,13 +1,15 @@
 {
+  "eslint.experimental.useFlatConfig": true,
   "cSpell.words": [
     "apac",
+    "astro",
     "astrojs",
     "brotli",
     "eeur",
     "enam",
     "hcloud",
-    "healthcheck",
     "Hetzner",
+    "healthcheck",
     "moderndash",
     "namecheap",
     "pino",
@@ -15,6 +17,7 @@
     "tenacify",
     "Tunables",
     "weur",
-    "wnam"
-  ]
+    "wnam",
+    "Caddyfile"
+  ],
 }

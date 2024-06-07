@@ -86,7 +86,7 @@ parallelTask("test", [
 ]);
 
 spawnTask("lint:rest", 
-  "yarn", ["eslint", ".", "--ext", ".ts,.js,.tsx"]
+  "yarn", ["eslint", ".", '--cache']
 );
 
 spawnTask("lint:agent", 
