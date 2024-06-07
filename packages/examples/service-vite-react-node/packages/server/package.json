@@ -1,13 +1,13 @@
 {
-  "name": "packages",
+  "name": "@deployer/service-vite-react-node-server",
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.js",
+  "type": "commonjs",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js"
   },
@@ -20,8 +20,5 @@
     "fastify": "^4.26.1",
     "fastify-cli": "^6.1.1",
     "fastify-plugin": "^4.5.1"
-  },
-  "devDependencies": {
-    "tap": "^16.3.10"
   }
 }

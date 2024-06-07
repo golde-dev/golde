@@ -1,8 +1,0 @@
-packages/agent
-packages/cli
-
-build
-node_modules
-dist
-lib
-examples

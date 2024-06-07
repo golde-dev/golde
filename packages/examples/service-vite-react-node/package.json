@@ -1,5 +1,5 @@
 {
-  "name": "@deployer/vite-react-node",
+  "name": "@deployer/service-vite-react-node",
   "packageManager": "yarn@4.0.2",
   "type": "commonjs",
   "workspaces": [
