@@ -36,7 +36,6 @@ const result = schema.safeParse({
 
 if (!result.success) {
   console.error("Invalid environment variables:", result.error.format());
-
   Deno.exit(1);
 }
 
