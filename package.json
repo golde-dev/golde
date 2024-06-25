@@ -6,7 +6,9 @@
     "packages/*"
   ],
   "scripts": {
+    "verdaccio": "runner verdaccio",
     "start": "runner start",
+    "local": "runner local",
     "test": "runner test",
     "lint": "runner lint",
     "dist": "runner dist",

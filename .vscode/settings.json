@@ -5,11 +5,13 @@
     "astro",
     "astrojs",
     "brotli",
+    "Caddyfile",
+    "corepack",
     "eeur",
     "enam",
     "hcloud",
-    "Hetzner",
     "healthcheck",
+    "Hetzner",
     "moderndash",
     "namecheap",
     "pino",
@@ -17,7 +19,6 @@
     "tenacify",
     "Tunables",
     "weur",
-    "wnam",
-    "Caddyfile"
+    "wnam"
   ],
 }
