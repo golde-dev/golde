@@ -1057,6 +1057,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@golde/root@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@golde/root@workspace:."
+  dependencies:
+    "@chyzwar/eslint-config": "npm:^0.2.26"
+    "@chyzwar/runner": "npm:^0.4.27"
+    "@commitlint/cli": "npm:^19.3.0"
+    "@commitlint/config-conventional": "npm:^19.2.2"
+    "@types/node": "npm:^20.14.10"
+    "@vitest/coverage-v8": "npm:^2.0.2"
+    eslint: "npm:^9.7.0"
+    globals: "npm:^15.8.0"
+    husky: "npm:^9.0.11"
+    lint-staged: "npm:^15.2.7"
+    typescript: "npm:^5.5.3"
+    vitest: "npm:^2.0.2"
+  languageName: unknown
+  linkType: soft
+
 "@humanwhocodes/module-importer@npm:^1.0.1":
   version: 1.0.1
   resolution: "@humanwhocodes/module-importer@npm:1.0.1"
@@ -1558,25 +1577,6 @@ __metadata:
   checksum: 10c2/7947051fba323e4a22d8b3be8ee0aaff85e9dd2327bf8cd97e992f6c2f17e9a038205ffa643cabaab2a9a907ea53a3a3b2146a70b4b1e83a6fa07ab5aa5adc93
   languageName: node
   linkType: hard
-
-"@tenacify/root@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "@tenacify/root@workspace:."
-  dependencies:
-    "@chyzwar/eslint-config": "npm:^0.2.26"
-    "@chyzwar/runner": "npm:^0.4.27"
-    "@commitlint/cli": "npm:^19.3.0"
-    "@commitlint/config-conventional": "npm:^19.2.2"
-    "@types/node": "npm:^20.14.10"
-    "@vitest/coverage-v8": "npm:^2.0.2"
-    eslint: "npm:^9.7.0"
-    globals: "npm:^15.8.0"
-    husky: "npm:^9.0.11"
-    lint-staged: "npm:^15.2.7"
-    typescript: "npm:^5.5.3"
-    vitest: "npm:^2.0.2"
-  languageName: unknown
-  linkType: soft
 
 "@types/acorn@npm:^4.0.0":
   version: 4.0.6

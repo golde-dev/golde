@@ -1,5 +1,5 @@
 {
-  "name": "@tenacify/root",
+  "name": "@golde/root",
   "packageManager": "yarn@4.1.1",
   "type": "module",
   "workspaces": [

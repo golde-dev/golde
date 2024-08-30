@@ -26,7 +26,7 @@ const config = {
     }
   },
   dns: {
-    "deployer.dev": {
+    "golde.dev": {
       type: "cloudflare",
       records: {
         "hetzner-server-1": {

@@ -48,7 +48,7 @@ export enum ContextErrorCode {
   /**
    * Provider init error
    */
-  STATE_OR_DEPLOYER_MISSING = "STATE_OR_DEPLOYER_MISSING",
+  STATE_OR_GOLDE_MISSING = "STATE_OR_GOLDE_MISSING",
 }
 
 export class ContextError extends Error {

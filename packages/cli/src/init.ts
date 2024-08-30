@@ -4,8 +4,8 @@ import { projectNameSchema } from "./schema.ts";
 import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "node:path";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { DeployerProvider, getDeployerConfig } from "./providers/deployer.ts";
-import { DeployerError } from "./clients/deployer.ts";
+import { getGoldeConfig, GoldeProvider } from "./providers/golde.ts";
+import { GoldeError } from "./clients/golde.ts";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
@@ -52,8 +52,8 @@ function createJSConfig(projectName: string) {
 const config = {
   name: "${projectName}",
   providers: {
-    deployer: {
-      apiKey: "{{ env.DEPLOYER_API_KEY }}",
+    golde: {
+      apiKey: "{{ env.golde_API_KEY }}",
     },
   },
 };
@@ -66,36 +66,36 @@ export default config;
 
 function createTSConfig(projectName: string) {
   const config = `
-import type {Config} from '@tenacify/cli'
+import type {Config} from '@golde/cli'
 
 const config: Config = {
   name: "${projectName}",
   providers: {
-    deployer: {
-      apiKey: "{{ env.DEPLOYER_API_KEY }}",
+    golde: {
+      apiKey: "{{ env.GOLDE_API_KEY }}",
     },
   },
 };
 export default config;
 `;
 
-  writeFileSync("./deployer.config.ts", config);
+  writeFileSync("./golde.config.ts", config);
 }
 
 function createJSONConfig(projectName: string) {
   const config = `
 {
-  "$schema": "https://tenacify.dev/schemas/deployer.config.schema.json",
+  "$schema": "https://golde.dev/schemas/golde.config.schema.json",
   "name": "${projectName}",
   "providers": {
-    "deployer": {
-      "apiKey": "{{ env.DEPLOYER_API_KEY }}"
+    "golde": {
+      "apiKey": "{{ env.GOLDE_API_KEY }}"
     }
   }
 }
 `;
 
-  writeFileSync("./deployer.config.json", config);
+  writeFileSync("./golde.config.json", config);
 }
 
 export async function initConfig() {
@@ -105,7 +105,7 @@ export async function initConfig() {
     isTSPackage,
   } = getProjectType();
 
-  const deployerConfig = getDeployerConfig();
+  const goldeConfig = getGoldeConfig();
 
   try {
     const projectName = await input({
@@ -117,55 +117,55 @@ export async function initConfig() {
     const configType = await select({
       message: "Select config format",
       default: isTSPackage
-        ? "deployer.config.ts"
+        ? "golde.config.ts"
         : isNPMPackage
-        ? "deployer.config.js"
-        : "deployer.toml",
+        ? "golde.config.js"
+        : "golde.toml",
       choices: [
         {
-          name: "deployer.config.js",
-          value: "deployer.config.js",
+          name: "golde.config.js",
+          value: "golde.config.js",
         },
         {
-          name: "deployer.config.ts",
-          value: "deployer.config.ts",
+          name: "golde.config.ts",
+          value: "golde.config.ts",
         },
         {
-          name: "deployer.config.json",
-          value: "deployer.config.json",
+          name: "golde.config.json",
+          value: "golde.config.json",
         },
         {
-          name: "deployer.toml",
-          value: "deployer.toml",
+          name: "golde.toml",
+          value: "golde.toml",
         },
       ],
     });
 
     switch (configType) {
-      case "deployer.config.js":
+      case "golde.config.js":
         createJSConfig(projectName);
         break;
-      case "deployer.config.ts":
+      case "golde.config.ts":
         createTSConfig(projectName);
         break;
-      case "deployer.config.json":
+      case "golde.config.json":
         createJSONConfig(projectName);
         break;
     }
 
-    if (deployerConfig) {
+    if (goldeConfig) {
       try {
-        const deployer = await DeployerProvider.init(
+        const golde = await GoldeProvider.init(
           projectName,
-          deployerConfig,
+          goldeConfig,
         );
-        await deployer.createProject();
+        await golde.createProject();
       } catch (error) {
-        if (error instanceof DeployerError) {
+        if (error instanceof GoldeError) {
           if (error.cause?.status === 409) {
             logger.error(`Project: ${projectName} already exists`);
           } else {
-            logger.error("Failed to create project in deployer", {
+            logger.error("Failed to create project in golde", {
               error,
             });
           }

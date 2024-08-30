@@ -12,7 +12,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
 
   await t.step("add new records", () => {
     const nextConfig = {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.1",
@@ -28,7 +28,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       [
         {
           "args": [
-            "deployer.dev",
+            "golde.dev",
             {
               "comment": undefined,
               "content": "20.10.10.1",
@@ -41,7 +41,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
           ],
           "dependencies": [],
           "executor": mockProvider.createZoneRecord,
-          "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
+          "path": "dns.cloudflare.golde.dev.A.dns-cloudflare",
           "type": Type.Create,
         },
       ],
@@ -50,7 +50,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
 
   await t.step("delete records", () => {
     const prevConfig = {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.1",
@@ -61,7 +61,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       },
     };
     const prevState = {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             id: "cloudflare id",
@@ -81,12 +81,12 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       [
         {
           "args": [
-            "deployer.dev",
+            "golde.dev",
             "cloudflare id",
           ],
           "dependencies": [],
           "executor": mockProvider.deleteZoneRecord,
-          "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
+          "path": "dns.cloudflare.golde.dev.A.dns-cloudflare",
           "type": Type.Delete,
         },
       ],
@@ -95,7 +95,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
 
   await t.step("update records", () => {
     const prevConfig = {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.1",
@@ -106,7 +106,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       },
     };
     const prevState = {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             id: "cloudflare id",
@@ -121,7 +121,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       },
     };
     const nextConfig = {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             value: "20.10.10.10",
@@ -136,7 +136,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       [
         {
           "args": [
-            "deployer.dev",
+            "golde.dev",
             "cloudflare id",
             {
               "comment": undefined,
@@ -150,7 +150,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
           ],
           "dependencies": [],
           "executor": mockProvider.updateZoneRecord,
-          "path": "dns.cloudflare.deployer.dev.A.dns-cloudflare",
+          "path": "dns.cloudflare.golde.dev.A.dns-cloudflare",
           "type": Type.Create,
         },
       ],

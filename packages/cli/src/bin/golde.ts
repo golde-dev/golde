@@ -12,8 +12,8 @@ await load({ export: true });
 const program = new Command();
 
 program
-  .name("deployer")
-  .description("CLI to manager deployer")
+  .name("golde")
+  .description("CLI to golde")
   .version("1.0.0");
 
 program

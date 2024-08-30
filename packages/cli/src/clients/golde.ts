@@ -2,15 +2,15 @@ import type { StateConfig } from "../providers/state.ts";
 import { logger } from "../logger.ts";
 import type { ConfigState } from "../types/config.ts";
 
-interface DeployerErrorCause {
+interface GoldeErrorCause {
   status: number;
   statusText: string;
 }
 
-export class DeployerError extends Error {
-  public cause?: DeployerErrorCause;
+export class GoldeError extends Error {
+  public cause?: GoldeErrorCause;
 
-  public constructor(message: string, cause?: DeployerErrorCause) {
+  public constructor(message: string, cause?: GoldeErrorCause) {
     super(message);
     this.cause = cause;
   }
@@ -20,7 +20,7 @@ function notFoundAsUndefined<T>(
   promise: Promise<T>,
 ): Promise<T | undefined> {
   return promise.catch((error: unknown) => {
-    if (error instanceof DeployerError) {
+    if (error instanceof GoldeError) {
       if (error.cause?.status === 404) {
         return undefined;
       }
@@ -29,7 +29,7 @@ function notFoundAsUndefined<T>(
   });
 }
 
-export class DeployerClient {
+export class GoldeClient {
   private readonly apiKey: string;
   private readonly baseUrl = "https://tech-stack.tenacify.localhost/api/v1";
 
@@ -52,7 +52,7 @@ export class DeployerClient {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        throw new DeployerError("Deployer request failed", {
+        throw new GoldeError("Golde request failed", {
           status: r.status,
           statusText: r.statusText,
         });
@@ -60,7 +60,7 @@ export class DeployerClient {
       return await r.json() as T;
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Deployer request", {
+      logger.debug("Golde request", {
         path,
         method,
         body,
@@ -83,14 +83,14 @@ export class DeployerClient {
       },
     }).then((r) => {
       if (!r.ok) {
-        throw new DeployerError("Deployer request failed", {
+        throw new GoldeError("Golde request failed", {
           status: r.status,
           statusText: r.statusText,
         });
       }
     }).finally(() => {
       const end = Date.now();
-      logger.debug("Deployer request", {
+      logger.debug("Golde request", {
         path,
         method,
         time: end - start,
@@ -103,7 +103,7 @@ export class DeployerClient {
       "/verify-token",
     );
     if (status !== "active") {
-      throw new DeployerError(`Token status is not active: ${status}`);
+      throw new GoldeError(`Token status is not active: ${status}`);
     }
   }
 

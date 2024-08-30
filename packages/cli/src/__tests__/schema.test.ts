@@ -8,7 +8,7 @@ Deno.test("validateConfig for project", async (t) => {
     const invalidConfig: Config = {
       name: "invalid project name",
       providers: {
-        deployer: {
+        golde: {
           apiKey: "valid_api_key",
         },
       },
@@ -23,7 +23,7 @@ Deno.test("validateConfig for project", async (t) => {
     const validConfig = {
       name: "valid_project_name",
       providers: {
-        deployer: {
+        golde: {
           apiKey: "valid_api_key",
         },
       },

@@ -8,7 +8,7 @@ function getExePath() {
 
   try {
     return require.resolve(
-      `@deployer/cli-${platform}-${arch}/bin/cli-${platform}-${arch}${extension}`,
+      `@golde/cli-${platform}-${arch}/bin/cli-${platform}-${arch}${extension}`,
     );
   } catch (e) {
     throw new Error(

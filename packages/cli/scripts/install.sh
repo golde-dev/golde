@@ -9,13 +9,13 @@ architecture="$(uname -m)"
 
 if [[ "$architecture" == "x86_64" ]]; then
   curl -fsSL \
-    https://github.com/deployer/deployer/releases/latest/download/cli-"${os,,}"-x64 \
-    -o /usr/local/bin/deployer
+    https://github.com/golde/golde/releases/latest/download/cli-"${os,,}"-x64 \
+    -o /usr/local/bin/golde
 else
   curl -fsSL \
-    https://github.com/deployer/deployer/releases/latest/download/cli-"${os,,}"-arm64 \
-    -o /usr/local/bin/deployer
+    https://github.com/golde/golde/releases/latest/download/cli-"${os,,}"-arm64 \
+    -o /usr/local/bin/golde
 fi
 
-sudo chmod +x /usr/local/bin/deployer
+sudo chmod +x /usr/local/bin/golde
 

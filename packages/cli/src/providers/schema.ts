@@ -4,14 +4,14 @@ import { z } from "zod";
 
 export const providersSchema: ZodType<ProvidersConfig> = z
   .object({
-    deployer: z
+    golde: z
       .object({
         apiKey: z
           .string()
-          .describe("Deployer api key"),
+          .describe("Golde api key"),
       })
       .optional()
-      .describe("Deployer provider config"),
+      .describe("Golde provider config"),
     cloudflare: z
       .object({
         apiToken: z
@@ -80,6 +80,6 @@ export const providersSchema: ZodType<ProvidersConfig> = z
   })
   .strict()
   .refine(
-    (data) => Boolean(data.deployer ?? data.state),
-    "Either deployer or state provider need to be configured",
+    (data) => Boolean(data.golde ?? data.state),
+    "Either golde or state provider need to be configured",
   );

@@ -1,15 +1,15 @@
 import { logger } from "../logger.ts";
-import { DeployerClient } from "../clients/deployer.ts";
+import { GoldeClient } from "../clients/golde.ts";
 import type { Provider } from "./types.ts";
 import type { StateConfig } from "./state.ts";
 import type { ConfigState } from "../types/config.ts";
 
-interface DeployerConfig {
+interface GoldeConfig {
   apiKey: string;
 }
 
-export const getDeployerConfig = (): DeployerConfig | void => {
-  const apiKey = Deno.env.get("DEPLOYER_API_KEY");
+export const getGoldeConfig = (): GoldeConfig | void => {
+  const apiKey = Deno.env.get("GOLDE_API_KEY");
   if (apiKey) {
     return {
       apiKey,
@@ -17,27 +17,27 @@ export const getDeployerConfig = (): DeployerConfig | void => {
   }
 };
 
-export class DeployerProvider implements Provider {
+export class GoldeProvider implements Provider {
   private readonly project: string;
-  private readonly client: DeployerClient;
+  private readonly client: GoldeClient;
 
-  private constructor(project: string, client: DeployerClient) {
+  private constructor(project: string, client: GoldeClient) {
     this.client = client;
     this.project = project;
   }
 
   public static async init(
     project: string,
-    { apiKey }: DeployerConfig,
-  ): Promise<DeployerProvider> {
-    const client = new DeployerClient(apiKey);
+    { apiKey }: GoldeConfig,
+  ): Promise<GoldeProvider> {
+    const client = new GoldeClient(apiKey);
 
     try {
       await client.verifyUserToken();
-      return new DeployerProvider(project, client);
+      return new GoldeProvider(project, client);
     } catch (error) {
       logger.error(
-        "Failed to initialize deployer provider, check your apiKey",
+        "Failed to initialize golde provider, check your apiKey",
         {
           error,
           apiKey: "<redacted>",
@@ -48,15 +48,15 @@ export class DeployerProvider implements Provider {
   }
 
   /**
-   * Create project in deployer
+   * Create project in golde
    */
   public async createProject() {
     await this.client.createProject(this.project);
   }
 
   /**
-   * If user use custom state provider we need to register with deployer
-   * Deployer need to know how to access state of project
+   * If user use custom state provider we need to register with golde
+   * Golde need to know how to access state of project
    */
   public async registerStateProvider(stateConfig: StateConfig) {
     await this.client.changeStateConfig(this.project, stateConfig);
@@ -77,7 +77,7 @@ export class DeployerProvider implements Provider {
   }
 
   /**
-   * Upload artifact via deployer api, using worker storage
+   * Upload artifact via golde api, using worker storage
    */
   public async uploadArtefact(path: string, key: string): Promise<void> {
     const fileBytes = await Deno.readFile(path);

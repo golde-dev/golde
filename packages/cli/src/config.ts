@@ -52,11 +52,11 @@ const getConfigRaw = (
     }
   }
   const possiblePaths = [
-    resolve("./deployer.config.cjs"),
-    resolve("./deployer.config.json"),
-    resolve("./deployer.config.js"),
-    resolve("./deployer.config.ts"),
-    resolve("./deployer.toml"),
+    resolve("./golde.config.cjs"),
+    resolve("./golde.config.json"),
+    resolve("./golde.config.js"),
+    resolve("./golde.config.ts"),
+    resolve("./golde.toml"),
   ];
 
   for (const configPath of possiblePaths) {

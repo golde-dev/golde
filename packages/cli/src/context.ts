@@ -1,7 +1,7 @@
 import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
 import { CloudflareProvider } from "./providers/cloudflare.ts";
-import { DeployerProvider, getDeployerConfig } from "./providers/deployer.ts";
+import { getGoldeConfig, GoldeProvider } from "./providers/golde.ts";
 import { HCloudProvider } from "./providers/hcloud.ts";
 import { StateProvider } from "./providers/state.ts";
 import type { Config } from "./types/config.ts";
@@ -12,8 +12,8 @@ export interface Context {
   previousState?: State;
   nextConfig: Config;
   nextState: State;
-  deployer?: DeployerProvider;
-  state: DeployerProvider | StateProvider;
+  golde?: GoldeProvider;
+  state: GoldeProvider | StateProvider;
   hcloud?: HCloudProvider;
   cloudflare?: CloudflareProvider;
 }
@@ -24,7 +24,7 @@ export const initializeContext = async (
   const {
     name,
     providers: {
-      deployer = getDeployerConfig(),
+      golde = getGoldeConfig(),
       state,
       hcloud,
       cloudflare,
@@ -35,12 +35,12 @@ export const initializeContext = async (
 
   try {
     const [
-      deployerProvider,
+      goldeProvider,
       stateProvider,
       hcloudProvider,
       cloudflareProvider,
     ] = await Promise.all([
-      deployer ? DeployerProvider.init(name, deployer) : undefined,
+      golde ? GoldeProvider.init(name, golde) : undefined,
       state ? StateProvider.init(name, state) : undefined,
       hcloud ? HCloudProvider.init(hcloud) : undefined,
       cloudflare ? CloudflareProvider.init(cloudflare) : undefined,
@@ -49,13 +49,13 @@ export const initializeContext = async (
     const contextBase = {
       nextConfig,
       nextState: {},
-      deployer: deployerProvider,
+      golde: goldeProvider,
       cloudflare: cloudflareProvider,
       hcloud: hcloudProvider,
     };
 
     if (stateProvider && state) {
-      await deployerProvider?.registerStateProvider(state);
+      await goldeProvider?.registerStateProvider(state);
       logger.debug("Using own state provider");
 
       const {
@@ -71,11 +71,11 @@ export const initializeContext = async (
         previousState,
         state: stateProvider,
       };
-    } else if (deployerProvider) {
+    } else if (goldeProvider) {
       const {
         config: previousConfig,
         state: previousState,
-      } = await deployerProvider.getState() ?? {};
+      } = await goldeProvider.getState() ?? {};
 
       logger.debug("Context initialized");
 
@@ -83,12 +83,12 @@ export const initializeContext = async (
         ...contextBase,
         previousConfig,
         previousState,
-        state: deployerProvider,
+        state: goldeProvider,
       };
     } else {
       throw new ContextError(
-        "Missing deployer or state config",
-        ContextErrorCode.STATE_OR_DEPLOYER_MISSING,
+        "Missing golde or state config",
+        ContextErrorCode.STATE_OR_GOLDE_MISSING,
       );
     }
   } catch (error) {

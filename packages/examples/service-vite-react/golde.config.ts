@@ -1,15 +1,15 @@
 
 const config = {
   providers: {
-    deployer: {
-      apiKey: "{{ env.DEPLOYER_API_KEY }}"
+    golde: {
+      apiKey: "{{ env.GOLDE_API_KEY }}"
     },
     cloudflare: {
       apiKey: "{{ env.CLOUDFLARE_API_KEY }}"
     }
   },
   dns: {
-    "deployer.dev": {
+    "golde.dev": {
       type: "cloudflare",
       records: [
         {
@@ -43,20 +43,20 @@ const config = {
       },
       branchMapping: {
         master: {
-          domain: "vite-react.deployer.dev",
+          domain: "vite-react.golde.dev",
           hosts: [
             "77.253.204.36",
           ],
         },
         develop: {
-          domain: "vite-react-dev.deployer.dev",
+          domain: "vite-react-dev.golde.dev",
           hosts: [
             "77.253.204.36",
           ],
         },
         "feature/*": {
           path: "{{ branchSlug }}",
-          domain: "vite-react-dev.deployer.dev",
+          domain: "vite-react-dev.golde.dev",
           hosts: [
             "77.253.204.36",
           ],

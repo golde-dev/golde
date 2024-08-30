@@ -24,8 +24,8 @@ After=network.target
 WantedBy=multi-user.target
 
 [Service]
-ExecStart=${join(`/opt/deployer/apps/${app}`, root)}/node build/app.js
-EnvironmentFile=${join(`/opt/deployer/apps/${app}`, root)}/env
+ExecStart=${join(`/opt/golde/apps/${app}`, root)}/node build/app.js
+EnvironmentFile=${join(`/opt/golde/apps/${app}`, root)}/env
 Restart=always
 DynamicUser=yes
 

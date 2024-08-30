@@ -106,7 +106,7 @@
                                   "hide": [
                                     "./Caddyfile"
                                   ],
-                                  "root": "/opt/deployer/apps/tech-stack-dev/current/packages/app/dist"
+                                  "root": "/opt/golde/apps/tech-stack-dev/current/packages/app/dist"
                                 }
                               ]
                             }
@@ -134,7 +134,7 @@
                                   "hide": [
                                     "./Caddyfile"
                                   ],
-                                  "root": "/opt/deployer/apps/tech-stack-dev/current/packages/website/dist"
+                                  "root": "/opt/golde/apps/tech-stack-dev/current/packages/website/dist"
                                 }
                               ]
                             }

@@ -26,10 +26,10 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
       cpu: [cpu],
       repository: {
         type: "git",
-        url: "git+https://github.com/username/repo.git",
+        url: "git+https://github.com/golde/golde.git",
       },
       bugs: {
-        url: "https://github.com/username/repo/issues",
+        url: "https://github.com/golde/golde/issues",
       },
     },
     null,
@@ -58,7 +58,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
     binDistPath,
     packageBinExecPath,
   );
-  Deno.copyFileSync("../../License", licensePath);
+  Deno.copyFileSync("../../LICENSE", licensePath);
 };
 
 createBinPackage("cli-linux-x64", "linux", "x64");
@@ -91,24 +91,24 @@ await build({
     license: "Apache-2.0",
     repository: {
       type: "git",
-      url: "git+https://github.com/username/repo.git",
+      url: "git+https://github.com/golde/golde.git",
     },
     bugs: {
-      url: "https://github.com/username/repo/issues",
+      url: "https://github.com/golde/golde/issues",
     },
     optionalDependencies: {
       "@golde/cli-linux-x64": version,
       "@golde/cli-linux-arm64": version,
       "@golde/cli-win32-x64": version,
-      "@deployer/cli-darwin-arm64": version,
-      "@deployer/cli-darwin-x64": version,
+      "@golde/cli-darwin-arm64": version,
+      "@golde/cli-darwin-x64": version,
     },
   },
   postBuild() {
-    Deno.mkdirSync("dist/npm/@deployer/cli/bin", { recursive: true });
-    Deno.copyFileSync("bin/cli.cjs", "dist/npm/@deployer/cli/bin/cli.cjs");
-    Deno.copyFileSync("Readme.md", "dist/npm/@deployer/cli/README.md");
-    Deno.copyFileSync("schema.json", "dist/npm/@deployer/cli/schema.json");
-    Deno.copyFileSync("../../License", "dist/npm/@deployer/cli/License");
+    Deno.mkdirSync("dist/npm/@golde/cli/bin", { recursive: true });
+    Deno.copyFileSync("bin/cli.cjs", "dist/npm/@golde/cli/bin/cli.cjs");
+    Deno.copyFileSync("README.md", "dist/npm/@golde/cli/README.md");
+    Deno.copyFileSync("schema.json", "dist/npm/@golde/cli/schema.json");
+    Deno.copyFileSync("../../LICENSE", "dist/npm/@golde/cli/LICENSE");
   },
 });

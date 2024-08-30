@@ -5,7 +5,7 @@ import { logger } from "../logger.ts";
 import { join } from "node:path";
 import type { StateProvider } from "../providers/state.ts";
 import type { Context } from "../context.ts";
-import type { DeployerProvider } from "../providers/deployer.ts";
+import type { GoldeProvider } from "../providers/golde.ts";
 
 export const getArtifactKey = (project: string, key: string) => {
   return `/${project}/artifacts/${key}`;
@@ -25,7 +25,7 @@ const tarArtifacts = async (
 };
 
 const uploadTar = async (
-  state: DeployerProvider | StateProvider,
+  state: GoldeProvider | StateProvider,
   tarFilePath: string,
   s3Path: string,
 ) => {

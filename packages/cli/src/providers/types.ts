@@ -1,10 +1,10 @@
 export interface ProvidersConfig {
   /**
-   * Hetzner cloud provider config
+   * Golde provider config
    */
-  deployer?: {
+  golde?: {
     /**
-     * Deployer API token
+     * Golde API token
      */
     apiKey: string;
   };

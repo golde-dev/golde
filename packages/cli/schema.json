@@ -1,7 +1,7 @@
 {
-  "$ref": "#/definitions/deployer",
+  "$ref": "#/definitions/golde",
   "definitions": {
-    "deployer": {
+    "golde": {
       "type": "object",
       "properties": {
         "name": {
@@ -12,19 +12,19 @@
         "providers": {
           "type": "object",
           "properties": {
-            "deployer": {
+            "golde": {
               "type": "object",
               "properties": {
                 "apiKey": {
                   "type": "string",
-                  "description": "Deployer api key"
+                  "description": "Golde api key"
                 }
               },
               "required": [
                 "apiKey"
               ],
               "additionalProperties": false,
-              "description": "Deployer provider config"
+              "description": "Golde provider config"
             },
             "cloudflare": {
               "type": "object",
