@@ -26,10 +26,10 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
       cpu: [cpu],
       repository: {
         type: "git",
-        url: "git+https://github.com/golde/golde.git",
+        url: "git+https://github.com/golde-dev/golde.git",
       },
       bugs: {
-        url: "https://github.com/golde/golde/issues",
+        url: "https://github.com/golde-dev/golde/issues",
       },
     },
     null,
@@ -91,10 +91,10 @@ await build({
     license: "Apache-2.0",
     repository: {
       type: "git",
-      url: "git+https://github.com/golde/golde.git",
+      url: "git+https://github.com/golde-dev/golde.git",
     },
     bugs: {
-      url: "https://github.com/golde/golde/issues",
+      url: "https://github.com/golde-dev/golde/issues",
     },
     optionalDependencies: {
       "@golde/cli-linux-x64": version,
