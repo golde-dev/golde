@@ -61,7 +61,7 @@ const config = {
 export default config;
 `;
 
-  writeFileSync("./deployer.config.js", config);
+  writeFileSync("./golde.config.js", config);
 }
 
 function createTSConfig(projectName: string) {

@@ -1,5 +1,5 @@
 {
-  "name": "@deployer/service-vite-react-node",
+  "name": "@golde/service-vite-react-node",
   "packageManager": "yarn@4.0.2",
   "type": "commonjs",
   "workspaces": [
@@ -15,7 +15,7 @@
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.24",
     "@chyzwar/runner": "^0.4.25",
-    "@deployer/cli": "0.2.0-1717373635979",
+    "@golde/cli": "^0.2.0",
     "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",

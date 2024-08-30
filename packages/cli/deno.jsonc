@@ -1,5 +1,5 @@
 {
-  "name": "@deployer/cli",
+  "name": "@golde/cli",
   "version": "0.2.0",
   "nodeModulesDir": false,
   "tasks": {
@@ -10,11 +10,11 @@
     "dist": "deno task schema && deno task compile && deno task build",
     "dist:local": "deno task schema && deno task compile && deno task build --local",
     "compile": "deno task compile:linux_x86 && deno task compile:linux_arm && deno task compile:windows && deno task compile:darwin_x86 && deno task compile:darwin_arm",
-    "compile:linux_x86": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu --output dist/bin/cli-linux-x64 src/bin/deployer.ts",
-    "compile:linux_arm": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-unknown-linux-gnu --output dist/bin/cli-linux-arm64 src/bin/deployer.ts",
-    "compile:windows": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc --output dist/bin/cli-win32-x64 src/bin/deployer.ts",
-    "compile:darwin_x86": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-apple-darwin --output dist/bin/cli-darwin-x64 src/bin/deployer.ts",
-    "compile:darwin_arm": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-apple-darwin --output dist/bin/cli-darwin-arm64 src/bin/deployer.ts"
+    "compile:linux_x86": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu --output dist/bin/cli-linux-x64 src/bin/golde.ts",
+    "compile:linux_arm": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-unknown-linux-gnu --output dist/bin/cli-linux-arm64 src/bin/golde.ts",
+    "compile:windows": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc --output dist/bin/cli-win32-x64 src/bin/golde.ts",
+    "compile:darwin_x86": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-apple-darwin --output dist/bin/cli-darwin-x64 src/bin/golde.ts",
+    "compile:darwin_arm": "deno compile --cert ../agent/certs/tenacify.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-apple-darwin --output dist/bin/cli-darwin-arm64 src/bin/golde.ts"
   },
   "imports": {
     "@aws-sdk/client-s3": "npm:@aws-sdk/client-s3@^3.23.0",

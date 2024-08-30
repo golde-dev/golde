@@ -52,7 +52,7 @@ async function publishNPMPackage(
 ) {
   const command = new Deno.Command("npm", {
     args: ["publish", "--registry", registry],
-    cwd: `dist/npm/@deployer/${pkg}`,
+    cwd: `dist/npm/@golde/${pkg}`,
     stdout: "piped",
     stderr: "piped",
   });
@@ -100,7 +100,7 @@ async function updateExample(
   }).output();
 
   const o = await new Deno.Command("yarn", {
-    args: ["up", "@deployer/*", "--caret"],
+    args: ["up", "@golde/*", "--caret"],
     cwd: `../examples/${example}`,
   }).output();
   console.log(new TextDecoder().decode(o.stdout));

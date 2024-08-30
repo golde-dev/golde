@@ -9,12 +9,12 @@ architecture="$(uname -m)"
 
 if [[ "$architecture" == "x86_64" ]]; then
   curl -fsSL \
-    https://github.com/deployer/deployer/releases/latest/download/agent-linux-x64 \
-    -o /tmp/deployer-agent
+    https://github.com/golde/golde/releases/latest/download/agent-linux-x64 \
+    -o /tmp/golde-agent
 else
   curl -fsSL \
-    https://github.com/deployer/deployer/releases/latest/download/agent-linux-arm64 \
-    -o /tmp/deployer-agent
+    https://github.com/golde/golde/releases/latest/download/agent-linux-arm64 \
+    -o /tmp/golde-agent
 fi
 
-./tmp/deployer-agent install
+./tmp/golde-agent install

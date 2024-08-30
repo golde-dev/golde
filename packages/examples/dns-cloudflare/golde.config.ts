@@ -1,10 +1,10 @@
-import type {Config} from '@deployer/cli'
+import type {Config} from '@golde/cli'
 
 const config: Config = {
   name: "example-dns-cloudflare",
   providers: {
-    deployer: {
-      apiKey: "{{ env.DEPLOYER_API_KEY }}",
+    golde: {
+      apiKey: "{{ env.GOLDE_API_KEY }}",
     },
     cloudflare: {
       apiToken: "{{ env.CLOUDFLARE_API_TOKEN }}",
@@ -13,7 +13,7 @@ const config: Config = {
   },
   dns: {
     cloudflare: {
-      "deployer.dev": {
+      "golde.dev": {
         "A": {
           "dns-cloudflare": {
             value: "",

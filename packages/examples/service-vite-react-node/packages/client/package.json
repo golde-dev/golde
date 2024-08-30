@@ -1,5 +1,5 @@
 {
-  "name": "@deployer/service-vite-react-node-client",
+  "name": "@golde/service-vite-react-node-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",

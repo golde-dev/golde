@@ -7,7 +7,7 @@ export const createService = () => {
   service
     .getUnitSection()
     .setAfter("network.target")
-    .setDescription("Deployer Agent");
+    .setDescription("Golde infrastructure agent");
 
   service
     .getInstallSection()
@@ -24,14 +24,13 @@ export const createService = () => {
   return service;
 };
 
-
 export const createUpdaterTimer = () => {
   const timer = new Timer();
 
   timer
     .getUnitSection()
-    .setDescription("Deployer Agent Updater");
-  
+    .setDescription("Golde infrastructure agent updater timer");
+
   timer
     .getInstallSection()
     .setWantedBy("timers.target");
@@ -39,17 +38,17 @@ export const createUpdaterTimer = () => {
   timer
     .getTimerSection()
     .setOnBootSec("1m")
-    .setOnUnitActiveSec("1h")
+    .setOnUnitActiveSec("1h");
 
   return timer;
-}
+};
 
 export const createUpdaterService = () => {
   const service = new Service();
 
   service
     .getUnitSection()
-    .setDescription("Deployer Agent Updater");
+    .setDescription("Golde infrastructure agent updater");
 
   service
     .getInstallSection()
@@ -64,4 +63,4 @@ export const createUpdaterService = () => {
     .setExecStart(`${AGENT_EXEC_PATH} upgrade`);
 
   return service;
-}
+};

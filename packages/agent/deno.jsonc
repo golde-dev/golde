@@ -1,5 +1,5 @@
 {
-  "name": "@deployer/agent",
+  "name": "@golde/agent",
   "version": "0.1.0",
   "tasks": {
     "start": "deno run --watch --allow-net --allow-read --allow-env src/bin/agent.ts start",

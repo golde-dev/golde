@@ -7,7 +7,7 @@ const config = {
   },
   dns: {
     cloudflare: {
-      "deployer.dev": {
+      "golde.dev": {
         records: {
           "vite-react-node": {
             type: "A", 

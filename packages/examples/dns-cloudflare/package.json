@@ -1,15 +1,15 @@
 {
-  "name": "@deployer/example-dns-cloudflare",
+  "name": "@golde/example-dns-cloudflare",
   "packageManager": "yarn@4.1.1",
   "type": "module",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "deployer:show": "deployer show",
-    "deployer:apply": "deployer apply"
+    "golde:show": "golde show",
+    "golde:apply": "golde apply"
   },
   "devDependencies": {
-    "@deployer/cli": "*"
+    "@golde/cli": "*"
   }
 }

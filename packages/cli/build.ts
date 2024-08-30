@@ -18,7 +18,7 @@ if (local) {
 const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
   const cliPackageSON = JSON.stringify(
     {
-      name: `@deployer/${name}`,
+      name: `@golde/${name}`,
       version,
       description: "Your package.",
       license: "Apache-2.0",
@@ -35,7 +35,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
     null,
     2,
   );
-  const packagePath = `dist/npm/@deployer/${name}`;
+  const packagePath = `dist/npm/@golde/${name}`;
   const packageJSONPath = `${packagePath}/package.json`;
   const licensePath = `${packagePath}/License`;
   const packageBinPath = `${packagePath}/bin`;
@@ -69,7 +69,7 @@ createBinPackage("cli-darwin-arm64", "darwin", "arm64");
 
 await build({
   entryPoints: ["./src/mod.ts"],
-  outDir: "./dist/npm/@deployer/cli",
+  outDir: "./dist/npm/@golde/cli",
   testPattern: "**/*.test.{ts,tsx,js,mjs,jsx}",
   importMap: "deno.jsonc",
   scriptModule: false,
@@ -81,10 +81,10 @@ await build({
     target: "ES2022",
   },
   package: {
-    name: "@deployer/cli",
+    name: "@golde/cli",
     version,
     bin: {
-      deployer: "bin/cli.cjs",
+      golde: "bin/cli.cjs",
     },
     type: "module",
     description: "Your package.",
@@ -97,9 +97,9 @@ await build({
       url: "https://github.com/username/repo/issues",
     },
     optionalDependencies: {
-      "@deployer/cli-linux-x64": version,
-      "@deployer/cli-linux-arm64": version,
-      "@deployer/cli-win32-x64": version,
+      "@golde/cli-linux-x64": version,
+      "@golde/cli-linux-arm64": version,
+      "@golde/cli-win32-x64": version,
       "@deployer/cli-darwin-arm64": version,
       "@deployer/cli-darwin-x64": version,
     },

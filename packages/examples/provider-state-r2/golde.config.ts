@@ -1,8 +1,8 @@
 
 const config = {
   providers: {
-    deployer: {
-      apiKey: "{{ env.DEPLOYER_API_KEY }}"
+    golde: {
+      apiKey: "{{ env.GOLDE_API_KEY }}"
     },
     cloudflare: {
       apiKey: "{{ env.CLOUDFLARE_API_KEY }}"

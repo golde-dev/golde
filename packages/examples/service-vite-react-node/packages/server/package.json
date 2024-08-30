@@ -1,5 +1,5 @@
 {
-  "name": "@deployer/service-vite-react-node-server",
+  "name": "@golde/service-vite-react-node-server",
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.js",

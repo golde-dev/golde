@@ -1,5 +1,5 @@
 {
-  "name": "vite-react",
+  "name": "@golde/example-service-vite-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,7 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "@deployer/cli": "*",
+    "@golde/cli": "*",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",

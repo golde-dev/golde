@@ -12,7 +12,7 @@ const program = new Command();
 
 program
   .name("agent")
-  .description("Agent deployer")
+  .description("Golde infrastructure agent CLI")
   .version("1.0.0");
 
 program
