@@ -20,7 +20,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
     {
       name: `@golde/${name}`,
       version,
-      description: "Your package.",
+      description: `CLI for Golde ${os}-${cpu}`,
       license: "Apache-2.0",
       os: [os],
       cpu: [cpu],

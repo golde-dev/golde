@@ -1,7 +1,7 @@
 import {spawnTask, parallelTask, seriesTask} from "@chyzwar/runner";
 
 spawnTask("verdaccio", 
-  "yarn", ["dlx", "verdaccio"]
+  "yarn", ["dlx", "verdaccio@6.0.0-rc.1"],
 );
 
 spawnTask("start:docs", 
@@ -90,13 +90,13 @@ spawnTask("lint:rest",
 );
 
 spawnTask("lint:agent", 
-  "deno", ["lint"], 
+  "deno", ["lint", "src/"], 
   {
     cwd: "./packages/agent",
   }
 );
 spawnTask("lint:cli", 
-  "deno", ["lint"], 
+  "deno", ["lint", "src/"], 
   {
     cwd: "./packages/cli",
   }

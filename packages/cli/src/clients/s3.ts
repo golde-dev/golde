@@ -6,7 +6,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import type { Readable } from "node:stream";
-import { Logger } from "../logger.ts";
+import type { Logger } from "../logger.ts";
 
 export enum LogCode {
   S3GetObjectError = "S3GetObjectError",

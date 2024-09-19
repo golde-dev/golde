@@ -2,6 +2,7 @@
   "name": "@golde/cli",
   "version": "0.2.0",
   "nodeModulesDir": false,
+  "exports": {},
   "tasks": {
     "schema": "deno run --allow-write --allow-read src/bin/schema.ts",
     "build": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net build.ts",

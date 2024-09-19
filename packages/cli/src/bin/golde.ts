@@ -5,7 +5,7 @@ import { getConfig } from "../config.ts";
 import { createPlan } from "../plan.ts";
 import { initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
-import { LevelName } from "@std/log";
+import type { LevelName } from "@std/log";
 
 await load({ export: true });
 

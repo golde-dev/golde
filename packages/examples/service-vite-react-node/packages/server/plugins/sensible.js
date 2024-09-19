@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 
 const fp = require('fastify-plugin');
 const sensible = require('@fastify/sensible');

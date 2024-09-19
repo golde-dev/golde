@@ -5,11 +5,11 @@ import {
   formatters,
   getLevelName,
   info,
-  LevelName,
-  LogLevel,
-  LogRecord,
   setup,
   warn,
+  type LogLevel,
+  type LogRecord,
+  type LevelName,
 } from "@std/log";
 
 const {

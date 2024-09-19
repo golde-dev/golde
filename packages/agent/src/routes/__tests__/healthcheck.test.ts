@@ -1,4 +1,4 @@
-import { Context } from "hono";
+import type { Context } from "hono";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { healthcheck } from "../healthcheck.ts";
 
