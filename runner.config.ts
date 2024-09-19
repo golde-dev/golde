@@ -108,6 +108,10 @@ parallelTask("lint", [
   "lint:rest",
 ]);
 
+spawnTask("version", 
+  "lerna", ["version", "--yes"],
+)
+
 spawnTask("publish:cli",
   "deno", ["task", "publish"],
   {

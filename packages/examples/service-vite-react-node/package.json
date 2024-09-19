@@ -2,6 +2,7 @@
   "name": "@golde/service-vite-react-node",
   "packageManager": "yarn@4.0.2",
   "type": "commonjs",
+  "private": true,
   "workspaces": [
     "packages/*"
   ],

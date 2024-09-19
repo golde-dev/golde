@@ -1,11 +1,12 @@
 {
-  "name": "docs",
+  "name": "@golde/docs",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.4.0",
+  "private": true,
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "dist": "astro check 4 m                                                          NN&& astro build",
+    "dist": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

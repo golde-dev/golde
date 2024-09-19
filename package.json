@@ -12,6 +12,8 @@
     "test": "runner test",
     "lint": "runner lint",
     "dist": "runner dist",
+    "version": "runner version",
+    "publish": "runner publish",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -22,6 +24,10 @@
     "@chyzwar/runner": "^0.4.30",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@lerna-lite/changed": "^3.9.0",
+    "@lerna-lite/cli": "^3.9.0",
+    "@lerna-lite/publish": "^3.9.0",
+    "@lerna-lite/version": "^3.9.0",
     "@types/node": "^22.5.5",
     "@vitest/coverage-v8": "^2.1.1",
     "eslint": "^9.10.0",

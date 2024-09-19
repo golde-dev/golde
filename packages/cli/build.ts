@@ -8,7 +8,7 @@ const { local } = parseArgs(Deno.args, {
 });
 
 let { version } = JSON.parse(
-  Deno.readTextFileSync("deno.jsonc"),
+  Deno.readTextFileSync("../../lerna.json"),
 );
 
 if (local) {
@@ -20,7 +20,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
     {
       name: `@golde/${name}`,
       version,
-      description: `CLI for Golde ${os}-${cpu}`,
+      description: `Golde CLI for ${os}-${cpu}`,
       license: "Apache-2.0",
       os: [os],
       cpu: [cpu],
@@ -87,7 +87,7 @@ await build({
       golde: "bin/cli.cjs",
     },
     type: "module",
-    description: "Your package.",
+    description: "Golde CLI",
     license: "Apache-2.0",
     repository: {
       type: "git",

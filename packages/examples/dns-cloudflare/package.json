@@ -2,9 +2,7 @@
   "name": "@golde/example-dns-cloudflare",
   "packageManager": "yarn@4.1.1",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
+  "private": true,
   "scripts": {
     "golde:show": "golde show",
     "golde:apply": "golde apply"

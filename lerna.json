@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
+  "npmClient": "yarn",
+  "version": "0.4.0",
+  "changelogPreset": "conventional-changelog-conventionalcommits",
+  "packages": [
+    "packages/*",
+    "packages/cli/dist/npm/@golde/*"
+  ],
+  "command": {
+    "version": {
+      "noPrivate": true,
+      "skipBumpOnlyReleases": true,
+      "conventionalCommits": true,
+      "syncWorkspaceLock": true,
+      "message": "chore(release): new versions",
+      "allowBranch": "master",
+      "createRelease": "github",
+      "changelogIncludeCommitsClientLogin": " - by @%l",
+      "ignoreChanges": [
+        "yarn.lock"
+      ]
+    }
+  }
+}
