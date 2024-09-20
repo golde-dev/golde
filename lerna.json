@@ -10,14 +10,17 @@
   "command": {
     "version": {
       "noPrivate": true,
-      "skipBumpOnlyReleases": true,
       "conventionalCommits": true,
       "syncWorkspaceLock": true,
       "message": "chore(release): new versions",
       "allowBranch": "master",
       "createRelease": "github",
+      "changelogHeaderMessage": "## Own yor PaaS",
       "changelogIncludeCommitsClientLogin": " - by @%l",
       "ignoreChanges": [
+        "**/__fixtures__/**",
+        "**/__tests__/**",
+        "**/*.md",
         "yarn.lock"
       ]
     }

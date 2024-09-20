@@ -1,3 +1,9 @@
 {
-  "extends": "astro/tsconfigs/strict"
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "allowJs": false,
+    "incremental": true,
+    "tsBuildInfoFile": "dist/buildInfo.json",
+  },
 }

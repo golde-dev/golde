@@ -7,14 +7,16 @@ import { install } from "../install.ts";
 import { upgrade } from "../upgrade.ts";
 import type { LevelName } from "@std/log";
 
-
 await load({ export: true });
+
+const { default: { version } } = await import("../../../../lerna.json");
+
 const program = new Command();
 
 program
   .name("agent")
   .description("Golde infrastructure agent CLI")
-  .version("1.0.0");
+  .version(version);
 
 program
   .command("start")

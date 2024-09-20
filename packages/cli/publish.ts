@@ -1,12 +1,17 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { TextLineStream } from "@std/streams";
+import { exec } from "sudo-prompt";
 
+const { version } = JSON.parse(
+  Deno.readTextFileSync("../../lerna.json"),
+);
 const { local } = parseArgs(Deno.args, {
   boolean: ["local"],
 });
 
 const localRegistry = "http://localhost:4873/";
-const resetPostInstall = true;
+const publicRegistry = "https://registry.npmjs.org/";
+
 const packages = [
   "cli",
   "cli-linux-x64",
@@ -21,12 +26,6 @@ const examples = [
   "service-vite-react-node",
   "service-vite-react",
 ];
-
-if (local) {
-  publishLocal();
-} else {
-  publish();
-}
 
 async function startVerdaccio() {
   try {
@@ -44,6 +43,16 @@ async function startVerdaccio() {
       process.kill();
     };
   }
+}
+
+async function uploadReleaseArtifacts() {
+  console.log("Updating artifacts");
+  const o = await new Deno.Command("gh", {
+    args: ["release", "upload", version, "*"],
+    cwd: `./dist/bin`,
+  }).output();
+  console.log(new TextDecoder().decode(o.stdout));
+  console.error(new TextDecoder().decode(o.stderr));
 }
 
 async function publishNPMPackage(
@@ -127,8 +136,40 @@ async function updateExample(
   }
 }
 
-function publish() {
+function updateLocalCLI(): Promise<void> {
+  console.log("Updating local CLI");
+
+  return new Promise((resolve, reject) => {
+    exec(
+      `cp ${import.meta.dirname}/dist/bin/cli-linux-x64 /usr/local/bin/golde`,
+      { name: "Golde CLI update" },
+      function (error, stdout, stderr) {
+        if (error) {
+          console.error({ error, stderr }, "Failed to update local agent");
+          reject(error);
+        }
+        console.log("stdout: " + stdout);
+        resolve();
+      },
+    );
+  });
+}
+
+async function publish() {
   console.log("Publishing to remote registry");
+  for (const pkg of packages) {
+    console.log(`Publishing ${pkg}`);
+    await publishNPMPackage(pkg, publicRegistry);
+  }
+  await uploadReleaseArtifacts();
+  for (const example of examples) {
+    console.log(`Updating ${example}`);
+    await updateExample(
+      example,
+      publicRegistry,
+      false,
+    );
+  }
 }
 
 async function publishLocal() {
@@ -136,6 +177,7 @@ async function publishLocal() {
   const stopVerdaccio = await startVerdaccio();
 
   try {
+    await updateLocalCLI();
     for (const pkg of packages) {
       console.log(`Publishing ${pkg}`);
       await publishNPMPackage(pkg, localRegistry);
@@ -145,11 +187,17 @@ async function publishLocal() {
       await updateExample(
         example,
         localRegistry,
-        resetPostInstall,
+        true,
       );
     }
   } finally {
     console.log("Stopping Verdaccio");
     stopVerdaccio?.();
   }
+}
+
+if (local) {
+  publishLocal();
+} else {
+  publish();
 }

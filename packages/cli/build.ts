@@ -21,9 +21,17 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
       name: `@golde/${name}`,
       version,
       description: `Golde CLI for ${os}-${cpu}`,
+      keywords: [
+        "cli",
+        "golde",
+        "infrastructure",
+      ],
       license: "Apache-2.0",
       os: [os],
       cpu: [cpu],
+      publishConfig: {
+        access: "public",
+      },
       repository: {
         type: "git",
         url: "git+https://github.com/golde-dev/golde.git",
@@ -73,6 +81,7 @@ await build({
   testPattern: "**/*.test.{ts,tsx,js,mjs,jsx}",
   importMap: "deno.jsonc",
   scriptModule: false,
+  skipNpmInstall: true,
   test: false,
   shims: {
     deno: true,
@@ -86,9 +95,17 @@ await build({
     bin: {
       golde: "bin/cli.cjs",
     },
+    keywords: [
+      "cli",
+      "golde",
+      "infrastructure",
+    ],
     type: "module",
     description: "Golde CLI",
     license: "Apache-2.0",
+    publishConfig: {
+      access: "public",
+    },
     repository: {
       type: "git",
       url: "git+https://github.com/golde-dev/golde.git",

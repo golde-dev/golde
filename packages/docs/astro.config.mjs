@@ -1,13 +1,17 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 
-// https://astro.build/config
+/**
+ * @see https://astro.build/config
+ */
 export default defineConfig({
+  site: "https://golde.dev/docs",
   integrations: [
     starlight({
-      title: "My Docs",
+      title: "Golde Docs",
+      disable404Route: true,
       social: {
-        github: "https://github.com/withastro/starlight",
+        github: "https://github.com/golde-dev/golde",
       },
       sidebar: [
         {

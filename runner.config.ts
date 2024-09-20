@@ -42,6 +42,11 @@ spawnTask("dist:cli",
   }
 );
 
+parallelTask("post-version", [
+  "dist:agent", 
+  "dist:cli",
+]);
+
 parallelTask("dist", [
   "dist:agent", 
   "dist:cli",

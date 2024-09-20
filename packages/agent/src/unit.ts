@@ -57,7 +57,6 @@ export const createUpdaterService = () => {
   service
     .getServiceSection()
     .setType("oneshot")
-    .setRestart("always")
     .setUser("root")
     .setGroup("root")
     .setExecStart(`${AGENT_EXEC_PATH} upgrade`);

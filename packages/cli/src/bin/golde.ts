@@ -9,12 +9,14 @@ import type { LevelName } from "@std/log";
 
 await load({ export: true });
 
+const { default: { version } } = await import("../../../../lerna.json");
+
 const program = new Command();
 
 program
   .name("golde")
   .description("CLI to golde")
-  .version("1.0.0");
+  .version(version);
 
 program
   .command("init")

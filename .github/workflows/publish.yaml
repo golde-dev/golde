@@ -4,16 +4,13 @@ name: Publish
 # https://dev.to/xcanchal/automatic-versioning-in-a-lerna-monorepo-using-github-actions-4hij
 # Problems:
 #   I tried to use github registry to publish public packages,
-#   but packages in github require auth to insall even if package is public.
-#
-#   Lerna use npm for publish, even if npm client is set to yarn
-#   Publish only use npm as client and it ignore any config in yarnrc and npmClient settings
+#   but packages in github require auth to install even if package is public.
 #
 #   Npm token will not be configured without registry-url set in actions/setup-node
 #   To configure authToken for npm both registry-url and secret is needed.
-#   
-#   When publishing public package, publishConfig.access need to be configured
-# 
+#   When publishing public package, publishConfig.access need to be configured on each package
+#
+#   Lerna need fetch-depth: 0 (full fetch) on checkout to be able generate full changelog
 
 on:
   pull_request:
@@ -29,6 +26,8 @@ jobs:
     steps:
     - name: "Checkout"
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: "Use NodeJS 22"
       uses: actions/setup-node@v4
@@ -44,11 +43,32 @@ jobs:
     - name: Install
       run: yarn install
       
-    - name: Run dist
-      run: yarn dist
-
-    - name: Run test
+    - name: Test
       run: yarn test
 
-    - name: Run lint
+    - name: Lint
       run: yarn lint
+
+    - name: Build
+      run: yarn dist
+
+    - name: Setup git user
+      run: |
+        echo "Setup git user to github action user"
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor}}@users.noreply.github.com"
+
+    - name: Version packages
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: yarn version
+
+    - name: Ensure that binaries include correct version
+      run: yarn post-version
+
+    - name: Publish packages
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: yarn publish

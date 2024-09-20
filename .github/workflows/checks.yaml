@@ -25,11 +25,11 @@ jobs:
     - name: Install
       run: yarn install
 
-    - name: Run build
+    - name: Build
       run: yarn dist
 
-    - name: Run test
+    - name: Test
       run: yarn test
   
-    - name: Run lint
+    - name: Lint
       run: yarn lint
