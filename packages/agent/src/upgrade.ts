@@ -1,4 +1,4 @@
-import { create, enable, reload, restart } from "@systemd-js/ctl";
+import { enable, reload, restart, write } from "@systemd-js/ctl";
 import {
   createService,
   createUpdaterService,
@@ -18,20 +18,18 @@ export function upgrade() {
   });
 
   const updater = createUpdaterService();
-  create(AGENT_UPDATER_UNIT_NAME, updater);
+  write(AGENT_UPDATER_UNIT_NAME, updater);
   enable(AGENT_UPDATER_UNIT_NAME, updater);
   reload(AGENT_UPDATER_UNIT_NAME, updater);
   restart(AGENT_UPDATER_UNIT_NAME, updater);
 
   const timer = createUpdaterTimer();
-  create(AGENT_UPDATER_UNIT_NAME, timer);
+  write(AGENT_UPDATER_UNIT_NAME, timer);
   enable(AGENT_UPDATER_UNIT_NAME, timer);
   reload(AGENT_UPDATER_UNIT_NAME, timer);
-  restart(AGENT_UPDATER_UNIT_NAME, timer);
 
   const service = createService();
-  create(AGENT_UNIT_NAME, service);
+  write(AGENT_UNIT_NAME, service);
   enable(AGENT_UNIT_NAME, service);
   reload(AGENT_UNIT_NAME, service);
-  restart(AGENT_UNIT_NAME, service);
 }

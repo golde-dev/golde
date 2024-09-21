@@ -6,17 +6,16 @@ import { load } from "@std/dotenv";
 import { install } from "../install.ts";
 import { upgrade } from "../upgrade.ts";
 import type { LevelName } from "@std/log";
+import { VERSION } from "../version.ts";
 
 await load({ export: true });
-
-const { default: { version } } = await import("../../../../lerna.json");
 
 const program = new Command();
 
 program
   .name("agent")
   .description("Golde infrastructure agent CLI")
-  .version(version);
+  .version(VERSION);
 
 program
   .command("start")

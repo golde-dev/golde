@@ -27,6 +27,7 @@ const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
         "infrastructure",
       ],
       license: "Apache-2.0",
+      scripts: {},
       os: [os],
       cpu: [cpu],
       publishConfig: {
@@ -100,6 +101,7 @@ await build({
       "golde",
       "infrastructure",
     ],
+    scripts: {},
     type: "module",
     description: "Golde CLI",
     license: "Apache-2.0",

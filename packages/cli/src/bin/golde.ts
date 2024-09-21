@@ -6,17 +6,16 @@ import { createPlan } from "../plan.ts";
 import { initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
 import type { LevelName } from "@std/log";
+import { VERSION } from "../version.ts";
 
 await load({ export: true });
-
-const { default: { version } } = await import("../../../../lerna.json");
 
 const program = new Command();
 
 program
   .name("golde")
   .description("CLI to golde")
-  .version(version);
+  .version(VERSION);
 
 program
   .command("init")

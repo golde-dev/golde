@@ -7,6 +7,9 @@ set -o pipefail # Cause a pipeline to return the status of the last command that
 os=$(uname -s)
 architecture="$(uname -m)"
 
+# Notes
+# "${os,,}" will lower case example: "Linux" to "linux"
+
 if [[ "$architecture" == "x86_64" ]]; then
   curl -fsSL \
     https://github.com/golde/golde/releases/latest/download/cli-"${os,,}"-x64 \

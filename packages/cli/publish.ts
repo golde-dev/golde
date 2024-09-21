@@ -10,6 +10,7 @@ const { local } = parseArgs(Deno.args, {
 });
 
 const localRegistry = "http://localhost:4873/";
+const resetLocalExamples = true;
 const publicRegistry = "https://registry.npmjs.org/";
 
 const packages = [
@@ -55,84 +56,87 @@ async function uploadReleaseArtifacts() {
   console.error(new TextDecoder().decode(o.stderr));
 }
 
-async function publishNPMPackage(
-  pkg: string,
+async function publishNPMPackages(
+  pkgs: string[],
   registry: string,
 ) {
-  const command = new Deno.Command("npm", {
-    args: ["publish", "--registry", registry],
-    cwd: `dist/npm/@golde/${pkg}`,
-    stdout: "piped",
-    stderr: "piped",
-  });
+  for (const pkg of pkgs) {
+    const command = new Deno.Command("npm", {
+      args: ["publish", "--registry", registry],
+      cwd: `dist/npm/@golde/${pkg}`,
+      stdout: "piped",
+      stderr: "piped",
+    });
 
-  const process = command.spawn();
+    const process = command.spawn();
 
-  const reader = process.stdout
-    .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new TextLineStream());
+    const reader = process.stdout
+      .pipeThrough(new TextDecoderStream())
+      .pipeThrough(new TextLineStream());
 
-  for await (const line of reader) {
-    console.log(line);
+    for await (const line of reader) {
+      console.log(line);
+    }
+
+    const stderrReader = process.stderr
+      .pipeThrough(new TextDecoderStream())
+      .pipeThrough(new TextLineStream());
+
+    for await (const line of stderrReader) {
+      console.error(line);
+    }
   }
-
-  const stderrReader = process.stderr
-    .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new TextLineStream());
-
-  for await (const line of stderrReader) {
-    console.error(line);
-  }
-
-  return await process.status;
 }
 
-async function updateExample(
-  example: string,
+async function updateExamples(
+  examples: string[],
   registry: string,
   reset: boolean = false,
 ) {
-  const { hostname } = new URL(registry);
-  await new Deno.Command("yarn", {
-    args: ["config", "set", "npmRegistryServer", registry],
-    cwd: `../examples/${example}`,
-  }).output();
-  await new Deno.Command("yarn", {
-    args: [
-      "config",
-      "set",
-      "unsafeHttpWhitelist",
-      "--json",
-      `["${hostname}"]`,
-    ],
-    cwd: `../examples/${example}`,
-  }).output();
-
-  const o = await new Deno.Command("yarn", {
-    args: ["up", "@golde/*", "--caret"],
-    cwd: `../examples/${example}`,
-  }).output();
-  console.log(new TextDecoder().decode(o.stdout));
-  console.error(new TextDecoder().decode(o.stderr));
-
-  await new Deno.Command("yarn", {
-    args: ["config", "unset", "npmRegistryServer"],
-    cwd: `../examples/${example}`,
-  }).output();
-  await new Deno.Command("yarn", {
-    args: ["config", "unset", "unsafeHttpWhitelist"],
-    cwd: `../examples/${example}`,
-  }).output();
-
-  if (reset) {
-    await new Deno.Command("git", {
-      args: ["restore", "yarn.lock"],
+  for (const example of examples) {
+    console.log(`Updating ${example}`);
+    const { hostname } = new URL(registry);
+    await new Deno.Command("yarn", {
+      args: ["config", "set", "npmRegistryServer", registry],
       cwd: `../examples/${example}`,
     }).output();
-    await new Deno.Command("git", {
-      args: ["restore", "package.json"],
+    await new Deno.Command("yarn", {
+      args: [
+        "config",
+        "set",
+        "unsafeHttpWhitelist",
+        "--json",
+        `["${hostname}"]`,
+      ],
       cwd: `../examples/${example}`,
     }).output();
+
+    const o = await new Deno.Command("yarn", {
+      args: ["up", "@golde/*", "--caret"],
+      cwd: `../examples/${example}`,
+    }).output();
+    console.log(new TextDecoder().decode(o.stdout));
+    console.error(new TextDecoder().decode(o.stderr));
+
+    await new Deno.Command("yarn", {
+      args: ["config", "unset", "npmRegistryServer"],
+      cwd: `../examples/${example}`,
+    }).output();
+    await new Deno.Command("yarn", {
+      args: ["config", "unset", "unsafeHttpWhitelist"],
+      cwd: `../examples/${example}`,
+    }).output();
+
+    if (reset) {
+      await new Deno.Command("git", {
+        args: ["restore", "yarn.lock"],
+        cwd: `../examples/${example}`,
+      }).output();
+      await new Deno.Command("git", {
+        args: ["restore", "package.json"],
+        cwd: `../examples/${example}`,
+      }).output();
+    }
   }
 }
 
@@ -157,19 +161,11 @@ function updateLocalCLI(): Promise<void> {
 
 async function publish() {
   console.log("Publishing to remote registry");
-  for (const pkg of packages) {
-    console.log(`Publishing ${pkg}`);
-    await publishNPMPackage(pkg, publicRegistry);
-  }
+  await publishNPMPackages(
+    packages,
+    publicRegistry,
+  );
   await uploadReleaseArtifacts();
-  for (const example of examples) {
-    console.log(`Updating ${example}`);
-    await updateExample(
-      example,
-      publicRegistry,
-      false,
-    );
-  }
 }
 
 async function publishLocal() {
@@ -177,19 +173,16 @@ async function publishLocal() {
   const stopVerdaccio = await startVerdaccio();
 
   try {
+    await publishNPMPackages(
+      packages,
+      localRegistry,
+    );
     await updateLocalCLI();
-    for (const pkg of packages) {
-      console.log(`Publishing ${pkg}`);
-      await publishNPMPackage(pkg, localRegistry);
-    }
-    for (const example of examples) {
-      console.log(`Updating ${example}`);
-      await updateExample(
-        example,
-        localRegistry,
-        true,
-      );
-    }
+    await updateExamples(
+      examples,
+      localRegistry,
+      resetLocalExamples,
+    );
   } finally {
     console.log("Stopping Verdaccio");
     stopVerdaccio?.();
