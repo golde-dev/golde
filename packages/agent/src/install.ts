@@ -7,13 +7,7 @@ import {
   start,
   write,
 } from "@systemd-js/ctl";
-import {
-  copySync,
-  ensureDirSync,
-  ensureFileSync,
-  ensureSymlinkSync,
-  existsSync,
-} from "@std/fs";
+import { copySync, ensureDirSync, ensureFileSync, existsSync } from "@std/fs";
 import {
   createService,
   createUpdaterService,
@@ -40,7 +34,7 @@ function isLinkChanges(nextTarget: string, linkName: string) {
   return currentTarget !== nextTarget;
 }
 
-export function install() {
+export async function install() {
   ensureDirSync(AGENT_DIR);
   ensureDirSync(AGENT_VERSIONS_DIR);
   ensureDirSync(AGENT_BIN_DIR);
@@ -66,10 +60,15 @@ export function install() {
   );
   if (isServiceVersionChanged) {
     logger.info("Symlinking agent to version " + VERSION);
-    ensureSymlinkSync(
-      versionedAgentPath,
-      AGENT_EXEC_PATH,
-    );
+    const o = await new Deno.Command("ln", {
+      args: ["-sfn", versionedAgentPath, AGENT_EXEC_PATH],
+    }).output();
+    const decoder = new TextDecoder();
+    logger.info(decoder.decode(o.stdout));
+    if (o.code !== 0) {
+      logger.error(decoder.decode(o.stderr));
+      throw new Error("Failed to symlink agent");
+    }
   }
 
   const service = createService();
@@ -106,7 +105,7 @@ export function install() {
 
   if (!isEnabled(AGENT_UPDATER_UNIT_NAME, timer)) {
     logger.info("Enabling golde-agent-updater timer");
-    enable(AGENT_UPDATER_UNIT_NAME, updater);
+    enable(AGENT_UPDATER_UNIT_NAME, timer);
   }
   if (!isActive(AGENT_UPDATER_UNIT_NAME, timer)) {
     logger.info("Starting golde-agent-updater timer");

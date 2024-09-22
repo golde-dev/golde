@@ -1,4 +1,5 @@
-import {spawnTask, parallelTask, seriesTask} from "@chyzwar/runner";
+import {spawnTask, parallelTask, seriesTask, task} from "@chyzwar/runner";
+import {rmSync, writeFileSync } from "fs";
 
 spawnTask("verdaccio", 
   "yarn", ["dlx", "verdaccio@6.0.0-rc.1"],
@@ -117,6 +118,21 @@ spawnTask("version",
   "lerna", ["version", "--yes"],
 )
 
+task("version:clean", () => {
+  rmSync("./local.json", { force: true });
+})
+
+task("version:local", () => {
+  writeFileSync(
+    "./local.json",
+    JSON.stringify(
+      {
+        version: Date.now().toString(),
+      },
+    ),
+  )
+})
+
 spawnTask("publish:cli",
   "deno", ["task", "publish"],
   {
@@ -155,6 +171,8 @@ parallelTask("publish:local", [
 ]);
 
 seriesTask("local", [
+  "version:local",
   "dist:local",
   "publish:local",
+  "version:clean"
 ]);

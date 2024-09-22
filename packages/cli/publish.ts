@@ -1,10 +1,8 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { TextLineStream } from "@std/streams";
 import { exec } from "sudo-prompt";
+import { VERSION } from "./src/version.ts";
 
-const { version } = JSON.parse(
-  Deno.readTextFileSync("../../lerna.json"),
-);
 const { local } = parseArgs(Deno.args, {
   boolean: ["local"],
 });
@@ -49,7 +47,7 @@ async function startVerdaccio() {
 async function uploadReleaseArtifacts() {
   console.log("Updating artifacts");
   const o = await new Deno.Command("gh", {
-    args: ["release", "upload", version, "*"],
+    args: ["release", "upload", VERSION, "*"],
     cwd: `./dist/bin`,
   }).output();
   console.log(new TextDecoder().decode(o.stdout));

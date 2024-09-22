@@ -1,25 +1,13 @@
 import { build, emptyDir } from "@deno/dnt";
-import { parseArgs } from "@std/cli/parse-args";
+import { VERSION } from "./src/version.ts";
 
 await emptyDir("./dist/npm");
-
-const { local } = parseArgs(Deno.args, {
-  boolean: ["local"],
-});
-
-let { version } = JSON.parse(
-  Deno.readTextFileSync("../../lerna.json"),
-);
-
-if (local) {
-  version = `${version}-${Date.now()}`;
-}
 
 const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
   const cliPackageSON = JSON.stringify(
     {
       name: `@golde/${name}`,
-      version,
+      version: VERSION,
       description: `Golde CLI for ${os}-${cpu}`,
       keywords: [
         "cli",
@@ -92,7 +80,7 @@ await build({
   },
   package: {
     name: "@golde/cli",
-    version,
+    version: VERSION,
     bin: {
       golde: "bin/cli.cjs",
     },
@@ -116,11 +104,11 @@ await build({
       url: "https://github.com/golde-dev/golde/issues",
     },
     optionalDependencies: {
-      "@golde/cli-linux-x64": version,
-      "@golde/cli-linux-arm64": version,
-      "@golde/cli-win32-x64": version,
-      "@golde/cli-darwin-arm64": version,
-      "@golde/cli-darwin-x64": version,
+      "@golde/cli-linux-x64": VERSION,
+      "@golde/cli-linux-arm64": VERSION,
+      "@golde/cli-win32-x64": VERSION,
+      "@golde/cli-darwin-arm64": VERSION,
+      "@golde/cli-darwin-x64": VERSION,
     },
   },
   postBuild() {
