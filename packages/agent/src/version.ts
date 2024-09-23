@@ -1,4 +1,4 @@
-import { logger } from "./logger.ts";
+// deno-lint-ignore-file no-empty
 
 interface WithVersion {
   default: {
@@ -14,18 +14,14 @@ let {
   with: { type: "json" },
 }) as WithVersion;
 
-try {
-  const {
-    default: {
-      version: localVersion,
-    },
-  } = await import("../../../local.json", {
-    with: { type: "json" },
-  }) as WithVersion;
+const {
+  default: {
+    version: localVersion,
+  },
+} = await import("../../../local.json", {
+  with: { type: "json" },
+}).catch(() => ({ default: { version: null } })) as WithVersion;
 
-  if (localVersion) version += "-" + localVersion;
-} finally {
-  logger.info("VERSION: ", version);
-}
+if (localVersion) version += "-" + localVersion;
 
 export const VERSION = version;

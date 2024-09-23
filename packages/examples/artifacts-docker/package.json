@@ -1,0 +1,16 @@
+{
+  "name": "@golde/example-dns-cloudflare",
+  "packageManager": "yarn@4.5.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "golde:show": "golde show",
+    "golde:apply": "golde apply"
+  },
+  "dependencies": {
+    "fastify": "5.0.0"
+  },
+  "devDependencies": {
+    "@golde/cli": "0.4.0-1727085269666"
+  }
+}

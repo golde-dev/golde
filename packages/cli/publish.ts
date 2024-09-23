@@ -21,6 +21,7 @@ const packages = [
 ];
 
 const examples = [
+  "artifacts-docker",
   "dns-cloudflare",
   "service-vite-react-node",
   "service-vite-react",
