@@ -9380,11 +9380,11 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A^5.6.2#optional!builtin<compat/typescript>":
   version: 5.6.2
-  resolution: "typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>::version=5.6.2&hash=5adc0c"
+  resolution: "typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>::version=5.6.2&hash=8c6c40"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c2/e00a6c5824c60399e48fbdde35eb87266087b4dbb4ae8fc519b04c0207d75272098ec78c49f3352b1b5d592606c8d8b40dccf7c9092a078183f19b4bc9b6a3cc
+  checksum: 10c2/f53c689dfeef2b5bcdde1d5047c0c78f24b97e30b9169a96dec17064a78ad6ab52c2992ef47e62e4578fa8945b8db69403d3d744b7fd89cc73583f304977d811
   languageName: node
   linkType: hard
 
