@@ -1,6 +1,6 @@
 {
   "name": "@golde/example-dns-cloudflare",
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.5.0",
   "type": "module",
   "private": true,
   "scripts": {
