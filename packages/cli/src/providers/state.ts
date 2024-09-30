@@ -1,12 +1,9 @@
 import { logger } from "../logger.ts";
 import type { Provider } from "./types.ts";
-import { NoSuchKey } from "@aws-sdk/client-s3";
-import type { ConfigLock, ConfigState } from "../types/config.ts";
-import { createReadStream } from "node:fs";
-import { getArtifactKey } from "../utils/artifacts.ts";
 import { S3 } from "../clients/s3.ts";
+import { S3StateClient } from "../clients/s3State.ts";
 
-export interface StateConfig {
+export interface S3StateConfig {
   type: "s3";
   bucket: string;
   region: string;
@@ -15,77 +12,52 @@ export interface StateConfig {
   secretAccessKey: string;
 }
 
-const getStateKey = (project: string) => `/${project}/state/current.json`;
-const getLockKey = (project: string) => `/${project}/state/lock.json`;
-
-function notFoundAsUndefined<T>(
-  promise: Promise<T>,
-): Promise<T | undefined> {
-  return promise.catch((error: unknown) => {
-    if (error instanceof NoSuchKey) {
-      return undefined;
-    }
-    throw error;
-  });
-}
-
 export class StateProvider implements Provider {
-  private readonly project: string = "new-project";
-  private readonly s3: S3;
+  private readonly stateClient: S3StateClient;
 
-  private constructor(project: string, s3: S3) {
-    this.project = project;
-    this.s3 = s3;
+  private constructor(stateClient: S3StateClient) {
+    this.stateClient = stateClient;
   }
 
-  public static async init(
-    project: string,
-    { bucket, region, endpoint, accessKeyId, secretAccessKey }: StateConfig,
-  ): Promise<StateProvider> {
-    const s3 = new S3({
-      bucket,
-      logger,
-      region,
-      endpoint,
-      accessKeyId,
-      secretAccessKey,
-    });
-    try {
-      await s3.verifyAccess();
-      return new StateProvider(project, s3);
-    } catch (error) {
-      logger.error(
-        "Failed to initialize state provider, please verify config",
-        {
-          error,
-          bucket,
-          region,
-          endpoint,
-          accessKeyId: "<redacted>",
-          secretAccessKey: "<redacted>",
-        },
-      );
-      throw error;
+  public static async init({
+    type,
+    bucket,
+    region,
+    endpoint,
+    accessKeyId,
+    secretAccessKey,
+  }: S3StateConfig): Promise<StateProvider> {
+    if (type === "s3") {
+      const s3 = new S3({
+        bucket,
+        logger,
+        region,
+        endpoint,
+        accessKeyId,
+        secretAccessKey,
+      });
+      try {
+        await s3.verifyAccess();
+        const stateClient = new S3StateClient(s3);
+        return new StateProvider(stateClient);
+      } catch (error) {
+        logger.error(
+          "Failed to initialize state provider, please verify config",
+          {
+            error,
+            bucket,
+            region,
+            endpoint,
+            accessKeyId: "<redacted>",
+            secretAccessKey: "<redacted>",
+          },
+        );
+        throw error;
+      }
     }
+
+    throw new Error("Unsupported state provider");
   }
 
-  /**
-   * Upload file to s3 artifact store for project
-   */
-  public uploadArtefact(path: string, key: string) {
-    const readable = createReadStream(path);
-    const artifactKey = getArtifactKey(this.project, key);
-
-    return this.s3.putObject(artifactKey, readable);
-  }
-
-  public getState(): Promise<ConfigState | undefined> {
-    const stateKey = getStateKey(this.project);
-    return notFoundAsUndefined(this.s3.getJSONObject<ConfigState>(stateKey));
-  }
-
-  public getLock(): Promise<ConfigLock | undefined> {
-    const lockKey = getLockKey(this.project);
-    return notFoundAsUndefined(this.s3.getJSONObject<ConfigLock>(lockKey));
-  }
+  public getClient = () => this.stateClient;
 }

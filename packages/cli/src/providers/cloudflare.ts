@@ -1,6 +1,4 @@
-import type { ZoneRecordRequest } from "../clients/cloudflare.ts";
 import { CloudflareClient } from "../clients/cloudflare.ts";
-import type { CloudflareDNSRecordState } from "../dns/types.ts";
 import { logger } from "../logger.ts";
 import type { Provider } from "./types.ts";
 
@@ -16,6 +14,9 @@ export class CloudflareProvider implements Provider {
     this.client = client;
   }
 
+  /**
+   * Initialize cloudflare provider and verify user token
+   */
   public static async init(
     { apiToken, accountId }: CloudflareConfig,
   ): Promise<CloudflareProvider> {
@@ -37,61 +38,8 @@ export class CloudflareProvider implements Provider {
     }
   }
 
-  public createZoneRecord = async (
-    zoneName: string,
-    config: ZoneRecordRequest,
-  ): Promise<CloudflareDNSRecordState> => {
-    const {
-      id,
-      ttl,
-      proxied,
-      zone_id,
-      modified_on,
-      created_on,
-      content: value,
-    } = await this.client.createZoneRecord(zoneName, config);
-
-    return {
-      id,
-      ttl,
-      proxied,
-      zone_id,
-      modified_on,
-      created_on,
-      value,
-    };
-  };
-
-  public updateZoneRecord = async (
-    zoneName: string,
-    recordId: string,
-    config: ZoneRecordRequest,
-  ): Promise<CloudflareDNSRecordState> => {
-    const {
-      id,
-      ttl,
-      proxied,
-      zone_id,
-      modified_on,
-      created_on,
-      content: value,
-    } = await this.client.updateZoneRecord(zoneName, recordId, config);
-
-    return {
-      id,
-      ttl,
-      proxied,
-      zone_id,
-      modified_on,
-      created_on,
-      value,
-    };
-  };
-
-  public deleteZoneRecord = async (
-    zoneName: string,
-    recordId: string,
-  ): Promise<void> => {
-    await this.client.deleteZoneRecord(zoneName, recordId);
-  };
+  /**
+   * Getter Cloudflare client
+   */
+  public getClient = () => this.client;
 }

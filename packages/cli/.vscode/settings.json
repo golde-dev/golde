@@ -7,8 +7,11 @@
     "editor.defaultFormatter": "denoland.vscode-deno" 
   },
   "cSpell.words": [
+    "hcloud",
     "Hetzner",
+    "luca",
     "moderndash",
+    "Namecheap",
     "tenacify"
   ]
 }

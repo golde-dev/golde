@@ -8,6 +8,20 @@ export interface ProvidersConfig {
      */
     apiKey: string;
   };
+  docker?: {
+    /**
+     * Docker registry url
+     */
+    registry: string;
+    /**
+     * Docker username
+     */
+    username: string;
+    /**
+     * Docker password
+     */
+    password: string;
+  };
   /**
    * Cloudflare provider config
    */
@@ -60,7 +74,6 @@ export interface ProvidersConfig {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export abstract class Provider {
   public static init: <T>(config: unknown) => Promise<T>;
 }

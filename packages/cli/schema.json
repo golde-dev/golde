@@ -26,6 +26,30 @@
               "additionalProperties": false,
               "description": "Golde provider config"
             },
+            "docker": {
+              "type": "object",
+              "properties": {
+                "registry": {
+                  "type": "string",
+                  "description": "Docker registry url"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "Docker registry username"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Docker registry password"
+                }
+              },
+              "required": [
+                "registry",
+                "username",
+                "password"
+              ],
+              "additionalProperties": false,
+              "description": "Docker provider config"
+            },
             "cloudflare": {
               "type": "object",
               "properties": {
@@ -234,6 +258,42 @@
                       "weur",
                       "wnam"
                     ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "artifacts": {
+          "type": "object",
+          "properties": {
+            "docker": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "archive": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "additionalProperties": false

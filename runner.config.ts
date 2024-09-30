@@ -176,3 +176,11 @@ seriesTask("local", [
   "publish:local",
   "version:clean"
 ]);
+
+
+seriesTask("local:cli", [
+  "version:local",
+  "dist:cli:local",
+  "publish:cli:local",
+  "version:clean"
+]);

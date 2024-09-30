@@ -9,6 +9,7 @@
     "verdaccio": "runner verdaccio",
     "start": "runner start",
     "local": "runner local",
+    "local:cli": "runner local:cli",
     "test": "runner test",
     "lint": "runner lint",
     "dist": "runner dist",

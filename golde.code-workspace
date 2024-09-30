@@ -26,6 +26,8 @@
 			"astro",
 			"astrojs",
 			"Deno",
+			"hcloud",
+			"namecheap",
 			"Nodenv"
 		]
 	},

@@ -30,7 +30,7 @@ const uploadTar = async (
   s3Path: string,
 ) => {
   const startS3 = Date.now();
-  await state.uploadArtefact(tarFilePath, s3Path);
+  // await state.uploadArtefact(tarFilePath, s3Path);
   const endS3 = Date.now();
 
   const s3Duration = endS3 - startS3;

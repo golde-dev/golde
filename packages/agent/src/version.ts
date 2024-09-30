@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-empty
-
 interface WithVersion {
   default: {
     version: string;

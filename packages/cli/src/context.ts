@@ -5,15 +5,18 @@ import { getGoldeConfig, GoldeProvider } from "./providers/golde.ts";
 import { HCloudProvider } from "./providers/hcloud.ts";
 import { StateProvider } from "./providers/state.ts";
 import type { Config } from "./types/config.ts";
-import type { State } from "./types/state.ts";
+import type { State, StateClient } from "./types/state.ts";
+import { DockerProvider } from "./providers/docker.ts";
 
 export interface Context {
   previousConfig?: Config;
   previousState?: State;
   nextConfig: Config;
   nextState: State;
+
+  docker?: DockerProvider;
   golde?: GoldeProvider;
-  state: GoldeProvider | StateProvider;
+  state: StateClient;
   hcloud?: HCloudProvider;
   cloudflare?: CloudflareProvider;
 }
@@ -28,6 +31,7 @@ export const initializeContext = async (
       state,
       hcloud,
       cloudflare,
+      docker,
     },
   } = nextConfig;
 
@@ -36,12 +40,14 @@ export const initializeContext = async (
   try {
     const [
       goldeProvider,
+      dockerProvider,
       stateProvider,
       hcloudProvider,
       cloudflareProvider,
     ] = await Promise.all([
-      golde ? GoldeProvider.init(name, golde) : undefined,
-      state ? StateProvider.init(name, state) : undefined,
+      golde ? GoldeProvider.init(golde) : undefined,
+      docker ? DockerProvider.init(docker) : undefined,
+      state ? StateProvider.init(state) : undefined,
       hcloud ? HCloudProvider.init(hcloud) : undefined,
       cloudflare ? CloudflareProvider.init(cloudflare) : undefined,
     ]);
@@ -50,40 +56,41 @@ export const initializeContext = async (
       nextConfig,
       nextState: {},
       golde: goldeProvider,
+      docker: dockerProvider,
       cloudflare: cloudflareProvider,
       hcloud: hcloudProvider,
     };
 
     if (stateProvider && state) {
-      await goldeProvider?.registerStateProvider(state);
+      await goldeProvider?.getClient().changeStateConfig(name, state);
       logger.debug("Using own state provider");
 
       const {
         config: previousConfig,
         state: previousState,
-      } = await stateProvider.getState() ?? {};
+      } = await stateProvider.getClient().getState(name) ?? {};
 
-      logger.debug("Context initialized");
+      logger.info("Context initialized");
 
       return {
         ...contextBase,
         previousConfig,
         previousState,
-        state: stateProvider,
+        state: stateProvider.getClient(),
       };
     } else if (goldeProvider) {
       const {
         config: previousConfig,
         state: previousState,
-      } = await goldeProvider.getState() ?? {};
+      } = await goldeProvider.getClient().getState(name) ?? {};
 
-      logger.debug("Context initialized");
+      logger.info("Context initialized");
 
       return {
         ...contextBase,
         previousConfig,
         previousState,
-        state: goldeProvider,
+        state: goldeProvider.getClient(),
       };
     } else {
       throw new ContextError(
@@ -94,6 +101,7 @@ export const initializeContext = async (
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Providers initialization failed: ${error.message}`);
+      logger.debug("Error details", error);
     }
     return Deno.exit(1);
   }

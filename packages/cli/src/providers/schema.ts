@@ -12,6 +12,20 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       })
       .optional()
       .describe("Golde provider config"),
+    docker: z
+      .object({
+        registry: z
+          .string()
+          .describe("Docker registry url"),
+        username: z
+          .string()
+          .describe("Docker registry username"),
+        password: z
+          .string()
+          .describe("Docker registry password"),
+      })
+      .optional()
+      .describe("Docker provider config"),
     cloudflare: z
       .object({
         apiToken: z

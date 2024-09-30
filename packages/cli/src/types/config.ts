@@ -1,3 +1,4 @@
+import type { ArtifactsConfig } from "../artifacts/types.ts";
 import type { BucketsConfig } from "../buckets/types.ts";
 import type { DNSConfig } from "../dns/types.ts";
 import type { ProvidersConfig } from "../providers/types.ts";
@@ -10,6 +11,7 @@ export type Config = {
   dns?: DNSConfig;
   buckets?: BucketsConfig;
   servers?: ServersConfig;
+  artifacts?: ArtifactsConfig;
 };
 
 export interface ConfigState {

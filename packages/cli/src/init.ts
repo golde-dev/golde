@@ -155,11 +155,8 @@ export async function initConfig() {
 
     if (goldeConfig) {
       try {
-        const golde = await GoldeProvider.init(
-          projectName,
-          goldeConfig,
-        );
-        await golde.createProject();
+        const golde = await GoldeProvider.init(goldeConfig);
+        await golde.getClient().createProject(projectName);
       } catch (error) {
         if (error instanceof GoldeError) {
           if (error.cause?.status === 409) {

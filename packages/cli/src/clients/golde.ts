@@ -1,6 +1,7 @@
-import type { StateConfig } from "../providers/state.ts";
+import type { S3StateConfig } from "../providers/state.ts";
 import { logger } from "../logger.ts";
-import type { ConfigState } from "../types/config.ts";
+import type { ConfigLock, ConfigState } from "../types/config.ts";
+import type { StateClient } from "../types/state.ts";
 
 interface GoldeErrorCause {
   status: number;
@@ -29,7 +30,7 @@ function notFoundAsUndefined<T>(
   });
 }
 
-export class GoldeClient {
+export class GoldeClient implements StateClient {
   private readonly apiKey: string;
   private readonly baseUrl = "https://tech-stack.tenacify.localhost/api/v1";
 
@@ -119,23 +120,27 @@ export class GoldeClient {
     );
   }
 
-  public getStateLock(project: string): Promise<ConfigState | undefined> {
+  public getStateLock(project: string): Promise<ConfigLock | undefined> {
     return notFoundAsUndefined(
-      this.makeRequest<ConfigState>(`/projects/${project}/lock`),
+      this.makeRequest<ConfigLock>(`/projects/${project}/lock`),
     );
   }
 
   public getStateConfig(
     project: string,
-  ): Promise<StateConfig | undefined> {
-    return this.makeRequest<StateConfig | undefined>(
+  ): Promise<S3StateConfig | undefined> {
+    return this.makeRequest<S3StateConfig | undefined>(
       `/projects/${project}/state-config`,
     );
   }
 
+  /**
+   * If user use custom state provider we need to register with golde
+   * Golde need to know how to access state of project
+   */
   public async changeStateConfig(
     project: string,
-    stateConfig: StateConfig,
+    stateConfig: S3StateConfig,
   ): Promise<void> {
     await this.makeRequest(
       `/projects/${project}/state-config`,

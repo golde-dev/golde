@@ -152,7 +152,7 @@ function updateLocalCLI(): Promise<void> {
           console.error({ error, stderr }, "Failed to update local agent");
           reject(error);
         }
-        console.log("stdout: " + stdout);
+        console.log(stdout);
         resolve();
       },
     );
@@ -173,11 +173,11 @@ async function publishLocal() {
   const stopVerdaccio = await startVerdaccio();
 
   try {
+    await updateLocalCLI();
     await publishNPMPackages(
       packages,
       localRegistry,
     );
-    await updateLocalCLI();
     await updateExamples(
       examples,
       localRegistry,

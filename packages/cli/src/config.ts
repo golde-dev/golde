@@ -2,7 +2,6 @@ import { existsSync } from "node:fs";
 import type { Config } from "./types/config.ts";
 import { validateConfig } from "./schema.ts";
 import { logger } from "./logger.ts";
-import { dynamicImport } from "@x/imports";
 import { extname, resolve } from "node:path";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import {
@@ -11,6 +10,7 @@ import {
   gitTemplate,
   resolveTemplate,
 } from "./utils/template.ts";
+import { dynamicImport } from "./utils/import.ts";
 
 const loadConfig = async (
   path: string,
@@ -22,7 +22,7 @@ const loadConfig = async (
     case ".json":
     case ".js":
     case ".ts": {
-      const { default: config } = await dynamicImport(path, { force: true });
+      const { default: config } = await dynamicImport(path);
       return { config, path };
     }
     case ".toml": {
@@ -60,6 +60,7 @@ const getConfigRaw = (
   ];
 
   for (const configPath of possiblePaths) {
+    logger.debug(`Checking config path: ${configPath}`);
     if (existsSync(configPath)) {
       return loadConfig(configPath);
     }
@@ -72,6 +73,7 @@ const getConfigRaw = (
 
 export const getConfig = async (configPath?: string): Promise<Config> => {
   try {
+    logger.debug("Loading config");
     const { config, path } = await getConfigRaw(configPath);
     logger.debug("Loaded config", { config, path });
 
@@ -82,7 +84,7 @@ export const getConfig = async (configPath?: string): Promise<Config> => {
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
     logger.debug("Resolved files templates in config", {
-      config: configWithEnv,
+      config: configWithFiles,
     });
 
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate);
@@ -124,7 +126,7 @@ export const getConfig = async (configPath?: string): Promise<Config> => {
           logger.error(`Configuration error: ${error.message}`);
       }
     } else {
-      logger.error("Unknown error", error);
+      logger.error(`Unknown error: ${error.message}`, error);
     }
     return Deno.exit(1);
   }

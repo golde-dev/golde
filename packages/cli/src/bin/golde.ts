@@ -8,6 +8,7 @@ import { initConfig } from "../init.ts";
 import type { LevelName } from "@std/log";
 import { VERSION } from "../version.ts";
 
+// TODO: handel .env.example errors
 await load({ export: true });
 
 const program = new Command();

@@ -5,6 +5,7 @@ import type { ZodType } from "zod";
 import { z } from "zod";
 import { providersSchema } from "./providers/schema.ts";
 import { bucketSchema } from "./buckets/schema.ts";
+import { artifactsSchema } from "./artifacts/schema.ts";
 
 export const projectNameSchema = z
   .string()
@@ -20,6 +21,7 @@ export const schema: ZodType<Config> = z
     providers: providersSchema,
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),
+    artifacts: artifactsSchema.optional(),
   }).strict();
 
 export function validateConfig(config: unknown): asserts config is Config {

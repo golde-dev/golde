@@ -11,6 +11,67 @@ import type {
   RecordType,
 } from "../types.ts";
 
+async function createZoneRecord(
+  this: CloudflareProvider,
+  zoneName: string,
+  config: ZoneRecordRequest,
+): Promise<CloudflareDNSRecordState> {
+  const {
+    id,
+    ttl,
+    proxied,
+    zone_id,
+    modified_on,
+    created_on,
+    content: value,
+  } = await this.getClient().createZoneRecord(zoneName, config);
+
+  return {
+    id,
+    ttl,
+    proxied,
+    zone_id,
+    modified_on,
+    created_on,
+    value,
+  };
+}
+
+async function updateZoneRecord(
+  this: CloudflareProvider,
+  zoneName: string,
+  recordId: string,
+  config: ZoneRecordRequest,
+): Promise<CloudflareDNSRecordState> {
+  const {
+    id,
+    ttl,
+    proxied,
+    zone_id,
+    modified_on,
+    created_on,
+    content: value,
+  } = await this.getClient().updateZoneRecord(zoneName, recordId, config);
+
+  return {
+    id,
+    ttl,
+    proxied,
+    zone_id,
+    modified_on,
+    created_on,
+    value,
+  };
+}
+
+async function deleteZoneRecord(
+  this: CloudflareProvider,
+  zoneName: string,
+  recordId: string,
+): Promise<void> {
+  await this.getClient().deleteZoneRecord(zoneName, recordId);
+}
+
 const getRecords = (
   config?: CloudflareDNSZones,
   state?: CloudflareZonesState,
@@ -75,9 +136,9 @@ export const createCloudflareDNSPlan = (
     .filter((key) => !(key in prevRecords))
     .map((path) => {
       const [zone, conf] = nextRecords[path];
-      const executionUnit: ExecutionUnit<typeof cloudflare.createZoneRecord> = {
+      const executionUnit: ExecutionUnit<typeof createZoneRecord> = {
         type: Type.Create,
-        executor: cloudflare.createZoneRecord,
+        executor: createZoneRecord.bind(cloudflare),
         args: [zone, conf],
         path,
         dependencies: [],
@@ -96,9 +157,9 @@ export const createCloudflareDNSPlan = (
           PlanErrorCode.STATE_MISSING,
         );
       }
-      const executionUnit: ExecutionUnit<typeof cloudflare.deleteZoneRecord> = {
+      const executionUnit: ExecutionUnit<typeof deleteZoneRecord> = {
         type: Type.Delete,
-        executor: cloudflare.deleteZoneRecord,
+        executor: deleteZoneRecord.bind(cloudflare),
         args: [zone, state.id],
         path,
         dependencies: [],
@@ -106,7 +167,7 @@ export const createCloudflareDNSPlan = (
       return executionUnit;
     });
 
-  const updated: ExecutionUnit<typeof cloudflare.updateZoneRecord>[] = [];
+  const updated: ExecutionUnit<typeof updateZoneRecord>[] = [];
   Object
     .keys(nextRecords)
     .filter((key) => key in prevRecords)
@@ -124,7 +185,7 @@ export const createCloudflareDNSPlan = (
       if (!isEqual(nextConf, prevConf)) {
         updated.push({
           type: Type.Create,
-          executor: cloudflare.updateZoneRecord,
+          executor: updateZoneRecord.bind(cloudflare),
           args: [zone, prevRecordState.id, nextConf],
           path,
           dependencies: [],
