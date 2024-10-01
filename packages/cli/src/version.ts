@@ -1,8 +1,11 @@
 interface WithVersion {
   default: {
     version: string;
+    goldeURL?: string;
   };
 }
+
+let goldeURL = "https://golde.dev/api/v1";
 
 let {
   default: {
@@ -15,11 +18,14 @@ let {
 const {
   default: {
     version: localVersion,
+    goldeURL: localGoldeUrl,
   },
 } = await import("../../../local.json", {
   with: { type: "json" },
 }).catch(() => ({ default: { version: null } })) as WithVersion;
 
 if (localVersion) version += "-" + localVersion;
+if (localGoldeUrl) goldeURL = localGoldeUrl;
 
 export const VERSION = version;
+export const GOLDE_API_URL = goldeURL;

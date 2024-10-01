@@ -2,6 +2,7 @@ import type { S3StateConfig } from "../providers/state.ts";
 import { logger } from "../logger.ts";
 import type { ConfigLock, ConfigState } from "../types/config.ts";
 import type { StateClient } from "../types/state.ts";
+import { GOLDE_API_URL } from "../version.ts";
 
 interface GoldeErrorCause {
   status: number;
@@ -32,7 +33,7 @@ function notFoundAsUndefined<T>(
 
 export class GoldeClient implements StateClient {
   private readonly apiKey: string;
-  private readonly baseUrl = "https://tech-stack.tenacify.localhost/api/v1";
+  private readonly baseUrl = GOLDE_API_URL;
 
   public constructor(apiKey: string) {
     this.apiKey = apiKey;
