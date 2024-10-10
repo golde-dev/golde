@@ -1,12 +1,35 @@
 import { z } from "zod";
-import type { ZodType } from "zod";
-import type { ArtifactsConfig } from "./types.ts";
+import type { Archive, ArtifactsConfig, DockerImage } from "./types.ts";
+import { implement } from "../utils/zod.ts";
 
-export const artifactsSchema: ZodType<ArtifactsConfig> = z.object({
-  docker: z.record(z.object({
+const dockerImage = implement<DockerImage>()
+  .with({
+    context: z.string().optional(),
+    dockerfile: z.string().optional(),
+    labels: z.record(z.string()).optional(),
     tags: z.array(z.string()).optional(),
-  })).optional(),
-  archive: z.record(z.object({
-    tags: z.array(z.string()).optional(),
-  })).optional(),
+    branch: z.string().optional(),
+    branchPattern: z.string().optional(),
+  })
+  .strict()
+  .refine(
+    (data) => !(data.branchPattern && data.branch),
+    "Cannot use both branchPattern and branch",
+  );
+
+const archive = implement<Archive>()
+  .with({
+    context: z.string().optional(),
+    branch: z.string().optional(),
+    branchPattern: z.string().optional(),
+  })
+  .strict()
+  .refine(
+    (data) => !(data.branchPattern && data.branch),
+    "Cannot use both branchPattern and branch",
+  );
+
+export const artifactsSchema = implement<ArtifactsConfig>().with({
+  docker: z.record(dockerImage).optional(),
+  archive: z.record(archive).optional(),
 }).strict();

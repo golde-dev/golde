@@ -1,3 +1,4 @@
+import { createArtifactsPlan } from "./artifacts/plan.ts";
 import { createBucketsPlan } from "./buckets/plan.ts";
 import type { Context } from "./context.ts";
 import { createDNSPlan } from "./dns/plan.ts";
@@ -8,13 +9,17 @@ import type { Plan } from "./types/plan.ts";
 export async function createPlan(
   context: Context,
 ): Promise<Plan> {
-  const plan: Plan = [];
-
   try {
-    plan.push(...await createDNSPlan(context));
-    plan.push(...await createBucketsPlan(context));
+    const plan: Plan = (await Promise.all(
+      [
+        createDNSPlan(context),
+        createBucketsPlan(context),
+        createArtifactsPlan(context),
+      ],
+    )).flat();
 
-    logger.info("Plan", plan);
+    logger.info("Execution plan", plan);
+    return plan;
   } catch (error) {
     if (error instanceof PlanError) {
       logger.error(`Failed to plan changes: ${error.message}`);
@@ -23,6 +28,4 @@ export async function createPlan(
     }
     return Deno.exit(1);
   }
-
-  return Promise.resolve(plan);
 }

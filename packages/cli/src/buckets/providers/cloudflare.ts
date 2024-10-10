@@ -7,12 +7,12 @@ export const createCloudflareBucketsPlan = (
   prevConfig?: CloudflareBuckets,
   prevState?: CloudflareBucketsState,
   nextConfig?: CloudflareBuckets,
-): Plan => {
+): Promise<Plan> => {
   console.log({
     cloudflare,
     prevConfig,
     prevState,
     nextConfig,
   });
-  return [];
+  return Promise.resolve([]);
 };

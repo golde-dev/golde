@@ -29,6 +29,10 @@
 			"hcloud",
 			"namecheap",
 			"Nodenv"
-		]
+		],
+		"files.associations": {
+			".env.example": "env",
+			".env.test": "env"
+		},
 	},
 }

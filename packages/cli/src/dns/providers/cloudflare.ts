@@ -1,5 +1,8 @@
 import { isEqual } from "moderndash";
-import type { ZoneRecordRequest } from "../../clients/cloudflare.ts";
+import type {
+  CloudflareClient,
+  ZoneRecordRequest,
+} from "../../clients/cloudflare.ts";
 import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
 import type { CloudflareProvider } from "../../providers/cloudflare.ts";
@@ -12,7 +15,7 @@ import type {
 } from "../types.ts";
 
 async function createZoneRecord(
-  this: CloudflareProvider,
+  this: CloudflareClient,
   zoneName: string,
   config: ZoneRecordRequest,
 ): Promise<CloudflareDNSRecordState> {
@@ -24,7 +27,7 @@ async function createZoneRecord(
     modified_on,
     created_on,
     content: value,
-  } = await this.getClient().createZoneRecord(zoneName, config);
+  } = await this.createZoneRecord(zoneName, config);
 
   return {
     id,
@@ -38,7 +41,7 @@ async function createZoneRecord(
 }
 
 async function updateZoneRecord(
-  this: CloudflareProvider,
+  this: CloudflareClient,
   zoneName: string,
   recordId: string,
   config: ZoneRecordRequest,
@@ -51,7 +54,7 @@ async function updateZoneRecord(
     modified_on,
     created_on,
     content: value,
-  } = await this.getClient().updateZoneRecord(zoneName, recordId, config);
+  } = await this.updateZoneRecord(zoneName, recordId, config);
 
   return {
     id,
@@ -65,11 +68,11 @@ async function updateZoneRecord(
 }
 
 async function deleteZoneRecord(
-  this: CloudflareProvider,
+  this: CloudflareClient,
   zoneName: string,
   recordId: string,
 ): Promise<void> {
-  await this.getClient().deleteZoneRecord(zoneName, recordId);
+  await this.deleteZoneRecord(zoneName, recordId);
 }
 
 const getRecords = (
@@ -114,12 +117,21 @@ const getRecords = (
   return flatRecords;
 };
 
+export const createCloudflareExecutors = (provider: CloudflareProvider) => {
+  const client = provider.getClient();
+  return {
+    createZoneRecord: createZoneRecord.bind(client),
+    updateZoneRecord: updateZoneRecord.bind(client),
+    deleteZoneRecord: deleteZoneRecord.bind(client),
+  };
+};
+
 export const createCloudflareDNSPlan = (
-  cloudflare: CloudflareProvider,
+  executors: ReturnType<typeof createCloudflareExecutors>,
   prevConfig?: CloudflareDNSZones,
   prevState?: CloudflareZonesState,
   nextConfig?: CloudflareDNSZones,
-): Plan => {
+): Promise<Plan> => {
   logger.debug(
     "Planning for cloudflare dns changes",
     {
@@ -138,7 +150,7 @@ export const createCloudflareDNSPlan = (
       const [zone, conf] = nextRecords[path];
       const executionUnit: ExecutionUnit<typeof createZoneRecord> = {
         type: Type.Create,
-        executor: createZoneRecord.bind(cloudflare),
+        executor: executors.createZoneRecord,
         args: [zone, conf],
         path,
         dependencies: [],
@@ -159,7 +171,7 @@ export const createCloudflareDNSPlan = (
       }
       const executionUnit: ExecutionUnit<typeof deleteZoneRecord> = {
         type: Type.Delete,
-        executor: deleteZoneRecord.bind(cloudflare),
+        executor: executors.deleteZoneRecord,
         args: [zone, state.id],
         path,
         dependencies: [],
@@ -184,8 +196,8 @@ export const createCloudflareDNSPlan = (
 
       if (!isEqual(nextConf, prevConf)) {
         updated.push({
-          type: Type.Create,
-          executor: updateZoneRecord.bind(cloudflare),
+          type: Type.Update,
+          executor: executors.updateZoneRecord,
           args: [zone, prevRecordState.id, nextConf],
           path,
           dependencies: [],
@@ -193,9 +205,9 @@ export const createCloudflareDNSPlan = (
       }
     });
 
-  return [
+  return Promise.resolve([
     ...removed,
     ...updated,
     ...added,
-  ];
+  ]);
 };

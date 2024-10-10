@@ -1,9 +1,13 @@
+import { isEmpty } from "moderndash";
 import type { Context } from "../context.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import type { Plan } from "../types/plan.ts";
-import { createCloudflareDNSPlan } from "./providers/cloudflare.ts";
+import {
+  createCloudflareDNSPlan,
+  createCloudflareExecutors,
+} from "./providers/cloudflare.ts";
 
-export const createDNSPlan = (context: Context): Promise<Plan> => {
+export async function createDNSPlan(context: Context): Promise<Plan> {
   const {
     previousConfig: {
       dns: prevDNSConfig,
@@ -17,10 +21,10 @@ export const createDNSPlan = (context: Context): Promise<Plan> => {
     cloudflare,
   } = context;
 
-  const plan: Plan = [];
+  const plan: Promise<Plan>[] = [];
 
   if (
-    Boolean(prevDNSConfig?.cloudflare) || Boolean(nextDNSConfig?.cloudflare)
+    !isEmpty(prevDNSConfig?.cloudflare) || !isEmpty(nextDNSConfig?.cloudflare)
   ) {
     if (!cloudflare) {
       throw new PlanError(
@@ -28,14 +32,15 @@ export const createDNSPlan = (context: Context): Promise<Plan> => {
         PlanErrorCode.PROVIDER_MISSING,
       );
     }
+    const cloudflareDNSExecutors = createCloudflareExecutors(cloudflare);
 
-    plan.push(...createCloudflareDNSPlan(
-      cloudflare,
+    plan.push(createCloudflareDNSPlan(
+      cloudflareDNSExecutors,
       prevDNSConfig?.cloudflare,
       prevDNSState?.cloudflare,
       nextDNSConfig?.cloudflare,
     ));
   }
 
-  return Promise.resolve(plan);
-};
+  return (await Promise.all(plan)).flat();
+}

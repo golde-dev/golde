@@ -1,16 +1,17 @@
 import { assertEquals } from "@std/assert";
-import { createCloudflareDNSPlan } from "../cloudflare.ts";
+import {
+  createCloudflareDNSPlan,
+  createCloudflareExecutors,
+} from "../cloudflare.ts";
 import type { CloudflareProvider } from "../../../providers/cloudflare.ts";
 import { Type } from "../../../types/plan.ts";
 
 Deno.test("createCloudflareDNSPlan", async (t) => {
-  const mockProvider = {
-    updateZoneRecord: () => {},
-    createZoneRecord: () => {},
-    deleteZoneRecord: () => {},
-  } as unknown as CloudflareProvider;
+  const executors = createCloudflareExecutors({
+    getClient: () => {},
+  } as unknown as CloudflareProvider);
 
-  await t.step("add new records", () => {
+  await t.step("add new records", async () => {
     const nextConfig = {
       "golde.dev": {
         "A": {
@@ -24,7 +25,12 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
     };
 
     assertEquals(
-      createCloudflareDNSPlan(mockProvider, undefined, undefined, nextConfig),
+      await createCloudflareDNSPlan(
+        executors,
+        undefined,
+        undefined,
+        nextConfig,
+      ),
       [
         {
           "args": [
@@ -40,7 +46,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
             },
           ],
           "dependencies": [],
-          "executor": mockProvider.createZoneRecord,
+          "executor": executors.createZoneRecord,
           "path": "dns.cloudflare.golde.dev.A.dns-cloudflare",
           "type": Type.Create,
         },
@@ -48,7 +54,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
     );
   });
 
-  await t.step("delete records", () => {
+  await t.step("delete records", async () => {
     const prevConfig = {
       "golde.dev": {
         "A": {
@@ -77,7 +83,12 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
     };
     const nextConfig = undefined;
     assertEquals(
-      createCloudflareDNSPlan(mockProvider, prevConfig, prevState, nextConfig),
+      await createCloudflareDNSPlan(
+        executors,
+        prevConfig,
+        prevState,
+        nextConfig,
+      ),
       [
         {
           "args": [
@@ -85,7 +96,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
             "cloudflare id",
           ],
           "dependencies": [],
-          "executor": mockProvider.deleteZoneRecord,
+          "executor": executors.deleteZoneRecord,
           "path": "dns.cloudflare.golde.dev.A.dns-cloudflare",
           "type": Type.Delete,
         },
@@ -93,7 +104,7 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
     );
   });
 
-  await t.step("update records", () => {
+  await t.step("update records", async () => {
     const prevConfig = {
       "golde.dev": {
         "A": {
@@ -132,7 +143,12 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
       },
     };
     assertEquals(
-      createCloudflareDNSPlan(mockProvider, prevConfig, prevState, nextConfig),
+      await createCloudflareDNSPlan(
+        executors,
+        prevConfig,
+        prevState,
+        nextConfig,
+      ),
       [
         {
           "args": [
@@ -149,9 +165,9 @@ Deno.test("createCloudflareDNSPlan", async (t) => {
             },
           ],
           "dependencies": [],
-          "executor": mockProvider.updateZoneRecord,
+          "executor": executors.updateZoneRecord,
           "path": "dns.cloudflare.golde.dev.A.dns-cloudflare",
-          "type": Type.Create,
+          "type": Type.Update,
         },
       ],
     );

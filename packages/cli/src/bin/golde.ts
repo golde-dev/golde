@@ -7,6 +7,7 @@ import { initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
 import type { LevelName } from "@std/log";
 import { VERSION } from "../version.ts";
+import { applyPlan } from "../apply.ts";
 
 // TODO: handel .env.example errors
 await load({ export: true });
@@ -103,8 +104,6 @@ program
 
       const loadedConfig = await getConfig(configPath);
       await initializeContext(loadedConfig);
-
-      logger.info("Config is valid");
     },
   );
 
@@ -151,7 +150,11 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      await getConfig(configPath);
+      const loadedConfig = await getConfig(configPath);
+      const context = await initializeContext(loadedConfig);
+      const plan = await createPlan(context);
+
+      await applyPlan(context, plan);
     },
   );
 

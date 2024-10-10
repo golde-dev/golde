@@ -1,4 +1,4 @@
-interface DockerInfo {
+export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";
   CgroupVersion?: string;
   ServerVersion: string;

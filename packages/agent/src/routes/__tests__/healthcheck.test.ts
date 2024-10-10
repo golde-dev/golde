@@ -1,17 +1,18 @@
 import type { Context } from "hono";
-import { assertSpyCalls, spy } from "@std/testing/mock";
+import { assertSpyCall, spy } from "@std/testing/mock";
 import { healthcheck } from "../healthcheck.ts";
 
 Deno.test("healthcheck", async (t) => {
   await t.step("should return status ok", () => {
+    const json = spy();
     const c = {
-      json: () => {},
+      json,
     } as unknown as Context;
-
-    const spyJson = spy(c, "json");
 
     healthcheck(c);
 
-    assertSpyCalls(spyJson, 1);
+    assertSpyCall(json, 0, {
+      args: [{ status: "ok" }],
+    });
   });
 });

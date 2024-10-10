@@ -128,7 +128,7 @@ task("version:local", () => {
     JSON.stringify(
       {
         version: Date.now().toString(),
-        goldeURL: "https://tech-stack.tenacify.localhost/api/v1",
+        goldeURL: "https://golde.localhost/api/v1",
       },
     ),
   )

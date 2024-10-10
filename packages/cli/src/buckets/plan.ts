@@ -1,9 +1,10 @@
+import { isEmpty } from "moderndash";
 import type { Context } from "../context.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import type { Plan } from "../types/plan.ts";
 import { createCloudflareBucketsPlan } from "./providers/cloudflare.ts";
 
-export const createBucketsPlan = (context: Context): Promise<Plan> => {
+export async function createBucketsPlan(context: Context): Promise<Plan> {
   const {
     previousConfig: {
       buckets: prevBucketsConfig,
@@ -17,11 +18,11 @@ export const createBucketsPlan = (context: Context): Promise<Plan> => {
     cloudflare,
   } = context;
 
-  const plan: Plan = [];
+  const promises: Promise<Plan>[] = [];
 
   if (
-    Boolean(prevBucketsConfig?.cloudflare) ||
-    Boolean(nextBucketsConfig?.cloudflare)
+    !isEmpty(prevBucketsConfig?.cloudflare) ||
+    !isEmpty(nextBucketsConfig?.cloudflare)
   ) {
     if (!cloudflare) {
       throw new PlanError(
@@ -29,7 +30,7 @@ export const createBucketsPlan = (context: Context): Promise<Plan> => {
         PlanErrorCode.PROVIDER_MISSING,
       );
     }
-    plan.push(...createCloudflareBucketsPlan(
+    promises.push(createCloudflareBucketsPlan(
       cloudflare,
       prevBucketsConfig?.cloudflare,
       prevBucketsState?.cloudflare,
@@ -37,5 +38,5 @@ export const createBucketsPlan = (context: Context): Promise<Plan> => {
     ));
   }
 
-  return Promise.resolve(plan);
-};
+  return (await Promise.all(promises)).flat();
+}
