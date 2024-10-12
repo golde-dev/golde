@@ -26,7 +26,7 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
   ) {
     if (!cloudflare) {
       throw new PlanError(
-        "Cloudflare provider is required when using cloudflare buckets",
+        "Cloudflare client is required when using cloudflare r2, ensure that providers.cloudflare is defined in config",
         PlanErrorCode.PROVIDER_MISSING,
       );
     }

@@ -1,7 +1,7 @@
-import { DockerProvider } from "../../providers/docker.ts";
-import { DockerImages, DockerImagesState } from "../types.ts";
+import type { DockerClient } from "../../clients/docker.ts";
+import type { DockerImages, DockerImagesState } from "../types.ts";
 
-export function createDockerExecutors(docker: DockerProvider) {
+export function createDockerExecutors(_: DockerClient) {
 }
 
 export async function createDockerArtifactsPlan(
@@ -10,5 +10,11 @@ export async function createDockerArtifactsPlan(
   prevState?: DockerImagesState,
   nextConfig?: DockerImages,
 ) {
-  return Promise.resolve([]);
+  console.log({
+    executors,
+    prevConfig,
+    prevState,
+    nextConfig,
+  });
+  return await Promise.resolve([]);
 }

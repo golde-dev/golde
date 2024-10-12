@@ -4,7 +4,7 @@ import { projectNameSchema } from "./schema.ts";
 import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "node:path";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { getGoldeConfig, GoldeProvider } from "./providers/golde.ts";
+import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
 import { GoldeError } from "./clients/golde.ts";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
@@ -155,8 +155,8 @@ export async function initConfig() {
 
     if (goldeConfig) {
       try {
-        const golde = await GoldeProvider.init(goldeConfig);
-        await golde.getClient().createProject(projectName);
+        const golde = await createGoldeClient(goldeConfig);
+        await golde.createProject(projectName);
       } catch (error) {
         if (error instanceof GoldeError) {
           if (error.cause?.status === 409) {

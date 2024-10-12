@@ -1,4 +1,4 @@
-import type { S3StateConfig } from "../providers/state.ts";
+import type { StateConfig } from "../state/types.ts";
 import { logger } from "../logger.ts";
 import type { ConfigLock, ConfigState } from "../types/config.ts";
 import type { StateClient } from "../types/state.ts";
@@ -129,8 +129,8 @@ export class GoldeClient implements StateClient {
 
   public getStateConfig(
     project: string,
-  ): Promise<S3StateConfig | undefined> {
-    return this.makeRequest<S3StateConfig | undefined>(
+  ): Promise<StateConfig | undefined> {
+    return this.makeRequest<StateConfig | undefined>(
       `/projects/${project}/state-config`,
     );
   }
@@ -141,7 +141,7 @@ export class GoldeClient implements StateClient {
    */
   public async changeStateConfig(
     project: string,
-    stateConfig: S3StateConfig,
+    stateConfig: StateConfig,
   ): Promise<void> {
     await this.makeRequest(
       `/projects/${project}/state-config`,

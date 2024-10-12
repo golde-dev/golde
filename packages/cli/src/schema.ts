@@ -6,6 +6,7 @@ import { z } from "zod";
 import { providersSchema } from "./providers/schema.ts";
 import { bucketSchema } from "./buckets/schema.ts";
 import { artifactsSchema } from "./artifacts/schema.ts";
+import { stateSchema } from "./state/schema.ts";
 
 export const projectNameSchema = z
   .string()
@@ -18,6 +19,7 @@ export const projectNameSchema = z
 export const schema: ZodType<Config> = z
   .object({
     name: projectNameSchema,
+    state: stateSchema.optional(),
     providers: providersSchema,
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),

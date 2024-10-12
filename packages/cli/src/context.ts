@@ -1,12 +1,18 @@
 import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
-import { CloudflareProvider } from "./providers/cloudflare.ts";
-import { getGoldeConfig, GoldeProvider } from "./providers/golde.ts";
-import { HCloudProvider } from "./providers/hcloud.ts";
-import { StateProvider } from "./providers/state.ts";
+import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
+import { createHCloudClient } from "./providers/hcloud.ts";
 import type { Config } from "./types/config.ts";
 import type { State, StateClient } from "./types/state.ts";
-import { DockerProvider } from "./providers/docker.ts";
+import { createDockerClient } from "./providers/docker.ts";
+import type { GitClient } from "./clients/git.ts";
+import { createGitClient } from "./providers/git.ts";
+import type { DockerClient } from "./clients/docker.ts";
+import type { GoldeClient } from "./clients/golde.ts";
+import type { CloudflareClient } from "./clients/cloudflare.ts";
+import type { HCloudClient } from "./clients/hcloud.ts";
+import { createCloudflareClient } from "./factory/cloudflare.ts";
+import { createStateClient } from "./state/state.ts";
 
 export interface Context {
   previousConfig?: Config;
@@ -14,11 +20,12 @@ export interface Context {
   nextConfig: Config;
   nextState: State;
 
-  docker?: DockerProvider;
-  golde?: GoldeProvider;
+  git: GitClient;
   state: StateClient;
-  hcloud?: HCloudProvider;
-  cloudflare?: CloudflareProvider;
+  docker?: DockerClient;
+  golde?: GoldeClient;
+  hcloud?: HCloudClient;
+  cloudflare?: CloudflareClient;
 }
 
 export const initializeContext = async (
@@ -26,9 +33,9 @@ export const initializeContext = async (
 ): Promise<Context> => {
   const {
     name,
+    state,
     providers: {
       golde = getGoldeConfig(),
-      state,
       hcloud,
       cloudflare,
       docker,
@@ -38,37 +45,45 @@ export const initializeContext = async (
   logger.debug("Start context initialization");
 
   try {
-    const [
-      goldeProvider,
-      dockerProvider,
-      stateProvider,
-      hcloudProvider,
-      cloudflareProvider,
+    let [
+      goldeClient,
+      stateClient,
+      hcloudClient,
+      dockerClient,
+      cloudflareClient,
+      gitClient,
     ] = await Promise.all([
-      golde ? GoldeProvider.init(golde) : undefined,
-      docker ? DockerProvider.init(docker) : undefined,
-      state ? StateProvider.init(state) : undefined,
-      hcloud ? HCloudProvider.init(hcloud) : undefined,
-      cloudflare ? CloudflareProvider.init(cloudflare) : undefined,
+      golde ? createGoldeClient(golde) : undefined,
+      state ? createStateClient(state) : undefined,
+      hcloud ? createHCloudClient(hcloud) : undefined,
+      docker ? createDockerClient(docker) : undefined,
+      cloudflare ? createCloudflareClient(cloudflare) : undefined,
+      createGitClient(),
     ]);
+
+    if (!dockerClient && golde) {
+      dockerClient = await createDockerClient(golde);
+    }
 
     const contextBase = {
       nextConfig,
       nextState: {},
-      golde: goldeProvider,
-      docker: dockerProvider,
-      cloudflare: cloudflareProvider,
-      hcloud: hcloudProvider,
+
+      git: gitClient,
+      docker: dockerClient,
+      golde: goldeClient,
+      cloudflare: cloudflareClient,
+      hcloud: hcloudClient,
     };
 
-    if (stateProvider && state) {
-      await goldeProvider?.getClient().changeStateConfig(name, state);
+    if (stateClient && state) {
+      await goldeClient?.changeStateConfig(name, state);
       logger.debug("Using own state provider");
 
       const {
         config: previousConfig,
         state: previousState,
-      } = await stateProvider.getClient().getState(name) ?? {};
+      } = await stateClient.getState(name) ?? {};
 
       logger.info("Context initialized");
 
@@ -76,13 +91,13 @@ export const initializeContext = async (
         ...contextBase,
         previousConfig,
         previousState,
-        state: stateProvider.getClient(),
+        state: stateClient,
       };
-    } else if (goldeProvider) {
+    } else if (goldeClient) {
       const {
         config: previousConfig,
         state: previousState,
-      } = await goldeProvider.getClient().getState(name) ?? {};
+      } = await goldeClient.getState(name) ?? {};
 
       logger.info("Context initialized");
 
@@ -90,7 +105,7 @@ export const initializeContext = async (
         ...contextBase,
         previousConfig,
         previousState,
-        state: goldeProvider.getClient(),
+        state: goldeClient,
       };
     } else {
       throw new ContextError(

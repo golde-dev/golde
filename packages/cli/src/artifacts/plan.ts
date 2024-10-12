@@ -29,7 +29,7 @@ export async function createArtifactsPlan(context: Context): Promise<Plan> {
   ) {
     if (!docker) {
       throw new PlanError(
-        "Docker provider is required when using docker artifacts",
+        "Docker is required when using docker artifacts",
         PlanErrorCode.PROVIDER_MISSING,
       );
     }

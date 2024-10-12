@@ -26,6 +26,9 @@ export interface DockerImage {
    */
   dockerfile?: string;
 }
+/**
+ * cache?: 'git-project-root' | 'git-context';
+ */
 
 export interface DockerImages {
   [imageName: string]: DockerImage;
@@ -66,6 +69,9 @@ export interface DockerImagesState {
 
 export interface ArchiveState {
   uri: string;
+  size: number;
+  createdAt: string;
+  version: string;
 }
 
 export interface ArchivesState {

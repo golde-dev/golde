@@ -1,5 +1,5 @@
 import { NoSuchKey } from "@aws-sdk/client-s3";
-import type { S3 } from "./s3.ts";
+import type { S3 } from "../clients/s3.ts";
 import type { ConfigLock, ConfigState } from "../types/config.ts";
 import type { StateClient } from "../types/state.ts";
 

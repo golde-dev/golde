@@ -1,47 +1,26 @@
 import { HCloudClient } from "../clients/hcloud.ts";
-import {logger} from "../logger.ts";
-import type { Provider } from "./types.ts";
-import type {
-  HCloudServerConfig,
-  HCloudServerState,
-} from "../servers/types.ts";
+import { logger } from "../logger.ts";
 
 interface HCloudConfig {
   apiKey: string;
 }
 
-export class HCloudProvider implements Provider {
-  private readonly client: HCloudClient;
+export async function createHCloudClient(
+  { apiKey }: HCloudConfig,
+): Promise<HCloudClient> {
+  const client = new HCloudClient(apiKey);
 
-  private constructor(client: HCloudClient) {
-    this.client = client;
-  }
-
-  public static async init({ apiKey }: HCloudConfig): Promise<HCloudProvider> {
-    const client = new HCloudClient(apiKey);
-
-    try {
-      await client.verifyUserToken();
-      return new HCloudProvider(client);
-    } catch (error) {
-      logger.error(
-        "Failed to initialize HCloud provider, check your apiKey and key policy",
-        {
-          error,
-          apiKey: "<redacted>",
-        },
-      );
-      throw error;
-    }
-  }
-
-  public async createServer(
-    config: HCloudServerConfig,
-  ): Promise<HCloudServerState> {
-    // @ts-expect-error TODO: fix this
-    const result = await this.client.createServer(config);
-    return {
-      id: result.server.id,
-    };
+  try {
+    await client.verifyUserToken();
+    return client;
+  } catch (error) {
+    logger.error(
+      "Failed to initialize HCloud provider, check your apiKey and key policy",
+      {
+        error,
+        apiKey: "<redacted>",
+      },
+    );
+    throw error;
   }
 }

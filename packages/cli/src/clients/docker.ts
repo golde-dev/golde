@@ -68,7 +68,6 @@ export class DockerClient {
       }
       throw new Error("Failed to verify docker install", { cause: error });
     }
-    return true;
   }
 
   public async buildImage(imageName: string, tags: string): Promise<void> {

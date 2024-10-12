@@ -16,3 +16,15 @@ export const getBranchSlug = () =>
     .trim()
     .replaceAll(" ", "-")
     .replaceAll("/", "-");
+
+export const getGitInfo = () => {
+  const branchName = getBranchName();
+  const currentHash = getCurrentHash();
+  const branchSlug = getBranchSlug();
+
+  return {
+    branchName,
+    currentHash,
+    branchSlug,
+  };
+};

@@ -1,36 +1,27 @@
 import { NameCheapClient } from "../clients/namecheap.ts";
 import { logger } from "../logger.ts";
-import type { Provider } from "./types.ts";
 
 interface NameCheapConfig {
   apiKey: string;
   apiUser: string;
 }
 
-export class NameCheapProvider implements Provider {
-  private readonly client: NameCheapClient;
+export async function createNameCheapClient(
+  { apiKey, apiUser }: NameCheapConfig,
+): Promise<NameCheapClient> {
+  const client = new NameCheapClient(apiKey, apiUser);
 
-  private constructor(client: NameCheapClient) {
-    this.client = client;
-  }
-
-  public static async init(
-    { apiKey, apiUser }: NameCheapConfig,
-  ): Promise<NameCheapProvider> {
-    const client = new NameCheapClient(apiKey, apiUser);
-
-    try {
-      await client.verifyUserToken();
-      return new NameCheapProvider(client);
-    } catch (error) {
-      logger.error(
-        "Failed to initialize Namecheap provider, check your apiKey, apiUser",
-        {
-          error,
-          apiKey: "<redacted>",
-        },
-      );
-      throw error;
-    }
+  try {
+    await client.verifyUserToken();
+    return client;
+  } catch (error) {
+    logger.error(
+      "Failed to initialize Namecheap client, check your apiKey, apiUser",
+      {
+        error,
+        apiKey: "<redacted>",
+      },
+    );
+    throw error;
   }
 }

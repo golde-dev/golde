@@ -5,7 +5,6 @@ import type {
 } from "../../clients/cloudflare.ts";
 import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
-import type { CloudflareProvider } from "../../providers/cloudflare.ts";
 import { type ExecutionUnit, type Plan, Type } from "../../types/plan.ts";
 import type {
   CloudflareDNSRecordState,
@@ -117,8 +116,7 @@ const getRecords = (
   return flatRecords;
 };
 
-export const createCloudflareExecutors = (provider: CloudflareProvider) => {
-  const client = provider.getClient();
+export const createCloudflareExecutors = (client: CloudflareClient) => {
   return {
     createZoneRecord: createZoneRecord.bind(client),
     updateZoneRecord: updateZoneRecord.bind(client),

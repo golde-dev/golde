@@ -28,7 +28,7 @@ export async function createDNSPlan(context: Context): Promise<Plan> {
   ) {
     if (!cloudflare) {
       throw new PlanError(
-        "Cloudflare provider is required when using cloudflare dns",
+        "Cloudflare is required when using cloudflare DNS, ensure that providers.cloudflare is defined in config",
         PlanErrorCode.PROVIDER_MISSING,
       );
     }

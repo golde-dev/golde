@@ -64,36 +64,5 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       })
       .optional()
       .describe("Hetzner provider config"),
-    state: z
-      .object({
-        type: z
-          .enum(["s3"])
-          .describe(
-            "Type of state provider, only s3 is supported at the moment",
-          ),
-        bucket: z
-          .string()
-          .describe("Name of s3 bucket"),
-        region: z
-          .string()
-          .describe("name of region, use auto for R2"),
-        endpoint: z
-          .string()
-          .describe("s3 endpoint"),
-        accessKeyId: z
-          .string()
-          .describe("access key id"),
-        secretAccessKey: z
-          .string()
-          .describe("s3 access key"),
-      })
-      .optional()
-      .describe(
-        "State provider config, only required when not using oss version",
-      ),
   })
-  .strict()
-  .refine(
-    (data) => Boolean(data.golde ?? data.state),
-    "Either golde or state provider need to be configured",
-  );
+  .strict();

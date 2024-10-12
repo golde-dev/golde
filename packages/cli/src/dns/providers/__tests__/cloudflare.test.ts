@@ -3,13 +3,13 @@ import {
   createCloudflareDNSPlan,
   createCloudflareExecutors,
 } from "../cloudflare.ts";
-import type { CloudflareProvider } from "../../../providers/cloudflare.ts";
 import { Type } from "../../../types/plan.ts";
+import type { CloudflareClient } from "../../../clients/cloudflare.ts";
 
 Deno.test("createCloudflareDNSPlan", async (t) => {
-  const executors = createCloudflareExecutors({
-    getClient: () => {},
-  } as unknown as CloudflareProvider);
+  const executors = createCloudflareExecutors(
+    {} as unknown as CloudflareClient,
+  );
 
   await t.step("add new records", async () => {
     const nextConfig = {

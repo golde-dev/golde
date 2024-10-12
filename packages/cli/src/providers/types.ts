@@ -60,20 +60,4 @@ export interface ProvidersConfig {
      */
     apiKey: string;
   };
-  /**
-   * State provider, only required if not using managed solution
-   * State provider would store build artifacts and state of project
-   */
-  state?: {
-    type: "s3";
-    bucket: string;
-    region: string;
-    endpoint: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-  };
-}
-
-export abstract class Provider {
-  public static init: <T>(config: unknown) => Promise<T>;
 }

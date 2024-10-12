@@ -1,53 +1,55 @@
-import type { Provider } from "./types.ts";
 import { logger } from "../logger.ts";
 import { DockerClient } from "../clients/docker.ts";
+import type { GoldeConfig } from "./golde.ts";
 
 export interface DockerConfig {
   registry: string;
   username: string;
   password: string;
 }
+export async function createDockerClient(
+  config: DockerConfig | GoldeConfig,
+): Promise<DockerClient> {
+  if ("apiKey" in config) {
+    throw new Error("Docker provider does not support Golde");
+  }
+  const {
+    registry,
+    username,
+    password,
+  } = config as DockerConfig;
 
-export class DockerProvider implements Provider {
-  private readonly client: DockerClient;
+  const docker = new DockerClient(
+    registry,
+    username,
+    password,
+  );
 
-  private constructor(client: DockerClient) {
-    this.client = client;
+  try {
+    logger.debug("Verifying docker installation");
+    await docker.verifyInstalled();
+  } catch (error) {
+    logger.error(
+      "Failed to initialize docker",
+      { error },
+    );
+    throw error;
   }
 
-  public static async init(
-    { registry, username, password }: DockerConfig,
-  ): Promise<DockerProvider> {
-    const docker = new DockerClient(
-      registry,
-      username,
-      password,
+  try {
+    logger.debug("Verifying docker credentials");
+    await docker.verifyCredentials();
+    return docker;
+  } catch (error) {
+    logger.error(
+      "Failed to initialize docker, check your config",
+      {
+        error,
+        registry,
+        username: "<redacted>",
+        password: "<redacted>",
+      },
     );
-
-    try {
-      await docker.verifyInstalled();
-    } catch (error) {
-      logger.error(
-        "Failed to initialize docker",
-        { error },
-      );
-      throw error;
-    }
-
-    try {
-      await docker.verifyCredentials();
-      return new DockerProvider(docker);
-    } catch (error) {
-      logger.error(
-        "Failed to initialize docker provider, check your config",
-        {
-          error,
-          registry,
-          username: "<redacted>",
-          password: "<redacted>",
-        },
-      );
-      throw error;
-    }
+    throw error;
   }
 }

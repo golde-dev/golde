@@ -3,9 +3,8 @@ import { createNativeTar } from "./tar.ts";
 import { createTar } from "./tar.ts";
 import { logger } from "../logger.ts";
 import { join } from "node:path";
-import type { StateProvider } from "../providers/state.ts";
 import type { Context } from "../context.ts";
-import type { GoldeProvider } from "../providers/golde.ts";
+import { StateClient } from "../types/state.ts";
 
 export const getArtifactKey = (project: string, key: string) => {
   return `/${project}/artifacts/${key}`;
@@ -25,7 +24,7 @@ const tarArtifacts = async (
 };
 
 const uploadTar = async (
-  state: GoldeProvider | StateProvider,
+  state: StateClient,
   tarFilePath: string,
   s3Path: string,
 ) => {
