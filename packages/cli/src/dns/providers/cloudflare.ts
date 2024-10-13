@@ -1,11 +1,9 @@
-import { isEqual } from "moderndash";
-import type {
-  CloudflareClient,
-  ZoneRecordRequest,
-} from "../../clients/cloudflare.ts";
-import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
-import { type ExecutionUnit, type Plan, Type } from "../../types/plan.ts";
+import { isEqual } from "moderndash";
+import { PlanError, PlanErrorCode } from "../../error.ts";
+import { Type } from "../../types/plan.ts";
+import type { CloudflareClient, ZoneRecordRequest } from "../../clients/cloudflare.ts";
+import type { ExecutionUnit, Plan } from "../../types/plan.ts";
 import type {
   CloudflareDNSRecordState,
   CloudflareDNSZones,

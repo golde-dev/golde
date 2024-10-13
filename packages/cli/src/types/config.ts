@@ -8,7 +8,7 @@ import type { State } from "./state.ts";
 
 export type Config = {
   name: string;
-  providers: ProvidersConfig;
+  providers?: ProvidersConfig;
   state?: StateConfig;
   dns?: DNSConfig;
   buckets?: BucketsConfig;

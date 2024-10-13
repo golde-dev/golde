@@ -4,7 +4,7 @@ import { createTar } from "./tar.ts";
 import { logger } from "../logger.ts";
 import { join } from "node:path";
 import type { Context } from "../context.ts";
-import { StateClient } from "../types/state.ts";
+import type { StateClient } from "../types/state.ts";
 
 export const getArtifactKey = (project: string, key: string) => {
   return `/${project}/artifacts/${key}`;
@@ -23,9 +23,9 @@ const tarArtifacts = async (
   logger.info(`Created tar for artifacts: ${tarFilePath} in ${tarDuration}ms`);
 };
 
-const uploadTar = async (
-  state: StateClient,
-  tarFilePath: string,
+const uploadTar = (
+  _: StateClient,
+  __: string,
   s3Path: string,
 ) => {
   const startS3 = Date.now();

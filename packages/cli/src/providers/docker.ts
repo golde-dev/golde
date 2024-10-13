@@ -11,7 +11,8 @@ export async function createDockerClient(
   config: DockerConfig | GoldeConfig,
 ): Promise<DockerClient> {
   if ("apiKey" in config) {
-    throw new Error("Docker provider does not support Golde");
+    logger.warn("Not implemented");
+    return {} as DockerClient;
   }
   const {
     registry,

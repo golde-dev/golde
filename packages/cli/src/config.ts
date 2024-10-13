@@ -126,7 +126,7 @@ export const getConfig = async (configPath?: string): Promise<Config> => {
           logger.error(`Configuration error: ${error.message}`);
       }
     } else {
-      logger.error(`Unknown error: ${error.message}`, error);
+      logger.error(`Unknown error: ${(error as Error).message}`, error);
     }
     return Deno.exit(1);
   }

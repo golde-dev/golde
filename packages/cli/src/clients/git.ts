@@ -1,6 +1,21 @@
 import { execSync } from "node:child_process";
+import { memoize } from "moderndash";
 
 const decoder = new TextDecoder();
+
+export interface GitInfo {
+  defaultBranch: string;
+  branchName: string;
+  branchSlug: string;
+  currentHash: string;
+  currentTag?: string;
+  localRefs: {
+    [branch: string]: string;
+  };
+  remoteRefs: {
+    [branch: string]: string;
+  };
+}
 
 export class GitClient {
   /**
@@ -29,20 +44,43 @@ export class GitClient {
     }
   }
 
-  getBranchName = () =>
-    execSync("git rev-parse --abbrev-ref HEAD")
-      .toString()
-      .trim();
+  public getGitInfo = memoize((): GitInfo => {
+    const defaultBranch = this.getDefaultBranch();
+    const branchName = this.getBranchName();
+    const currentHash = this.getRefHash();
+    const branchSlug = this.getBranchSlug();
 
-  getCurrentHash = () =>
-    execSync("git rev-parse HEAD")
-      .toString()
-      .trim();
+    return {
+      defaultBranch,
+      branchName,
+      currentHash,
+      branchSlug,
+      localRefs: {},
+      remoteRefs: {},
+    };
+  });
 
-  getBranchSlug = () =>
-    execSync("git rev-parse --abbrev-ref HEAD")
+  public getDefaultBranch = memoize(() =>
+    execSync("git config --get init.defaultbranch")
       .toString()
       .trim()
+  );
+
+  public getBranchName = memoize((revision: string = "HEAD") =>
+    execSync(`git rev-parse --abbrev-ref ${revision}`)
+      .toString()
+      .trim()
+  );
+
+  public getRefHash = memoize((revision: string = "HEAD") =>
+    execSync(`git rev-parse ${revision}`)
+      .toString()
+      .trim()
+  );
+
+  public getBranchSlug = memoize((revision: string = "HEAD") =>
+    this.getBranchName(revision)
       .replaceAll(" ", "-")
-      .replaceAll("/", "-");
+      .replaceAll("/", "-")
+  );
 }

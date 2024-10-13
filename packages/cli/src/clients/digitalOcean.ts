@@ -1,6 +1,3 @@
-
-
-
 export class DigitalOceanClient {
   private readonly apiKey: string;
   private readonly baseUrl = "https://api.hetzner.cloud/v1";
@@ -8,5 +5,4 @@ export class DigitalOceanClient {
   public constructor(apiKey: string) {
     this.apiKey = apiKey;
   }
-
 }

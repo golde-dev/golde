@@ -30,8 +30,7 @@ export class S3 {
   private readonly logger: Logger;
 
   public constructor(
-    { logger, bucket, region, endpoint, accessKeyId, secretAccessKey }:
-      S3Options,
+    { logger, bucket, region, endpoint, accessKeyId, secretAccessKey }: S3Options,
   ) {
     this.logger = logger;
     this.bucket = bucket;

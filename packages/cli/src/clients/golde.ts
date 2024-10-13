@@ -10,7 +10,7 @@ interface GoldeErrorCause {
 }
 
 export class GoldeError extends Error {
-  public cause?: GoldeErrorCause;
+  public override cause?: GoldeErrorCause;
 
   public constructor(message: string, cause?: GoldeErrorCause) {
     super(message);

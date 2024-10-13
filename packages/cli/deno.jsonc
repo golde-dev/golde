@@ -1,7 +1,6 @@
 {
   "name": "@golde/cli",
   "version": "0.2.0",
-  "nodeModulesDir": false,
   "exports": {},
   "tasks": {
     "schema": "deno run --allow-write --allow-read src/bin/schema.ts",
@@ -37,5 +36,8 @@
     "sudo-prompt": "npm:sudo-prompt@^9.2.1",
     "zod": "npm:zod@^3.23.4",
     "zod-to-json-schema": "npm:zod-to-json-schema@^3.23.0"
+  }, 
+  "fmt": {
+    "lineWidth": 100
   }
 }

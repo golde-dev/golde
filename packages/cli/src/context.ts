@@ -5,13 +5,13 @@ import { createHCloudClient } from "./providers/hcloud.ts";
 import type { Config } from "./types/config.ts";
 import type { State, StateClient } from "./types/state.ts";
 import { createDockerClient } from "./providers/docker.ts";
-import type { GitClient } from "./clients/git.ts";
+import type { GitInfo } from "./clients/git.ts";
 import { createGitClient } from "./providers/git.ts";
 import type { DockerClient } from "./clients/docker.ts";
 import type { GoldeClient } from "./clients/golde.ts";
 import type { CloudflareClient } from "./clients/cloudflare.ts";
 import type { HCloudClient } from "./clients/hcloud.ts";
-import { createCloudflareClient } from "./factory/cloudflare.ts";
+import { createCloudflareClient } from "./providers/cloudflare.ts";
 import { createStateClient } from "./state/state.ts";
 
 export interface Context {
@@ -20,7 +20,7 @@ export interface Context {
   nextConfig: Config;
   nextState: State;
 
-  git: GitClient;
+  git: GitInfo;
   state: StateClient;
   docker?: DockerClient;
   golde?: GoldeClient;
@@ -39,37 +39,46 @@ export const initializeContext = async (
       hcloud,
       cloudflare,
       docker,
-    },
+    } = {},
   } = nextConfig;
 
   logger.debug("Start context initialization");
 
+  const createDocker = async (): Promise<DockerClient | undefined> => {
+    if (docker) {
+      logger.debug("Using docker provider to create docker client");
+      return await createDockerClient(docker);
+    } else if (golde) {
+      logger.debug("Using golde provider to create docker client");
+      return await createDockerClient(golde);
+    }
+    logger.debug("No docker client initialized");
+  };
+
   try {
-    let [
+    const [
       goldeClient,
       stateClient,
       hcloudClient,
-      dockerClient,
       cloudflareClient,
+      dockerClient,
       gitClient,
     ] = await Promise.all([
       golde ? createGoldeClient(golde) : undefined,
       state ? createStateClient(state) : undefined,
       hcloud ? createHCloudClient(hcloud) : undefined,
-      docker ? createDockerClient(docker) : undefined,
       cloudflare ? createCloudflareClient(cloudflare) : undefined,
+      createDocker(),
       createGitClient(),
     ]);
 
-    if (!dockerClient && golde) {
-      dockerClient = await createDockerClient(golde);
-    }
+    const git = gitClient.getGitInfo();
+    logger.debug("Git info", git);
 
     const contextBase = {
+      git,
       nextConfig,
       nextState: {},
-
-      git: gitClient,
       docker: dockerClient,
       golde: goldeClient,
       cloudflare: cloudflareClient,

@@ -20,7 +20,7 @@ export const schema: ZodType<Config> = z
   .object({
     name: projectNameSchema,
     state: stateSchema.optional(),
-    providers: providersSchema,
+    providers: providersSchema.optional(),
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),
     artifacts: artifactsSchema.optional(),
@@ -32,7 +32,7 @@ export function validateConfig(config: unknown): asserts config is Config {
     throw new ConfigError(
       "Failed schema validation",
       ConfigErrorCode.INVALID_CONFIG,
-      result.error.issues,
+      result.error.flatten(),
     );
   }
 }

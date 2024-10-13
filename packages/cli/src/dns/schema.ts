@@ -1,11 +1,6 @@
-import type {
-  BaseDNSRecord,
-  CloudflareDNSRecord,
-  DNSConfig,
-  RecordType,
-} from "./types.ts";
-import type { ZodType } from "zod";
 import { z } from "zod";
+import type { BaseDNSRecord, CloudflareDNSRecord, DNSConfig, RecordType } from "./types.ts";
+import type { ZodType } from "zod";
 
 const recordTypeSchema: ZodType<RecordType> = z.union([
   z.literal("A"),

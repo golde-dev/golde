@@ -9,6 +9,72 @@
           "minLength": 2,
           "pattern": "^[A-Za-z0-9_@./#&+-]*$"
         },
+        "state": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "s3",
+                  "description": "Type of state backend for s3 backed state"
+                },
+                "bucket": {
+                  "type": "string",
+                  "description": "Name of s3 bucket"
+                },
+                "region": {
+                  "type": "string",
+                  "description": "name of region, use auto for R2"
+                },
+                "endpoint": {
+                  "type": "string",
+                  "description": "s3 endpoint"
+                },
+                "accessKeyId": {
+                  "type": "string",
+                  "description": "access key id"
+                },
+                "secretAccessKey": {
+                  "type": "string",
+                  "description": "s3 access key"
+                }
+              },
+              "required": [
+                "type",
+                "bucket",
+                "region",
+                "endpoint",
+                "accessKeyId",
+                "secretAccessKey"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "fs",
+                  "description": "Type of state backend"
+                },
+                "lockPath": {
+                  "type": "string",
+                  "description": "relative path to lock file"
+                },
+                "statePath": {
+                  "type": "string",
+                  "description": "relative state to lock file"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "State backend config, only required when not using oss version"
+        },
         "providers": {
           "type": "object",
           "properties": {
@@ -101,48 +167,6 @@
               ],
               "additionalProperties": false,
               "description": "Hetzner provider config"
-            },
-            "state": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "s3"
-                  ],
-                  "description": "Type of state provider, only s3 is supported at the moment"
-                },
-                "bucket": {
-                  "type": "string",
-                  "description": "Name of s3 bucket"
-                },
-                "region": {
-                  "type": "string",
-                  "description": "name of region, use auto for R2"
-                },
-                "endpoint": {
-                  "type": "string",
-                  "description": "s3 endpoint"
-                },
-                "accessKeyId": {
-                  "type": "string",
-                  "description": "access key id"
-                },
-                "secretAccessKey": {
-                  "type": "string",
-                  "description": "s3 access key"
-                }
-              },
-              "required": [
-                "type",
-                "bucket",
-                "region",
-                "endpoint",
-                "accessKeyId",
-                "secretAccessKey"
-              ],
-              "additionalProperties": false,
-              "description": "State provider config, only required when not using oss version"
             }
           },
           "additionalProperties": false
@@ -274,11 +298,29 @@
               "additionalProperties": {
                 "type": "object",
                 "properties": {
+                  "context": {
+                    "type": "string"
+                  },
+                  "dockerfile": {
+                    "type": "string"
+                  },
+                  "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
                   "tags": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
                   }
                 },
                 "additionalProperties": false
@@ -289,11 +331,14 @@
               "additionalProperties": {
                 "type": "object",
                 "properties": {
-                  "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
+                  "context": {
+                    "type": "string"
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
                   }
                 },
                 "additionalProperties": false
@@ -304,8 +349,7 @@
         }
       },
       "required": [
-        "name",
-        "providers"
+        "name"
       ],
       "additionalProperties": false
     }
