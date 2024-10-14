@@ -2,7 +2,10 @@ import { isEmpty } from "moderndash";
 import type { Context } from "../context.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import type { Plan } from "../types/plan.ts";
-import { createCloudflareBucketsPlan } from "./providers/cloudflare.ts";
+import {
+  createCloudflareBucketsExecutors,
+  createCloudflareBucketsPlan,
+} from "./providers/cloudflare.ts";
 
 export async function createBucketsPlan(context: Context): Promise<Plan> {
   const {
@@ -16,6 +19,7 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
       buckets: nextBucketsConfig,
     },
     cloudflare,
+    git,
   } = context;
 
   const promises: Promise<Plan>[] = [];
@@ -30,8 +34,10 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
         PlanErrorCode.PROVIDER_MISSING,
       );
     }
+    const executors = createCloudflareBucketsExecutors(cloudflare);
     promises.push(createCloudflareBucketsPlan(
-      cloudflare,
+      executors,
+      git,
       prevBucketsConfig?.cloudflare,
       prevBucketsState?.cloudflare,
       nextBucketsConfig?.cloudflare,

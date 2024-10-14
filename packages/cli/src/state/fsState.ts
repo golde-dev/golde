@@ -1,6 +1,8 @@
+import { ensureDir } from "@std/fs";
+import { exists } from "@std/fs/exists";
+import { dirname, join } from "@std/path";
 import type { ConfigLock, ConfigState } from "../types/config.ts";
 import type { StateClient } from "../types/state.ts";
-import { exists } from "@std/fs/exists";
 
 export class FSStateClient implements StateClient {
   private readonly statePath: string;
@@ -10,8 +12,16 @@ export class FSStateClient implements StateClient {
     statePath: string = "golder.state.json",
     lockPath: string = "golder.lock.json",
   ) {
-    this.statePath = statePath;
-    this.lockPath = lockPath;
+    this.statePath = join(Deno.cwd(), statePath);
+    this.lockPath = join(Deno.cwd(), lockPath);
+  }
+
+  /**
+   * Ensure that state and lock parent directories exist
+   */
+  public async ensureLocation() {
+    await ensureDir(dirname(this.statePath));
+    await ensureDir(dirname(this.lockPath));
   }
 
   public async getState(): Promise<ConfigState | undefined> {

@@ -18,7 +18,6 @@ export interface Context {
   previousConfig?: Config;
   previousState?: State;
   nextConfig: Config;
-  nextState: State;
 
   git: GitInfo;
   state: StateClient;
@@ -78,7 +77,6 @@ export const initializeContext = async (
     const contextBase = {
       git,
       nextConfig,
-      nextState: {},
       docker: dockerClient,
       golde: goldeClient,
       cloudflare: cloudflareClient,

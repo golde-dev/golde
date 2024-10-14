@@ -26,3 +26,11 @@ export interface ConfigLock {
   branch: string;
   createdAt: string;
 }
+
+export interface Resource {
+  branch?: string;
+}
+
+export interface ResourceState {
+  branch: string;
+}

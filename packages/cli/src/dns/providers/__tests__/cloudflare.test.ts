@@ -1,8 +1,5 @@
 import { assertEquals } from "@std/assert";
-import {
-  createCloudflareDNSPlan,
-  createCloudflareExecutors,
-} from "../cloudflare.ts";
+import { createCloudflareDNSPlan, createCloudflareExecutors } from "../cloudflare.ts";
 import { Type } from "../../../types/plan.ts";
 import type { CloudflareClient } from "../../../clients/cloudflare.ts";
 

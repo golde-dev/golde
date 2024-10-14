@@ -1,28 +1,30 @@
+import type { Region, StorageClass } from "../clients/cloudflare.ts";
+import type { Resource } from "../types/config.ts";
 
+export interface CloudflareBucket extends Resource {
+  locationHint?: Region;
+  storageClass?: StorageClass;
+}
 
-type CloudflareRegion = 
-  | "apac"  /** Asia-Pacific */ 
-  | "eeur"  /** Eastern Europe */ 
-  | "enam"  /** Eastern North America */ 
-  | "weur"  /** Western Europe */ 
-  | "wnam"; /** Western North America */ 
-
-export interface CloudflareBuckets {  
-  [name: string]: {
-    locationHint?: CloudflareRegion
-  }
+export interface CloudflareBuckets {
+  [bucketName: string]: CloudflareBucket;
 }
 
 export interface BucketsConfig {
-  cloudflare?: CloudflareBuckets
+  cloudflare?: CloudflareBuckets;
+}
+
+export interface CloudflareBucketState {
+  branch: string;
+  location: Region;
+  createdAt: string;
+  storageClass: StorageClass;
 }
 
 export interface CloudflareBucketsState {
-  [name: string]: {
-    locationHint?: CloudflareRegion;
-  }
+  [bucketName: string]: CloudflareBucketState;
 }
 
 export interface BucketsState {
-  cloudflare?: CloudflareBucketsState
+  cloudflare?: CloudflareBucketsState;
 }

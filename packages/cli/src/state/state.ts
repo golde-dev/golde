@@ -51,7 +51,21 @@ export async function createStateClient(
       lockPath,
     } = config;
 
-    return new FSStateClient(statePath, lockPath);
+    const stateClient = new FSStateClient(statePath, lockPath);
+    try {
+      await stateClient.ensureLocation();
+      return stateClient;
+    } catch (error) {
+      logger.error(
+        "Failed to initialize fs state client, check your config",
+        {
+          error,
+          statePath,
+          lockPath,
+        },
+      );
+      throw error;
+    }
   }
 
   throw new Error("Unsupported state provider");

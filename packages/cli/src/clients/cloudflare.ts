@@ -1,6 +1,13 @@
 import { stringify } from "node:querystring";
 import { logger } from "../logger.ts";
 
+export type Region =
+  | "apac" /** Asia-Pacific */
+  | "eeur" /** Eastern Europe */
+  | "enam" /** Eastern North America */
+  | "weur" /** Western Europe */
+  | "wnam"; /** Western North America */
+
 interface ErrorCause {
   code: string;
   message: string;
@@ -84,18 +91,22 @@ export interface ZoneRecord {
   zone_name: string;
 }
 
+export type StorageClass = "Standard" | "InfrequentAccess";
+
 /**
  * @see https://developers.cloudflare.com/api/operations/r2-create-bucket
  */
-interface BucketRequest {
-  locationHint?: "apac" | "eeur" | "enam" | "weur" | "wnam";
+export interface BucketRequest {
   name: string;
+  locationHint?: Region;
+  storageClass?: StorageClass;
 }
 
 interface Bucket {
   creation_date: string;
-  location: "apac" | "eeur" | "enam" | "weur" | "wnam";
+  location: Region;
   name: string;
+  storage_class: StorageClass;
 }
 
 interface FetchErrorCause {
