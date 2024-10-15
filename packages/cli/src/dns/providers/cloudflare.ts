@@ -5,37 +5,54 @@ import { Type } from "../../types/plan.ts";
 import type { CloudflareClient, ZoneRecordRequest } from "../../clients/cloudflare.ts";
 import type { ExecutionUnit, Plan } from "../../types/plan.ts";
 import type {
+  CloudflareDNSRecord,
   CloudflareDNSRecordState,
   CloudflareDNSZones,
   CloudflareZonesState,
   RecordType,
 } from "../types.ts";
+import type { GitInfo } from "../../clients/git.ts";
+import { assertBranch } from "../../utils/resource.ts";
 
 async function createZoneRecord(
   this: CloudflareClient,
   zoneName: string,
-  config: ZoneRecordRequest,
+  type: RecordType,
+  name: string,
+  config: CloudflareDNSRecord,
 ): Promise<CloudflareDNSRecordState> {
+  assertBranch(config);
+
   const {
     id,
     ttl,
     proxied,
-    zone_id,
-    modified_on,
-    created_on,
+    zone_id: zoneId,
+    modified_on: modifiedAt,
+    created_on: createdAt,
     content: value,
-  } = await this.createZoneRecord(zoneName, config);
+  } = await this.createZoneRecord(zoneName, {
+    type,
+    name,
+    tags: config.tags,
+    ttl: config.ttl,
+    content: config.value,
+    proxied: config.proxied,
+    comment: config.comment,
+  });
 
   return {
     id,
     ttl,
     proxied,
-    zone_id,
-    modified_on,
-    created_on,
+    zoneId,
+    modifiedAt,
+    createdAt,
     value,
+    config,
   };
 }
+export type CreateZoneRecord = typeof createZoneRecord;
 
 async function updateZoneRecord(
   this: CloudflareClient,
@@ -61,6 +78,7 @@ async function updateZoneRecord(
     modified_on,
     created_on,
     value,
+    config,
   };
 }
 
@@ -124,9 +142,9 @@ export const createCloudflareExecutors = (client: CloudflareClient) => {
 
 export const createCloudflareDNSPlan = (
   executors: ReturnType<typeof createCloudflareExecutors>,
-  prevConfig?: CloudflareDNSZones,
-  prevState?: CloudflareZonesState,
-  nextConfig?: CloudflareDNSZones,
+  git: GitInfo,
+  state?: CloudflareZonesState,
+  config: CloudflareDNSZones,
 ): Promise<Plan> => {
   logger.debug(
     "Planning for cloudflare dns changes",

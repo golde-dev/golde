@@ -1,12 +1,23 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { spy } from "@std/testing/mock";
-import type { CloudflareBuckets, CloudflareBucketsState } from "../../types.ts";
-import { type createBucket, type deleteBucket, type Executors } from "../cloudflare.ts";
+import { Type } from "../../../types/plan.ts";
 import { createCloudflareBucketsPlan } from "../cloudflare.ts";
-import { type ExecutionUnit, type MigrationUnit, Type } from "../../../types/plan.ts";
+import type {
+  CloudflareBucket,
+  CloudflareBuckets,
+  CloudflareBucketsState,
+  CloudflareBucketState,
+} from "../../types.ts";
+import type { CreateBucket, DeleteBucket, Executors } from "../cloudflare.ts";
 import type { GitInfo } from "../../../clients/git.ts";
-import type { NoopUnit, SkipUnit } from "../../../types/plan.ts";
+import type {
+  CreateUnit,
+  DeleteUnit,
+  MigrationUnit,
+  NoopUnit,
+  SkipUnit,
+} from "../../../types/plan.ts";
 
 const executors = {
   createBucket: spy(),
@@ -24,6 +35,7 @@ describe("new bucket config", () => {
     const state = {};
     const config: CloudflareBuckets = {
       "bucket1": {
+        branch: "master",
         storageClass: "Standard",
       },
     };
@@ -35,14 +47,12 @@ describe("new bucket config", () => {
       config,
     );
 
-    const execution: ExecutionUnit<typeof createBucket> = {
+    const execution: CreateUnit<CloudflareBucket, CloudflareBucketState, CreateBucket> = {
       type: Type.Create,
       executor: executors.createBucket,
-      args: [{
-        storageClass: "Standard",
-        name: "bucket1",
-      }],
+      args: ["bucket1", config.bucket1],
       path: "buckets.cloudflare.bucket1",
+      config: config.bucket1,
       dependencies: [],
     };
     expect(result).toEqual([execution]);
@@ -57,6 +67,7 @@ describe("new bucket config", () => {
     const state = {};
     const config: CloudflareBuckets = {
       "bucket1": {
+        branch: "master",
         storageClass: "Standard",
       },
     };
@@ -79,12 +90,6 @@ describe("new bucket config", () => {
 });
 
 describe("migrate bucket", () => {
-  const executors = {
-    createBucket: spy(),
-    deleteBucket: spy(),
-    updateBucket: spy(),
-  } as Executors;
-
   it("should move bucket to different branch state, running on prev branch", async () => {
     const git = {
       defaultBranch: "master",
@@ -98,6 +103,7 @@ describe("migrate bucket", () => {
         createdAt: "2022-01-01T00:00:00.000Z",
         config: {
           storageClass: "Standard",
+          branch: "master",
         },
       },
     };
@@ -175,9 +181,11 @@ describe("migrate bucket", () => {
     const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
-        branch: "master",
         location: "apac",
         createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          branch: "master",
+        },
       },
     };
 
@@ -214,9 +222,11 @@ describe("delete bucket", () => {
     const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
-        branch: "master",
         location: "apac",
         createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          branch: "master",
+        },
       },
     };
 
@@ -229,12 +239,13 @@ describe("delete bucket", () => {
       config,
     );
 
-    const execution: ExecutionUnit<typeof deleteBucket> = {
+    const execution: DeleteUnit<CloudflareBucketState, DeleteBucket> = {
       type: Type.Delete,
       executor: executors.deleteBucket,
       args: ["bucket1"],
       path: "buckets.cloudflare.bucket1",
       dependencies: [],
+      state: state.bucket1,
     };
     expect(result).toEqual([execution]);
   });
@@ -249,9 +260,11 @@ describe("delete bucket", () => {
     const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
-        branch: "master",
         location: "apac",
         createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          branch: "master",
+        },
       },
     };
 
@@ -269,6 +282,44 @@ describe("delete bucket", () => {
       state: state.bucket1,
     };
     expect(result).toEqual([skip]);
+  });
+});
+
+describe("update bucket", () => {
+  it("should throw when trying to update a bucket", async () => {
+    const git = {
+      defaultBranch: "master",
+      branchName: "master",
+    } as GitInfo;
+
+    const state: CloudflareBucketsState = {
+      "bucket1": {
+        storageClass: "Standard",
+        location: "eeur",
+        createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          storageClass: "Standard",
+          locationHint: "apac",
+          branch: "master",
+        },
+      },
+    };
+
+    const config: CloudflareBuckets = {
+      "bucket1": {
+        storageClass: "Standard",
+        locationHint: "apac",
+        branch: "master",
+      },
+    };
+    await expect(() =>
+      createCloudflareBucketsPlan(
+        executors,
+        git,
+        state,
+        config,
+      )
+    ).toThrow("It is not possible to update r2 bucket, create new and migrate data");
   });
 });
 
@@ -314,7 +365,4 @@ describe("noop changes on bucket", () => {
     };
     expect(result).toEqual([noop]);
   });
-});
-
-describe("update bucket", () => {
 });

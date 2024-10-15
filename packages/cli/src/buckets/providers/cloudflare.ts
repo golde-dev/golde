@@ -1,13 +1,26 @@
-import type { BucketRequest, CloudflareClient } from "../../clients/cloudflare.ts";
+import type { CloudflareClient } from "../../clients/cloudflare.ts";
 import type { GitInfo } from "../../clients/git.ts";
 import type { Plan } from "../../types/plan.ts";
-import type { CloudflareBuckets, CloudflareBucketsState, CloudflareBucketState } from "../types.ts";
+import { assertBranch } from "../../utils/resource.ts";
+import type {
+  CloudflareBucket,
+  CloudflareBuckets,
+  CloudflareBucketsState,
+  CloudflareBucketState,
+} from "../types.ts";
 
 export async function createBucket(
   this: CloudflareClient,
-  config: BucketRequest,
+  name: string,
+  config: CloudflareBucket,
 ): Promise<CloudflareBucketState> {
-  return await this.createBucket(config).then((b) => {
+  assertBranch(config);
+
+  return await this.createBucket({
+    name,
+    locationHint: config.locationHint,
+    storageClass: config.storageClass,
+  }).then((b) => {
     return {
       location: b.location,
       createdAt: b.creation_date,
@@ -16,18 +29,18 @@ export async function createBucket(
     };
   });
 }
+export type CreateBucket = typeof createBucket;
 
 export function updateBucket(
   this: CloudflareClient,
 ) {
-  throw Promise.reject(
-    new Error("It is not possible to update r2 bucket, create new and migrate data"),
-  );
+  throw new Error("It is not possible to update r2 bucket, create new and migrate data");
 }
 
 export async function deleteBucket(this: CloudflareClient, name: string) {
   return await this.deleteBucket(name);
 }
+export type DeleteBucket = typeof deleteBucket;
 
 export const createCloudflareBucketsExecutors = (cloudflare: CloudflareClient) => {
   return {

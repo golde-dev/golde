@@ -17,6 +17,38 @@ export interface GitInfo {
   };
 }
 
+export const getDefaultBranch = memoize(() => {
+  try {
+    return execSync("gh repo view --json defaultBranchRef --jq .defaultBranchRef.name")
+      .toString()
+      .trim() ?? "master";
+  } catch {
+    return execSync("git rev-parse --abbrev-ref origin/HEAD")
+      .toString()
+      .trim()
+      .split("/")
+      .at(1) ?? "master";
+  }
+});
+
+export const getBranchName = memoize((revision: string = "HEAD") =>
+  execSync(`git rev-parse --abbrev-ref ${revision}`)
+    .toString()
+    .trim()
+);
+
+export const getRefHash = memoize((revision: string = "HEAD") =>
+  execSync(`git rev-parse ${revision}`)
+    .toString()
+    .trim()
+);
+
+export const getBranchSlug = memoize((revision: string = "HEAD") =>
+  getBranchName(revision)
+    .replaceAll(" ", "-")
+    .replaceAll("/", "-")
+);
+
 export class GitClient {
   /**
    * Check if git is installed
@@ -60,27 +92,8 @@ export class GitClient {
     };
   });
 
-  public getDefaultBranch = memoize(() =>
-    execSync("git config --get init.defaultbranch")
-      .toString()
-      .trim()
-  );
-
-  public getBranchName = memoize((revision: string = "HEAD") =>
-    execSync(`git rev-parse --abbrev-ref ${revision}`)
-      .toString()
-      .trim()
-  );
-
-  public getRefHash = memoize((revision: string = "HEAD") =>
-    execSync(`git rev-parse ${revision}`)
-      .toString()
-      .trim()
-  );
-
-  public getBranchSlug = memoize((revision: string = "HEAD") =>
-    this.getBranchName(revision)
-      .replaceAll(" ", "-")
-      .replaceAll("/", "-")
-  );
+  public getDefaultBranch = getDefaultBranch;
+  public getBranchName = getBranchName;
+  public getRefHash = getRefHash;
+  public getBranchSlug = getBranchSlug;
 }

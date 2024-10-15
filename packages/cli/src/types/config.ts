@@ -26,7 +26,14 @@ export interface ConfigLock {
   branch: string;
   createdAt: string;
 }
+export type WithBranch<T extends Resource> = T & {
+  branch: string;
+};
 
-export interface ResourceConfig {
+export interface Resource {
   branch?: string;
 }
+
+export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {
+  config: C;
+};

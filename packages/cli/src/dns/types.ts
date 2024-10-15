@@ -1,3 +1,5 @@
+import type { Resource, WithBranch } from "../types/config.ts";
+
 export type RecordType =
   | "A"
   | "AAAA"
@@ -16,15 +18,7 @@ export type RecordType =
   | "SVCB"
   | "TXT";
 
-export interface BaseDNSRecord {
-  /**
-   * Pattern of related git branch
-   */
-  branchPattern?: string;
-  /**
-   * Name of related git branch
-   */
-  branch?: string;
+export interface BaseDNSRecord extends Resource {
   /**
    * Time to live in seconds
    */
@@ -70,9 +64,10 @@ export interface CloudflareDNSRecordState extends BaseDNSRecord {
   id: string;
   ttl: number;
   proxied: boolean;
-  zone_id: string;
-  modified_on: string;
-  created_on: string;
+  zoneId: string;
+  modifiedAt: string;
+  createdAt: string;
+  config: WithBranch<CloudflareDNSRecord>;
 }
 
 export type CloudflareZoneRecordsState = Partial<
