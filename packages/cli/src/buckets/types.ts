@@ -1,7 +1,7 @@
 import type { Region, StorageClass } from "../clients/cloudflare.ts";
-import type { Resource } from "../types/config.ts";
+import type { ResourceConfig } from "../types/config.ts";
 
-export interface CloudflareBucket extends Resource {
+export interface CloudflareBucket extends ResourceConfig {
   locationHint?: Region;
   storageClass?: StorageClass;
 }
@@ -15,10 +15,10 @@ export interface BucketsConfig {
 }
 
 export interface CloudflareBucketState {
-  branch: string;
   location: Region;
   createdAt: string;
   storageClass: StorageClass;
+  config: CloudflareBucket;
 }
 
 export interface CloudflareBucketsState {

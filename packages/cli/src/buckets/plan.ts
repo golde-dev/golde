@@ -9,15 +9,16 @@ import {
 
 export async function createBucketsPlan(context: Context): Promise<Plan> {
   const {
-    previousConfig: {
-      buckets: prevBucketsConfig,
-    } = {},
     previousState: {
-      buckets: prevBucketsState,
+      buckets: {
+        cloudflare: cloudflareState,
+      } = { cloudflare: undefined },
     } = {},
     nextConfig: {
-      buckets: nextBucketsConfig,
-    },
+      buckets: {
+        cloudflare: cloudflareConfig,
+      } = { cloudflare: undefined },
+    } = {},
     cloudflare,
     git,
   } = context;
@@ -25,8 +26,8 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
   const promises: Promise<Plan>[] = [];
 
   if (
-    !isEmpty(prevBucketsConfig?.cloudflare) ||
-    !isEmpty(nextBucketsConfig?.cloudflare)
+    !isEmpty(cloudflareState) ||
+    !isEmpty(cloudflareConfig)
   ) {
     if (!cloudflare) {
       throw new PlanError(
@@ -38,9 +39,8 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
     promises.push(createCloudflareBucketsPlan(
       executors,
       git,
-      prevBucketsConfig?.cloudflare,
-      prevBucketsState?.cloudflare,
-      nextBucketsConfig?.cloudflare,
+      cloudflareState,
+      cloudflareConfig,
     ));
   }
 

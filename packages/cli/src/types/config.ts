@@ -27,10 +27,6 @@ export interface ConfigLock {
   createdAt: string;
 }
 
-export interface Resource {
+export interface ResourceConfig {
   branch?: string;
-}
-
-export interface ResourceState {
-  branch: string;
 }

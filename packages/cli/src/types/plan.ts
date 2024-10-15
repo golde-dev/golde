@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import type { Resource, ResourceState } from "./config.ts";
+import type { ResourceConfig, ResourceState } from "./config.ts";
 
 export enum Type {
   Create = "Create",
@@ -28,13 +28,26 @@ export interface MigrationUnit {
   path: string;
 }
 
-export interface SkipUnit<C extends Resource = Resource> {
+/**
+ * Skip used when there executing on different branch than owner
+ */
+export interface SkipUnit<
+  S extends ResourceState = ResourceState,
+  C extends ResourceConfig = ResourceConfig,
+> {
   type: Type.Skip;
   path: string;
   config?: C;
+  state?: S;
 }
 
-export interface NoopUnit<S extends ResourceState = ResourceState, C extends Resource = Resource> {
+/**
+ * Used when there is no need to update resource
+ */
+export interface NoopUnit<
+  S extends ResourceState = ResourceState,
+  C extends ResourceConfig = ResourceConfig,
+> {
   type: Type.Noop;
   path: string;
   config: C;

@@ -5,15 +5,14 @@ import type { CloudflareBuckets, CloudflareBucketsState, CloudflareBucketState }
 
 export async function createBucket(
   this: CloudflareClient,
-  branch: string,
   config: BucketRequest,
 ): Promise<CloudflareBucketState> {
   return await this.createBucket(config).then((b) => {
     return {
-      branch,
       location: b.location,
       createdAt: b.creation_date,
       storageClass: b.storage_class,
+      config,
     };
   });
 }
@@ -43,15 +42,13 @@ export type Executors = ReturnType<typeof createCloudflareBucketsExecutors>;
 export const createCloudflareBucketsPlan = (
   executors: Executors,
   git: GitInfo,
-  prevConfig?: CloudflareBuckets,
-  prevState?: CloudflareBucketsState,
-  nextConfig?: CloudflareBuckets,
+  state?: CloudflareBucketsState,
+  config?: CloudflareBuckets,
 ): Promise<Plan> => {
   console.log({
     executors,
-    prevConfig,
-    prevState,
-    nextConfig,
+    state,
+    config,
     git,
   });
   return Promise.resolve([]);

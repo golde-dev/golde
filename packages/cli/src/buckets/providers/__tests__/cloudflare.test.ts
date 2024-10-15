@@ -1,14 +1,9 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-
 import { spy } from "@std/testing/mock";
 import type { CloudflareBuckets, CloudflareBucketsState } from "../../types.ts";
-import {
-  type createBucket,
-  createCloudflareBucketsPlan,
-  deleteBucket,
-  type Executors,
-} from "../cloudflare.ts";
+import { type createBucket, type deleteBucket, type Executors } from "../cloudflare.ts";
+import { createCloudflareBucketsPlan } from "../cloudflare.ts";
 import { type ExecutionUnit, type MigrationUnit, Type } from "../../../types/plan.ts";
 import type { GitInfo } from "../../../clients/git.ts";
 import type { NoopUnit, SkipUnit } from "../../../types/plan.ts";
@@ -26,7 +21,8 @@ describe("new bucket config", () => {
       branchName: "master",
     } as GitInfo;
 
-    const nextConfig: CloudflareBuckets = {
+    const state = {};
+    const config: CloudflareBuckets = {
       "bucket1": {
         storageClass: "Standard",
       },
@@ -35,54 +31,14 @@ describe("new bucket config", () => {
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      undefined,
-      undefined,
-      nextConfig,
+      state,
+      config,
     );
 
     const execution: ExecutionUnit<typeof createBucket> = {
       type: Type.Create,
       executor: executors.createBucket,
-      args: ["master", {
-        storageClass: "Standard",
-        name: "bucket1",
-      }],
-      path: "buckets.cloudflare.bucket1",
-      dependencies: [],
-    };
-    expect(result).toEqual([execution]);
-  });
-
-  it("should create bucket if state was not created previously", async () => {
-    const git = {
-      defaultBranch: "master",
-      branchName: "develop",
-    } as GitInfo;
-
-    const prevConfig: CloudflareBuckets = {
-      "bucket1": {
-        storageClass: "Standard",
-      },
-    };
-
-    const nextConfig: CloudflareBuckets = {
-      "bucket1": {
-        storageClass: "Standard",
-        branch: "develop",
-      },
-    };
-    const result = await createCloudflareBucketsPlan(
-      executors,
-      git,
-      prevConfig,
-      undefined,
-      nextConfig,
-    );
-
-    const execution: ExecutionUnit<typeof createBucket> = {
-      type: Type.Create,
-      executor: executors.createBucket,
-      args: ["develop", {
+      args: [{
         storageClass: "Standard",
         name: "bucket1",
       }],
@@ -98,7 +54,8 @@ describe("new bucket config", () => {
       branchName: "develop",
     } as GitInfo;
 
-    const nextConfig: CloudflareBuckets = {
+    const state = {};
+    const config: CloudflareBuckets = {
       "bucket1": {
         storageClass: "Standard",
       },
@@ -107,15 +64,14 @@ describe("new bucket config", () => {
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      undefined,
-      undefined,
-      nextConfig,
+      state,
+      config,
     );
 
     const skip: SkipUnit = {
       type: Type.Skip,
       path: "buckets.cloudflare.bucket1",
-      config: nextConfig.bucket1,
+      config: config.bucket1,
     };
 
     expect(result).toEqual([skip]);
@@ -135,22 +91,18 @@ describe("migrate bucket", () => {
       branchName: "master",
     } as GitInfo;
 
-    const prevConfig: CloudflareBuckets = {
+    const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
-      },
-    };
-
-    const prevState: CloudflareBucketsState = {
-      "bucket1": {
-        storageClass: "Standard",
-        branch: "master",
         location: "apac",
         createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          storageClass: "Standard",
+        },
       },
     };
 
-    const nextConfig: CloudflareBuckets = {
+    const config: CloudflareBuckets = {
       "bucket1": {
         storageClass: "Standard",
         branch: "develop",
@@ -160,9 +112,8 @@ describe("migrate bucket", () => {
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      prevConfig,
-      prevState,
-      nextConfig,
+      state,
+      config,
     );
 
     const migration: MigrationUnit = {
@@ -180,22 +131,19 @@ describe("migrate bucket", () => {
       branchName: "develop",
     } as GitInfo;
 
-    const prevConfig: CloudflareBuckets = {
+    const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
-      },
-    };
-
-    const prevState: CloudflareBucketsState = {
-      "bucket1": {
-        storageClass: "Standard",
-        branch: "master",
         location: "apac",
         createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          storageClass: "Standard",
+          branch: "master",
+        },
       },
     };
 
-    const nextConfig: CloudflareBuckets = {
+    const config: CloudflareBuckets = {
       "bucket1": {
         storageClass: "Standard",
         branch: "develop",
@@ -205,9 +153,8 @@ describe("migrate bucket", () => {
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      prevConfig,
-      prevState,
-      nextConfig,
+      state,
+      config,
     );
 
     const migration: MigrationUnit = {
@@ -225,13 +172,7 @@ describe("migrate bucket", () => {
       branchName: "test",
     } as GitInfo;
 
-    const prevConfig: CloudflareBuckets = {
-      "bucket1": {
-        storageClass: "Standard",
-      },
-    };
-
-    const prevState: CloudflareBucketsState = {
+    const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
         branch: "master",
@@ -240,7 +181,7 @@ describe("migrate bucket", () => {
       },
     };
 
-    const nextConfig: CloudflareBuckets = {
+    const config: CloudflareBuckets = {
       "bucket1": {
         storageClass: "Standard",
         branch: "develop",
@@ -249,16 +190,15 @@ describe("migrate bucket", () => {
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      prevConfig,
-      prevState,
-      nextConfig,
+      state,
+      config,
     );
 
-    const noop: NoopUnit = {
-      type: Type.Noop,
+    const noop: SkipUnit = {
+      type: Type.Skip,
       path: "buckets.cloudflare.bucket1",
-      config: nextConfig.bucket1,
-      state: prevState.bucket1,
+      config: config.bucket1,
+      state: state.bucket1,
     };
     expect(result).toEqual([noop]);
   });
@@ -271,13 +211,7 @@ describe("delete bucket", () => {
       branchName: "master",
     } as GitInfo;
 
-    const prevConfig: CloudflareBuckets = {
-      "bucket1": {
-        storageClass: "Standard",
-      },
-    };
-
-    const prevState: CloudflareBucketsState = {
+    const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
         branch: "master",
@@ -286,14 +220,13 @@ describe("delete bucket", () => {
       },
     };
 
-    const nextConfig: CloudflareBuckets = {};
+    const config: CloudflareBuckets = {};
 
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      prevConfig,
-      prevState,
-      nextConfig,
+      state,
+      config,
     );
 
     const execution: ExecutionUnit<typeof deleteBucket> = {
@@ -306,51 +239,14 @@ describe("delete bucket", () => {
     expect(result).toEqual([execution]);
   });
 
-  it("should skip delete if bucket was not created previously", async () => {
-    const git = {
-      defaultBranch: "master",
-      branchName: "master",
-    } as GitInfo;
-
-    const prevConfig: CloudflareBuckets = {
-      "bucket1": {
-        storageClass: "Standard",
-      },
-    };
-
-    const prevState: CloudflareBucketsState = {};
-
-    const nextConfig: CloudflareBuckets = {};
-
-    const result = await createCloudflareBucketsPlan(
-      executors,
-      git,
-      prevConfig,
-      prevState,
-      nextConfig,
-    );
-
-    const skip: SkipUnit = {
-      type: Type.Skip,
-      path: "buckets.cloudflare.bucket1",
-      config: nextConfig.bucket1,
-    };
-    expect(result).toEqual([skip]);
-  });
-
   it("should not delete if running on different branch", async () => {
     const git = {
       defaultBranch: "master",
       branchName: "test",
     } as GitInfo;
 
-    const prevConfig: CloudflareBuckets = {
-      "bucket1": {
-        storageClass: "Standard",
-      },
-    };
-
-    const prevState: CloudflareBucketsState = {
+    const config: CloudflareBuckets = {};
+    const state: CloudflareBucketsState = {
       "bucket1": {
         storageClass: "Standard",
         branch: "master",
@@ -359,22 +255,66 @@ describe("delete bucket", () => {
       },
     };
 
-    const nextConfig: CloudflareBuckets = {};
-
     const result = await createCloudflareBucketsPlan(
       executors,
       git,
-      prevConfig,
-      prevState,
-      nextConfig,
+      state,
+      config,
+    );
+
+    const skip: SkipUnit = {
+      type: Type.Skip,
+      path: "buckets.cloudflare.bucket1",
+      config: config.bucket1,
+      state: state.bucket1,
+    };
+    expect(result).toEqual([skip]);
+  });
+});
+
+describe("noop changes on bucket", () => {
+  it("when state and config are the same", async () => {
+    const git = {
+      defaultBranch: "master",
+      branchName: "master",
+    } as GitInfo;
+
+    const state: CloudflareBucketsState = {
+      "bucket1": {
+        storageClass: "Standard",
+        location: "apac",
+        createdAt: "2022-01-01T00:00:00.000Z",
+        config: {
+          storageClass: "Standard",
+          locationHint: "apac",
+          branch: "master",
+        },
+      },
+    };
+
+    const config: CloudflareBuckets = {
+      "bucket1": {
+        storageClass: "Standard",
+        locationHint: "apac",
+        branch: "master",
+      },
+    };
+    const result = await createCloudflareBucketsPlan(
+      executors,
+      git,
+      state,
+      config,
     );
 
     const noop: NoopUnit = {
       type: Type.Noop,
       path: "buckets.cloudflare.bucket1",
-      config: nextConfig.bucket1,
-      state: prevState.bucket1,
+      config: config.bucket1,
+      state: state.bucket1,
     };
     expect(result).toEqual([noop]);
   });
+});
+
+describe("update bucket", () => {
 });
