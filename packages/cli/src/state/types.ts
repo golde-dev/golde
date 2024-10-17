@@ -3,8 +3,8 @@ export interface S3StateConfig {
   bucket: string;
   region: string;
   endpoint: string;
-  accessKeyId: string;
-  secretAccessKey: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
 }
 
 export interface FSStateConfig {

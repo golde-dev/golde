@@ -3,8 +3,17 @@ import { DockerClient } from "../clients/docker.ts";
 import type { GoldeConfig } from "./golde.ts";
 
 export interface DockerConfig {
+  /**
+   * Docker registry url
+   */
   registry: string;
+  /**
+   * Docker username
+   */
   username: string;
+  /**
+   * Docker password
+   */
   password: string;
 }
 export async function createDockerClient(

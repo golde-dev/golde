@@ -6,8 +6,17 @@ import type { ServersConfig } from "../servers/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { State } from "./state.ts";
 
+export type Tags = Record<string, string>;
+
 export type Config = {
+  /**
+   * Name of project,
+   */
   name: string;
+  /**
+   * Tags that would be attached to all resources
+   */
+  tags?: Tags;
   providers?: ProvidersConfig;
   state?: StateConfig;
   dns?: DNSConfig;
@@ -26,6 +35,7 @@ export interface ConfigLock {
   branch: string;
   createdAt: string;
 }
+
 export type WithBranch<T extends Resource> = T & {
   branch: string;
 };

@@ -12,12 +12,12 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
     previousState: {
       buckets: {
         cloudflare: cloudflareState,
-      } = { cloudflare: undefined },
+      } = {},
     } = {},
     nextConfig: {
       buckets: {
         cloudflare: cloudflareConfig,
-      } = { cloudflare: undefined },
+      } = {},
     } = {},
     cloudflare,
     git,

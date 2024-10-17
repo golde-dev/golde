@@ -2,6 +2,9 @@ import { logger } from "../logger.ts";
 import { GoldeClient } from "../clients/golde.ts";
 
 export interface GoldeConfig {
+  /**
+   * Golde API token
+   */
   apiKey: string;
 }
 

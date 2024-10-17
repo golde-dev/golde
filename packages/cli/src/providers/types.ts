@@ -1,41 +1,19 @@
+import type { AWSConfig } from "./aws.ts";
+import type { CloudflareConfig } from "./cloudflare.ts";
+import type { GoldeConfig } from "./golde.ts";
+import type { DockerConfig } from "./docker.ts";
+
 export interface ProvidersConfig {
   /**
    * Golde provider config
    */
-  golde?: {
-    /**
-     * Golde API token
-     */
-    apiKey: string;
-  };
-  docker?: {
-    /**
-     * Docker registry url
-     */
-    registry: string;
-    /**
-     * Docker username
-     */
-    username: string;
-    /**
-     * Docker password
-     */
-    password: string;
-  };
+  golde?: GoldeConfig;
+  aws?: AWSConfig;
+  docker?: DockerConfig;
   /**
    * Cloudflare provider config
    */
-  cloudflare?: {
-    /**
-     * Cloudflare API token
-     * @see https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
-     */
-    apiToken: string;
-    /**
-     * Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
-     */
-    accountId: string;
-  };
+  cloudflare?: CloudflareConfig;
   /**
    * Namecheap provider config
    */

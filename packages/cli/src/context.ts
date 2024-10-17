@@ -2,7 +2,7 @@ import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
 import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
 import { createHCloudClient } from "./providers/hcloud.ts";
-import type { Config } from "./types/config.ts";
+import type { Config, Tags } from "./types/config.ts";
 import type { State, StateClient } from "./types/state.ts";
 import { createDockerClient } from "./providers/docker.ts";
 import type { GitInfo } from "./clients/git.ts";
@@ -18,7 +18,7 @@ export interface Context {
   previousConfig?: Config;
   previousState?: State;
   nextConfig: Config;
-
+  tags?: Tags;
   git: GitInfo;
   state: StateClient;
   docker?: DockerClient;
@@ -33,8 +33,10 @@ export const initializeContext = async (
   const {
     name,
     state,
+    tags,
     providers: {
       golde = getGoldeConfig(),
+      aws,
       hcloud,
       cloudflare,
       docker,
@@ -64,7 +66,7 @@ export const initializeContext = async (
       gitClient,
     ] = await Promise.all([
       golde ? createGoldeClient(golde) : undefined,
-      state ? createStateClient(state) : undefined,
+      state ? createStateClient(state, aws) : undefined,
       hcloud ? createHCloudClient(hcloud) : undefined,
       cloudflare ? createCloudflareClient(cloudflare) : undefined,
       createDocker(),
@@ -76,6 +78,7 @@ export const initializeContext = async (
 
     const contextBase = {
       git,
+      tags,
       nextConfig,
       docker: dockerClient,
       golde: goldeClient,

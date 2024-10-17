@@ -2,7 +2,15 @@ import { CloudflareClient } from "../clients/cloudflare.ts";
 import { logger } from "../logger.ts";
 
 export interface CloudflareConfig {
+  /**
+   * Cloudflare API token
+   * @see https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
+   */
   apiToken: string;
+  /**
+   * Cloudflare account id
+   * @see https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
+   */
   accountId: string;
 }
 

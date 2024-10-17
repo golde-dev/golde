@@ -6,14 +6,15 @@ import { createCloudflareDNSPlan, createCloudflareExecutors } from "./providers/
 
 export async function createDNSPlan(context: Context): Promise<Plan> {
   const {
-    previousConfig: {
-      dns: prevDNSConfig,
-    } = {},
     previousState: {
-      dns: prevDNSState,
+      dns: {
+        cloudflare: cloudflareState,
+      } = {},
     } = {},
     nextConfig: {
-      dns: nextDNSConfig,
+      dns: {
+        cloudflare: cloudflareConfig,
+      } = {},
     },
     cloudflare,
     git,
@@ -21,9 +22,7 @@ export async function createDNSPlan(context: Context): Promise<Plan> {
 
   const plan: Promise<Plan>[] = [];
 
-  if (
-    !isEmpty(prevDNSConfig?.cloudflare) || !isEmpty(nextDNSConfig?.cloudflare)
-  ) {
+  if (!isEmpty(cloudflareState) || !isEmpty(cloudflareConfig)) {
     if (!cloudflare) {
       throw new PlanError(
         "Cloudflare is required when using cloudflare DNS, ensure that providers.cloudflare is defined in config",
@@ -34,9 +33,9 @@ export async function createDNSPlan(context: Context): Promise<Plan> {
 
     plan.push(createCloudflareDNSPlan(
       cloudflareDNSExecutors,
-      prevDNSConfig?.cloudflare,
-      prevDNSState?.cloudflare,
-      nextDNSConfig?.cloudflare,
+      git,
+      cloudflareState,
+      cloudflareConfig,
     ));
   }
 

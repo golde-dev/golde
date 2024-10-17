@@ -3,27 +3,54 @@ import { S3 } from "../clients/s3.ts";
 import { S3StateClient } from "./s3State.ts";
 import { FSStateClient } from "./fsState.ts";
 import type { StateClient } from "../types/state.ts";
-import type { StateConfig } from "./types.ts";
+import type { S3StateConfig, StateConfig } from "./types.ts";
+import type { AWSConfig } from "../providers/aws.ts";
+
+const getAWSCredentials = (
+  config: S3StateConfig,
+  awsConfig?: AWSConfig,
+) => {
+  const {
+    accessKeyId = awsConfig?.accessKeyId,
+    secretAccessKey = awsConfig?.secretAccessKey,
+  } = config;
+
+  if (!accessKeyId || !secretAccessKey) {
+    logger.error(
+      "Missing accessKeyId or secretAccessKey for AWS",
+      {
+        accessKeyId: "<redacted>",
+        secretAccessKey: "<redacted>",
+      },
+    );
+    throw new Error("Missing accessKeyId or secretAccessKey for AWS client");
+  }
+
+  return {
+    accessKeyId,
+    secretAccessKey,
+  };
+};
 
 export async function createStateClient(
   config: StateConfig,
+  awsConfig?: AWSConfig,
 ): Promise<StateClient> {
   if (config.type === "s3") {
     const {
       bucket,
       region,
       endpoint,
-      accessKeyId,
-      secretAccessKey,
     } = config;
+
+    const credentials = getAWSCredentials(config, awsConfig);
 
     const s3 = new S3({
       bucket,
       logger,
       region,
       endpoint,
-      accessKeyId,
-      secretAccessKey,
+      ...credentials,
     });
     try {
       await s3.verifyAccess();

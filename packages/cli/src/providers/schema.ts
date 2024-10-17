@@ -12,6 +12,17 @@ export const providersSchema: ZodType<ProvidersConfig> = z
       })
       .optional()
       .describe("Golde provider config"),
+    aws: z
+      .object({
+        accessKeyId: z
+          .string()
+          .describe("AWS access key id"),
+        secretAccessKey: z
+          .string()
+          .describe("AWS secret access key"),
+      })
+      .optional()
+      .describe("AWS provider config"),
     docker: z
       .object({
         registry: z
