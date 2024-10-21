@@ -36,7 +36,7 @@ export interface DeleteUnit<
 export interface UpdateUnit<
   C extends Resource = Resource,
   S extends ResourceState = ResourceState,
-  T extends (...args: any[]) => any = (...args: any) => Promise<void>,
+  T extends (...args: any[]) => any = (...args: any) => Promise<S>,
 > {
   type: Type.Update;
   executor: T;
@@ -64,15 +64,13 @@ export type ExecutionUnit =
   | CreateUnit
   | UpdateUnit
   | DeleteUnit
-  | NoopUnit
-
+  | NoopUnit;
 
 export type ExecutionGroups = {
   [Type.Noop]: NoopUnit[];
   [Type.Create]: CreateUnit[];
   [Type.Delete]: DeleteUnit[];
   [Type.Update]: UpdateUnit[];
-}
-
+};
 
 export type Plan = ExecutionUnit[];

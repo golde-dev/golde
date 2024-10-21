@@ -1,7 +1,7 @@
 import { isEqual } from "moderndash";
 import type { CloudflareClient } from "../../clients/cloudflare.ts";
-import type { NoopUnit, DeleteUnit } from "../../types/plan.ts";
-import { Type, type CreateUnit, type Plan } from "../../types/plan.ts";
+import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
+import { type CreateUnit, type Plan, Type } from "../../types/plan.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import type {
   CloudflareBucket,
@@ -62,9 +62,9 @@ function getCurrent(buckets: CloudflareBucketsState = {}) {
       config: CloudflareBucket;
       state: CloudflareBucketState;
     };
-  } = {} ;
+  } = {};
 
-  for (const [name, {config, ...rest}] of Object.entries(buckets)) {
+  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
     previous[`buckets.cloudflare.${name}`] = {
       name,
       config,
@@ -94,12 +94,11 @@ function getNext(config: CloudflareBuckets = {}) {
   return next;
 }
 
-
 export async function createCloudflareBucketsPlan(
   executors: Executors,
   state?: CloudflareBucketsState,
   config?: CloudflareBuckets,
-): Promise<Plan>{
+): Promise<Plan> {
   logger.debug("Creating cloudflare buckets plan", {
     state,
     config,
@@ -110,10 +109,9 @@ export async function createCloudflareBucketsPlan(
   const previous = getCurrent(state);
   const next = getNext(config);
 
-  // Buckets to create
-  const toCreateCandidates = Object.keys(next).filter(key => !(key in previous));
-  for (const key of toCreateCandidates) {
-    const {config, name} = next[key];
+  const creating = Object.keys(next).filter((key) => !(key in previous));
+  for (const key of creating) {
+    const { config, name } = next[key];
 
     const createUnit: CreateUnit<CloudflareBucket, CloudflareBucketState, CreateBucket> = {
       type: Type.Create,
@@ -121,15 +119,14 @@ export async function createCloudflareBucketsPlan(
       args: [name, config],
       path: key,
       config,
-      dependsOn: []
+      dependsOn: [],
     };
     plan.push(createUnit);
   }
 
-  // Buckets to delete
-  const toDeleteCandidates = Object.keys(previous).filter(key => !(key in next));
-  for (const key of toDeleteCandidates) {
-    const {state, name} = previous[key];
+  const deleting = Object.keys(previous).filter((key) => !(key in next));
+  for (const key of deleting) {
+    const { state, name } = previous[key];
     const deleteUnit: DeleteUnit<CloudflareBucketState, DeleteBucket> = {
       type: Type.Delete,
       executor: executors.deleteBucket,
@@ -140,15 +137,14 @@ export async function createCloudflareBucketsPlan(
     plan.push(deleteUnit);
   }
 
-  // Buckets to update, migrate or noop
-  const toUpdateCandidates = Object.keys(next).filter(key => key in previous);
-  for (const key of toUpdateCandidates) {
-    const {config: nextConfig} = next[key];
-    const {config: previousConfig, state} = previous[key];
+  const updating = Object.keys(next).filter((key) => key in previous);
+  for (const key of updating) {
+    const { config: nextConfig } = next[key];
+    const { config: previousConfig, state } = previous[key];
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
 
-    if(isSameBaseConfig) {
+    if (isSameBaseConfig) {
       const noopUnit: NoopUnit<CloudflareBucket, CloudflareBucketState> = {
         type: Type.Noop,
         path: key,
@@ -161,10 +157,6 @@ export async function createCloudflareBucketsPlan(
       throw new Error("It is not possible to update r2 bucket, create new and migrate data");
     }
   }
-  
-  logger.debug("Cloudflare buckets plan", {
-    plan,
-  });
 
   return await Promise.resolve(plan);
-};
+}

@@ -5,6 +5,7 @@ import { getDefaultBranch } from "../clients/git.ts";
 
 export const cloudflareBucketSchema = implement<CloudflareBucket>().with({
   branch: z.string().default(getDefaultBranch()).optional(),
+  branchPattern: z.string().optional(),
   locationHint: z.enum([
     "apac",
     "eeur",

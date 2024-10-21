@@ -1,19 +1,16 @@
 import { expect } from "@std/expect";
 import { describe, it } from "@std/testing/bdd";
 import { createCloudflareDNSPlan, createCloudflareExecutors } from "../cloudflare.ts";
-import type { CreateZoneRecord, DeleteZoneRecord } from "../cloudflare.ts";
 import { Type } from "../../../types/plan.ts";
+import type { CreateZoneRecord, DeleteZoneRecord, UpdateZoneRecord } from "../cloudflare.ts";
 import type { CloudflareClient } from "../../../clients/cloudflare.ts";
-import type { GitInfo } from "../../../clients/git.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../types/plan.ts";
 import type {
   CloudflareDNSRecord,
   CloudflareDNSRecordState,
   CloudflareDNSZones,
   CloudflareZonesState,
 } from "../../types.ts";
-import type { UpdateUnit } from "../../../types/plan.ts";
-import type { UpdateZoneRecord } from "../cloudflare.ts";
-import type { NoopUnit, CreateUnit, DeleteUnit } from "../../../types/plan.ts";
 
 const executors = createCloudflareExecutors(
   {} as unknown as CloudflareClient,
@@ -69,7 +66,7 @@ describe.skip("cloudflare dsn", () => {
             "dns-cloudflare": recordConfig,
           },
         },
-      };  
+      };
       const state: CloudflareZonesState = {};
       const tags = {
         "ProjectCode": "my-project",
@@ -86,7 +83,7 @@ describe.skip("cloudflare dsn", () => {
       const recordConfigWithTags = {
         ...recordConfig,
         tags: {
-          "ProjectCode": "my-project",    
+          "ProjectCode": "my-project",
           "Environment": "production",
           "Type": "dns",
         },
@@ -164,7 +161,8 @@ describe.skip("cloudflare dsn", () => {
       expect(result).toEqual([update]);
     });
 
-    it.todo("should include top level tags dns config");
+    it("should include top level tags dns config", () => {
+    });
   });
 
   describe("delete record", () => {
@@ -215,7 +213,6 @@ describe.skip("cloudflare dsn", () => {
       expect(result).toEqual([deleteUnit]);
     });
   });
-
 
   describe("noop changes on record", () => {
     it("when state and config are the same", async () => {

@@ -4,19 +4,22 @@ import type { DNSConfig } from "../dns/types.ts";
 import type { ProvidersConfig } from "../providers/types.ts";
 import type { ServersConfig } from "../servers/types.ts";
 import type { StateConfig } from "../state/types.ts";
-import type { State } from "./state.ts";
 
 export type Tags = Record<string, string>;
 
 export type Config = {
   /**
-   * Name of project,
+   * Name of project
+   * @note Change to project name will result with state becoming detached from project
    */
   name: string;
   /**
-   * Tags that would be attached to all resources
+   * These would be merged with resource specific tags
    */
   tags?: Tags;
+  /**
+   * Config for providers (aws, golde, cloudflare, etc)
+   */
   providers?: ProvidersConfig;
   state?: StateConfig;
   dns?: DNSConfig;
@@ -24,12 +27,6 @@ export type Config = {
   servers?: ServersConfig;
   artifacts?: ArtifactsConfig;
 };
-
-export interface ConfigState {
-  config: Config;
-  state: State;
-  previous: string | null;
-}
 
 export interface ConfigLock {
   branch: string;
@@ -40,10 +37,10 @@ export type WithBranch<T extends Resource> = T & {
   branch: string;
 };
 
-export interface Resource {
+export type Resource = {
   branch?: string;
   branchPattern?: string;
-}
+};
 
 export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {
   config: C;

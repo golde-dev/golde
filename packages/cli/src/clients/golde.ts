@@ -1,7 +1,7 @@
 import type { StateConfig } from "../state/types.ts";
 import { logger } from "../logger.ts";
-import type { ConfigLock, ConfigState } from "../types/config.ts";
-import type { StateClient } from "../types/state.ts";
+import type { ConfigLock } from "../types/config.ts";
+import type { State, StateClient } from "../types/state.ts";
 import { GOLDE_API_URL } from "../version.ts";
 
 interface GoldeErrorCause {
@@ -115,11 +115,11 @@ export class GoldeClient implements StateClient {
     });
   }
 
-  public getState(project: string, branch: string): Promise<ConfigState | undefined> {
+  public getState(project: string, branch: string): Promise<State | undefined> {
     return notFoundAsUndefined(
-      this.makeRequest<ConfigState>(
-        `/projects/${project}/state`, 
-        "POST", 
+      this.makeRequest<State>(
+        `/projects/${project}/state`,
+        "POST",
         { branch },
       ),
     );

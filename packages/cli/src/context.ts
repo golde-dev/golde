@@ -14,7 +14,6 @@ import { createCloudflareClient } from "./providers/cloudflare.ts";
 import { createStateClient } from "./state/state.ts";
 
 export interface Context {
-  previousConfig?: Config;
   previousState?: State;
   nextConfig: Config;
   tags?: Tags;
@@ -75,7 +74,7 @@ export const initializeContext = async (
     logger.debug("Git info", git);
 
     const {
-      branchName
+      branchName,
     } = git;
 
     const contextBase = {
@@ -91,22 +90,17 @@ export const initializeContext = async (
       await goldeClient?.changeStateConfig(name, state);
       logger.debug("Using own state provider");
 
-      const {
-        config: previousConfig,
-        state: previousState,
-      } = await stateClient.getState(name, branchName) ?? {};
+      const previousState = await stateClient.getState(name, branchName) ?? {};
 
       logger.info("Context initialized");
 
       return {
         ...contextBase,
-        previousConfig,
         previousState,
         state: stateClient,
       };
     } else if (goldeClient) {
       const {
-        config: previousConfig,
         state: previousState,
       } = await goldeClient.getState(name, branchName) ?? {};
 
@@ -114,7 +108,6 @@ export const initializeContext = async (
 
       return {
         ...contextBase,
-        previousConfig,
         previousState,
         state: goldeClient,
       };
