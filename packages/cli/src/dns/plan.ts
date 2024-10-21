@@ -17,7 +17,7 @@ export async function createDNSPlan(context: Context): Promise<Plan> {
       } = {},
     },
     cloudflare,
-    git,
+    tags,
   } = context;
 
   const plan: Promise<Plan>[] = [];
@@ -33,7 +33,7 @@ export async function createDNSPlan(context: Context): Promise<Plan> {
 
     plan.push(createCloudflareDNSPlan(
       cloudflareDNSExecutors,
-      git,
+      tags,
       cloudflareState,
       cloudflareConfig,
     ));

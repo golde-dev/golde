@@ -20,7 +20,6 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
       } = {},
     } = {},
     cloudflare,
-    git,
   } = context;
 
   const promises: Promise<Plan>[] = [];
@@ -38,7 +37,6 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
     const executors = createCloudflareBucketsExecutors(cloudflare);
     promises.push(createCloudflareBucketsPlan(
       executors,
-      git,
       cloudflareState,
       cloudflareConfig,
     ));

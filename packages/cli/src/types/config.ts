@@ -42,6 +42,7 @@ export type WithBranch<T extends Resource> = T & {
 
 export interface Resource {
   branch?: string;
+  branchPattern?: string;
 }
 
 export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {

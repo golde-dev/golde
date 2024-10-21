@@ -10,6 +10,6 @@ export interface State {
 }
 
 export interface StateClient {
-  getState(project: string): Promise<ConfigState | undefined>;
-  getStateLock(project: string): Promise<ConfigLock | undefined>;
+  getState(project: string, branch: string): Promise<ConfigState | undefined>;
+  getStateLock(project: string, branch: string): Promise<ConfigLock | undefined>;
 }

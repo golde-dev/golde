@@ -1,8 +1,6 @@
 import { isEqual } from "moderndash";
 import type { CloudflareClient } from "../../clients/cloudflare.ts";
-import type { GitInfo } from "../../clients/git.ts";
-import type { NoopUnit, SkipUnit } from "../../types/plan.ts";
-import type { DeleteUnit, MigrationUnit } from "../../types/plan.ts";
+import type { NoopUnit, DeleteUnit } from "../../types/plan.ts";
 import { Type, type CreateUnit, type Plan } from "../../types/plan.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import type {
@@ -11,6 +9,7 @@ import type {
   CloudflareBucketsState,
   CloudflareBucketState,
 } from "../types.ts";
+import { logger } from "../../logger.ts";
 
 export async function createBucket(
   this: CloudflareClient,
@@ -19,7 +18,8 @@ export async function createBucket(
 ): Promise<CloudflareBucketState> {
   assertBranch(config);
 
-  return await this.createBucket({
+  const start = Date.now();
+  const bucket = await this.createBucket({
     name,
     locationHint: config.locationHint,
     storageClass: config.storageClass,
@@ -31,17 +31,18 @@ export async function createBucket(
       config,
     };
   });
+  const end = Date.now();
+  logger.debug(`Created cloudflare bucket ${name} in ${end - start}ms`);
+  return bucket;
 }
 export type CreateBucket = typeof createBucket;
 
-export function updateBucket(
-  this: CloudflareClient,
-) {
-  throw new Error("It is not possible to update r2 bucket, create new and migrate data");
-}
-
 export async function deleteBucket(this: CloudflareClient, name: string) {
-  return await this.deleteBucket(name);
+  const start = Date.now();
+  await this.deleteBucket(name);
+  const end = Date.now();
+
+  logger.debug(`Deleted cloudflare bucket ${name} in ${end - start}ms`);
 }
 export type DeleteBucket = typeof deleteBucket;
 
@@ -49,7 +50,6 @@ export const createCloudflareBucketsExecutors = (cloudflare: CloudflareClient) =
   return {
     createBucket: createBucket.bind(cloudflare),
     deleteBucket: deleteBucket.bind(cloudflare),
-    updateBucket: updateBucket.bind(cloudflare),
   };
 };
 
@@ -60,8 +60,7 @@ function getCurrent(buckets: CloudflareBucketsState = {}) {
     [path: string]: {
       name: string;
       config: CloudflareBucket;
-      state: Omit<CloudflareBucketState, "config">;
-      original: CloudflareBucketState;
+      state: CloudflareBucketState;
     };
   } = {} ;
 
@@ -69,8 +68,7 @@ function getCurrent(buckets: CloudflareBucketsState = {}) {
     previous[`buckets.cloudflare.${name}`] = {
       name,
       config,
-      state: rest,
-      original: {
+      state: {
         ...rest,
         config,
       },
@@ -99,14 +97,15 @@ function getNext(config: CloudflareBuckets = {}) {
 
 export async function createCloudflareBucketsPlan(
   executors: Executors,
-  git: GitInfo,
   state?: CloudflareBucketsState,
   config?: CloudflareBuckets,
 ): Promise<Plan>{
+  logger.debug("Creating cloudflare buckets plan", {
+    state,
+    config,
+  });
+
   const plan: Plan = [];
-  const {
-    branchName,
-  } = git;
 
   const previous = getCurrent(state);
   const next = getNext(config);
@@ -115,23 +114,14 @@ export async function createCloudflareBucketsPlan(
   const toCreateCandidates = Object.keys(next).filter(key => !(key in previous));
   for (const key of toCreateCandidates) {
     const {config, name} = next[key];
-    if(config.branch !== branchName) {
-      const skipUnit: SkipUnit<CloudflareBucket, CloudflareBucketState> = {
-        type: Type.Skip,
-        path: key,
-        config,
-        reason:`Bucket owner branch: ${config.branch}, current branch: ${branchName}`,
-      };
-      plan.push(skipUnit);
-      continue;
-    }
+
     const createUnit: CreateUnit<CloudflareBucket, CloudflareBucketState, CreateBucket> = {
       type: Type.Create,
       executor: executors.createBucket,
       args: [name, config],
       path: key,
       config,
-      dependencies: []
+      dependsOn: []
     };
     plan.push(createUnit);
   }
@@ -139,24 +129,13 @@ export async function createCloudflareBucketsPlan(
   // Buckets to delete
   const toDeleteCandidates = Object.keys(previous).filter(key => !(key in next));
   for (const key of toDeleteCandidates) {
-    const {original, config, name} = previous[key];
-    if(config.branch !== branchName) {
-      const skipUnit: SkipUnit<CloudflareBucket, CloudflareBucketState> = {
-        type: Type.Skip,
-        path: key,
-        state: original,
-        reason:`Bucket owner branch: ${config.branch}, current branch: ${branchName}`,
-      };
-      plan.push(skipUnit);
-      continue;
-    }
+    const {state, name} = previous[key];
     const deleteUnit: DeleteUnit<CloudflareBucketState, DeleteBucket> = {
       type: Type.Delete,
       executor: executors.deleteBucket,
       args: [name],
       path: key,
-      state: original,
-      dependencies: []
+      state,
     };
     plan.push(deleteUnit);
   }
@@ -165,60 +144,27 @@ export async function createCloudflareBucketsPlan(
   const toUpdateCandidates = Object.keys(next).filter(key => key in previous);
   for (const key of toUpdateCandidates) {
     const {config: nextConfig} = next[key];
-    const {config: previousConfig, original} = previous[key];
+    const {config: previousConfig, state} = previous[key];
 
-    const {
-      branch: nextBranch,
-      ...restNextConfig
-    } = nextConfig;
-    const {
-      branch: previousBranch,
-      ...restPreviousConfig
-    } = previousConfig;
+    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
 
-    const isSameBaseConfig = isEqual(restNextConfig, restPreviousConfig);
-    const isOnOwnerBranch = previousBranch === branchName;
-    const isOnTargetBranch = nextBranch === branchName;
-    const isSameBranch = nextBranch === previousBranch;
-    const isOnOwnerOrTargetBranch = isOnOwnerBranch || isOnTargetBranch;
-
-    if(!isSameBranch && isOnOwnerOrTargetBranch) {
-      if(isSameBaseConfig) {
-        const migrationUnit: MigrationUnit = {
-          type: Type.Migrate,
-          path: key,
-          from: previousBranch as string,
-          to: nextBranch as string,
-        };
-        plan.push(migrationUnit);
-        continue;
-      }
-    }
-
-    if(isSameBranch && isOnOwnerBranch) {
-      if(isSameBaseConfig) {
-        const noopUnit: NoopUnit<CloudflareBucket, CloudflareBucketState> = {
-          type: Type.Noop,
-          path: key,
-          config: previousConfig,
-          state: original,
-        };
-        plan.push(noopUnit);
-        continue;
-      } else {
-        throw new Error("It is not possible to update r2 bucket, create new and migrate data");
-      }
-    } else {
-      const skipUnit: SkipUnit<CloudflareBucket, CloudflareBucketState> = {
-        type: Type.Skip,
+    if(isSameBaseConfig) {
+      const noopUnit: NoopUnit<CloudflareBucket, CloudflareBucketState> = {
+        type: Type.Noop,
         path: key,
-        config: nextConfig,
-        state: original,
-        reason: `Bucket owner branch: ${previousBranch}, current branch: ${branchName}`,
+        config: previousConfig,
+        state,
       };
-      plan.push(skipUnit);
+      plan.push(noopUnit);
+      continue;
+    } else {
+      throw new Error("It is not possible to update r2 bucket, create new and migrate data");
     }
   }
+  
+  logger.debug("Cloudflare buckets plan", {
+    plan,
+  });
 
   return await Promise.resolve(plan);
 };

@@ -1,8 +1,8 @@
 import { logger } from "../../logger.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import type { CloudflareClient } from "../../clients/cloudflare.ts";
-import type { Plan } from "../../types/plan.ts";
-import type { GitInfo } from "../../clients/git.ts";
+import { Type, type CreateUnit, type Plan } from "../../types/plan.ts";
+import type { Tags } from "../../types/config.ts";
 import type {
   CloudflareDNSRecord,
   CloudflareDNSRecordState,
@@ -110,12 +110,67 @@ export const createCloudflareExecutors = (client: CloudflareClient) => {
   };
 };
 
+function getPrevious(state: CloudflareZonesState = {}) {
+  const records: {
+    [path: string]: {
+      config: CloudflareDNSRecord,
+      state: CloudflareDNSRecordState,
+      zone: string,
+      type: RecordType,
+      name: string,
+  }} = {}
+
+  for (const [zone, zoneState] of Object.entries(state)) {
+    for (const [type, recordState] of Object.entries(zoneState)) {
+      for (const [name, record] of Object.entries(recordState)) {
+        records[`dns.cloudflare.${zone}.${type}.${name}`] = {
+          state: record,
+          config: record.config,
+          zone,
+          type: type as RecordType,
+          name,
+        };
+      }
+    }
+  }
+
+  return records;
+}
+
+function getNext(config: CloudflareDNSZones = {}, tags: Tags = {}) {
+  const records: {
+    [path: string]: {
+      config: CloudflareDNSRecord,
+      zone: string,
+      type: RecordType,
+      name: string,
+  }} = {}
+
+  for (const [zone, zoneConfig] of Object.entries(config)) {
+    for (const [type, recordConfig] of Object.entries(zoneConfig)) {
+      for (const [name, record] of Object.entries(recordConfig)) {
+        records[`dns.cloudflare.${zone}.${type}.${name}`] = {
+          config: record,
+          zone,
+          type: type as RecordType,
+          name,
+        };
+      }
+    }
+  }
+
+  return records;
+}
+
+
+
 export const createCloudflareDNSPlan = (
-  _executors: ReturnType<typeof createCloudflareExecutors>,
-  _git: GitInfo,
+  executors: ReturnType<typeof createCloudflareExecutors>,
+  _tags?: Tags,
   state?: CloudflareZonesState,
   config?: CloudflareDNSZones,
 ): Promise<Plan> => {
+  const plan: Plan = [];  
   logger.debug(
     "Planning for cloudflare dns changes",
     {
@@ -124,5 +179,23 @@ export const createCloudflareDNSPlan = (
     },
   );
 
-  return Promise.resolve([]);
+  const previous = getPrevious(state);
+  const next = getNext(config, tags);
+
+  const toCreateCandidates = Object.keys(next).filter(key => !(key in previous));
+  for (const key of toCreateCandidates) {
+    const {config, zone, type, name} = next[key];
+
+    const createUnit: CreateUnit<CloudflareDNSRecord, CloudflareDNSRecordState, CreateZoneRecord> = {
+      type: Type.Create,
+      executor: executors.createZoneRecord,
+      args: [zone, type, name, config],
+      path: key,
+      config,
+      dependsOn: [],
+    };
+    plan.push(createUnit);
+  }
+
+  return Promise.resolve(plan);
 };

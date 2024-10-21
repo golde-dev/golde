@@ -1,3 +1,4 @@
+import type { Tags } from "../types/config.ts";
 import type { Resource, WithBranch } from "../types/config.ts";
 
 export type RecordType =
@@ -44,7 +45,7 @@ export interface DNSZonesState {
 export interface CloudflareDNSRecord extends BaseDNSRecord {
   proxied?: boolean;
   comment?: string;
-  tags?: string[];
+  tags?: Tags;
 }
 
 export type CloudflareZoneRecords = Partial<

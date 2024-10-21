@@ -6,9 +6,7 @@ export enum Type {
   Create = "Create",
   Delete = "Delete",
   Update = "Update",
-  Migrate = "Migrate",
   Noop = "Noop",
-  Skip = "Skip",
 }
 
 export interface CreateUnit<
@@ -21,7 +19,7 @@ export interface CreateUnit<
   args: Parameters<T>;
   config: C;
   path: string;
-  dependencies: string[];
+  dependsOn: string[];
 }
 
 export interface DeleteUnit<
@@ -33,7 +31,6 @@ export interface DeleteUnit<
   args: Parameters<T>;
   state: S;
   path: string;
-  dependencies: string[];
 }
 
 export interface UpdateUnit<
@@ -47,31 +44,7 @@ export interface UpdateUnit<
   state: S;
   config: C;
   path: string;
-  dependencies: string[];
-}
-
-/**
- * Used when assets ownership change between git branches
- */
-export interface MigrationUnit {
-  type: Type.Migrate;
-  from: string;
-  to: string;
-  path: string;
-}
-
-/**
- * Skip used when there executing on different branch than owner
- */
-export interface SkipUnit<
-  C extends Resource = Resource,
-  S extends ResourceState = ResourceState,
-> {
-  type: Type.Skip;
-  path: string;
-  config?: C;
-  state?: S;
-  reason?: string;
+  dependsOn: string[];
 }
 
 /**
@@ -91,8 +64,15 @@ export type ExecutionUnit =
   | CreateUnit
   | UpdateUnit
   | DeleteUnit
-  | MigrationUnit
   | NoopUnit
-  | SkipUnit;
+
+
+export type ExecutionGroups = {
+  [Type.Noop]: NoopUnit[];
+  [Type.Create]: CreateUnit[];
+  [Type.Delete]: DeleteUnit[];
+  [Type.Update]: UpdateUnit[];
+}
+
 
 export type Plan = ExecutionUnit[];

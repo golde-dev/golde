@@ -6,6 +6,12 @@ import { PlanError } from "./error.ts";
 import { logger } from "./logger.ts";
 import type { Plan } from "./types/plan.ts";
 
+function logPlan(plan: Plan) {
+  logger.debug("Plan", {
+    plan,
+  });
+}
+
 export async function createPlan(
   context: Context,
 ): Promise<Plan> {
@@ -18,7 +24,7 @@ export async function createPlan(
       ],
     )).flat();
 
-    logger.info("Execution plan", plan);
+    logPlan(plan);
     return plan;
   } catch (error) {
     if (error instanceof PlanError) {

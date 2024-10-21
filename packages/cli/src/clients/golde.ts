@@ -115,15 +115,23 @@ export class GoldeClient implements StateClient {
     });
   }
 
-  public getState(project: string): Promise<ConfigState | undefined> {
+  public getState(project: string, branch: string): Promise<ConfigState | undefined> {
     return notFoundAsUndefined(
-      this.makeRequest<ConfigState>(`/projects/${project}/state`),
+      this.makeRequest<ConfigState>(
+        `/projects/${project}/state`, 
+        "POST", 
+        { branch },
+      ),
     );
   }
 
-  public getStateLock(project: string): Promise<ConfigLock | undefined> {
+  public getStateLock(project: string, branch: string): Promise<ConfigLock | undefined> {
     return notFoundAsUndefined(
-      this.makeRequest<ConfigLock>(`/projects/${project}/lock`),
+      this.makeRequest<ConfigLock>(
+        `/projects/${project}/lock`,
+        "POST",
+        { branch },
+      ),
     );
   }
 

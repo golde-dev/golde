@@ -5,7 +5,6 @@ import { createHCloudClient } from "./providers/hcloud.ts";
 import type { Config, Tags } from "./types/config.ts";
 import type { State, StateClient } from "./types/state.ts";
 import { createDockerClient } from "./providers/docker.ts";
-import type { GitInfo } from "./clients/git.ts";
 import { createGitClient } from "./providers/git.ts";
 import type { DockerClient } from "./clients/docker.ts";
 import type { GoldeClient } from "./clients/golde.ts";
@@ -19,7 +18,6 @@ export interface Context {
   previousState?: State;
   nextConfig: Config;
   tags?: Tags;
-  git: GitInfo;
   state: StateClient;
   docker?: DockerClient;
   golde?: GoldeClient;
@@ -76,8 +74,11 @@ export const initializeContext = async (
     const git = gitClient.getGitInfo();
     logger.debug("Git info", git);
 
+    const {
+      branchName
+    } = git;
+
     const contextBase = {
-      git,
       tags,
       nextConfig,
       docker: dockerClient,
@@ -93,7 +94,7 @@ export const initializeContext = async (
       const {
         config: previousConfig,
         state: previousState,
-      } = await stateClient.getState(name) ?? {};
+      } = await stateClient.getState(name, branchName) ?? {};
 
       logger.info("Context initialized");
 
@@ -107,7 +108,7 @@ export const initializeContext = async (
       const {
         config: previousConfig,
         state: previousState,
-      } = await goldeClient.getState(name) ?? {};
+      } = await goldeClient.getState(name, branchName) ?? {};
 
       logger.info("Context initialized");
 
