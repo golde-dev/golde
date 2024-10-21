@@ -1,10 +1,13 @@
 import { validateConfig } from "../schema.ts";
 import { ConfigError } from "../error.ts";
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import type { Config } from "../types/config.ts";
+import { describe, it } from "@std/testing/bdd";
+import { expect } from "@std/expect/expect";
 
-Deno.test("validateConfig for project", async (t) => {
-  await t.step("should throw an error if the config is invalid", () => {
+describe("validateConfig for project", () => {
+
+  it("should throw an error if the config is invalid", () => {
     const invalidConfig: Config = {
       name: "invalid project name",
       providers: {
@@ -14,12 +17,12 @@ Deno.test("validateConfig for project", async (t) => {
       },
     };
 
-    assertThrows(() => {
+    expect(() => {
       validateConfig(invalidConfig);
-    }, ConfigError);
+    }).toThrow(ConfigError);
   });
 
-  await t.step("should not throw an error if the config is valid", () => {
+  it("should not throw an error if the config is valid", () => {
     const validConfig = {
       name: "valid_project_name",
       providers: {
@@ -29,6 +32,6 @@ Deno.test("validateConfig for project", async (t) => {
       },
     };
 
-    assertEquals(validateConfig(validConfig), undefined);
+    expect(validateConfig(validConfig)).toBeUndefined();
   });
 });

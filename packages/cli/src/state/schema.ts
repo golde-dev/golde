@@ -19,10 +19,10 @@ export const s3stateSchema = implement<S3StateConfig>().with({
     .describe("s3 endpoint"),
   accessKeyId: z
     .string()
-    .describe("access key id"),
+    .describe("access key id").optional(),
   secretAccessKey: z
     .string()
-    .describe("s3 access key"),
+    .describe("s3 access key").optional(),
 });
 
 export const fsStateSchema = implement<FSStateConfig>().with({

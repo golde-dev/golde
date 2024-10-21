@@ -74,13 +74,22 @@ parallelTask("dist:local", [
 ]);
 
 spawnTask("test:agent", 
-  "deno", ["test"], 
+  "deno", [
+    "test", 
+    "--allow-env", 
+    "--allow-read"
+  ], 
   {
     cwd: "./packages/agent",
   }
 );
 spawnTask("test:cli", 
-  "deno", ["test"], 
+  "deno", [
+    "test", 
+    "--allow-env", 
+    "--allow-read", 
+    "--allow-run"
+  ], 
   {
     cwd: "./packages/cli",
   }

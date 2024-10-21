@@ -71,6 +71,7 @@ export interface SkipUnit<
   path: string;
   config?: C;
   state?: S;
+  reason?: string;
 }
 
 /**

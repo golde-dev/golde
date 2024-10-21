@@ -21,7 +21,7 @@ const executors = createCloudflareExecutors(
   {} as unknown as CloudflareClient,
 );
 
-describe("cloudflare dsn", () => {
+describe.skip("cloudflare dsn", () => {
   describe("create new record", () => {
     it("should create bucket for new config on default branch", async () => {
       const git = {

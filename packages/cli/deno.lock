@@ -6,7 +6,6 @@
     "jsr:@deno/dnt@~0.41.3": "0.41.3",
     "jsr:@deno/graph@~0.73.1": "0.73.1",
     "jsr:@luca/esbuild-deno-loader@~0.10.3": "0.10.3",
-    "jsr:@std/archive@~0.225.4": "0.225.4",
     "jsr:@std/assert@0.223": "0.223.0",
     "jsr:@std/assert@0.226": "0.226.0",
     "jsr:@std/assert@^1.0.6": "1.0.6",
@@ -37,6 +36,7 @@
     "jsr:@std/path@^1.0.6": "1.0.6",
     "jsr:@std/path@~0.225.2": "0.225.2",
     "jsr:@std/streams@^1.0.6": "1.0.6",
+    "jsr:@std/testing@^1.0.3": "1.0.3",
     "jsr:@ts-morph/bootstrap@0.24": "0.24.0",
     "jsr:@ts-morph/common@0.24": "0.24.0",
     "npm:@aws-sdk/client-s3@^3.23.0": "3.654.0_@aws-sdk+client-sts@3.654.0__@aws-sdk+client-sso-oidc@3.654.0___@aws-sdk+client-sts@3.654.0_@aws-sdk+client-sso-oidc@3.654.0__@aws-sdk+client-sts@3.654.0___@aws-sdk+client-sso-oidc@3.654.0____@aws-sdk+client-sts@3.654.0__@aws-sdk+client-sts@3.654.0___@aws-sdk+client-sso-oidc@3.654.0____@aws-sdk+client-sts@3.654.0_____@aws-sdk+client-sso-oidc@3.654.0___@aws-sdk+client-sso-oidc@3.654.0",
@@ -82,12 +82,6 @@
         "jsr:@std/encoding",
         "jsr:@std/jsonc",
         "jsr:@std/path@0.213"
-      ]
-    },
-    "@std/archive@0.225.4": {
-      "integrity": "59fe5d1834cbb6a2a7913b102d41c11d51475328d5b843bea75b94a40b44a115",
-      "dependencies": [
-        "jsr:@std/io@~0.224.9"
       ]
     },
     "@std/assert@0.213.1": {
@@ -210,6 +204,13 @@
       "integrity": "022ed94e380d06b4d91c49eb70241b7289ab78b8c2b4c4bbb7eb265e4997c25c",
       "dependencies": [
         "jsr:@std/bytes@^1.0.2"
+      ]
+    },
+    "@std/testing@1.0.3": {
+      "integrity": "f98c2bee53860a5916727d7e7d3abe920dd6f9edace022e2d059f00d05c2cf42",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.6",
+        "jsr:@std/internal"
       ]
     },
     "@ts-morph/bootstrap@0.24.0": {
@@ -3273,10 +3274,10 @@
     "dependencies": [
       "jsr:@deno/dnt@~0.41.3",
       "jsr:@luca/esbuild-deno-loader@~0.10.3",
-      "jsr:@std/archive@~0.225.4",
       "jsr:@std/assert@^1.0.6",
       "jsr:@std/cli@^1.0.6",
       "jsr:@std/dotenv@~0.225.2",
+      "jsr:@std/expect@^1.0.5",
       "jsr:@std/fs@^1.0.4",
       "jsr:@std/io@~0.224.9",
       "jsr:@std/log@~0.224.8",

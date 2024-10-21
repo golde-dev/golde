@@ -84,6 +84,7 @@ describe("cloudflare buckets", () => {
         type: Type.Skip,
         path: "buckets.cloudflare.bucket1",
         config: config.bucket1,
+        reason: `Bucket owner branch: ${config.bucket1.branch}, current branch: ${git.branchName}`,
       };
 
       expect(result).toEqual([skip]);
@@ -112,19 +113,17 @@ describe("cloudflare buckets", () => {
 
       const config: CloudflareBuckets = {
         "bucket1": {
-          storageClass: "Standard",
-          locationHint: "apac",
+          storageClass: "InfrequentAccess",
+          locationHint: "eeur",
           branch: "master",
         },
       };
-      await expect(() =>
-        createCloudflareBucketsPlan(
-          executors,
-          git,
-          state,
-          config,
-        )
-      ).toThrow("It is not possible to update r2 bucket, create new and migrate data");
+      await expect(createCloudflareBucketsPlan(
+        executors,
+        git,
+        state,
+        config,
+      )).rejects.toThrow("It is not possible to update r2 bucket, create new and migrate data");
     });
   });
 
@@ -194,8 +193,8 @@ describe("cloudflare buckets", () => {
       const skip: SkipUnit = {
         type: Type.Skip,
         path: "buckets.cloudflare.bucket1",
-        config: config.bucket1,
         state: state.bucket1,
+        reason: `Bucket owner branch: ${state.bucket1.config.branch}, current branch: ${git.branchName}`,
       };
       expect(result).toEqual([skip]);
     });
@@ -319,6 +318,7 @@ describe("cloudflare buckets", () => {
         path: "buckets.cloudflare.bucket1",
         config: config.bucket1,
         state: state.bucket1,
+        reason: `Bucket owner branch: ${state.bucket1.config.branch}, current branch: ${git.branchName}`,
       };
       expect(result).toEqual([noop]);
     });

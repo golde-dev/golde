@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { ConfigError, ConfigErrorCode } from "../error.ts";
-import { getBranchName, getBranchSlug } from "./git.ts";
+import { getBranchName, getBranchSlug } from "../clients/git.ts";
 
 const templateRe = new RegExp(/{{(.*?)}}/g);
 
