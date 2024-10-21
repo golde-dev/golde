@@ -1,0 +1,16 @@
+{
+  "name": "@golde/example-config-formats",
+  "packageManager": "yarn@4.5.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "show:json": "golde show -c golde.config.json",
+    "show:js": "golde show -c golde.config.js",
+    "show:ts": "golde show -c golde.config.ts",
+    "show:yaml": "golde show -c golde.yaml",
+    "show:toml": "golde show -c golde.toml"
+  },
+  "devDependencies": {
+    "@golde/cli": "*"
+  }
+}
