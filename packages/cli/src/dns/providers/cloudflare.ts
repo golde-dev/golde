@@ -100,6 +100,8 @@ async function deleteZoneRecord(
   await this.deleteZoneRecord(zoneName, recordId);
 }
 
+export type DeleteZoneRecord = typeof deleteZoneRecord;
+
 export const createCloudflareExecutors = (client: CloudflareClient) => {
   return {
     createZoneRecord: createZoneRecord.bind(client),
