@@ -19,11 +19,17 @@ export interface GitInfo {
 
 export const getDefaultBranch = memoize(() => {
   try {
+    /**
+     * This try to use github cli to get the default branch
+     */
     return execSync("gh repo view --json defaultBranchRef --jq .defaultBranchRef.name")
       .toString()
       .trim() ?? "master";
   } catch {
-    return execSync("git rev-parse --abbrev-ref origin/HEAD")
+    /**
+     * This need be improved as it not always the case that remote is origin
+     */
+    return execSync("git symbolic-ref refs/remotes/origin/HEAD --short")
       .toString()
       .trim()
       .split("/")

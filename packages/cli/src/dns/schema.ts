@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { BaseDNSRecord, CloudflareDNSRecord, DNSConfig, RecordType } from "./types.ts";
 import type { ZodType } from "zod";
-import { getDefaultBranch } from "../clients/git.ts";
-import { tagsSchema } from "../schema.ts";
+import { tagsSchema } from "../utils/tags.ts";
+import { branchPatternSchema, branchSchema } from "../utils/resource.ts";
 
 const recordTypeSchema: ZodType<RecordType> = z.union([
   z.literal("A"),
@@ -33,8 +33,8 @@ const dnsRecord: ZodType<BaseDNSRecord> = z
       .number()
       .optional()
       .describe("TTL in seconds"),
-    branch: z.string().default(getDefaultBranch()),
-    branchPattern: z.string().optional(),
+    branch: branchSchema,
+    branchPattern: branchPatternSchema,
   })
   .strict();
 
@@ -51,9 +51,9 @@ const cloudflareDNSRecord: ZodType<CloudflareDNSRecord> = z
       .describe("TTL in seconds"),
     proxied: z.boolean().optional(),
     comment: z.string().optional(),
-    tags: tagsSchema.optional(),
-    branch: z.string().default(getDefaultBranch()),
-    branchPattern: z.string().optional(),
+    tags: tagsSchema,
+    branch: branchSchema,
+    branchPattern: branchPatternSchema,
   })
   .strict();
 

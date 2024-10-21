@@ -1,4 +1,7 @@
+import { z } from "zod";
 import type { Tags } from "../types/config.ts";
+
+export const tagsSchema = z.record(z.string()).optional();
 
 export function mergeTags(tags?: Tags, other?: Tags) {
   if (!tags && !other) {

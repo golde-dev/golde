@@ -1,11 +1,11 @@
 import { z } from "zod";
 import type { BucketsConfig, CloudflareBucket } from "./types.ts";
 import { implement } from "../utils/zod.ts";
-import { getDefaultBranch } from "../clients/git.ts";
+import { branchPatternSchema, branchSchema } from "../utils/resource.ts";
 
 export const cloudflareBucketSchema = implement<CloudflareBucket>().with({
-  branch: z.string().default(getDefaultBranch()).optional(),
-  branchPattern: z.string().optional(),
+  branch: branchSchema.optional(),
+  branchPattern: branchPatternSchema,
   locationHint: z.enum([
     "apac",
     "eeur",

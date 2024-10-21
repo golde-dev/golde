@@ -7,6 +7,7 @@ import { providersSchema } from "./providers/schema.ts";
 import { bucketSchema } from "./buckets/schema.ts";
 import { artifactsSchema } from "./artifacts/schema.ts";
 import { stateSchema } from "./state/schema.ts";
+import { tagsSchema } from "./utils/tags.ts";
 
 export const projectNameSchema = z
   .string()
@@ -15,8 +16,6 @@ export const projectNameSchema = z
     /^[A-Za-z0-9_@./#&+-]*$/,
     "Projects name may include alphanumeric characters and the following special symbols: -, _, @, ., /, #, &, +.",
   );
-
-export const tagsSchema = z.record(z.string());
 
 export const schema: ZodType<Config> = z
   .object({
