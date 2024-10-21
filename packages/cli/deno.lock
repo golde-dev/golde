@@ -13,6 +13,7 @@
     "jsr:@std/bytes@0.223": "0.223.0",
     "jsr:@std/bytes@^1.0.2": "1.0.2",
     "jsr:@std/cli@^1.0.6": "1.0.6",
+    "jsr:@std/collections@^1.0.5": "1.0.8",
     "jsr:@std/dotenv@~0.225.2": "0.225.2",
     "jsr:@std/encoding@0.213": "0.213.1",
     "jsr:@std/expect@^1.0.5": "1.0.5",
@@ -37,6 +38,8 @@
     "jsr:@std/path@~0.225.2": "0.225.2",
     "jsr:@std/streams@^1.0.6": "1.0.6",
     "jsr:@std/testing@^1.0.3": "1.0.3",
+    "jsr:@std/toml@*": "1.0.1",
+    "jsr:@std/yaml@^1.0.5": "1.0.5",
     "jsr:@ts-morph/bootstrap@0.24": "0.24.0",
     "jsr:@ts-morph/common@0.24": "0.24.0",
     "npm:@aws-sdk/client-s3@^3.23.0": "3.654.0_@aws-sdk+client-sts@3.654.0__@aws-sdk+client-sso-oidc@3.654.0___@aws-sdk+client-sts@3.654.0_@aws-sdk+client-sso-oidc@3.654.0__@aws-sdk+client-sts@3.654.0___@aws-sdk+client-sso-oidc@3.654.0____@aws-sdk+client-sts@3.654.0__@aws-sdk+client-sts@3.654.0___@aws-sdk+client-sso-oidc@3.654.0____@aws-sdk+client-sts@3.654.0_____@aws-sdk+client-sso-oidc@3.654.0___@aws-sdk+client-sso-oidc@3.654.0",
@@ -107,6 +110,9 @@
     },
     "@std/cli@1.0.6": {
       "integrity": "d22d8b38c66c666d7ad1f2a66c5b122da1704f985d3c47f01129f05abb6c5d3d"
+    },
+    "@std/collections@1.0.8": {
+      "integrity": "de76692f9121838711b1d2fb5042619c074db26905a87b58cff56cfe1bd6d6d0"
     },
     "@std/dotenv@0.225.2": {
       "integrity": "e2025dce4de6c7bca21dece8baddd4262b09d5187217e231b033e088e0c4dd23"
@@ -212,6 +218,15 @@
         "jsr:@std/assert@^1.0.6",
         "jsr:@std/internal"
       ]
+    },
+    "@std/toml@1.0.1": {
+      "integrity": "b55b407159930f338d384b1f8fd317c8e8a35e27ebb8946155f49e3a158d16c4",
+      "dependencies": [
+        "jsr:@std/collections"
+      ]
+    },
+    "@std/yaml@1.0.5": {
+      "integrity": "71ba3d334305ee2149391931508b2c293a8490f94a337eef3a09cade1a2a2742"
     },
     "@ts-morph/bootstrap@0.24.0": {
       "integrity": "a826a2ef7fa8a7c3f1042df2c034d20744d94da2ee32bf29275bcd4dffd3c060",

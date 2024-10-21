@@ -23,6 +23,8 @@
     "@std/cli": "jsr:@std/cli@^1.0.6",
     "@std/fs": "jsr:@std/fs@^1.0.4",
     "@std/streams": "jsr:@std/streams@^1.0.6",
+    "@std/yaml": "jsr:@std/yaml@^1.0.5",
+    "@std/toml": "jsr:@std/toml@^1.0.1",
     "@std/io": "jsr:@std/io@^0.224.9",
     "@std/log": "jsr:@std/log@^0.224.8",
     "@std/expect": "jsr:@std/expect@^1.0.5",

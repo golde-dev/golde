@@ -2,19 +2,16 @@ import { existsSync } from "node:fs";
 import type { Config } from "./types/config.ts";
 import { validateConfig } from "./schema.ts";
 import { logger } from "./logger.ts";
+import { parse as parseToml } from "@std/toml";
+import { parse as parseYaml } from "@std/yaml";
 import { extname, resolve } from "node:path";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
-import {
-  envTemplate,
-  fileTemplate,
-  gitTemplate,
-  resolveTemplate,
-} from "./utils/template.ts";
+import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template.ts";
 import { dynamicImport } from "./utils/import.ts";
 
 const loadConfig = async (
   path: string,
-): Promise<{ config: unknown; path: string }> => {
+): Promise<{ config: object; path: string }> => {
   logger.debug(path, "Loading config");
 
   switch (extname(path)) {
@@ -30,7 +27,15 @@ const loadConfig = async (
       const tomlConfig = decoder.decode(
         Deno.readFileSync(path),
       );
-      return { config: tomlConfig, path };
+      return { config: parseToml(tomlConfig), path };
+    }
+    case ".yml":
+    case ".yaml": {
+      const decoder = new TextDecoder("utf-8");
+      const yamlConfig = decoder.decode(
+        Deno.readFileSync(path),
+      );
+      return { config: parseYaml(yamlConfig) as object, path };
     }
     default:
       throw new Error("Unknown extension");
@@ -57,6 +62,8 @@ const getConfigRaw = (
     resolve("./golde.config.js"),
     resolve("./golde.config.ts"),
     resolve("./golde.toml"),
+    resolve("./golde.yaml"),
+    resolve("./golde.yml"),
   ];
 
   for (const configPath of possiblePaths) {
