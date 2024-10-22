@@ -44,7 +44,7 @@ describe("resolveConfig", () => {
       },
     });
   });
-
+  
   it("should resolve files", () => {
   });
 
@@ -87,7 +87,7 @@ describe("resolveConfig", () => {
     }); 
   });
 
-  it("should load only for current branch", () => {
+  it("should include resources only for selected branch", () => {
     const gitInfo = {
       branchName: "feature/test",
       branchSlug: "feature-test",
@@ -118,6 +118,79 @@ describe("resolveConfig", () => {
       name: "test",
       buckets: {
         cloudflare: {
+          "bucket_branch_feature-test": {
+            storageClass: "Standard",
+            branch: "feature/test",
+          },
+          "bucket_pattern_feature-test": {
+            storageClass: "Standard",
+            branchPattern: "feature/*",
+            branch: "feature/test",
+          },
+        },
+      },
+    });
+  });
+
+  it("should exclude resources when pattern do not match", () => {
+    const gitInfo = {
+      branchName: "dependencies/test",
+      branchSlug: "dependencies-test",
+    } as GitInfo;
+
+    const config = resolveConfig({
+      name: "test",
+      buckets: {
+        cloudflare: {
+          [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
+            storageClass: "Standard",
+            branchPattern: "feature/*",
+            branch: "{{ git.BRANCH_NAME }}",
+          },
+        },
+      },
+    }, gitInfo,"feature/test");
+
+    expect(config).toEqual({
+      name: "test",
+    });
+  });
+
+  it("should return full config if argument branch name is omitted", () => {
+    const gitInfo = {
+      branchName: "feature/test",
+      branchSlug: "feature-test",
+    } as GitInfo;
+
+    const config = resolveConfig({
+      name: "test",
+      buckets: {
+        cloudflare: {
+          [`bucket`]: {
+            storageClass: "Standard",
+            branch: "master",
+          },
+          [`bucket_branch_{{ git.BRANCH_SLUG }}`]: {
+            storageClass: "Standard",
+            branch: "{{ git.BRANCH_NAME }}",
+          },
+          [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
+            storageClass: "Standard",
+            branchPattern: "feature/*",
+            branch: "{{ git.BRANCH_NAME }}",
+          },
+        },
+      },
+    }, gitInfo);
+
+    expect(config).toEqual({
+      name: "test",
+      buckets: {
+        cloudflare: {
+          bucket: {
+            storageClass: "Standard",
+            branch: "master",
+          },
           "bucket_branch_feature-test": {
             storageClass: "Standard",
             branch: "feature/test",

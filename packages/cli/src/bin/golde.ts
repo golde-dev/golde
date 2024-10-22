@@ -49,15 +49,16 @@ program
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { logLevel, json, config: configPath }: {
+      { logLevel, json, config: configPath, all }: {
         logLevel: LevelName;
         config: string;
         json: boolean;
+        all: boolean;
       },
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(configPath);
+      const loadedConfig = await getConfig(configPath, all);
 
       const {
         config,

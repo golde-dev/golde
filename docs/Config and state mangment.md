@@ -98,7 +98,7 @@ Result of plan is number of changes to state (Create, Update, Delete, Noop).
 
 ## Branch patterns
 
-For example there might be resource that is created for each branch using git template.
+For example there might be resource that is created for each feature/* branch using git template.
 
 ```json
 {

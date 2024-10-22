@@ -9,7 +9,7 @@ import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template.ts";
 import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
-import { isPlainObject } from "moderndash";
+import { isEmpty, isPlainObject } from "moderndash";
 import { globToRegExp } from "@std/path";
 
 const decoder = new TextDecoder("utf-8");
@@ -99,6 +99,9 @@ const testBranchName = (branch: unknown, filterBranch: string) => {
   return branch === filterBranch;
 };
 
+/**
+ * Recursively filter config to only include resources for the given branch
+ */
 export const filterToBranch = (config: unknown, filterBranch: string): unknown => {
   if (!isPlainObject(config)) {
     return config;
@@ -122,9 +125,9 @@ export const filterToBranch = (config: unknown, filterBranch: string): unknown =
           }
           return true;
         }
-      ).map(([key, value]) => {
-        return [key, isPlainObject(value) ? filterToBranch(value, filterBranch) : value]
-      }),
+      )
+      .map(([key, value]) => [key, filterToBranch(value, filterBranch)])
+      .filter(([_, value]) => !isPlainObject(value) || !isEmpty(value)),
   );
 };
 
