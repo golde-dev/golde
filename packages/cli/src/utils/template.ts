@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { ConfigError, ConfigErrorCode } from "../error.ts";
-import { getBranchName, getBranchSlug } from "../clients/git.ts";
+import { getBranchName, getBranchSlug, type GitInfo } from "../clients/git.ts";
 
 const templateRe = new RegExp(/{{(.*?)}}/g);
 
@@ -81,15 +81,15 @@ export const envTemplate = (value: string): string => {
 
 const gitRe = new RegExp(/(?<=git.)(.*)/);
 
-export const gitTemplate = (value: string): string => {
+export const gitTemplate = (gitInfo: GitInfo) => (value: string): string => {
   const match = gitRe.exec(value);
   if (match) {
     const [variableName] = match;
 
     if (variableName === "BRANCH_SLUG") {
-      return getBranchSlug();
-    } else if (variableName === "BRANCH") {
-      return getBranchName();
+      return gitInfo.branchSlug;
+    } else if (variableName === "BRANCH_NAME") {
+      return gitInfo.branchName;
     } else {
       throw new ConfigError(
         "git variable is missing",

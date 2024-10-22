@@ -24,6 +24,9 @@ interface S3Options {
   secretAccessKey: string;
 }
 
+/**
+ * S3 Client for any S3 compatible storage example: r2, s3, gcs, cloud storage
+ */
 export class S3 {
   private readonly bucket: string;
   private readonly client: S3Client;

@@ -1,3 +1,4 @@
+import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
 import { memoize } from "moderndash";
 
@@ -50,54 +51,58 @@ export const getRefHash = memoize((revision: string = "HEAD") =>
 );
 
 export const getBranchSlug = memoize((revision: string = "HEAD") =>
-  getBranchName(revision)
-    .replaceAll(" ", "-")
-    .replaceAll("/", "-")
+  slugify(getBranchName(revision))
 );
+
+export const getGitInfo = memoize((): GitInfo => {
+  const defaultBranch = getDefaultBranch();
+  const branchName = getBranchName();
+  const currentHash = getRefHash();
+  const branchSlug = getBranchSlug();
+
+  return {
+    defaultBranch,
+    branchName,
+    currentHash,
+    branchSlug,
+    localRefs: {},
+    remoteRefs: {},
+  };
+});
+
+/**
+ * Verify if git is installed
+ */
+export const verifyInstalled = async () => {
+  try {
+    const { success, stderr } = await new Deno.Command("git", {
+      args: ["--version"],
+    }).output();
+
+    const stdErrDecoded = decoder.decode(stderr);
+    if (!success) {
+      throw new Error(
+        `Failed to git version`,
+        { cause: stdErrDecoded },
+      );
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes("No such file or directory")) {
+        throw new Error("Git is not installed", { cause: error });
+      }
+    }
+    throw new Error("Failed to verify git install", { cause: error });
+  }
+};
 
 export class GitClient {
   /**
    * Check if git is installed
    */
-  public async verifyInstalled() {
-    try {
-      const { success, stderr } = await new Deno.Command("git", {
-        args: ["--version"],
-      }).output();
+  public verifyInstalled = verifyInstalled;
 
-      const stdErrDecoded = decoder.decode(stderr);
-      if (!success) {
-        throw new Error(
-          `Failed to git version`,
-          { cause: stdErrDecoded },
-        );
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes("No such file or directory")) {
-          throw new Error("Git is not installed", { cause: error });
-        }
-      }
-      throw new Error("Failed to verify git install", { cause: error });
-    }
-  }
-
-  public getGitInfo = memoize((): GitInfo => {
-    const defaultBranch = this.getDefaultBranch();
-    const branchName = this.getBranchName();
-    const currentHash = this.getRefHash();
-    const branchSlug = this.getBranchSlug();
-
-    return {
-      defaultBranch,
-      branchName,
-      currentHash,
-      branchSlug,
-      localRefs: {},
-      remoteRefs: {},
-    };
-  });
-
+  public getGitInfo = getGitInfo;
   public getDefaultBranch = getDefaultBranch;
   public getBranchName = getBranchName;
   public getRefHash = getRefHash;

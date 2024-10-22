@@ -15,7 +15,7 @@ import { createStateClient } from "./state/state.ts";
 
 export interface Context {
   previousState?: State;
-  nextConfig: Config;
+  config: Config;
   tags?: Tags;
   state: StateClient;
   docker?: DockerClient;
@@ -25,7 +25,7 @@ export interface Context {
 }
 
 export const initializeContext = async (
-  nextConfig: Config,
+  config: Config,
 ): Promise<Context> => {
   const {
     name,
@@ -38,7 +38,7 @@ export const initializeContext = async (
       cloudflare,
       docker,
     } = {},
-  } = nextConfig;
+  } = config;
 
   logger.debug("Start context initialization");
 
@@ -79,7 +79,7 @@ export const initializeContext = async (
 
     const contextBase = {
       tags,
-      nextConfig,
+      config,
       docker: dockerClient,
       golde: goldeClient,
       cloudflare: cloudflareClient,
@@ -100,9 +100,7 @@ export const initializeContext = async (
         state: stateClient,
       };
     } else if (goldeClient) {
-      const {
-        state: previousState,
-      } = await goldeClient.getState(name, branchName) ?? {};
+      const previousState = await goldeClient.getState(name, branchName) ?? {};
 
       logger.info("Context initialized");
 

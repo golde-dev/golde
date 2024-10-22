@@ -8,11 +8,16 @@ import { extname, resolve } from "node:path";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template.ts";
 import { dynamicImport } from "./utils/import.ts";
+import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
+import { isPlainObject } from "moderndash";
+import { globToRegExp } from "@std/path";
+
+const decoder = new TextDecoder("utf-8");
 
 const loadConfig = async (
   path: string,
-): Promise<{ config: object; path: string }> => {
-  logger.debug(path, "Loading config");
+): Promise<unknown> => {
+  logger.debug(`Loading config from: ${path}`);
 
   switch (extname(path)) {
     case ".cjs":
@@ -20,31 +25,30 @@ const loadConfig = async (
     case ".js":
     case ".ts": {
       const { default: config } = await dynamicImport(path);
-      return { config, path };
+      return config;
     }
     case ".toml": {
-      const decoder = new TextDecoder("utf-8");
       const tomlConfig = decoder.decode(
         Deno.readFileSync(path),
       );
-      return { config: parseToml(tomlConfig), path };
+      return parseToml(tomlConfig);
     }
     case ".yml":
     case ".yaml": {
-      const decoder = new TextDecoder("utf-8");
       const yamlConfig = decoder.decode(
         Deno.readFileSync(path),
       );
-      return { config: parseYaml(yamlConfig) as object, path };
+      return parseYaml(yamlConfig);
     }
     default:
       throw new Error("Unknown extension");
   }
 };
 
-const getConfigRaw = (
+export const getConfigRaw = (
   path?: string,
-): Promise<{ config: unknown; path: string }> => {
+): Promise<unknown> => {
+  logger.debug(`Loading config`);
   if (path) {
     if (existsSync(resolve(path))) {
       return loadConfig(path);
@@ -78,11 +82,55 @@ const getConfigRaw = (
   );
 };
 
-export const getConfig = async (configPath?: string): Promise<Config> => {
+const testBranchPattern = (branch: unknown, pattern: unknown) => {
+  if (typeof branch !== "string") {
+    throw new Error("Branch is not a string");
+  }
+  if (typeof pattern !== "string") {
+    throw new Error("Pattern is not a string");
+  }
+  return globToRegExp(pattern).test(branch);
+};
+
+const testBranchName = (branch: unknown, filterBranch: string) => {
+  if (typeof branch !== "string") {
+    throw new Error("Branch is not a string");
+  }
+  return branch === filterBranch;
+};
+
+export const filterToBranch = (config: unknown, filterBranch: string): unknown => {
+  if (!isPlainObject(config)) {
+    return config;
+  }
+  return Object.fromEntries(
+    Object.entries(config)
+      .filter(([, value]) => {
+        if (!isPlainObject(value)) {
+          return true;
+        }
+        const {
+            branch,
+            branchPattern,
+          } = value;
+
+          if (branch && branchPattern) {
+            return testBranchName(branch, filterBranch) || testBranchPattern(branch, branchPattern);
+          }
+          else if (branch) {
+            return testBranchName(branch, filterBranch);
+          }
+          return true;
+        }
+      ).map(([key, value]) => {
+        return [key, isPlainObject(value) ? filterToBranch(value, filterBranch) : value]
+      }),
+  );
+};
+
+export const resolveConfig = (config: unknown, gitInfo: GitInfo, branch?: string): Config => {
   try {
-    logger.debug("Loading config");
-    const { config, path } = await getConfigRaw(configPath);
-    logger.debug("Loaded config", { config, path });
+    logger.debug("Resolving config");
 
     const configWithEnv = resolveTemplate(config, envTemplate);
     logger.debug("Resolved env vars templates in config", {
@@ -94,13 +142,16 @@ export const getConfig = async (configPath?: string): Promise<Config> => {
       config: configWithFiles,
     });
 
-    const configWithGit = resolveTemplate(configWithFiles, gitTemplate);
+    const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
     logger.debug("Resolved git templates in config", { config: configWithGit });
 
     validateConfig(configWithGit);
-    logger.debug("Validated config with json schema");
+    logger.debug("Validated config with schema");
 
-    return configWithGit;
+    if (!branch) {
+      return configWithGit;
+    }
+    return filterToBranch(configWithGit, branch) as Config;
   } catch (error) {
     if (error instanceof ConfigError) {
       switch (error.code) {
@@ -138,3 +189,14 @@ export const getConfig = async (configPath?: string): Promise<Config> => {
     return Deno.exit(1);
   }
 };
+
+export async function getConfig(configPath?: string, all: boolean = false): Promise<Config> {
+  const rawConfig = await getConfigRaw(configPath);
+
+  const branch = getBranchName();
+  const gitInfo = getGitInfo();
+
+  return all 
+    ? resolveConfig(rawConfig, gitInfo) 
+    : resolveConfig(rawConfig, gitInfo, branch);
+}

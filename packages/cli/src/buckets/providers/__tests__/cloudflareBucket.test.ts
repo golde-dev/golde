@@ -10,11 +10,7 @@ import type {
   CloudflareBucketsState,
   CloudflareBucketState,
 } from "../../types.ts";
-import type {
-  CreateUnit,
-  DeleteUnit,
-  NoopUnit,
-} from "../../../types/plan.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../types/plan.ts";
 
 const executors = {
   createBucket: spy(),

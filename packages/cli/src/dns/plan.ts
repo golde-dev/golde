@@ -11,7 +11,7 @@ export async function createDNSPlan(context: Context): Promise<Plan> {
         cloudflare: cloudflareState,
       } = {},
     } = {},
-    nextConfig: {
+    config: {
       dns: {
         cloudflare: cloudflareConfig,
       } = {},

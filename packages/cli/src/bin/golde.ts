@@ -8,9 +8,14 @@ import { initConfig } from "../init.ts";
 import type { LevelName } from "@std/log";
 import { VERSION } from "../version.ts";
 import { applyPlan } from "../apply.ts";
+import { verifyInstalled } from "../clients/git.ts";
 
 // TODO: handel .env.example errors
-await load({ export: true });
+await load({ 
+  export: true 
+});
+
+await verifyInstalled();
 
 const program = new Command();
 
@@ -37,9 +42,10 @@ program
 
 program
   .command("show")
-  .description("Show configuration")
+  .description("Show current configuration")
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-c, --config <config>", "location of config file")
+  .option("-a, --all", "show full config, including all branches")
   .option("-j, --json", "log output as json")
   .action(
     async function (
@@ -54,10 +60,10 @@ program
       const loadedConfig = await getConfig(configPath);
 
       const {
-        nextConfig,
+        config,
       } = await initializeContext(loadedConfig);
 
-      logger.info("Config", nextConfig);
+      logger.info("Config", config);
     },
   );
 

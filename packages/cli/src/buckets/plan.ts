@@ -14,7 +14,7 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
         cloudflare: cloudflareState,
       } = {},
     } = {},
-    nextConfig: {
+    config: {
       buckets: {
         cloudflare: cloudflareConfig,
       } = {},

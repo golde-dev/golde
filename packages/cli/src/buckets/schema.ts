@@ -4,7 +4,7 @@ import { implement } from "../utils/zod.ts";
 import { branchPatternSchema, branchSchema } from "../utils/resource.ts";
 
 export const cloudflareBucketSchema = implement<CloudflareBucket>().with({
-  branch: branchSchema.optional(),
+  branch: branchSchema,
   branchPattern: branchPatternSchema,
   locationHint: z.enum([
     "apac",
