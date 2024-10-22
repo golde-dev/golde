@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { ConfigError, ConfigErrorCode } from "../error.ts";
 import type { GitInfo } from "../clients/git.ts";
+import type { Dependencies } from "../types/dependencies.ts";
 
 const templateRe = new RegExp(/{{(.*?)}}/g);
 
@@ -118,5 +119,11 @@ export const fileTemplate = (value: string): string => {
       );
     }
   }
+  return `{{ ${value} }}`;
+};
+
+const _stateRe = new RegExp(/(?<=state.)(.*)/);
+
+export const stateTemplate = (_dependencies: Dependencies) => (value: string): string => {
   return `{{ ${value} }}`;
 };

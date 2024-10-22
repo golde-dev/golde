@@ -6,11 +6,18 @@ import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
 import { extname, resolve } from "node:path";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
-import { envTemplate, fileTemplate, gitTemplate, resolveTemplate } from "./utils/template.ts";
+import {
+  envTemplate,
+  fileTemplate,
+  gitTemplate,
+  resolveTemplate,
+  stateTemplate,
+} from "./utils/template.ts";
 import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
 import { isEmpty, isPlainObject } from "moderndash";
 import { globToRegExp } from "@std/path";
+import type { Dependencies } from "./types/dependencies.ts";
 
 const decoder = new TextDecoder("utf-8");
 
@@ -113,19 +120,17 @@ export const filterToBranch = (config: unknown, filterBranch: string): unknown =
           return true;
         }
         const {
-            branch,
-            branchPattern,
-          } = value;
+          branch,
+          branchPattern,
+        } = value;
 
-          if (branch && branchPattern) {
-            return testBranchName(branch, filterBranch) || testBranchPattern(branch, branchPattern);
-          }
-          else if (branch) {
-            return testBranchName(branch, filterBranch);
-          }
-          return true;
+        if (branch && branchPattern) {
+          return testBranchName(branch, filterBranch) || testBranchPattern(branch, branchPattern);
+        } else if (branch) {
+          return testBranchName(branch, filterBranch);
         }
-      )
+        return true;
+      })
       .map(([key, value]) => [key, filterToBranch(value, filterBranch)])
       .filter(([_, value]) => !isPlainObject(value) || !isEmpty(value)),
   );
@@ -199,7 +204,30 @@ export async function getConfig(configPath?: string, all: boolean = false): Prom
   const branch = getBranchName();
   const gitInfo = getGitInfo();
 
-  return all 
-    ? resolveConfig(rawConfig, gitInfo) 
-    : resolveConfig(rawConfig, gitInfo, branch);
+  return all ? resolveConfig(rawConfig, gitInfo) : resolveConfig(rawConfig, gitInfo, branch);
+}
+
+export function getFinalConfig(config: Config, dependencies: Dependencies): Config {
+  try {
+    const configWithDeps = resolveTemplate(config, stateTemplate(dependencies));
+    logger.debug("Resolved state dependencies in config", { config: configWithDeps });
+    validateConfig(configWithDeps);
+    return config;
+  } catch (error) {
+    if (error instanceof ConfigError) {
+      switch (error.code) {
+        case ConfigErrorCode.STATE_MISSING:
+          logger.error(`Env variable is missing: ${error.cause as string}`);
+          break;
+        case ConfigErrorCode.INVALID_CONFIG:
+          logger.error("Config failed validation", error.cause);
+          break;
+        default:
+          logger.error(`Configuration error: ${error.message}`);
+      }
+    } else {
+      logger.error(`Unknown error: ${(error as Error).message}`, error);
+    }
+    return Deno.exit(1);
+  }
 }

@@ -3,8 +3,8 @@ import { createNativeTar } from "./tar.ts";
 import { createTar } from "./tar.ts";
 import { logger } from "../logger.ts";
 import { join } from "node:path";
-import type { Context } from "../context.ts";
 import type { StateClient } from "../types/state.ts";
+import type { Context } from "../types/context.ts";
 
 export const getArtifactKey = (project: string, key: string) => {
   return `/${project}/artifacts/${key}`;

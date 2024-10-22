@@ -1,18 +1,20 @@
 import { load } from "@std/dotenv";
 import { logger } from "../logger.ts";
 import { Command } from "commander";
-import { getConfig } from "../config.ts";
-import { createPlan } from "../plan.ts";
-import { initializeContext } from "../context.ts";
+import { getConfig, getFinalConfig } from "../config.ts";
+import { createPlan, printPlan } from "../plan.ts";
+import { getFinalContext, initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
 import type { LevelName } from "@std/log";
 import { VERSION } from "../version.ts";
 import { applyPlan } from "../apply.ts";
 import { verifyInstalled } from "../clients/git.ts";
+import { getDependencies } from "../dependacies.ts";
+import { lockDependencies } from "../lock.ts";
 
 // TODO: handel .env.example errors
-await load({ 
-  export: true 
+await load({
+  export: true,
 });
 
 await verifyInstalled();
@@ -59,10 +61,7 @@ program
       logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath, all);
-
-      const {
-        config,
-      } = await initializeContext(loadedConfig);
+      const { config } = await initializeContext(loadedConfig);
 
       logger.info("Config", config);
     },
@@ -111,6 +110,8 @@ program
 
       const loadedConfig = await getConfig(configPath);
       await initializeContext(loadedConfig);
+
+      logger.info("Config is valid");
     },
   );
 
@@ -134,8 +135,7 @@ program
       const loadedConfig = await getConfig(configPath);
       const context = await initializeContext(loadedConfig);
       const plan = await createPlan(context);
-
-      logger.info("Execution plan", plan);
+      printPlan(plan);
     },
   );
 
@@ -159,9 +159,22 @@ program
 
       const loadedConfig = await getConfig(configPath);
       const context = await initializeContext(loadedConfig);
-      const plan = await createPlan(context);
 
-      await applyPlan(context, plan);
+      const initialPlan = await createPlan(context);
+      const initialDependencies = await getDependencies(context, initialPlan);
+      const locks = await lockDependencies(context, initialDependencies);
+      const dependencies = await getDependencies(context, initialPlan);
+      
+      const finalConfig = getFinalConfig(loadedConfig, dependencies);
+      const finalContext = getFinalContext(context, finalConfig);
+
+      const finalPlan = await createPlan(finalContext);
+      printPlan(finalPlan);
+      const result = await applyPlan(context, finalPlan);
+      printResult(result);
+
+      await saveState(context, result);
+      await releaseLocks(context, locks);
     },
   );
 

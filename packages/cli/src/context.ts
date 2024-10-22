@@ -2,27 +2,13 @@ import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
 import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
 import { createHCloudClient } from "./providers/hcloud.ts";
-import type { Config, Tags } from "./types/config.ts";
-import type { State, StateClient } from "./types/state.ts";
+import type { Config } from "./types/config.ts";
 import { createDockerClient } from "./providers/docker.ts";
 import { createGitClient } from "./providers/git.ts";
 import type { DockerClient } from "./clients/docker.ts";
-import type { GoldeClient } from "./clients/golde.ts";
-import type { CloudflareClient } from "./clients/cloudflare.ts";
-import type { HCloudClient } from "./clients/hcloud.ts";
 import { createCloudflareClient } from "./providers/cloudflare.ts";
 import { createStateClient } from "./state/state.ts";
-
-export interface Context {
-  previousState?: State;
-  config: Config;
-  tags?: Tags;
-  state: StateClient;
-  docker?: DockerClient;
-  golde?: GoldeClient;
-  hcloud?: HCloudClient;
-  cloudflare?: CloudflareClient;
-}
+import type { Context } from "./types/context.ts";
 
 export const initializeContext = async (
   config: Config,
@@ -123,3 +109,11 @@ export const initializeContext = async (
     return Deno.exit(1);
   }
 };
+
+
+export function getFinalContext(context: Context, config: Config): Context {
+  return {
+    ...context,
+    config,
+  };
+}

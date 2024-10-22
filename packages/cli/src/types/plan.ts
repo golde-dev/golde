@@ -67,10 +67,10 @@ export type ExecutionUnit =
   | NoopUnit;
 
 export type ExecutionGroups = {
-  [Type.Noop]: NoopUnit[];
-  [Type.Create]: CreateUnit[];
-  [Type.Delete]: DeleteUnit[];
-  [Type.Update]: UpdateUnit[];
+  [Type.Noop]?: NoopUnit[];
+  [Type.Create]?: CreateUnit[];
+  [Type.Delete]?: DeleteUnit[];
+  [Type.Update]?: UpdateUnit[];
 };
 
 export type Plan = ExecutionUnit[];

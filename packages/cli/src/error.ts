@@ -33,6 +33,11 @@ export enum ConfigErrorCode {
    * Generic template error
    */
   TEMPLATE_ERROR = "TEMPLATE_ERROR",
+
+  /**
+   * Missing state dependencies
+   */
+  STATE_MISSING = "STATE_MISSING",
 }
 
 export class ConfigError extends Error {
@@ -65,11 +70,6 @@ export enum PlanErrorCode {
    * Provider is missing
    */
   PROVIDER_MISSING = "PROVIDER_MISSING",
-
-  /**
-   * State is missing
-   */
-  STATE_MISSING = "STATE_MISSING",
 }
 
 export class PlanError extends Error {

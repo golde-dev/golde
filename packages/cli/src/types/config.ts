@@ -21,6 +21,9 @@ export type Config = {
    * Config for providers (aws, golde, cloudflare, etc)
    */
   providers?: ProvidersConfig;
+  /**
+   * Config for state management, define how projects state will be stored
+   */
   state?: StateConfig;
   dns?: DNSConfig;
   buckets?: BucketsConfig;

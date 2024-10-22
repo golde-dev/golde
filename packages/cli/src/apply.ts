@@ -1,16 +1,10 @@
 import { logger } from "./logger.ts";
-import type { Context } from "./context.ts";
-import type { ExecutionGroups, Plan } from "./types/plan.ts";
+import type { Context } from "./types/context.ts";
+import type { Plan } from "./types/plan.ts";
 
-export async function applyPlan(_: Context, plan: Plan): Promise<void> {
-
-  const grouped = plan.reduce((acc, unit) => {
-    (acc[unit.type] as ExecutionGroups[typeof unit.type]) = [...(acc[unit.type] ?? []), unit] as ExecutionGroups[typeof unit.type];
-    return acc;
-  }, {} as ExecutionGroups);
-
+export async function applyPlan(_context: Context, _plan: Plan): Promise<void> {
   logger.debug("Grouped", {
-    grouped,
+    _plan,
   });
 
   return await Promise.resolve();
