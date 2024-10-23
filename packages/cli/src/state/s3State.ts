@@ -1,6 +1,6 @@
 import { NoSuchKey } from "@aws-sdk/client-s3";
 import type { S3 } from "../clients/s3.ts";
-import type { StateClient } from "../types/state.ts";
+import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 
@@ -18,7 +18,7 @@ function notFoundAsUndefined<T>(
   });
 }
 
-export class S3StateClient implements StateClient {
+export class S3StateClient implements AbstractStateClient {
   private readonly s3: S3;
 
   public constructor(s3: S3) {

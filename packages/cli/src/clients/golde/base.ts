@@ -1,8 +1,5 @@
-import type { StateConfig } from "../state/types.ts";
-import { logger } from "../logger.ts";
-import type { State, StateClient } from "../types/state.ts";
-import { GOLDE_API_URL } from "../version.ts";
-import type { Lock } from "../types/lock.ts";
+import { logger } from "../../logger.ts";
+import { GOLDE_API_URL } from "../../version.ts";
 
 interface GoldeErrorCause {
   status: number;
@@ -18,7 +15,7 @@ export class GoldeError extends Error {
   }
 }
 
-function notFoundAsUndefined<T>(
+export function notFoundAsUndefined<T>(
   promise: Promise<T>,
 ): Promise<T | undefined> {
   return promise.catch((error: unknown) => {
@@ -31,15 +28,15 @@ function notFoundAsUndefined<T>(
   });
 }
 
-export class GoldeClient implements StateClient {
-  private readonly apiKey: string;
-  private readonly baseUrl = GOLDE_API_URL;
+export class GoldeClientBase {
+  protected readonly apiKey: string;
+  protected readonly baseUrl = GOLDE_API_URL;
 
   public constructor(apiKey: string) {
     this.apiKey = apiKey;
   }
 
-  private makeRequest<T>(
+  protected makeRequest<T>(
     path: string,
     method = "GET",
     body?: object,
@@ -71,7 +68,7 @@ export class GoldeClient implements StateClient {
     });
   }
 
-  private makeFileRequest(
+  protected makeFileRequest(
     path: string,
     method: "POST",
     body: FormData,
@@ -107,70 +104,5 @@ export class GoldeClient implements StateClient {
     if (status !== "active") {
       throw new GoldeError(`Token status is not active: ${status}`);
     }
-  }
-
-  public createProject(project: string): Promise<void> {
-    return this.makeRequest("/projects", "POST", {
-      name: project,
-    });
-  }
-
-  public getState(project: string, branch: string): Promise<State | undefined> {
-    return notFoundAsUndefined(
-      this.makeRequest<State>(
-        `/projects/${project}/state`,
-        "POST",
-        { branch },
-      ),
-    );
-  }
-
-  public getStateLock(project: string, branch: string): Promise<Lock[] | undefined> {
-    return notFoundAsUndefined(
-      this.makeRequest<Lock[]>(
-        `/projects/${project}/lock`,
-        "POST",
-        { branch },
-      ),
-    );
-  }
-
-  public getStateConfig(
-    project: string,
-  ): Promise<StateConfig | undefined> {
-    return this.makeRequest<StateConfig | undefined>(
-      `/projects/${project}/state-config`,
-    );
-  }
-
-  /**
-   * If user use custom state provider we need to register with golde
-   * Golde need to know how to access state of project
-   */
-  public async changeStateConfig(
-    project: string,
-    stateConfig: StateConfig,
-  ): Promise<void> {
-    await this.makeRequest(
-      `/projects/${project}/state-config`,
-      "PUT",
-      stateConfig,
-    );
-  }
-
-  public async uploadArtifact(
-    project: string,
-    key: string,
-    body: Blob,
-  ): Promise<void> {
-    const form = new FormData();
-    form.set("key", key);
-    form.set("body", body);
-
-    await this.makeFileRequest(
-      `/projects/${project}/artifacts`,
-      "POST",
-      form,
-    );
   }
 }

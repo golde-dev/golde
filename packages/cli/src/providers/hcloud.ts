@@ -1,4 +1,4 @@
-import { HCloudClient } from "../clients/hcloud.ts";
+import { HCloudClient } from "../clients/hcloud/client.ts";
 import { logger } from "../logger.ts";
 
 interface HCloudConfig {

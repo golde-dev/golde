@@ -5,7 +5,7 @@ import { ZodError, type ZodSchema } from "zod";
 import { resolve } from "node:path";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
-import { GoldeError } from "./clients/golde.ts";
+import { GoldeError } from "./clients/golde/base.ts";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
@@ -116,11 +116,7 @@ export async function initConfig() {
 
     const configType = await select({
       message: "Select config format",
-      default: isTSPackage
-        ? "golde.config.ts"
-        : isNPMPackage
-        ? "golde.config.js"
-        : "golde.toml",
+      default: isTSPackage ? "golde.config.ts" : isNPMPackage ? "golde.config.js" : "golde.toml",
       choices: [
         {
           name: "golde.config.js",

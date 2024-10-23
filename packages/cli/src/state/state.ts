@@ -2,7 +2,7 @@ import { logger } from "../logger.ts";
 import { S3 } from "../clients/s3.ts";
 import { S3StateClient } from "./s3State.ts";
 import { FSStateClient } from "./fsState.ts";
-import type { StateClient } from "../types/state.ts";
+import type { AbstractStateClient } from "../types/state.ts";
 import type { S3StateConfig, StateConfig } from "./types.ts";
 import type { AWSConfig } from "../providers/types.ts";
 
@@ -35,7 +35,7 @@ const getAWSCredentials = (
 export async function createStateClient(
   config: StateConfig,
   awsConfig?: AWSConfig,
-): Promise<StateClient> {
+): Promise<AbstractStateClient> {
   if (config.type === "s3") {
     const {
       bucket,

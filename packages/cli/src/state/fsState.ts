@@ -1,10 +1,10 @@
 import { ensureDir } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { dirname, join } from "@std/path";
-import type { State, StateClient } from "../types/state.ts";
+import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 
-export class FSStateClient implements StateClient {
+export class FSStateClient implements AbstractStateClient {
   private readonly statePath: string;
   private readonly lockPath: string;
 

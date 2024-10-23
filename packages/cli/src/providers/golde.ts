@@ -1,5 +1,5 @@
 import { logger } from "../logger.ts";
-import { GoldeClient } from "../clients/golde.ts";
+import { GoldeClient } from "../clients/golde/client.ts";
 import type { GoldeConfig } from "./types.ts";
 
 export const getGoldeConfig = (): GoldeConfig | void => {

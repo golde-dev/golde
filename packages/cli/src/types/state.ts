@@ -9,7 +9,7 @@ export interface State {
   artifacts?: ArtifactsState;
 }
 
-export abstract class StateClient {
+export abstract class AbstractStateClient {
   public abstract getState(project: string, branch: string): Promise<State | undefined>;
   public abstract getStateLock(project: string, branch: string): Promise<Lock[] | undefined>;
 }
