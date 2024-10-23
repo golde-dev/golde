@@ -1,5 +1,5 @@
 {
-  "name": "@golde/example-dns-cloudflare",
+  "name": "@golde/example-artifacts-archive-cloudflare",
   "packageManager": "yarn@4.5.0",
   "type": "module",
   "private": true,
