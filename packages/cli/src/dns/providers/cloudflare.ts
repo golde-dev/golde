@@ -2,7 +2,7 @@ import { logger } from "../../logger.ts";
 import { isEqual } from "moderndash";
 import { mergeTags, toTagsArray } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
-import type { CloudflareClient } from "../../clients/cloudflare.ts";
+import type { CloudflareClient } from "../../clients/cloudflare/client.ts";
 import { Type } from "../../types/plan.ts";
 import type { Tags } from "../../types/config.ts";
 import type {

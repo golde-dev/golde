@@ -1,12 +1,6 @@
 import { logger } from "../logger.ts";
 import { GoldeClient } from "../clients/golde.ts";
-
-export interface GoldeConfig {
-  /**
-   * Golde API token
-   */
-  apiKey: string;
-}
+import type { GoldeConfig } from "./types.ts";
 
 export const getGoldeConfig = (): GoldeConfig | void => {
   const apiKey = Deno.env.get("GOLDE_API_KEY");

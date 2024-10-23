@@ -1,8 +1,8 @@
 import { ensureDir } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { dirname, join } from "@std/path";
-import type { ConfigLock } from "../types/config.ts";
 import type { State, StateClient } from "../types/state.ts";
+import type { Lock } from "../types/lock.ts";
 
 export class FSStateClient implements StateClient {
   private readonly statePath: string;
@@ -31,7 +31,7 @@ export class FSStateClient implements StateClient {
     return JSON.parse(await Deno.readTextFile(this.statePath));
   }
 
-  public async getStateLock(): Promise<ConfigLock | undefined> {
+  public async getStateLock(): Promise<Lock[] | undefined> {
     if (!await exists(this.lockPath)) {
       return;
     }

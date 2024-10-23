@@ -4,7 +4,7 @@ import { S3StateClient } from "./s3State.ts";
 import { FSStateClient } from "./fsState.ts";
 import type { StateClient } from "../types/state.ts";
 import type { S3StateConfig, StateConfig } from "./types.ts";
-import type { AWSConfig } from "../providers/aws.ts";
+import type { AWSConfig } from "../providers/types.ts";
 
 const getAWSCredentials = (
   config: S3StateConfig,

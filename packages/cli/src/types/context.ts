@@ -1,4 +1,4 @@
-import type { CloudflareClient } from "../clients/cloudflare.ts";
+import type { CloudflareClient } from "../clients/cloudflare/client.ts";
 import type { DockerClient } from "../clients/docker.ts";
 import type { GoldeClient } from "../clients/golde.ts";
 import type { HCloudClient } from "../clients/hcloud.ts";

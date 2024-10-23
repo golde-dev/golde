@@ -1,6 +1,7 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { ensureDir } from "@std/fs/ensure-dir";
 import { decode } from "./src/utils/text.ts";
+import { logger } from "./src/logger.ts";
 
 const { local } = parseArgs(Deno.args, {
   boolean: ["local"],
@@ -42,7 +43,7 @@ type Target =
   | "aarch64-apple-darwin";
 
 async function compile(target: Target, path: string, local: boolean) {
-  console.log(`Compiling target: ${target}`);
+  logger.info(`Compiling target: ${target}`);
 
   const perms = [
     "--allow-read",
@@ -59,6 +60,7 @@ async function compile(target: Target, path: string, local: boolean) {
     "compile",
     ...cert,
     ...perms,
+    "--no-check",
     "--target",
     target,
     "--output",
@@ -71,11 +73,11 @@ async function compile(target: Target, path: string, local: boolean) {
   }).output();
 
   if (!success) {
-    console.error(`Failed CLI compilation for ${target} path: ${path}`);
-    console.log(decode(stdout));
-    console.error(decode(stderr));
+    logger.error(`Failed CLI compilation for ${target} path: ${path}`);
+    logger.info(decode(stdout));
+    logger.error(decode(stderr));
     Deno.exit(1);
   } else {
-    console.info(`Success CLI compilation for ${target} path: ${path}`);
+    logger.info(`Success CLI compilation for ${target} path: ${path}`);
   }
 }

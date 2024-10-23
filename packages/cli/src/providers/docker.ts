@@ -1,26 +1,12 @@
 import { logger } from "../logger.ts";
 import { DockerClient } from "../clients/docker.ts";
-import type { GoldeConfig } from "./golde.ts";
+import type { DockerConfig, GoldeConfig } from "./types.ts";
 
-export interface DockerConfig {
-  /**
-   * Docker registry url
-   */
-  registry: string;
-  /**
-   * Docker username
-   */
-  username: string;
-  /**
-   * Docker password
-   */
-  password: string;
-}
 export async function createDockerClient(
   config: DockerConfig | GoldeConfig,
 ): Promise<DockerClient> {
   if ("apiKey" in config) {
-    logger.warn("Not implemented");
+    logger.warn("Golde docker registry not implemented");
     return {} as DockerClient;
   }
   const {

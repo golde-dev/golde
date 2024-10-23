@@ -1,4 +1,4 @@
-import type { Region, StorageClass } from "../clients/cloudflare.ts";
+import type { Region, StorageClass } from "../clients/cloudflare/types.ts";
 import type { Resource, WithBranch } from "../types/config.ts";
 
 export interface CloudflareBucket extends Resource {

@@ -1,18 +1,6 @@
-import { CloudflareClient } from "../clients/cloudflare.ts";
+import { CloudflareClient } from "../clients/cloudflare/client.ts";
 import { logger } from "../logger.ts";
-
-export interface CloudflareConfig {
-  /**
-   * Cloudflare API token
-   * @see https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
-   */
-  apiToken: string;
-  /**
-   * Cloudflare account id
-   * @see https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
-   */
-  accountId: string;
-}
+import type { CloudflareConfig } from "./types.ts";
 
 export async function createCloudflareClient(
   { apiToken, accountId }: CloudflareConfig,

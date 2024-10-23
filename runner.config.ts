@@ -136,7 +136,7 @@ task("version:local", () => {
     "./local.json",
     JSON.stringify(
       {
-        version: Date.now().toString(),
+        version: new Date().toISOString(),
         goldeURL: "https://golde.localhost/api/v1",
       },
     ),

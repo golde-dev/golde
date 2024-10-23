@@ -1,5 +1,5 @@
 import { isEqual } from "moderndash";
-import type { CloudflareClient } from "../../clients/cloudflare.ts";
+import type { CloudflareClient } from "../../clients/cloudflare/client.ts";
 import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
 import { type CreateUnit, type Plan, Type } from "../../types/plan.ts";
 import { assertBranch } from "../../utils/resource.ts";

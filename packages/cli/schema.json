@@ -228,7 +228,8 @@
                             "$ref": "#/definitions/golde/properties/tags"
                           },
                           "branch": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "master"
                           },
                           "branchPattern": {
                             "type": "string"

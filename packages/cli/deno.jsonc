@@ -3,12 +3,12 @@
   "version": "0.2.0",
   "exports": {},
   "tasks": {
-    "schema": "deno run --allow-write --allow-read --allow-env ./schema.ts",
-    "build": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net build.ts",
+    "schema": "deno run --allow-write --allow-run --allow-read --allow-env ./schema.ts",
+    "package": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net package.ts",
     "publish": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts",
     "publish:local": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --local",
-    "dist": "deno task schema && deno task compile && deno task build",
-    "dist:local": "deno task schema && deno task compile --local && deno task build --local",
+    "dist": "deno check src && deno task schema &&  deno task compile && deno task package",
+    "dist:local": "deno check src && deno task schema && deno task compile --local && deno task package --local",
     "compile": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts",
     "compile:local": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --local"
   },

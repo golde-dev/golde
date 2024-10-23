@@ -2,6 +2,7 @@ import { parseArgs } from "@std/cli/parse-args";
 import { TextLineStream } from "@std/streams";
 import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
+import { logger } from "./src/logger.ts";
 
 const { local } = parseArgs(Deno.args, {
   boolean: ["local"],
@@ -39,7 +40,7 @@ function decode(buffer: BufferSource): string {
 async function startVerdaccio() {
   try {
     await fetch(localRegistry);
-    console.log("Verdaccio already running");
+    logger.info("Verdaccio already running");
   } catch {
     const command = new Deno.Command("yarn", {
       args: ["dlx", "verdaccio"],
@@ -55,13 +56,13 @@ async function startVerdaccio() {
 }
 
 async function uploadReleaseArtifacts() {
-  console.log("Updating artifacts");
+  logger.info("Updating artifacts");
   const o = await new Deno.Command("gh", {
     args: ["release", "upload", VERSION, "*"],
     cwd: `./dist/bin`,
   }).output();
-  console.log(decode(o.stdout));
-  console.error(decode(o.stderr));
+  logger.info(decode(o.stdout));
+  logger.error(decode(o.stderr));
 }
 
 async function publishNPMPackages(
@@ -83,7 +84,7 @@ async function publishNPMPackages(
       .pipeThrough(new TextLineStream());
 
     for await (const line of reader) {
-      console.log(line);
+      logger.info(line);
     }
 
     const stderrReader = process.stderr
@@ -91,7 +92,7 @@ async function publishNPMPackages(
       .pipeThrough(new TextLineStream());
 
     for await (const line of stderrReader) {
-      console.error(line);
+      logger.error(line);
     }
   }
 }
@@ -102,7 +103,7 @@ async function updateExamples(
   reset: boolean = false,
 ) {
   for (const example of examples) {
-    console.log(`Updating ${example}`);
+    logger.info(`Updating ${example}`);
     const { hostname } = new URL(registry);
     await new Deno.Command("yarn", {
       args: ["config", "set", "npmRegistryServer", registry],
@@ -123,8 +124,8 @@ async function updateExamples(
       args: ["up", "@golde/*", "--caret"],
       cwd: `../examples/${example}`,
     }).output();
-    console.log(decode(o.stdout));
-    console.error(decode(o.stderr));
+    logger.info(decode(o.stdout));
+    logger.error(decode(o.stderr));
 
     await new Deno.Command("yarn", {
       args: ["config", "unset", "npmRegistryServer"],
@@ -149,7 +150,7 @@ async function updateExamples(
 }
 
 function updateLocalCLI(): Promise<void> {
-  console.log("Updating local CLI");
+  logger.info("Updating local CLI");
 
   return new Promise((resolve, reject) => {
     exec(
@@ -157,10 +158,10 @@ function updateLocalCLI(): Promise<void> {
       { name: "Golde CLI update" },
       function (error, stdout, stderr) {
         if (error) {
-          console.error({ error, stderr }, "Failed to update local agent");
+          logger.error({ error, stderr }, "Failed to update local agent");
           reject(error);
         }
-        console.log(stdout);
+        logger.info(stdout);
         resolve();
       },
     );
@@ -168,7 +169,7 @@ function updateLocalCLI(): Promise<void> {
 }
 
 async function publish() {
-  console.log("Publishing to remote registry");
+  logger.info("Publishing to remote registry");
   await publishNPMPackages(
     packages,
     publicRegistry,
@@ -177,7 +178,7 @@ async function publish() {
 }
 
 async function publishLocal() {
-  console.log("Publishing to local registry");
+  logger.info("Publishing to local registry");
   const stopVerdaccio = await startVerdaccio();
 
   try {
@@ -192,7 +193,7 @@ async function publishLocal() {
       resetLocalExamples,
     );
   } finally {
-    console.log("Stopping Verdaccio");
+    logger.info("Stopping Verdaccio");
     stopVerdaccio?.();
   }
 }

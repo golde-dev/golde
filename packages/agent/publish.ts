@@ -1,5 +1,6 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { exec } from "sudo-prompt";
+import { logger } from "./src/logger.ts";
 
 const { version } = JSON.parse(
   Deno.readTextFileSync("../../lerna.json"),
@@ -17,27 +18,27 @@ if (local) {
 }
 
 async function uploadReleaseArtifacts() {
-  console.log("Updating artifacts");
+  logger.info("Updating artifacts");
   const o = await new Deno.Command("gh", {
     args: ["release", "upload", version, "*"],
     cwd: `./dist/bin`,
   }).output();
-  console.log(new TextDecoder().decode(o.stdout));
-  console.error(new TextDecoder().decode(o.stderr));
+  logger.info(new TextDecoder().decode(o.stdout));
+  logger.error(new TextDecoder().decode(o.stderr));
 }
 
 function updateLocalAgent(): Promise<void> {
-  console.log("Updating local agent");
+  logger.info("Updating local agent");
   return new Promise((resolve, reject) => {
     exec(
       `${import.meta.dirname}/dist/bin/agent-linux-x64 install`,
       { name: "Golde Agent" },
       function (error, stdout, stderr) {
         if (error) {
-          console.error({ error, stderr }, "Failed to update local agent");
+          logger.error({ error, stderr }, "Failed to update local agent");
           reject(error);
         }
-        console.log("stdout: " + stdout);
+        logger.info("stdout: " + stdout);
         resolve();
       },
     );
@@ -45,11 +46,11 @@ function updateLocalAgent(): Promise<void> {
 }
 
 function publish() {
-  console.log("Publishing to remote registry");
+  logger.info("Publishing to remote registry");
   uploadReleaseArtifacts();
 }
 
 function publishLocal() {
-  console.log("Locally installing agent");
+  logger.info("Locally installing agent");
   updateLocalAgent();
 }

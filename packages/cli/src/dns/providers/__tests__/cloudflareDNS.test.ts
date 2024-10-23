@@ -3,7 +3,7 @@ import { describe, it } from "@std/testing/bdd";
 import { createCloudflareDNSPlan, createCloudflareExecutors } from "../cloudflare.ts";
 import { Type } from "../../../types/plan.ts";
 import type { CreateZoneRecord, DeleteZoneRecord, UpdateZoneRecord } from "../cloudflare.ts";
-import type { CloudflareClient } from "../../../clients/cloudflare.ts";
+import type { CloudflareClient } from "../../../clients/cloudflare/client.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../types/plan.ts";
 import type {
   CloudflareDNSRecord,
