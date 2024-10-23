@@ -9,6 +9,12 @@
           "minLength": 2,
           "pattern": "^[A-Za-z0-9_@./#&+-]*$"
         },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "state": {
           "anyOf": [
             {
@@ -44,9 +50,7 @@
                 "type",
                 "bucket",
                 "region",
-                "endpoint",
-                "accessKeyId",
-                "secretAccessKey"
+                "endpoint"
               ],
               "additionalProperties": false
             },
@@ -91,6 +95,25 @@
               ],
               "additionalProperties": false,
               "description": "Golde provider config"
+            },
+            "aws": {
+              "type": "object",
+              "properties": {
+                "accessKeyId": {
+                  "type": "string",
+                  "description": "AWS access key id"
+                },
+                "secretAccessKey": {
+                  "type": "string",
+                  "description": "AWS secret access key"
+                }
+              },
+              "required": [
+                "accessKeyId",
+                "secretAccessKey"
+              ],
+              "additionalProperties": false,
+              "description": "AWS provider config"
             },
             "docker": {
               "type": "object",
@@ -202,10 +225,7 @@
                             "type": "string"
                           },
                           "tags": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
+                            "$ref": "#/definitions/golde/properties/tags"
                           },
                           "branch": {
                             "type": "string"
@@ -246,10 +266,10 @@
                             "description": "TTL in seconds"
                           },
                           "branch": {
-                            "type": "string"
+                            "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
                           },
                           "branchPattern": {
-                            "type": "string"
+                            "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
                           }
                         },
                         "required": [
@@ -273,6 +293,12 @@
               "additionalProperties": {
                 "type": "object",
                 "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                  },
                   "locationHint": {
                     "type": "string",
                     "enum": [
@@ -281,6 +307,13 @@
                       "enam",
                       "weur",
                       "wnam"
+                    ]
+                  },
+                  "storageClass": {
+                    "type": "string",
+                    "enum": [
+                      "Standard",
+                      "InfrequentAccess"
                     ]
                   }
                 },

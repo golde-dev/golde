@@ -1,8 +1,8 @@
 import { isEmpty } from "moderndash";
-import type { Context } from "../context.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import type { Plan } from "../types/plan.ts";
 import { createCloudflareDNSPlan, createCloudflareExecutors } from "./providers/cloudflare.ts";
+import type { Context } from "../types/context.ts";
 
 export async function createDNSPlan(context: Context): Promise<Plan> {
   const {

@@ -1,3 +1,5 @@
+import { decode } from "../utils/text.ts";
+
 export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";
   CgroupVersion?: string;
@@ -5,8 +7,6 @@ export interface DockerInfo {
   OSVersion: string;
   OSType: "windows" | "linux";
 }
-
-const decoder = new TextDecoder();
 
 export class DockerClient {
   private readonly registry: string;
@@ -53,7 +53,7 @@ export class DockerClient {
         args: ["info", "--format", "json"],
       }).output();
 
-      const stdErrDecoded = decoder.decode(stderr);
+      const stdErrDecoded = decode(stderr);
       if (!success) {
         throw new Error(
           `Failed to run docker info`,

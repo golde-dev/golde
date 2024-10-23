@@ -1,11 +1,15 @@
-import { existsSync } from "node:fs";
-import type { Config } from "./types/config.ts";
 import { validateConfig } from "./schema.ts";
 import { logger } from "./logger.ts";
+import { existsSync } from "@std/fs";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
-import { extname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
+import { dynamicImport } from "./utils/import.ts";
+import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
+import { isEmpty, isPlainObject } from "moderndash";
+import { extname, globToRegExp } from "@std/path";
+import { decode } from "./utils/text.ts";
 import {
   envTemplate,
   fileTemplate,
@@ -13,13 +17,8 @@ import {
   resolveTemplate,
   stateTemplate,
 } from "./utils/template.ts";
-import { dynamicImport } from "./utils/import.ts";
-import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
-import { isEmpty, isPlainObject } from "moderndash";
-import { globToRegExp } from "@std/path";
 import type { Dependencies } from "./types/dependencies.ts";
-
-const decoder = new TextDecoder("utf-8");
+import type { Config } from "./types/config.ts";
 
 const loadConfig = async (
   path: string,
@@ -35,14 +34,14 @@ const loadConfig = async (
       return config;
     }
     case ".toml": {
-      const tomlConfig = decoder.decode(
+      const tomlConfig = decode(
         Deno.readFileSync(path),
       );
       return parseToml(tomlConfig);
     }
     case ".yml":
     case ".yaml": {
-      const yamlConfig = decoder.decode(
+      const yamlConfig = decode(
         Deno.readFileSync(path),
       );
       return parseYaml(yamlConfig);

@@ -1,4 +1,5 @@
 import type { DockerClient } from "../../clients/docker.ts";
+import type { Tags } from "../../types/config.ts";
 import type { DockerImages, DockerImagesState } from "../types.ts";
 
 export function createDockerExecutors(_: DockerClient) {
@@ -6,15 +7,15 @@ export function createDockerExecutors(_: DockerClient) {
 
 export async function createDockerArtifactsPlan(
   executors: ReturnType<typeof createDockerExecutors>,
-  prevConfig?: DockerImages,
-  prevState?: DockerImagesState,
-  nextConfig?: DockerImages,
+  tags?: Tags,
+  state?: DockerImagesState,
+  config?: DockerImages,
 ) {
   console.log({
     executors,
-    prevConfig,
-    prevState,
-    nextConfig,
+    tags,
+    state,
+    config,
   });
   return await Promise.resolve([]);
 }

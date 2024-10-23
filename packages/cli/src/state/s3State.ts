@@ -1,7 +1,8 @@
 import { NoSuchKey } from "@aws-sdk/client-s3";
 import type { S3 } from "../clients/s3.ts";
-import type { ConfigLock, ConfigState } from "../types/config.ts";
+import type { ConfigLock } from "../types/config.ts";
 import type { StateClient } from "../types/state.ts";
+import type { State } from "../types/state.ts";
 
 const getStateKey = (project: string) => `/${project}/state/current.json`;
 const getLockKey = (project: string) => `/${project}/state/lock.json`;
@@ -24,9 +25,9 @@ export class S3StateClient implements StateClient {
     this.s3 = s3;
   }
 
-  public getState(project: string): Promise<ConfigState | undefined> {
+  public getState(project: string): Promise<State | undefined> {
     const stateKey = getStateKey(project);
-    return notFoundAsUndefined(this.s3.getJSONObject<ConfigState>(stateKey));
+    return notFoundAsUndefined(this.s3.getJSONObject<State>(stateKey));
   }
 
   public getStateLock(project: string): Promise<ConfigLock | undefined> {

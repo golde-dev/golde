@@ -2,12 +2,10 @@ import { z } from "zod";
 import type { Resource, WithBranch } from "../types/config.ts";
 import { getDefaultBranch } from "../clients/git.ts";
 
-const main = getDefaultBranch();
-
 export const branchSchema = z
   .string()
-  .default(main)
-  .optional();
+  .optional()
+  .transform((v) => v ?? getDefaultBranch());
 
 export const branchPatternSchema = z
   .string()

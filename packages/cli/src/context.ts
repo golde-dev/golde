@@ -110,7 +110,6 @@ export const initializeContext = async (
   }
 };
 
-
 export function getFinalContext(context: Context, config: Config): Context {
   return {
     ...context,

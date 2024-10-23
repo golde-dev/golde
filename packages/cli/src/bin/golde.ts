@@ -5,12 +5,12 @@ import { getConfig, getFinalConfig } from "../config.ts";
 import { createPlan, printPlan } from "../plan.ts";
 import { getFinalContext, initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
-import type { LevelName } from "@std/log";
 import { VERSION } from "../version.ts";
-import { applyPlan } from "../apply.ts";
+import { applyPlan, printResult, saveState } from "../apply.ts";
 import { verifyInstalled } from "../clients/git.ts";
 import { getDependencies } from "../dependacies.ts";
-import { lockDependencies } from "../lock.ts";
+import { lockDependencies, releaseLocks } from "../lock.ts";
+import type { LevelName } from "@std/log";
 
 // TODO: handel .env.example errors
 await load({
@@ -109,7 +109,12 @@ program
       logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath);
-      await initializeContext(loadedConfig);
+      const context = await initializeContext(loadedConfig);
+
+      const initialPlan = await createPlan(context);
+      const dependencies = await getDependencies(context, initialPlan);
+
+      getFinalConfig(loadedConfig, dependencies);
 
       logger.info("Config is valid");
     },
@@ -134,8 +139,16 @@ program
 
       const loadedConfig = await getConfig(configPath);
       const context = await initializeContext(loadedConfig);
-      const plan = await createPlan(context);
-      printPlan(plan);
+
+      const initialPlan = await createPlan(context);
+      const dependencies = await getDependencies(context, initialPlan);
+
+      const finalConfig = getFinalConfig(loadedConfig, dependencies);
+      const finalContext = getFinalContext(context, finalConfig);
+
+      const finalPlan = await createPlan(finalContext);
+
+      printPlan(finalPlan);
     },
   );
 
@@ -164,7 +177,7 @@ program
       const initialDependencies = await getDependencies(context, initialPlan);
       const locks = await lockDependencies(context, initialDependencies);
       const dependencies = await getDependencies(context, initialPlan);
-      
+
       const finalConfig = getFinalConfig(loadedConfig, dependencies);
       const finalContext = getFinalContext(context, finalConfig);
 

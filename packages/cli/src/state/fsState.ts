@@ -1,8 +1,8 @@
 import { ensureDir } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { dirname, join } from "@std/path";
-import type { ConfigLock, ConfigState } from "../types/config.ts";
-import type { StateClient } from "../types/state.ts";
+import type { ConfigLock } from "../types/config.ts";
+import type { State, StateClient } from "../types/state.ts";
 
 export class FSStateClient implements StateClient {
   private readonly statePath: string;
@@ -24,7 +24,7 @@ export class FSStateClient implements StateClient {
     await ensureDir(dirname(this.lockPath));
   }
 
-  public async getState(): Promise<ConfigState | undefined> {
+  public async getState(): Promise<State | undefined> {
     if (!await exists(this.statePath)) {
       return;
     }

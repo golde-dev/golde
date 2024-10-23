@@ -21,6 +21,9 @@ const packages = [
 ];
 
 const examples = [
+  "bucket-r2",
+  "bucket-s3",
+  "config-formats",
   "artifacts-docker",
   "artifacts-archive",
   "dns-cloudflare",

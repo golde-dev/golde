@@ -1,8 +1,7 @@
 import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
 import { memoize } from "moderndash";
-
-const decoder = new TextDecoder();
+import { decode } from "../utils/text.ts";
 
 export interface GitInfo {
   defaultBranch: string;
@@ -79,7 +78,7 @@ export const verifyInstalled = async () => {
       args: ["--version"],
     }).output();
 
-    const stdErrDecoded = decoder.decode(stderr);
+    const stdErrDecoded = decode(stderr);
     if (!success) {
       throw new Error(
         `Failed to git version`,
