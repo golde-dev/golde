@@ -30,6 +30,13 @@
 			"namecheap",
 			"Nodenv"
 		],
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/dist": true,
+			"**/yarn.lock": true,
+			"**/deno.lock": true,
+			"**/*.yarn": true
+		},
 		"files.associations": {
 			".env.example": "env",
 			".env.test": "env"

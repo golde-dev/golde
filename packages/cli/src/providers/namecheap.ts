@@ -1,4 +1,4 @@
-import { NameCheapClient } from "../clients/namecheap.ts";
+import { NameCheapClient } from "../clients/nameCheap/namecheap.ts";
 import { logger } from "../logger.ts";
 
 interface NameCheapConfig {

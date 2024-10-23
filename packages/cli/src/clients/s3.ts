@@ -5,7 +5,6 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import type { Readable } from "node:stream";
 import type { Logger } from "../logger.ts";
 
 export enum LogCode {
@@ -139,7 +138,7 @@ export class S3 {
     }
   }
 
-  public async putObject(key: string, body: Readable | string) {
+  public async putObject(key: string, body: ReadableStream | string) {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
