@@ -3,18 +3,14 @@
   "version": "0.2.0",
   "exports": {},
   "tasks": {
-    "schema": "deno run --allow-write --allow-read --allow-env src/bin/schema.ts",
+    "schema": "deno run --allow-write --allow-read --allow-env ./schema.ts",
     "build": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net build.ts",
     "publish": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts",
     "publish:local": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --local",
     "dist": "deno task schema && deno task compile && deno task build",
-    "dist:local": "deno task schema && deno task compile && deno task build --local",
-    "compile": "deno task compile:linux_x86 && deno task compile:linux_arm && deno task compile:windows && deno task compile:darwin_x86 && deno task compile:darwin_arm",
-    "compile:linux_x86": "deno compile --cert ../../certs/golde.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu --output dist/bin/cli-linux-x64 src/bin/golde.ts ",
-    "compile:linux_arm": "deno compile --cert ../../certs/golde.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-unknown-linux-gnu --output dist/bin/cli-linux-arm64 src/bin/golde.ts ",
-    "compile:windows": "deno compile --cert ../../certs/golde.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc --output dist/bin/cli-win32-x64 src/bin/golde.ts",
-    "compile:darwin_x86": "deno compile --cert ../../certs/golde.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target x86_64-apple-darwin --output dist/bin/cli-darwin-x64 src/bin/golde.ts",
-    "compile:darwin_arm": "deno compile --cert ../../certs/golde.localhost.root.crt --allow-read --allow-write --allow-sys --allow-net --allow-env --allow-run --target aarch64-apple-darwin --output dist/bin/cli-darwin-arm64 src/bin/golde.ts"
+    "dist:local": "deno task schema && deno task compile --local && deno task build --local",
+    "compile": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts",
+    "compile:local": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --local"
   },
   "imports": {
     "@deno/dnt": "jsr:@deno/dnt@^0.41.3",

@@ -31,6 +31,11 @@ const examples = [
   "service-vite-react",
 ];
 
+const decoder = new TextDecoder();
+function decode(buffer: BufferSource): string {
+  return decoder.decode(buffer);
+}
+
 async function startVerdaccio() {
   try {
     await fetch(localRegistry);
@@ -55,8 +60,8 @@ async function uploadReleaseArtifacts() {
     args: ["release", "upload", VERSION, "*"],
     cwd: `./dist/bin`,
   }).output();
-  console.log(new TextDecoder().decode(o.stdout));
-  console.error(new TextDecoder().decode(o.stderr));
+  console.log(decode(o.stdout));
+  console.error(decode(o.stderr));
 }
 
 async function publishNPMPackages(
@@ -118,8 +123,8 @@ async function updateExamples(
       args: ["up", "@golde/*", "--caret"],
       cwd: `../examples/${example}`,
     }).output();
-    console.log(new TextDecoder().decode(o.stdout));
-    console.error(new TextDecoder().decode(o.stderr));
+    console.log(decode(o.stdout));
+    console.error(decode(o.stderr));
 
     await new Deno.Command("yarn", {
       args: ["config", "unset", "npmRegistryServer"],

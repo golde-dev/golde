@@ -3,60 +3,13 @@ import { VERSION } from "./src/version.ts";
 
 await emptyDir("./dist/npm");
 
-const createBinPackage = (name: string, os: string, cpu: "x64" | "arm64") => {
-  const cliPackageSON = JSON.stringify(
-    {
-      name: `@golde/${name}`,
-      version: VERSION,
-      description: `Golde CLI for ${os}-${cpu}`,
-      keywords: [
-        "cli",
-        "golde",
-        "infrastructure",
-      ],
-      license: "Apache-2.0",
-      scripts: {},
-      os: [os],
-      cpu: [cpu],
-      publishConfig: {
-        access: "public",
-      },
-      repository: {
-        type: "git",
-        url: "git+https://github.com/golde-dev/golde.git",
-      },
-      bugs: {
-        url: "https://github.com/golde-dev/golde/issues",
-      },
-    },
-    null,
-    2,
-  );
-  const packagePath = `dist/npm/@golde/${name}`;
-  const packageJSONPath = `${packagePath}/package.json`;
-  const licensePath = `${packagePath}/License`;
-  const packageBinPath = `${packagePath}/bin`;
-  const packageBinExecPath = name.includes("windows")
-    ? `${packageBinPath}/${name}.exe`
-    : `${packageBinPath}/${name}`;
-
-  const binDistPath = name.includes("win32")
-    ? `dist/bin/${name}.exe`
-    : `dist/bin/${name}`;
-
-  Deno.mkdirSync(packagePath, { recursive: true });
-  Deno.mkdirSync(packageBinPath, { recursive: true });
-
-  Deno.writeTextFileSync(
-    packageJSONPath,
-    cliPackageSON,
-  );
-  Deno.copyFileSync(
-    binDistPath,
-    packageBinExecPath,
-  );
-  Deno.copyFileSync("../../LICENSE", licensePath);
-};
+const keywords = [
+  "cli",
+  "golde",
+  "PaaS",
+  "IaC",
+  "cloud",
+];
 
 createBinPackage("cli-linux-x64", "linux", "x64");
 createBinPackage("cli-linux-arm64", "linux", "arm64");
@@ -84,11 +37,7 @@ await build({
     bin: {
       golde: "bin/cli.cjs",
     },
-    keywords: [
-      "cli",
-      "golde",
-      "infrastructure",
-    ],
+    keywords,
     scripts: {},
     type: "module",
     description: "Golde CLI",
@@ -119,3 +68,52 @@ await build({
     Deno.copyFileSync("../../LICENSE", "dist/npm/@golde/cli/LICENSE");
   },
 });
+
+function createBinPackage(name: string, os: string, cpu: "x64" | "arm64") {
+  const cliPackageSON = JSON.stringify(
+    {
+      name: `@golde/${name}`,
+      version: VERSION,
+      description: `Golde CLI for ${os}-${cpu}`,
+      keywords,
+      license: "Apache-2.0",
+      scripts: {},
+      os: [os],
+      cpu: [cpu],
+      publishConfig: {
+        access: "public",
+      },
+      repository: {
+        type: "git",
+        url: "git+https://github.com/golde-dev/golde.git",
+      },
+      bugs: {
+        url: "https://github.com/golde-dev/golde/issues",
+      },
+    },
+    null,
+    2,
+  );
+  const packagePath = `dist/npm/@golde/${name}`;
+  const packageJSONPath = `${packagePath}/package.json`;
+  const licensePath = `${packagePath}/License`;
+  const packageBinPath = `${packagePath}/bin`;
+  const packageBinExecPath = name.includes("windows")
+    ? `${packageBinPath}/${name}.exe`
+    : `${packageBinPath}/${name}`;
+
+  const binDistPath = name.includes("win32") ? `dist/bin/${name}.exe` : `dist/bin/${name}`;
+
+  Deno.mkdirSync(packagePath, { recursive: true });
+  Deno.mkdirSync(packageBinPath, { recursive: true });
+
+  Deno.writeTextFileSync(
+    packageJSONPath,
+    cliPackageSON,
+  );
+  Deno.copyFileSync(
+    binDistPath,
+    packageBinExecPath,
+  );
+  Deno.copyFileSync("../../LICENSE", licensePath);
+}

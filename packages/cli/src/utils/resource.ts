@@ -4,8 +4,8 @@ import { getDefaultBranch } from "../clients/git.ts";
 
 export const branchSchema = z
   .string()
-  .optional()
-  .transform((v) => v ?? getDefaultBranch());
+  .default(getDefaultBranch())
+  .optional();
 
 export const branchPatternSchema = z
   .string()

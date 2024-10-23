@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
-import { schema } from "../schema.ts";
+import { schema } from "./src/schema.ts";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { logger } from "../logger.ts";
+import { logger } from "./src/logger.ts";
 
 const jsonSchema = zodToJsonSchema(schema, "golde");
 
