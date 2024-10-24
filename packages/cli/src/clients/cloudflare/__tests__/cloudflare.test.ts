@@ -1,6 +1,6 @@
 // import { assertRejects } from "@std/assert";
 // import { assertSpyCall, stub } from "@std/testing/mock";
-// import { CloudflareClient } from "../cloudflare.ts";
+// import { CloudflareClient } from "../client.ts";
 
 // function createFetchResponse(data: unknown): Response {
 //   return {

@@ -71,7 +71,7 @@ async function publishNPMPackages(
 ) {
   for (const pkg of pkgs) {
     const command = new Deno.Command("npm", {
-      args: ["publish", "--registry", registry],
+      args: ["publish", "--registry", registry, "--loglevel", "warn"],
       cwd: `dist/npm/@golde/${pkg}`,
       stdout: "piped",
       stderr: "piped",
@@ -97,10 +97,9 @@ async function publishNPMPackages(
   }
 }
 
-async function updateExamples(
+async function updateLocalExamples(
   examples: string[],
   registry: string,
-  reset: boolean = false,
 ) {
   for (const example of examples) {
     logger.info(`Updating ${example}`);
@@ -136,17 +135,60 @@ async function updateExamples(
       cwd: `../examples/${example}`,
     }).output();
 
-    if (reset) {
-      await new Deno.Command("git", {
-        args: ["restore", "yarn.lock"],
-        cwd: `../examples/${example}`,
-      }).output();
-      await new Deno.Command("git", {
-        args: ["restore", "package.json"],
-        cwd: `../examples/${example}`,
-      }).output();
-    }
+    await new Deno.Command("git", {
+      args: ["restore", "yarn.lock"],
+      cwd: `../examples/${example}`,
+    }).output();
+    await new Deno.Command("git", {
+      args: ["restore", "package.json"],
+      cwd: `../examples/${example}`,
+    }).output();
   }
+}
+
+async function updateExamples(
+  examples: string[],
+  registry: string,
+) {
+  for (const example of examples) {
+    logger.info(`Updating ${example}`);
+
+    await new Deno.Command("yarn", {
+      args: ["config", "set", "npmRegistryServer", registry],
+      cwd: `../examples/${example}`,
+    }).output();
+
+    const o = await new Deno.Command("yarn", {
+      args: ["up", "@golde/*", "--caret"],
+      cwd: `../examples/${example}`,
+    }).output();
+    logger.info(decode(o.stdout));
+    logger.error(decode(o.stderr));
+
+    await new Deno.Command("yarn", {
+      args: ["config", "unset", "npmRegistryServer"],
+      cwd: `../examples/${example}`,
+    }).output();
+  }
+}
+
+async function commitExamplesChanges() {
+  logger.info("Committing examples changes");
+  const o1 = await new Deno.Command("git", {
+    args: ["add", "."],
+    cwd: `../examples`,
+  })
+    .output();
+  logger.info(decode(o1.stdout));
+  logger.error(decode(o1.stderr));
+
+  const o2 = await new Deno.Command("git", {
+    args: ["commit", "-m", "chore(examples): update cli client"],
+    cwd: `../examples`,
+  })
+    .output();
+  logger.info(decode(o2.stdout));
+  logger.error(decode(o2.stderr));
 }
 
 function updateLocalCLI(): Promise<void> {
@@ -174,6 +216,12 @@ async function publish() {
     packages,
     publicRegistry,
   );
+  // TODO: decide if we want to update examples in first release
+  await updateExamples(
+    packages,
+    publicRegistry,
+  );
+  await commitExamplesChanges();
   await uploadReleaseArtifacts();
 }
 
@@ -187,10 +235,9 @@ async function publishLocal() {
       packages,
       localRegistry,
     );
-    await updateExamples(
+    await updateLocalExamples(
       examples,
       localRegistry,
-      resetLocalExamples,
     );
   } finally {
     logger.info("Stopping Verdaccio");

@@ -136,7 +136,7 @@ task("version:local", () => {
     "./local.json",
     JSON.stringify(
       {
-        version: new Date().toISOString(),
+        version: new Date().toISOString().replaceAll(":", "-"),
         goldeURL: "https://golde.localhost/api/v1",
       },
     ),
@@ -150,7 +150,7 @@ spawnTask("publish:cli",
   }
 );
 spawnTask("publish:cli:local",
-  "deno", ["task", "publish", "--local"],
+  "deno", ["task", "publish:local"],
   {
     cwd: "./packages/cli",
   }
@@ -164,7 +164,7 @@ spawnTask("publish:agent",
 );
 
 spawnTask("publish:agent:local",
-  "deno", ["task", "publish", "--local"],
+  "deno", ["task", "publish:local"],
   {
     cwd: "./packages/agent",
   }

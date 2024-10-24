@@ -4,7 +4,6 @@
   "version": "0.4.0",
   "changelogPreset": "conventional-changelog-conventionalcommits",
   "packages": [
-    "packages/*",
     "packages/cli/dist/npm/@golde/*"
   ],
   "command": {

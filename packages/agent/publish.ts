@@ -2,6 +2,8 @@ import { parseArgs } from "@std/cli/parse-args";
 import { exec } from "sudo-prompt";
 import { logger } from "./src/logger.ts";
 
+logger.configure("INFO", true);
+
 const { version } = JSON.parse(
   Deno.readTextFileSync("../../lerna.json"),
 );

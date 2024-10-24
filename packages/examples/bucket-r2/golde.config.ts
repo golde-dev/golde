@@ -1,4 +1,4 @@
-import type {Config} from '@golde/cli';
+import type {Config} from "@golde/cli";
 
 const config: Config = {
   name: "example-dns-cloudflare",
