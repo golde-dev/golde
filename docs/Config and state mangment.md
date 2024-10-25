@@ -2,10 +2,13 @@
 
 ## General structure
 
-- Each resource will have implicit or explicit `branch` ownership
-- Each resource can also have `branchPattern` which will be used to match multiple branches.
-- State is partitioned by branch name.
-- Changes to state are locked to the branch.
+- Each resource will have implicit or explicit `branch` ownership. If branch is not configured we will implicitly set branch to the main branch or to current branch if branch pattern is used.
+
+- Each resource can also have `branchPattern` which will be used to match multiple branches. Once branch is matched it would create new resource for that branch.
+
+- State is partitioned by branch name. Each git branch have its own state. This could be represented as file or database row.
+
+- When executing changes branch is locked for writes. Dependencies on other branches state will lock these branches as well.
 
 Given config like this:
 
@@ -17,6 +20,9 @@ Given config like this:
         "branch": "master"
       },
       "bucket2": {
+        "storageClass": "Standard",
+      },
+      "bucket3": {
         "branch": "develop"
       }
     }
@@ -37,6 +43,13 @@ Would result into following state when fully executed on both branches:
         "config": {
           "branch": "master"
         }
+      },
+      "bucket2": {
+        "branch": "master",
+        "createdAt": "2024-01-01T00:00:00.000Z", 
+        "config": {
+          "branch": "master"
+        }
       }
     }
   }
@@ -48,7 +61,7 @@ Would result into following state when fully executed on both branches:
 {
   "buckets": {
     "cloudflare": {
-      "bucket2": {
+      "bucket3": {
         "branch": "develop",
         "createdAt": "2024-01-01T00:00:00.000Z",
         "config": {
@@ -100,6 +113,8 @@ Result of plan is number of changes to state (Create, Update, Delete, Noop).
 
 For example there might be resource that is created for each feature/* branch using git template.
 
+When branch pattern is used, branch is automatically set to the current branch.
+
 ```json
 {
   "buckets": {
@@ -111,7 +126,6 @@ For example there might be resource that is created for each feature/* branch us
         "branch": "develop"
       },
       "branch-{{ git.BRANCH_SLUG}}": {
-        "branch": "{{ git.BRANCH_NAME }}",
         "branchPattern": "feature/*"
       }
     }
@@ -186,7 +200,6 @@ Another common use case is when resources depends on each other across branches.
             "{{ git.BRANCH_SLUG }}": {
               "value": "{{ state.servers.hcloud.staging.ipv4 }}",
               "branchPattern": "feature/*",
-              "branch": "{{ git.BRANCH_SLUG }}"
             }
           },
         },
@@ -199,8 +212,8 @@ Assuming we have two feature branches `feature/test` and `feature/test2`
 We would create dns records like
 
 - `develop` => `dev.golde.dev` would point to staging server.
-- `feature/test` => `feature--test.golde.dev` would point to staging server.
-- `feature/test2` `feature--test2.golde.dev` would point to staging server.
+- `feature/test` => `feature-test.golde.dev` would point to staging server.
+- `feature/test2` `feature-test2.golde.dev` would point to staging server.
 
 For this case planing and execution would be slightly different.
 

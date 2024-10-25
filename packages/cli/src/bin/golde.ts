@@ -48,7 +48,8 @@ program
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-c, --config <config>", "location of config file")
   .option("-a, --all", "show full config, including all branches")
-  .option("-j, --json", "log output as json")
+  .option("-f, --format", "config output format", "json")
+  .option("-j, --json", "logging output as json")
   .action(
     async function (
       { logLevel, json, config: configPath, all }: {
@@ -56,6 +57,7 @@ program
         config: string;
         json: boolean;
         all: boolean;
+        format: "json" | "yaml" | "toml";
       },
     ) {
       logger.configure(logLevel, json);

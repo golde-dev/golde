@@ -11,7 +11,7 @@ const config = {
         records: {
           "vite-react-node": {
             type: "A", 
-            value: "{{ servers.hetzner-server-1.ip_address }}",
+            value: "{{ state.servers.hetzner-server-1.ip_address }}",
             ttl: "3600",
             proxied: false, 
           },

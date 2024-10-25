@@ -9,7 +9,6 @@ const { local } = parseArgs(Deno.args, {
 });
 
 const localRegistry = "http://localhost:4873/";
-const resetLocalExamples = true;
 const publicRegistry = "https://registry.npmjs.org/";
 
 const packages = [

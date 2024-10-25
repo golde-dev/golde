@@ -3,11 +3,11 @@ import type { Dependencies } from "./types/dependencies.ts";
 import type { Lock } from "./types/lock.ts";
 
 export async function lockDependencies(
-  context: Context,
-  dependacies: Dependencies,
+  _context: Context,
+  _dependencies: Dependencies,
 ): Promise<Lock[]> {
-  return Promise.resolve([]);
+  return await Promise.resolve([]);
 }
 
-export async function releaseLocks(context: Context, locks: Lock[]): Promise<void> {
+export async function releaseLocks(_context: Context, _locks: Lock[]): Promise<void> {
 }

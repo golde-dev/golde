@@ -4,6 +4,7 @@ import { logger } from "./src/logger.ts";
 
 logger.configure("INFO", true);
 
+const decoder = new TextDecoder();
 const { version } = JSON.parse(
   Deno.readTextFileSync("../../lerna.json"),
 );
@@ -21,12 +22,12 @@ if (local) {
 
 async function uploadReleaseArtifacts() {
   logger.info("Updating artifacts");
-  const o = await new Deno.Command("gh", {
+  const { stdout, stderr } = await new Deno.Command("gh", {
     args: ["release", "upload", version, "*"],
     cwd: `./dist/bin`,
   }).output();
-  logger.info(new TextDecoder().decode(o.stdout));
-  logger.error(new TextDecoder().decode(o.stderr));
+  logger.info(decoder.decode(stdout));
+  logger.error(decoder.decode(stderr));
 }
 
 function updateLocalAgent(): Promise<void> {

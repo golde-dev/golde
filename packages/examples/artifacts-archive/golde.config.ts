@@ -8,11 +8,7 @@ const config: Config = {
     },
   },
   artifacts: {
-    archive: {
-      nodeApi: {
-        tags: ["latest"],
-      }
-    }
+
   }
 };
 

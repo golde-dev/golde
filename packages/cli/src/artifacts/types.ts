@@ -1,3 +1,5 @@
+import type { Tags } from "../types/config.ts";
+
 export interface DockerImage {
   /**
    * Pattern of related git branch
@@ -10,7 +12,7 @@ export interface DockerImage {
   /**
    * Tags defines a list of tag mappings that must be associated to the build image.
    */
-  tags?: string[];
+  tags?: Tags;
   /**
    * Labels add metadata to the resulting image.
    */

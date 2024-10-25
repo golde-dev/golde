@@ -14,7 +14,7 @@ const config: Config = {
   },
   artifacts: {
     docker: {
-      nodeApi: {
+      "example-artifacts-docker": {
         tags: ["latest"],
       }
     }

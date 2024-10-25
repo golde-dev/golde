@@ -1,3 +1,4 @@
+// deno-lint-ignore-file ban-types no-explicit-any
 type Constructor = new (...args: any[]) => {};
 
 /**

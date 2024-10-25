@@ -1,12 +1,10 @@
 import { validateConfig } from "../schema.ts";
 import { ConfigError } from "../error.ts";
-import { assertEquals } from "@std/assert";
 import type { Config } from "../types/config.ts";
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 
 describe("validateConfig for project", () => {
-
   it("should throw an error if the config is invalid", () => {
     const invalidConfig: Config = {
       name: "invalid project name",

@@ -74,3 +74,40 @@ export type ExecutionGroups = {
 };
 
 export type Plan = ExecutionUnit[];
+
+export interface CreateResult<
+  C extends Resource = Resource,
+  S extends ResourceState = ResourceState,
+> {
+  type: Type.Create;
+  path: string;
+  state: S;
+  config: C;
+  executionTime: number;
+}
+
+export interface UpdateResult<
+  C extends Resource = Resource,
+  S extends ResourceState = ResourceState,
+> {
+  type: Type.Update;
+  path: string;
+  prevState: S;
+  state: S;
+  config: C;
+  executionTime: number;
+}
+
+export interface DeleteResult<
+  S extends ResourceState = ResourceState,
+> {
+  type: Type.Delete;
+  path: string;
+  state: S;
+  executionTime: number;
+}
+
+export type Result =
+  | CreateResult
+  | UpdateResult
+  | DeleteResult;
