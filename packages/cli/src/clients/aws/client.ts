@@ -1,5 +1,6 @@
 import { applyMixins } from "../../utils/mixin.ts";
 import { AWSClientBase } from "./base.ts";
+import { Route53Client } from "./route53.ts";
 import { S3Client } from "./s3.ts";
 
 export class AWSClient extends AWSClientBase {
@@ -8,8 +9,9 @@ export class AWSClient extends AWSClientBase {
   }
 }
 
-export interface AWSClient extends S3Client {}
+export interface AWSClient extends S3Client, Route53Client {}
 
 applyMixins(AWSClient, [
   S3Client,
+  Route53Client,
 ]);

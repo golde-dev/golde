@@ -228,8 +228,7 @@
                             "$ref": "#/definitions/golde/properties/tags"
                           },
                           "branch": {
-                            "type": "string",
-                            "default": "master"
+                            "type": "string"
                           },
                           "branchPattern": {
                             "type": "string"
@@ -345,16 +344,13 @@
                     }
                   },
                   "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
+                    "$ref": "#/definitions/golde/properties/tags"
                   },
                   "branch": {
-                    "type": "string"
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
                   },
                   "branchPattern": {
-                    "type": "string"
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
                   }
                 },
                 "additionalProperties": false
