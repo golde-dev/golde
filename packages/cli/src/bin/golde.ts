@@ -6,7 +6,7 @@ import { createPlan, printPlan } from "../plan.ts";
 import { getFinalContext, initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
 import { VERSION } from "../version.ts";
-import { applyPlan, printResult, saveState } from "../apply.ts";
+import { applyChanges, executePlan, printResult } from "../apply.ts";
 import { verifyInstalled } from "../clients/git.ts";
 import { getDependencies } from "../dependacies.ts";
 import { lockDependencies, releaseLocks } from "../lock.ts";
@@ -185,10 +185,10 @@ program
 
       const finalPlan = await createPlan(finalContext);
       printPlan(finalPlan);
-      const result = await applyPlan(context, finalPlan);
+      const result = await executePlan(context, finalPlan);
       printResult(result);
 
-      await saveState(context, result);
+      await applyChanges(context, result);
       await releaseLocks(context, locks);
     },
   );
