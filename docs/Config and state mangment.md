@@ -1,144 +1,130 @@
-# Config and state management
+# Configuration and State Management
 
-## General structure
+## General Structure
 
-- Each resource will have implicit or explicit `branch` ownership. If branch is not configured we will implicitly set branch to the main branch or to current branch if branch pattern is used.
+- State is segmented by branch name, meaning each Git branch maintains its own state. This can be stored as a file or a database row. State is just collection of resources.
 
-- Each resource can also have `branchPattern` which will be used to match multiple branches. Once branch is matched it would create new resource for that branch.
+- Each resource is associated with a `branch`, either implicitly or explicitly. If a branch is not specified, it defaults to the main branch. If a branch pattern is used, it defaults to the current branch.
 
-- State is partitioned by branch name. Each git branch have its own state. This could be represented as file or database row.
+- Resources can also specify a `branchPattern`, which matches multiple branches. When a branch matches the pattern, a new resource is created for that branch.
 
-- When executing changes branch is locked for writes. Dependencies on other branches state will lock these branches as well.
+- When executing changes, the current branch is locked for writing. Dependencies on other branches will cause those branches to be locked as well.
 
-Given config like this:
+### Example Configuration
+
+Given a configuration like this:
+
+```json
+{
+  "buckets": {
+    "cloudflare": {
+      "bucket1": { "branch": "master" },
+      "bucket2": { "storageClass": "Standard" },
+      "bucket3": { "branch": "develop" }
+    }
+  }
+}
+```
+
+The resulting state, when executed fully on both branches, would look like this:
+
+**`master.state.json`**
 
 ```json
 {
   "buckets": {
     "cloudflare": {
       "bucket1": {
-        "branch": "master"
+        "branch": "master",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "config": { "branch": "master" }
       },
       "bucket2": {
-        "storageClass": "Standard",
-      },
-      "bucket3": {
-        "branch": "develop"
+        "branch": "master",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "config": { "branch": "master" }
       }
     }
   }
 }
 ```
 
-Would result into following state when fully executed on both branches:
+**`develop.state.json`**
 
 ```json
-// master.state.json
-{
-  "buckets": {
-    "cloudflare": {
-      "bucket1": {
-        "branch": "master",
-        "createdAt": "2024-01-01T00:00:00.000Z", 
-        "config": {
-          "branch": "master"
-        }
-      },
-      "bucket2": {
-        "branch": "master",
-        "createdAt": "2024-01-01T00:00:00.000Z", 
-        "config": {
-          "branch": "master"
-        }
-      }
-    }
-  }
-}
-```
-
-```json
-// develop.state.json
 {
   "buckets": {
     "cloudflare": {
       "bucket3": {
         "branch": "develop",
         "createdAt": "2024-01-01T00:00:00.000Z",
-        "config": {
-          "branch": "develop"
-        }
+        "config": { "branch": "develop" }
       }
     }
   }
 }
 ```
 
-To avoid conflict and race conditions state is partitioned by branch name. When calculating plan we only consider config and state for the current branch. This makes planning simple and deterministic.
+States are partitioned by branch to avoid conflicts and race conditions. While calculating a plan, only the config and state for the current branch are considered, ensuring the process is straightforward and predictable.
 
-For example when running on `master` plan would be calculated as following function
+### Planning Example
 
-```ts
-plan(currentBranchState, currentBranchConfig): ExecutionGroups
+For the `master` branch, the plan calculation might be represented as follows:
+
+```typescript
+plan(currentBranchState, currentBranchConfig): Plan
 ```
 
-```ts
+```typescript
 plan(
   {
     "buckets": {
       "cloudflare": {
-        "bucket1": {
-          "branch": "master"
-        }
+        "bucket1": { "branch": "master" }
       }
-    }, 
-    {
+    }
+  },
+  {
     "buckets": {
       "cloudflare": {
         "bucket1": {
           "branch": "master",
           "createdAt": "2024-01-01T00:00:00.000Z",
-          "config": {
-            "branch": "master"
-          }
+          "config": { "branch": "master" }
         }
       }
     }
   }
-})
+)
 ```
 
-Result of plan is number of changes to state (Create, Update, Delete, Noop).
+The plan results in changes to the state, such as Create, Update, Delete, or Noop.
 
-## Branch patterns
+## Branch Patterns
 
-For example there might be resource that is created for each feature/* branch using git template.
+Resources can be created for each `feature/*` branch using the git template. If a branch pattern is used, it automatically matches the current branch.
 
-When branch pattern is used, branch is automatically set to the current branch.
+### Example with Branch Patterns
 
 ```json
 {
   "buckets": {
     "cloudflare": {
-      "bucket1": {
-        "branch": "master"
-      },
-      "bucket2": {
-        "branch": "develop"
-      },
-      "branch-{{ git.BRANCH_SLUG}}": {
-        "branchPattern": "feature/*"
+      "bucket1": { "branch": "master" },
+      "bucket2": { "branch": "develop" },
+      "branch-{{git.BRANCH_SLUG}}": { 
+        "branchPattern": "feature/*" 
       }
     }
   }
 }
 ```
 
-Assuming two developers are working on feature branches `feature/test` and `feature/test2`
+Assume two developers are working on `feature/test` and `feature/test2` branches. In addition to `master` and `develop` buckets, the following states would be created:
 
-In addition to master and develop buckets, following state would be created:
+**`feature-test.state.json`**
 
 ```json
-// feature/test.state.json
 {
   "buckets": {
     "cloudflare": {
@@ -150,34 +136,37 @@ In addition to master and develop buckets, following state would be created:
           "branchPattern": "feature/*"
         }
       }
-    } 
+    }
   }
 }
 ```
 
+**`feature-test2.state.json`**
+
 ```json
-// feature/test2.state.json
 {
   "buckets": {
     "cloudflare": {
-      "branch-feature--test": {   
+      "branch-feature--test2": {
         "branch": "feature/test2",
         "createdAt": "2024-01-01T00:00:00.000Z",
         "config": {
-          "branch": "feature/test2", 
+          "branch": "feature/test2",
           "branchPattern": "feature/*"
         }
       }
-    } 
+    }
   }
 }
 ```
 
-When executing plan for `feature/test` we will create lock for that that branch preventing any reads and writes to that branch state.
+When executing a plan for `feature/test`, the branch is locked, preventing any reads or writes to that branch's state.
 
-## State dependencies
+## State Dependencies
 
-Another common use case is when resources depends on each other across branches. We might have one staging server that would be used to deploy both develop and feature branches.
+Resources can depend on each other across branches. For instance, a staging server might be used to deploy both `develop` and `feature` branches.
+
+### Example Configuration with Dependencies
 
 ```json
 {
@@ -188,61 +177,60 @@ Another common use case is when resources depends on each other across branches.
         "location": "fsn1"
       }
     }
-  }, 
+  },
   "dns": {
     "cloudflare": {
       "golde.dev": {
-          "A": {
-            "dev": {
-              "value": "{{ state.servers.hcloud.staging.ipv4 }}",
-              "branch": "develop"
-            },
-            "{{ git.BRANCH_SLUG }}": {
-              "value": "{{ state.servers.hcloud.staging.ipv4 }}",
-              "branchPattern": "feature/*",
-            }
+        "A": {
+          "dev": {
+            "value": "{{state.servers.hcloud.staging.ipv4}}",
+            "branch": "develop"
           },
-        },
-      },
+          "{{git.BRANCH_SLUG}}": {
+            "value": "{{state.servers.hcloud.staging.ipv4}}",
+            "branchPattern": "feature/*"
+          }
+        }
+      }
     }
   }
+}
 ```
 
-Assuming we have two feature branches `feature/test` and `feature/test2`
-We would create dns records like
+### Resulting DNS Records
 
-- `develop` => `dev.golde.dev` would point to staging server.
-- `feature/test` => `feature-test.golde.dev` would point to staging server.
-- `feature/test2` `feature-test2.golde.dev` would point to staging server.
+- `develop` => `dev.golde.dev` points to the staging server.
+- `feature/test` => `feature-test.golde.dev` points to the staging server.
+- `feature/test2` => `feature-test2.golde.dev` points to the staging server.
 
-For this case planing and execution would be slightly different.
+### Planning and Execution with Dependencies
 
-on feature/test branch plan would be calculated as following:
+For the `feature/test` branch, the plan calculation includes:
 
-```ts
+```typescript
 plan(
   {
-  "dns": {
-    "cloudflare": {
-      "golde.dev": {
+    "dns": {
+      "cloudflare": {
+        "golde.dev": {
           "A": {
             "feature--test": {
-              "value": "{{ state.servers.hcloud.staging.ipv4 }}",
+              "value": "{{state.servers.hcloud.staging.ipv4}}",
               "branchPattern": "feature/*",
               "branch": "feature/test"
             }
-          },
-        },
-      },
+          }
+        }
+      }
     }
-  }, 
+  },
   {}
 )
 ```
 
-This would result to a plan with dependency on `servers.hcloud.staging` resource.
+This plan creates a dependency on the `servers.hcloud.staging` resource:
 
-```js
+```json
 [
   {
     "type": "Create",
@@ -253,9 +241,9 @@ This would result to a plan with dependency on `servers.hcloud.staging` resource
 ]
 ```
 
-During execution we first check `servers.hcloud.staging.ipv4`to find if state exist and what branch is an owner.
+During execution, check the state of `servers.hcloud.staging.ipv4` to determine if it exists and which branch owns it:
 
-```ts
+```typescript
 getStateForResource("servers.hcloud.staging.ipv4")
 ```
 
@@ -263,24 +251,15 @@ getStateForResource("servers.hcloud.staging.ipv4")
 {
   "branch": "develop",
   "resource": "servers.hcloud.staging",
-  "state": {
-    "ipv4": "123.123.123.123"
-  }
+  "state": { "ipv4": "123.123.123.123" }
 }
 ```
 
-At this point we know that there is a need to create lock on both `develop` and `feature/test` branches as there is specific dependency.
+A resource lock is applied to `feature/test`, and a partial lock on `develop`. The partial lock allows changes to `develop` unless they affect `servers.hcloud.staging.ipv4`. The full lock on `feature/test` ensures state consistency during updates.
 
-We create full lock on `feature/test` branch and partial lock on `develop` branch.
-Thanks to partial lock we could still make changes to develop branch as long there is no changes to `servers.hcloud.staging.ipv4` resource. We want to create full lock on `feature/test` because during state update we will read value of whole state and overwrite state once execution is complete.
-
-```ts
-lockState("feature/test")
-lockState("develop", [
-  "servers.hcloud.staging"
-])
+```typescript
+lockState("feature/test");
+lockState("develop", ["servers.hcloud.staging"]);
 ```
 
-Once locks are created we would re-run plan for `feature/test` branch and resolve any state dependencies.
-
-Once execution is complete we would release locks and update state for feature branch.
+After creating locks, re-run the plan for `feature/test` and handle any state dependencies. Upon completion, release the locks and update the feature branch's state.
