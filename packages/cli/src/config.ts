@@ -216,7 +216,7 @@ export function getFinalConfig(config: Config, dependencies: Dependencies): Conf
     if (error instanceof ConfigError) {
       switch (error.code) {
         case ConfigErrorCode.STATE_MISSING:
-          logger.error(`Env variable is missing: ${error.cause as string}`);
+          logger.error(`State variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.INVALID_CONFIG:
           logger.error("Config failed validation", error.cause);

@@ -9,6 +9,7 @@ import type { DockerClient } from "./clients/docker.ts";
 import { createCloudflareClient } from "./providers/cloudflare.ts";
 import { createStateClient } from "./state/state.ts";
 import type { Context } from "./types/context.ts";
+import { createAWSClient } from "./providers/aws.ts";
 
 export const initializeContext = async (
   config: Config,
@@ -45,6 +46,7 @@ export const initializeContext = async (
       stateClient,
       hcloudClient,
       cloudflareClient,
+      awsClient,
       dockerClient,
       gitClient,
     ] = await Promise.all([
@@ -52,6 +54,7 @@ export const initializeContext = async (
       state ? createStateClient(state, aws) : undefined,
       hcloud ? createHCloudClient(hcloud) : undefined,
       cloudflare ? createCloudflareClient(cloudflare) : undefined,
+      aws ? createAWSClient(aws) : undefined,
       createDocker(),
       createGitClient(),
     ]);
@@ -66,6 +69,7 @@ export const initializeContext = async (
     const contextBase = {
       tags,
       config,
+      aws: awsClient,
       docker: dockerClient,
       golde: goldeClient,
       cloudflare: cloudflareClient,

@@ -6,7 +6,17 @@ export interface GoldeConfig {
 }
 
 export interface AWSConfig {
+  /**
+   * AWS region to use when managing aws resources
+   */
+  region?: string;
+  /**
+   * AWS access key id
+   */
   accessKeyId: string;
+  /**
+   * AWS secret access key
+   */
   secretAccessKey: string;
 }
 

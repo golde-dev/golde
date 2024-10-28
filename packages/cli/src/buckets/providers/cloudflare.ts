@@ -10,6 +10,7 @@ import type {
   CloudflareBucketState,
 } from "../types.ts";
 import { logger } from "../../logger.ts";
+import type { Tags } from "../../types/config.ts";
 
 export async function createBucket(
   this: CloudflareClient,
@@ -96,6 +97,7 @@ function getNext(config: CloudflareBuckets = {}) {
 
 export async function createCloudflareBucketsPlan(
   executors: Executors,
+  tags?: Tags,
   state?: CloudflareBucketsState,
   config?: CloudflareBuckets,
 ): Promise<Plan> {

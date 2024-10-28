@@ -20,6 +20,10 @@ export const providersSchema: ZodType<ProvidersConfig> = z
         secretAccessKey: z
           .string()
           .describe("AWS secret access key"),
+        region: z
+          .string()
+          .describe("AWS region to use when managing aws resources")
+          .optional(),
       })
       .optional()
       .describe("AWS provider config"),

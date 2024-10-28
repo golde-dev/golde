@@ -1,17 +1,19 @@
 import { applyMixins } from "../../utils/mixin.ts";
 import { AWSClientBase } from "./base.ts";
+import { LambdaClient } from "./lambda.ts";
 import { Route53Client } from "./route53.ts";
 import { S3Client } from "./s3.ts";
 
 export class AWSClient extends AWSClientBase {
-  constructor(apiToken: string, accountId: string) {
-    super(apiToken, accountId);
+  constructor(accessKeyId: string, secretAccessKey: string, region?: string) {
+    super(accessKeyId, secretAccessKey, region);
   }
 }
 
-export interface AWSClient extends S3Client, Route53Client {}
+export interface AWSClient extends S3Client, Route53Client, LambdaClient {}
 
 applyMixins(AWSClient, [
   S3Client,
   Route53Client,
+  LambdaClient,
 ]);

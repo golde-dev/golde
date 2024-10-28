@@ -5,11 +5,16 @@ import {
   ListHostedZonesCommand,
   Route53Client as Client,
 } from "@aws-sdk/client-route-53";
-import type { ListHostedZonesCommandOutput, ResourceRecordSet } from "@aws-sdk/client-route-53";
+import type {
+  ListHostedZonesCommandInput,
+  ListHostedZonesCommandOutput,
+  ResourceRecordSet,
+} from "@aws-sdk/client-route-53";
 
 export class Route53Client extends AWSClientBase {
-  private getRoute53Client = memoize(() => {
+  private getRoute53Client = memoize((region: string) => {
     return new Client({
+      region,
       credentials: {
         accessKeyId: this.accessKeyId,
         secretAccessKey: this.secretAccessKey,
@@ -17,23 +22,25 @@ export class Route53Client extends AWSClientBase {
     });
   });
 
-  private getHostedZoneIdByName = memoize(async (zoneName: string) => {
+  private getHostedZoneIdByName = memoize(async (region: string, zoneName: string) => {
     const command = new ListHostedZonesCommand();
     const result = await this
-      .getRoute53Client()
-      .send<ListHostedZonesCommand, ListHostedZonesCommandOutput>(command);
+      .getRoute53Client(region)
+      .send<ListHostedZonesCommandInput, ListHostedZonesCommandOutput>(command);
 
-    const { Id } = result.HostedZones?.find(({ Name }) => Name === zoneName) ?? {};
-
+    const Id = result.HostedZones?.find(({ Name }) => Name === zoneName)?.Id;
     if (!Id) {
       throw new Error(`Hosted zone ${zoneName} not found`);
     }
-
     return Id;
   });
 
-  async createDNSRecord(hostedZoneName: string, resourceRecordSet: ResourceRecordSet) {
-    const hostedZoneId = await this.getHostedZoneIdByName(hostedZoneName);
+  async createDNSRecord(
+    region: string,
+    hostedZoneName: string,
+    resourceRecordSet: ResourceRecordSet,
+  ) {
+    const hostedZoneId = await this.getHostedZoneIdByName(region, hostedZoneName);
     const command = new ChangeResourceRecordSetsCommand({
       HostedZoneId: hostedZoneId,
       ChangeBatch: {
@@ -45,11 +52,15 @@ export class Route53Client extends AWSClientBase {
         ],
       },
     });
-    await this.getRoute53Client().send(command);
+    await this.getRoute53Client(region).send(command);
   }
 
-  async updateDNSRecord(hostedZoneName: string, resourceRecordSet: ResourceRecordSet) {
-    const hostedZoneId = await this.getHostedZoneIdByName(hostedZoneName);
+  async updateDNSRecord(
+    region: string,
+    hostedZoneName: string,
+    resourceRecordSet: ResourceRecordSet,
+  ) {
+    const hostedZoneId = await this.getHostedZoneIdByName(region, hostedZoneName);
     const command = new ChangeResourceRecordSetsCommand({
       HostedZoneId: hostedZoneId,
       ChangeBatch: {
@@ -61,11 +72,15 @@ export class Route53Client extends AWSClientBase {
         ],
       },
     });
-    await this.getRoute53Client().send(command);
+    await this.getRoute53Client(region).send(command);
   }
 
-  async deleteDNSRecord(hostedZoneName: string, resourceRecordSet: ResourceRecordSet) {
-    const hostedZoneId = await this.getHostedZoneIdByName(hostedZoneName);
+  async deleteDNSRecord(
+    region: string,
+    hostedZoneName: string,
+    resourceRecordSet: ResourceRecordSet,
+  ) {
+    const hostedZoneId = await this.getHostedZoneIdByName(region, hostedZoneName);
     const command = new ChangeResourceRecordSetsCommand({
       HostedZoneId: hostedZoneId,
       ChangeBatch: {
@@ -77,6 +92,6 @@ export class Route53Client extends AWSClientBase {
         ],
       },
     });
-    await this.getRoute53Client().send(command);
+    await this.getRoute53Client(region).send(command);
   }
 }

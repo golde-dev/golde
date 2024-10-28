@@ -4,6 +4,7 @@ import {
   createCloudflareBucketsExecutors,
   createCloudflareBucketsPlan,
 } from "./providers/cloudflare.ts";
+import { createAWSBucketsExecutors, createAWSBucketsPlan } from "./providers/aws.ts";
 import type { Plan } from "../types/plan.ts";
 import type { Context } from "../types/context.ts";
 
@@ -12,13 +13,17 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
     previousState: {
       buckets: {
         cloudflare: cloudflareState,
+        aws: awsState,
       } = {},
     } = {},
     config: {
       buckets: {
         cloudflare: cloudflareConfig,
+        aws: awsConfig,
       } = {},
     } = {},
+    tags,
+    aws,
     cloudflare,
   } = context;
 
@@ -37,8 +42,28 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
     const executors = createCloudflareBucketsExecutors(cloudflare);
     promises.push(createCloudflareBucketsPlan(
       executors,
+      tags,
       cloudflareState,
       cloudflareConfig,
+    ));
+  }
+
+  if (
+    !isEmpty(awsConfig) ||
+    !isEmpty(awsState)
+  ) {
+    if (!aws) {
+      throw new PlanError(
+        "AWS client is required when using aws s3, ensure that providers.aws is defined in config",
+        PlanErrorCode.PROVIDER_MISSING,
+      );
+    }
+    const executors = createAWSBucketsExecutors(aws);
+    promises.push(createAWSBucketsPlan(
+      executors,
+      tags,
+      awsState,
+      awsConfig,
     ));
   }
 
