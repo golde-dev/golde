@@ -9,12 +9,6 @@ export interface GitInfo {
   branchSlug: string;
   currentHash: string;
   currentTag?: string;
-  localRefs: {
-    [branch: string]: string;
-  };
-  remoteRefs: {
-    [branch: string]: string;
-  };
 }
 
 export const getDefaultBranch = memoize(() => {
@@ -64,8 +58,6 @@ export const getGitInfo = memoize((): GitInfo => {
     branchName,
     currentHash,
     branchSlug,
-    localRefs: {},
-    remoteRefs: {},
   };
 });
 

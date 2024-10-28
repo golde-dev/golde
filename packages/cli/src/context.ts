@@ -68,6 +68,7 @@ export const initializeContext = async (
 
     const contextBase = {
       tags,
+      git,
       config,
       aws: awsClient,
       docker: dockerClient,
@@ -80,7 +81,7 @@ export const initializeContext = async (
       await goldeClient?.changeStateConfig(name, state);
       logger.debug("Using own state provider");
 
-      const previousState = await stateClient.getState(name, branchName) ?? {};
+      const previousState = await stateClient.getState(branchName, name);
 
       logger.info("Context initialized");
 
@@ -90,7 +91,7 @@ export const initializeContext = async (
         state: stateClient,
       };
     } else if (goldeClient) {
-      const previousState = await goldeClient.getState(name, branchName) ?? {};
+      const previousState = await goldeClient.getState(branchName, name);
 
       logger.info("Context initialized");
 

@@ -10,7 +10,6 @@ import type {
   CloudflareBucketState,
 } from "../types.ts";
 import { logger } from "../../logger.ts";
-import type { Tags } from "../../types/config.ts";
 
 export async function createBucket(
   this: CloudflareClient,
@@ -33,7 +32,7 @@ export async function createBucket(
     };
   });
   const end = Date.now();
-  logger.debug(`Created cloudflare bucket ${name} in ${end - start}ms`);
+  logger.debug(`Cloudflare: created bucket ${name} in ${end - start}ms`);
   return bucket;
 }
 export type CreateBucket = typeof createBucket;
@@ -43,7 +42,7 @@ export async function deleteBucket(this: CloudflareClient, name: string) {
   await this.deleteBucket(name);
   const end = Date.now();
 
-  logger.debug(`Deleted cloudflare bucket ${name} in ${end - start}ms`);
+  logger.debug(`Cloudflare: deleting bucket ${name} in ${end - start}ms`);
 }
 export type DeleteBucket = typeof deleteBucket;
 
@@ -97,7 +96,6 @@ function getNext(config: CloudflareBuckets = {}) {
 
 export async function createCloudflareBucketsPlan(
   executors: Executors,
-  tags?: Tags,
   state?: CloudflareBucketsState,
   config?: CloudflareBuckets,
 ): Promise<Plan> {

@@ -6,9 +6,9 @@ import { createPlan, printPlan } from "../plan.ts";
 import { getFinalContext, initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
 import { VERSION } from "../version.ts";
-import { applyChanges, executePlan, printResult } from "../apply.ts";
+import { executePlan, printResult, updateState } from "../apply.ts";
 import { verifyInstalled } from "../clients/git.ts";
-import { getDependencies } from "../dependacies.ts";
+import { getDependencies } from "../dependencies.ts";
 import { lockDependencies, releaseLocks } from "../lock.ts";
 import type { LevelName } from "@std/log";
 
@@ -185,10 +185,10 @@ program
 
       const finalPlan = await createPlan(finalContext);
       printPlan(finalPlan);
-      const result = await executePlan(context, finalPlan);
+      const result = await executePlan(finalPlan);
       printResult(result);
 
-      await applyChanges(context, result);
+      await updateState(context, result);
       await releaseLocks(context, locks);
     },
   );

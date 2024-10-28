@@ -9,8 +9,7 @@ export interface S3StateConfig {
 
 export interface FSStateConfig {
   type: "fs";
-  statePath?: string;
-  lockPath?: string;
+  path?: string;
 }
 
 export type StateConfig = S3StateConfig | FSStateConfig;

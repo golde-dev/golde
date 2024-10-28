@@ -1,5 +1,6 @@
 import type { StateConfig } from "../../state/types.ts";
 import type { Lock } from "../../types/lock.ts";
+import type { Changes } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
 import { GoldeClientBase, notFoundAsUndefined } from "./base.ts";
@@ -12,6 +13,18 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
         "POST",
         { branch },
       ),
+    );
+  }
+
+  public applyChanges(
+    project: string,
+    branch: string,
+    changes: Changes[],
+  ): Promise<void> {
+    return this.makeRequest<void>(
+      `/projects/${project}/state`,
+      "POST",
+      { branch, changes },
     );
   }
 

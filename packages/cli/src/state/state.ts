@@ -74,11 +74,10 @@ export async function createStateClient(
 
   if (config.type === "fs") {
     const {
-      statePath,
-      lockPath,
+      path,
     } = config;
 
-    const stateClient = new FSStateClient(statePath, lockPath);
+    const stateClient = new FSStateClient(path);
     try {
       await stateClient.ensureLocation();
       return stateClient;
@@ -87,8 +86,7 @@ export async function createStateClient(
         "Failed to initialize fs state client, check your config",
         {
           error,
-          statePath,
-          lockPath,
+          path,
         },
       );
       throw error;

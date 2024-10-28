@@ -10,6 +10,10 @@ export class AWSClientBase {
   protected readonly secretAccessKey: string;
   protected readonly region?: string;
 
+  public userId?: string;
+  public accountId?: string;
+  public arn?: string;
+
   constructor(accessKeyId: string, secretAccessKey: string, region?: string) {
     this.accessKeyId = accessKeyId;
     this.secretAccessKey = secretAccessKey;
@@ -20,7 +24,7 @@ export class AWSClientBase {
     try {
       const command = new GetCallerIdentityCommand();
       const stsClient = new STSClient({
-        region: this.region ?? "us-east-1",
+        region: this.region ?? "us-east-2",
         credentials: {
           accessKeyId: this.accessKeyId,
           secretAccessKey: this.secretAccessKey,
@@ -31,7 +35,12 @@ export class AWSClientBase {
           GetCallerIdentityCommandInput,
           GetCallerIdentityCommandOutput
         >(command);
-      logger.debug("Verified AWS credentials result", result);
+
+      this.userId = result.UserId;
+      this.accountId = result.Account;
+      this.arn = result.Arn;
+
+      logger.debug("Verified AWS credentials:", result);
     } catch (error) {
       throw error;
     }

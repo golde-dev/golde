@@ -8,6 +8,10 @@ import type { Plan } from "./types/plan.ts";
 import type { ExecutionGroups } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
 
+function sortByPath(plan: Plan) {
+  return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
+}
+
 export function printPlan(flatPlan: Plan) {
   const plan = Object.groupBy(flatPlan, ({ type }) => type) as ExecutionGroups;
 
@@ -17,7 +21,7 @@ export function printPlan(flatPlan: Plan) {
     logger.debug("Noop", {
       count: plan[Type.Noop].length,
     });
-    plan[Type.Noop].forEach((noop) => {
+    sortByPath(plan[Type.Noop]).forEach((noop) => {
       logger.debug("Noop", {
         noop,
       });
@@ -28,7 +32,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info("Create", {
       count: plan[Type.Create].length,
     });
-    plan[Type.Create].forEach((create) => {
+    sortByPath(plan[Type.Create]).forEach((create) => {
       logger.info("Create", {
         create,
       });
@@ -39,7 +43,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info("Delete", {
       count: plan[Type.Delete].length,
     });
-    plan[Type.Delete].forEach((deleted) => {
+    sortByPath(plan[Type.Delete]).forEach((deleted) => {
       logger.info("Delete", {
         deleted,
       });
@@ -50,7 +54,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info("Update", {
       count: plan[Type.Update].length,
     });
-    plan[Type.Update].forEach((update) => {
+    sortByPath(plan[Type.Update]).forEach((update) => {
       logger.info("Update", {
         update,
       });

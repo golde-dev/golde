@@ -42,7 +42,6 @@ export async function createBucketsPlan(context: Context): Promise<Plan> {
     const executors = createCloudflareBucketsExecutors(cloudflare);
     promises.push(createCloudflareBucketsPlan(
       executors,
-      tags,
       cloudflareState,
       cloudflareConfig,
     ));

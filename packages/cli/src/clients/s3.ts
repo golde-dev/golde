@@ -2,6 +2,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadBucketCommand,
+  NoSuchKey,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -21,6 +22,17 @@ interface S3Options {
   endpoint: string;
   accessKeyId: string;
   secretAccessKey: string;
+}
+
+export function notFoundAsUndefined<T>(
+  promise: Promise<T>,
+): Promise<T | undefined> {
+  return promise.catch((error: unknown) => {
+    if (error instanceof NoSuchKey) {
+      return undefined;
+    }
+    throw error;
+  });
 }
 
 /**
@@ -143,6 +155,28 @@ export class S3 {
       Bucket: this.bucket,
       Key: key,
       Body: body,
+    });
+    try {
+      await this.client.send(command);
+    } catch (error) {
+      this.logger.debug(
+        "Failed to put object",
+        {
+          type: LogCode.S3PutObjectError,
+          error,
+          key,
+          bucket: this.bucket,
+        },
+      );
+      throw error;
+    }
+  }
+
+  public async putJSONObject(key: string, object: object) {
+    const command = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      Body: JSON.stringify(object, null, 2),
     });
     try {
       await this.client.send(command);
