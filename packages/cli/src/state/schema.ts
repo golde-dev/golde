@@ -31,14 +31,10 @@ export const fsStateSchema = implement<FSStateConfig>().with({
     .describe(
       "Type of state backend",
     ),
-  lockPath: z
+  path: z
     .string()
     .optional()
     .describe("relative path to lock file"),
-  statePath: z
-    .string()
-    .optional()
-    .describe("relative state to lock file"),
 });
 
 export const stateSchema: ZodType<StateConfig> = z.discriminatedUnion("type", [

@@ -18,46 +18,38 @@ export function printPlan(flatPlan: Plan) {
   logger.info("Execution plan");
 
   if (plan[Type.Noop]) {
-    logger.debug("Noop", {
+    logger.info("Resources that are already up to date", {
       count: plan[Type.Noop].length,
     });
     sortByPath(plan[Type.Noop]).forEach((noop) => {
-      logger.debug("Noop", {
-        noop,
-      });
+      logger.info(`   ${noop.path}`);
     });
   }
 
   if (plan[Type.Create]) {
-    logger.info("Create", {
+    logger.info("Resources to create", {
       count: plan[Type.Create].length,
     });
     sortByPath(plan[Type.Create]).forEach((create) => {
-      logger.info("Create", {
-        create,
-      });
+      logger.info(`   ${create.path}`);
     });
   }
 
   if (plan[Type.Delete]) {
-    logger.info("Delete", {
+    logger.info("Resources to delete:", {
       count: plan[Type.Delete].length,
     });
     sortByPath(plan[Type.Delete]).forEach((deleted) => {
-      logger.info("Delete", {
-        deleted,
-      });
+      logger.info(`   ${deleted.path}`);
     });
   }
 
   if (plan[Type.Update]) {
-    logger.info("Update", {
+    logger.info("Resources to delete", {
       count: plan[Type.Update].length,
     });
     sortByPath(plan[Type.Update]).forEach((update) => {
-      logger.info("Update", {
-        update,
-      });
+      logger.info(`   ${update.path}`);
     });
   }
 }

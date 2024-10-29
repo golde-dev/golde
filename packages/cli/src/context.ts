@@ -10,9 +10,11 @@ import { createCloudflareClient } from "./providers/cloudflare.ts";
 import { createStateClient } from "./state/state.ts";
 import type { Context } from "./types/context.ts";
 import { createAWSClient } from "./providers/aws.ts";
+import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
 
 export const initializeContext = async (
   config: Config,
+  yes: boolean = false,
 ): Promise<Context> => {
   const {
     name,
@@ -77,11 +79,19 @@ export const initializeContext = async (
       hcloud: hcloudClient,
     };
 
+    if (goldeClient) {
+      if (yes) {
+        await createProjectIfMissing(goldeClient, name);
+      } else {
+        await createProjectIfWanted(goldeClient, name);
+      }
+    }
+
     if (stateClient && state) {
       await goldeClient?.changeStateConfig(name, state);
       logger.debug("Using own state provider");
 
-      const previousState = await stateClient.getState(branchName, name);
+      const previousState = await stateClient.getState(name, branchName);
 
       logger.info("Context initialized");
 
@@ -91,7 +101,7 @@ export const initializeContext = async (
         state: stateClient,
       };
     } else if (goldeClient) {
-      const previousState = await goldeClient.getState(branchName, name);
+      const previousState = await goldeClient.getState(name, branchName);
 
       logger.info("Context initialized");
 
@@ -109,7 +119,6 @@ export const initializeContext = async (
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Providers initialization failed: ${error.message}`);
-      logger.debug("Error details", error);
     }
     return Deno.exit(1);
   }

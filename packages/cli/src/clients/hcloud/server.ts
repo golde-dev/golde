@@ -1,4 +1,3 @@
-import { stringify } from "node:querystring";
 import { HCloudClientBase } from "./base.ts";
 
 /**
@@ -225,9 +224,9 @@ interface ErrorDetails {
 
 export class ServerClient extends HCloudClientBase {
   public getLocations() {
-    const query = stringify({
-      per_page: 200,
-    });
+    const query = new URLSearchParams({
+      per_page: "200",
+    }).toString();
     return this.makeRequest<LocationsResponse>(
       `/locations?${query}`,
     );

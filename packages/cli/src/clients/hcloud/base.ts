@@ -45,7 +45,6 @@ export class HCloudClientBase {
     method = "GET",
     body?: BodyInit,
   ): Promise<Omit<T, "error" | "meta">> {
-    const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       body,
       method,
@@ -55,24 +54,18 @@ export class HCloudClientBase {
       },
     }).then(async (d) => {
       if (!d.ok) {
-        throw new HCloudError("Request failed", {
+        logger.debug("HCloud request failed", { body, path, method });
+        throw new HCloudError("HCloud Request failed", {
           status: d.status,
           statusText: d.statusText,
         });
       }
       const { error, meta: _, ...rest } = await d.json() as T;
       if (error) {
-        throw new HCloudError("Request failed", error);
+        logger.debug("HCloud request error", { error, path, body, method });
+        throw new HCloudError(`HCloud Request failed: ${path}`, error);
       }
       return rest;
-    }).finally(() => {
-      const end = Date.now();
-      logger.debug("Completed hetzner request", {
-        path,
-        method,
-        body,
-        time: end - start,
-      });
     });
   }
 

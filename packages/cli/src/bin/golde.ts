@@ -164,8 +164,9 @@ program
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { logLevel, json, config: configPath }: {
+      { logLevel, json, config: configPath, yes }: {
         logLevel: LevelName;
+        yes: boolean;
         config: string;
         json: boolean;
       },
@@ -173,7 +174,7 @@ program
       logger.configure(logLevel, json);
 
       const loadedConfig = await getConfig(configPath);
-      const context = await initializeContext(loadedConfig);
+      const context = await initializeContext(loadedConfig, yes);
 
       const initialPlan = await createPlan(context);
       const initialDependencies = await getDependencies(context, initialPlan);

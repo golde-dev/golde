@@ -3,16 +3,15 @@ import type { Lock } from "../../types/lock.ts";
 import type { Changes } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
-import { GoldeClientBase, notFoundAsUndefined } from "./base.ts";
+import { GoldeClientBase } from "./base.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
-  public getState(project: string, branch: string): Promise<State | undefined> {
-    return notFoundAsUndefined(
-      this.makeRequest<State>(
-        `/projects/${project}/state`,
-        "POST",
-        { branch },
-      ),
+  public getState(project: string, branch: string): Promise<State> {
+    const query = new URLSearchParams({ branch }).toString();
+
+    return this.makeRequest<State>(
+      `/projects/${project}/state?${query}`,
+      "GET",
     );
   }
 
@@ -29,12 +28,12 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   }
 
   public getStateLock(project: string, branch: string): Promise<Lock[] | undefined> {
-    return notFoundAsUndefined(
-      this.makeRequest<Lock[]>(
-        `/projects/${project}/lock`,
-        "POST",
-        { branch },
-      ),
+    const query = new URLSearchParams({ branch }).toString();
+
+    return this.makeRequest<Lock[]>(
+      `/projects/${project}/lock?${query}`,
+      "GET",
+      { branch },
     );
   }
 

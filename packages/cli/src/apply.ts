@@ -1,30 +1,12 @@
 import { Queue } from "moderndash";
-import type { Context } from "./types/context.ts";
-import type { Changes, Plan } from "./types/plan.ts";
-import type { CreateResult } from "./types/plan.ts";
-import type { UpdateResult } from "./types/plan.ts";
-import { Type } from "./types/plan.ts";
-import type { DeleteResult } from "./types/plan.ts";
-import type { State } from "./mod.ts";
 import { removeEmpty } from "./utils/object.ts";
 import { set } from "moderndash";
-
-export async function updateState(context: Context, result: Changes[]): Promise<void> {
-  const {
-    state,
-    config: {
-      name,
-    },
-    git: {
-      branchName,
-    },
-  } = context;
-
-  await state.applyChanges(branchName, name, result);
-}
-
-export async function printResult(_result: Changes[]): Promise<void> {
-}
+import { logger } from "./logger.ts";
+import { Type } from "./types/plan.ts";
+import type { Context } from "./types/context.ts";
+import type { Changes, Plan } from "./types/plan.ts";
+import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
+import type { State } from "./types/state.ts";
 
 export async function executePlan(plan: Plan): Promise<Changes[]> {
   const queue = new Queue(20);
@@ -109,4 +91,38 @@ export function applyChanges(state: State = {}, changes: Changes[]): State {
     }
   }
   return removeEmpty(newState) as State;
+}
+
+export async function updateState(context: Context, changes: Changes[]): Promise<void> {
+  const {
+    state,
+    config: {
+      name,
+    },
+    git: {
+      branchName,
+    },
+  } = context;
+
+  await state.applyChanges(branchName, name, changes);
+}
+
+export function printResult(changes: Changes[]): void {
+  for (const change of changes) {
+    const {
+      type,
+      path,
+    } = change;
+
+    switch (type) {
+      case Type.Update:
+      case Type.Create:
+        break;
+      case Type.Delete:
+        logger.info(`Deleted ${path}`);
+        break;
+      default:
+        throw new Error("Unknown type");
+    }
+  }
 }

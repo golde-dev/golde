@@ -2,6 +2,7 @@ import { logger } from "../../logger.ts";
 import { GOLDE_API_URL } from "../../version.ts";
 
 interface GoldeErrorCause {
+  path: string;
   status: number;
   statusText: string;
 }
@@ -41,7 +42,6 @@ export class GoldeClientBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
-    const start = Date.now();
     return fetch(`${this.baseUrl}${path}`, {
       method,
       body: JSON.stringify(body),
@@ -51,20 +51,20 @@ export class GoldeClientBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        throw new GoldeError("Golde request failed", {
+        logger.debug("Golde client error", {
+          path,
+          method,
+          body,
+          status: r.status,
+          statusText: r.statusText,
+        });
+        throw new GoldeError(`Golde request to: ${path} failed`, {
+          path,
           status: r.status,
           statusText: r.statusText,
         });
       }
       return await r.json() as T;
-    }).finally(() => {
-      const end = Date.now();
-      logger.debug("Golde request", {
-        path,
-        method,
-        body,
-        time: end - start,
-      });
     });
   }
 
@@ -73,8 +73,7 @@ export class GoldeClientBase {
     method: "POST",
     body: FormData,
   ): Promise<void> {
-    const start = Date.now();
-    return fetch(`${this.baseUrl}/${path}`, {
+    return fetch(`${this.baseUrl}${path}`, {
       method,
       body,
       headers: {
@@ -82,18 +81,19 @@ export class GoldeClientBase {
       },
     }).then((r) => {
       if (!r.ok) {
-        throw new GoldeError("Golde request failed", {
+        logger.debug("Golde failed to fetch", {
+          path,
+          method,
+          body,
+          status: r.status,
+          statusText: r.statusText,
+        });
+        throw new GoldeError(`Golde request to: ${path} failed`, {
+          path,
           status: r.status,
           statusText: r.statusText,
         });
       }
-    }).finally(() => {
-      const end = Date.now();
-      logger.debug("Golde request", {
-        path,
-        method,
-        time: end - start,
-      });
     });
   }
 

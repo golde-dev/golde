@@ -3,7 +3,6 @@ import { logger } from "./logger.ts";
 import { existsSync } from "@std/fs";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
-import { resolve } from "node:path";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
@@ -19,6 +18,7 @@ import {
 } from "./utils/template.ts";
 import type { Dependencies } from "./types/dependencies.ts";
 import type { Config } from "./types/config.ts";
+import { resolve } from "@std/path/resolve";
 
 const loadConfig = async (
   path: string,

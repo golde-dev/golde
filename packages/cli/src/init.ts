@@ -1,11 +1,12 @@
 import { logger } from "./logger.ts";
-import { input, select } from "@inquirer/prompts";
+import { confirm, input, select } from "@inquirer/prompts";
 import { projectNameSchema } from "./schema.ts";
 import { ZodError, type ZodSchema } from "zod";
-import { resolve } from "node:path";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
 import { GoldeError } from "./clients/golde/base.ts";
+import { resolve } from "@std/path/resolve";
+import { existsSync } from "@std/fs/exists";
+import type { GoldeClient } from "./clients/golde/client.ts";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
@@ -33,7 +34,7 @@ const getProjectType = () => {
   const packagePath = resolve("./package.json");
   if (existsSync(packagePath)) {
     const source = JSON.parse(
-      readFileSync(packagePath, { encoding: "utf-8" }),
+      Deno.readTextFileSync(packagePath),
     ) as PackageJSON;
 
     projectInfo.name = source.name;
@@ -61,7 +62,7 @@ const config = {
 export default config;
 `;
 
-  writeFileSync("./golde.config.js", config);
+  Deno.writeTextFileSync("./golde.config.js", config);
 }
 
 function createTSConfig(projectName: string) {
@@ -79,7 +80,7 @@ const config: Config = {
 export default config;
 `;
 
-  writeFileSync("./golde.config.ts", config);
+  Deno.writeTextFileSync("./golde.config.ts", config);
 }
 
 function createJSONConfig(projectName: string) {
@@ -95,7 +96,53 @@ function createJSONConfig(projectName: string) {
 }
 `;
 
-  writeFileSync("./golde.config.json", config);
+  Deno.writeTextFileSync("./golde.config.json", config);
+}
+
+export async function confirmCreateProject(name: string): Promise<boolean> {
+  try {
+    const shouldCreate = await confirm({
+      message: `Would you like to create a new project: ${name}?`,
+      default: true,
+    });
+    return shouldCreate;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes("User force closed the prompt")) {
+        Deno.exit(0);
+      }
+    }
+    throw error;
+  }
+}
+
+export async function createProjectIfWanted(
+  golde: GoldeClient,
+  name: string,
+) {
+  const projectExists = await golde.hasProject(name);
+  if (projectExists) {
+    logger.debug(`Project ${name} already exists`);
+    return;
+  }
+  const shouldCreate = await confirmCreateProject(name);
+
+  if (!shouldCreate) {
+    throw new Error("Unable to continue, when using golde project is required");
+  }
+  await golde.createProject(name);
+}
+
+export async function createProjectIfMissing(
+  golde: GoldeClient,
+  name: string,
+) {
+  const hasProject = await golde.hasProject(name);
+  if (hasProject) {
+    logger.debug(`Project ${name} already exists`);
+    return;
+  }
+  await golde.createProject(name);
 }
 
 export async function initConfig() {
@@ -134,6 +181,10 @@ export async function initConfig() {
           name: "golde.toml",
           value: "golde.toml",
         },
+        {
+          name: "golde.yaml",
+          value: "golde.yaml",
+        },
       ],
     });
 
@@ -152,6 +203,11 @@ export async function initConfig() {
     if (goldeConfig) {
       try {
         const golde = await createGoldeClient(goldeConfig);
+        const hasProject = await golde.hasProject(name);
+        if (hasProject) {
+          logger.info(`Project ${projectName} already exists`);
+          return;
+        }
         await golde.createProject(projectName);
       } catch (error) {
         if (error instanceof GoldeError) {

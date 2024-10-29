@@ -1,5 +1,4 @@
 import { logger } from "../../logger.ts";
-import { stringify } from "node:querystring";
 
 interface ErrorCause {
   code: string;
@@ -33,6 +32,7 @@ interface VerifyTokenResult {
 }
 
 interface FetchErrorCause {
+  path: string;
   status: number;
   statusText: string;
 }
@@ -57,11 +57,10 @@ export class CloudflareBase {
     path: string,
     extraQuery?: object,
   ): Promise<T> {
-    const start = Date.now();
-    const query = stringify({
-      per_page: 10000,
+    const query = new URLSearchParams({
+      per_page: "10000",
       ...extraQuery,
-    });
+    }).toString();
 
     return fetch(`${this.baseUrl}/${path}?${query}`, {
       method: "GET",
@@ -71,7 +70,13 @@ export class CloudflareBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
+        logger.debug("Cloudflare request error", {
+          path,
+          status: r.status,
+          statusText: r.statusText,
+        });
         throw new CloudflareError("Cloudflare request error", {
+          path,
           status: r.status,
           statusText: r.statusText,
         });
@@ -86,15 +91,14 @@ export class CloudflareBase {
       if (success && result) {
         return result;
       } else {
+        logger.debug("Cloudflare request error", {
+          path,
+          errors,
+          status: r.status,
+          statusText: r.statusText,
+        });
         throw new CloudflareError("Cloudflare request error", errors);
       }
-    }).finally(() => {
-      const end = Date.now();
-      logger.debug("Completed cloudflare list request", {
-        path,
-        query,
-        time: end - start,
-      });
     });
   }
 
@@ -103,7 +107,6 @@ export class CloudflareBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
-    const start = Date.now();
     return fetch(`${this.baseUrl}/${path}`, {
       method,
       body: JSON.stringify(body),
@@ -113,7 +116,15 @@ export class CloudflareBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
+        logger.debug("Cloudflare request error", {
+          path,
+          method,
+          body,
+          status: r.status,
+          statusText: r.statusText,
+        });
         throw new CloudflareError("Cloudflare request error", {
+          path,
           status: r.status,
           statusText: r.statusText,
         });
@@ -128,16 +139,16 @@ export class CloudflareBase {
       if (success && result) {
         return result;
       } else {
+        logger.debug("Cloudflare response error", {
+          path,
+          method,
+          body,
+          errors,
+          status: r.status,
+          statusText: r.statusText,
+        });
         throw new CloudflareError("Cloudflare response error", errors);
       }
-    }).finally(() => {
-      const end = Date.now();
-      logger.debug("Completed cloudflare request", {
-        path,
-        method,
-        body,
-        time: end - start,
-      });
     });
   }
 

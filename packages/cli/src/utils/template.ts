@@ -1,7 +1,7 @@
-import { existsSync, readFileSync } from "node:fs";
 import { ConfigError, ConfigErrorCode } from "../error.ts";
 import type { GitInfo } from "../clients/git.ts";
 import type { Dependencies } from "../types/dependencies.ts";
+import { existsSync } from "@std/fs/exists";
 
 const templateRe = new RegExp(/{{(.*?)}}/g);
 
@@ -110,7 +110,7 @@ export const fileTemplate = (value: string): string => {
     const [fileName] = match;
 
     if (existsSync(fileName)) {
-      return readFileSync(fileName, { encoding: "utf8" });
+      return Deno.readTextFileSync(fileName);
     } else {
       throw new ConfigError(
         "Template file is missing",
