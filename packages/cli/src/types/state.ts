@@ -11,7 +11,9 @@ export interface State {
 }
 
 export abstract class AbstractStateClient {
-  public abstract getState(project: string, branch: string): Promise<State | undefined>;
+  public abstract getBranchState(project: string, branch: string): Promise<State | undefined>;
+
+  public abstract getState(project: string): Promise<State | undefined>;
 
   public abstract applyChanges(project: string, branch: string, state: Changes[]): Promise<void>;
 

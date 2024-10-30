@@ -25,6 +25,13 @@ export class FSStateClient implements AbstractStateClient {
   }
 
   /**
+   * Get state for all branches
+   */
+  public getState(_: string): Promise<State | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
    * Get state path for a branch
    */
   private getStatePath(branch: string) {
@@ -35,7 +42,7 @@ export class FSStateClient implements AbstractStateClient {
    * Get current state for a branch
    * Assume that state only belongs to a current project
    */
-  public async getState(_: string, branch: string): Promise<State | undefined> {
+  public async getBranchState(_: string, branch: string): Promise<State | undefined> {
     const path = this.getStatePath(branch);
     if (!await exists(path)) {
       return;
@@ -55,7 +62,7 @@ export class FSStateClient implements AbstractStateClient {
    * Update state by applying changes to state
    */
   public async applyChanges(project: string, branch: string, result: Changes[]): Promise<void> {
-    const currentState = await this.getState(project, branch);
+    const currentState = await this.getBranchState(project, branch);
     const updatedState = applyChanges(currentState, result);
 
     await this.saveState(branch, updatedState);

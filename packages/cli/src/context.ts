@@ -85,13 +85,14 @@ export const initializeContext = async (
       } else {
         await createProjectIfWanted(goldeClient, name);
       }
+
+      if (state) {
+        await goldeClient.changeStateConfig(name, state);
+      }
     }
 
     if (stateClient && state) {
-      await goldeClient?.changeStateConfig(name, state);
-      logger.debug("Using own state provider");
-
-      const previousState = await stateClient.getState(name, branchName);
+      const previousState = await stateClient.getBranchState(name, branchName);
 
       logger.info("Context initialized");
 
@@ -101,7 +102,7 @@ export const initializeContext = async (
         state: stateClient,
       };
     } else if (goldeClient) {
-      const previousState = await goldeClient.getState(name, branchName);
+      const previousState = await goldeClient.getBranchState(name, branchName);
 
       logger.info("Context initialized");
 

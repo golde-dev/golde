@@ -5,9 +5,13 @@ import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Changes } from "../types/plan.ts";
+import slugify from "@sindresorhus/slugify";
 
-const getStateKey = (project: string, branch: string) => `/${project}/${branch}.state.json`;
-const getLockKey = (project: string, branch: string) => `/${project}/${branch}.lock.json`;
+const getStateKey = (projectName: string, branch: string) =>
+  `/${projectName}/${slugify(branch)}.state.json`;
+
+const getLockKey = (projectName: string, branch: string) =>
+  `/${projectName}/${slugify(branch)}.lock.json`;
 
 export class S3StateClient implements AbstractStateClient {
   private readonly s3: S3;
@@ -15,10 +19,14 @@ export class S3StateClient implements AbstractStateClient {
   public constructor(s3: S3) {
     this.s3 = s3;
   }
+
+  public getState(_project: string): Promise<State | undefined> {
+    throw new Error("Method not implemented.");
+  }
   /**
    * Get state for a branch and project
    */
-  public getState(project: string, branch: string): Promise<State | undefined> {
+  public getBranchState(project: string, branch: string): Promise<State | undefined> {
     const stateKey = getStateKey(project, branch);
     return notFoundAsUndefined(this.s3.getJSONObject<State>(stateKey));
   }
@@ -35,7 +43,7 @@ export class S3StateClient implements AbstractStateClient {
    * Apply changes to state for a branch and project
    */
   public async applyChanges(project: string, branch: string, state: Changes[]): Promise<void> {
-    const currentState = await this.getState(branch, project);
+    const currentState = await this.getBranchState(branch, project);
     const updatedState = applyChanges(currentState, state);
     await this.saveState(branch, project, updatedState);
   }

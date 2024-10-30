@@ -1,1 +1,406 @@
-{"$ref":"#/definitions/golde","definitions":{"golde":{"type":"object","properties":{"name":{"type":"string","minLength":2,"pattern":"^[A-Za-z0-9_@./#&+-]*$"},"tags":{"type":"object","additionalProperties":{"type":"string"}},"state":{"anyOf":[{"type":"object","properties":{"type":{"type":"string","const":"s3","description":"Type of state backend for s3 backed state"},"bucket":{"type":"string","description":"Name of s3 bucket"},"region":{"type":"string","description":"name of region, use auto for R2"},"endpoint":{"type":"string","description":"s3 endpoint"},"accessKeyId":{"type":"string","description":"access key id"},"secretAccessKey":{"type":"string","description":"s3 access key"}},"required":["type","bucket","region","endpoint"],"additionalProperties":false},{"type":"object","properties":{"type":{"type":"string","const":"fs","description":"Type of state backend"},"path":{"type":"string","description":"relative path to lock file"}},"required":["type"],"additionalProperties":false}],"description":"State backend config, only required when not using oss version"},"providers":{"type":"object","properties":{"golde":{"type":"object","properties":{"apiKey":{"type":"string","description":"Golde api key"}},"required":["apiKey"],"additionalProperties":false,"description":"Golde provider config"},"aws":{"type":"object","properties":{"accessKeyId":{"type":"string","description":"AWS access key id"},"secretAccessKey":{"type":"string","description":"AWS secret access key"},"region":{"type":"string","description":"AWS region to use when managing aws resources"}},"required":["accessKeyId","secretAccessKey"],"additionalProperties":false,"description":"AWS provider config"},"docker":{"type":"object","properties":{"registry":{"type":"string","description":"Docker registry url"},"username":{"type":"string","description":"Docker registry username"},"password":{"type":"string","description":"Docker registry password"}},"required":["registry","username","password"],"additionalProperties":false,"description":"Docker provider config"},"cloudflare":{"type":"object","properties":{"apiToken":{"type":"string","description":"Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"},"accountId":{"type":"string","description":"Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"}},"required":["apiToken","accountId"],"additionalProperties":false,"description":"Cloudflare provider config"},"namecheap":{"type":"object","properties":{"apiKey":{"type":"string","description":"Namecheap api keyhttps://www.namecheap.com/support/api/intro/"},"apiUser":{"type":"string","description":"Your Namecheap account username will act as API username"}},"required":["apiKey","apiUser"],"additionalProperties":false,"description":"Hetzner provider config"},"hcloud":{"type":"object","properties":{"apiKey":{"type":"string","description":"Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"}},"required":["apiKey"],"additionalProperties":false,"description":"Hetzner provider config"}},"additionalProperties":false},"dns":{"type":"object","properties":{"cloudflare":{"type":"object","additionalProperties":{"type":"object","additionalProperties":{"anyOf":[{"not":{}},{"type":"object","additionalProperties":{"type":"object","properties":{"value":{"type":"string"},"ttl":{"type":"number","description":"TTL in seconds"},"proxied":{"type":"boolean"},"comment":{"type":"string"},"tags":{"$ref":"#/definitions/golde/properties/tags"},"branch":{"type":"string"},"branchPattern":{"type":"string"}},"required":["value"],"additionalProperties":false}}]}}},"namecheap":{"type":"object","additionalProperties":{"type":"object","additionalProperties":{"anyOf":[{"not":{}},{"type":"object","additionalProperties":{"type":"object","properties":{"value":{"type":"string"},"ttl":{"type":"number","description":"TTL in seconds"},"branch":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"},"branchPattern":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"}},"required":["value"],"additionalProperties":false}}]}}}},"additionalProperties":false},"buckets":{"type":"object","properties":{"cloudflare":{"type":"object","additionalProperties":{"type":"object","properties":{"branch":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"},"branchPattern":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"},"locationHint":{"type":"string","enum":["apac","eeur","enam","weur","wnam"]},"storageClass":{"type":"string","enum":["Standard","InfrequentAccess"]}},"additionalProperties":false}},"aws":{"type":"object","additionalProperties":{"type":"object","properties":{"branch":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"},"branchPattern":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"},"region":{"type":"string"}},"additionalProperties":false}}},"additionalProperties":false},"artifacts":{"type":"object","properties":{"docker":{"type":"object","additionalProperties":{"type":"object","properties":{"context":{"type":"string"},"dockerfile":{"type":"string"},"labels":{"type":"object","additionalProperties":{"type":"string"}},"tags":{"$ref":"#/definitions/golde/properties/tags"},"branch":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"},"branchPattern":{"$ref":"#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"}},"additionalProperties":false}},"archive":{"type":"object","additionalProperties":{"type":"object","properties":{"context":{"type":"string"},"branch":{"type":"string"},"branchPattern":{"type":"string"}},"additionalProperties":false}}},"additionalProperties":false}},"required":["name"],"additionalProperties":false}},"$schema":"http://json-schema.org/draft-07/schema#"}
+{
+  "$ref": "#/definitions/golde",
+  "definitions": {
+    "golde": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "pattern": "^[A-Za-z0-9_@./#&+-]*$"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "s3",
+                  "description": "Type of state backend for s3 backed state"
+                },
+                "bucket": {
+                  "type": "string",
+                  "description": "Name of s3 bucket"
+                },
+                "region": {
+                  "type": "string",
+                  "description": "name of region, use auto for R2"
+                },
+                "endpoint": {
+                  "type": "string",
+                  "description": "s3 endpoint"
+                },
+                "accessKeyId": {
+                  "type": "string",
+                  "description": "access key id"
+                },
+                "secretAccessKey": {
+                  "type": "string",
+                  "description": "s3 access key"
+                }
+              },
+              "required": [
+                "type",
+                "bucket",
+                "region",
+                "endpoint"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "fs",
+                  "description": "Type of state backend"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "relative path to lock file"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "State backend config, only required when not using oss version"
+        },
+        "providers": {
+          "type": "object",
+          "properties": {
+            "golde": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Golde api key"
+                }
+              },
+              "required": [
+                "apiKey"
+              ],
+              "additionalProperties": false,
+              "description": "Golde provider config"
+            },
+            "aws": {
+              "type": "object",
+              "properties": {
+                "accessKeyId": {
+                  "type": "string",
+                  "description": "AWS access key id"
+                },
+                "secretAccessKey": {
+                  "type": "string",
+                  "description": "AWS secret access key"
+                },
+                "region": {
+                  "type": "string",
+                  "description": "AWS region to use when managing aws resources"
+                }
+              },
+              "required": [
+                "accessKeyId",
+                "secretAccessKey"
+              ],
+              "additionalProperties": false,
+              "description": "AWS provider config"
+            },
+            "docker": {
+              "type": "object",
+              "properties": {
+                "registry": {
+                  "type": "string",
+                  "description": "Docker registry url"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "Docker registry username"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Docker registry password"
+                }
+              },
+              "required": [
+                "registry",
+                "username",
+                "password"
+              ],
+              "additionalProperties": false,
+              "description": "Docker provider config"
+            },
+            "cloudflare": {
+              "type": "object",
+              "properties": {
+                "apiToken": {
+                  "type": "string",
+                  "description": "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"
+                },
+                "accountId": {
+                  "type": "string",
+                  "description": "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"
+                }
+              },
+              "required": [
+                "apiToken",
+                "accountId"
+              ],
+              "additionalProperties": false,
+              "description": "Cloudflare provider config"
+            },
+            "namecheap": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Namecheap api keyhttps://www.namecheap.com/support/api/intro/"
+                },
+                "apiUser": {
+                  "type": "string",
+                  "description": "Your Namecheap account username will act as API username"
+                }
+              },
+              "required": [
+                "apiKey",
+                "apiUser"
+              ],
+              "additionalProperties": false,
+              "description": "Hetzner provider config"
+            },
+            "hcloud": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "description": "Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"
+                }
+              },
+              "required": [
+                "apiKey"
+              ],
+              "additionalProperties": false,
+              "description": "Hetzner provider config"
+            }
+          },
+          "additionalProperties": false
+        },
+        "dns": {
+          "type": "object",
+          "properties": {
+            "cloudflare": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "not": {}
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "ttl": {
+                            "type": "number",
+                            "description": "TTL in seconds"
+                          },
+                          "proxied": {
+                            "type": "boolean"
+                          },
+                          "comment": {
+                            "type": "string"
+                          },
+                          "tags": {
+                            "$ref": "#/definitions/golde/properties/tags"
+                          },
+                          "branch": {
+                            "type": "string"
+                          },
+                          "branchPattern": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "namecheap": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "not": {}
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "ttl": {
+                            "type": "number",
+                            "description": "TTL in seconds"
+                          },
+                          "branch": {
+                            "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                          },
+                          "branchPattern": {
+                            "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                          }
+                        },
+                        "required": [
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "buckets": {
+          "type": "object",
+          "properties": {
+            "cloudflare": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                  },
+                  "locationHint": {
+                    "type": "string",
+                    "enum": [
+                      "apac",
+                      "eeur",
+                      "enam",
+                      "weur",
+                      "wnam"
+                    ]
+                  },
+                  "storageClass": {
+                    "type": "string",
+                    "enum": [
+                      "Standard",
+                      "InfrequentAccess"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "aws": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                  },
+                  "region": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "artifacts": {
+          "type": "object",
+          "properties": {
+            "docker": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "context": {
+                    "type": "string"
+                  },
+                  "dockerfile": {
+                    "type": "string"
+                  },
+                  "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "tags": {
+                    "$ref": "#/definitions/golde/properties/tags"
+                  },
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "archive": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "context": {
+                    "type": "string"
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

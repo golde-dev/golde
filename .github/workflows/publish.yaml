@@ -68,7 +68,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: yarn version
 
-    - name: Ensure that binaries include correct version
+    - name: Build again with new version
       run: yarn post-version
 
     - name: Publish packages

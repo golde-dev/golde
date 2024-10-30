@@ -52,7 +52,7 @@ program
   .option("-j, --json", "logging output as json")
   .action(
     async function (
-      { logLevel, json, config: configPath, all }: {
+      { logLevel, json, config, all }: {
         logLevel: LevelName;
         config: string;
         json: boolean;
@@ -62,10 +62,10 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(configPath, all);
-      const { config } = await initializeContext(loadedConfig);
+      const loadedConfig = await getConfig(config, all);
+      const context = await initializeContext(loadedConfig);
 
-      logger.info("Config", config);
+      logger.info("Config", context.config);
     },
   );
 
@@ -77,7 +77,7 @@ program
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { logLevel, json, config: configPath }: {
+      { logLevel, json, config }: {
         logLevel: LevelName;
         config: string;
         json: boolean;
@@ -85,7 +85,7 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(configPath);
+      const loadedConfig = await getConfig(config);
       const {
         previousState,
       } = await initializeContext(loadedConfig);
@@ -102,7 +102,7 @@ program
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { logLevel, json, config: configPath }: {
+      { logLevel, json, config }: {
         logLevel: LevelName;
         config: string;
         json: boolean;
@@ -110,7 +110,7 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(configPath);
+      const loadedConfig = await getConfig(config);
       const context = await initializeContext(loadedConfig);
 
       const initialPlan = await createPlan(context);
@@ -131,7 +131,7 @@ program
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { logLevel, json, config: configPath }: {
+      { logLevel, json, config }: {
         logLevel: LevelName;
         config: string;
         json: boolean;
@@ -139,7 +139,7 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(configPath);
+      const loadedConfig = await getConfig(config);
       const context = await initializeContext(loadedConfig);
 
       const initialPlan = await createPlan(context);
@@ -164,7 +164,7 @@ program
   .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { logLevel, json, config: configPath, yes }: {
+      { logLevel, json, config, yes }: {
         logLevel: LevelName;
         yes: boolean;
         config: string;
@@ -173,7 +173,7 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(configPath);
+      const loadedConfig = await getConfig(config);
       const context = await initializeContext(loadedConfig, yes);
 
       const initialPlan = await createPlan(context);

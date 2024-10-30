@@ -152,13 +152,13 @@ export const resolveConfig = (config: unknown, gitInfo: GitInfo, branch?: string
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
     logger.debug("Resolved git templates in config", { config: configWithGit });
 
-    validateConfig(configWithGit);
+    const validatedConfig = validateConfig(configWithGit);
     logger.debug("Validated config with schema");
 
     if (!branch) {
-      return configWithGit;
+      return validatedConfig;
     }
-    return filterToBranch(configWithGit, branch) as Config;
+    return filterToBranch(validatedConfig, branch) as Config;
   } catch (error) {
     if (error instanceof ConfigError) {
       switch (error.code) {
@@ -210,8 +210,8 @@ export function getFinalConfig(config: Config, dependencies: Dependencies): Conf
   try {
     const configWithDeps = resolveTemplate(config, stateTemplate(dependencies));
     logger.debug("Resolved state dependencies in config", { config: configWithDeps });
-    validateConfig(configWithDeps);
-    return config;
+    const validatedConfig = validateConfig(configWithDeps);
+    return validatedConfig;
   } catch (error) {
     if (error instanceof ConfigError) {
       switch (error.code) {

@@ -28,13 +28,14 @@ export const schema: ZodType<Config> = z
     artifacts: artifactsSchema.optional(),
   }).strict();
 
-export function validateConfig(config: unknown): asserts config is Config {
-  const result = schema.safeParse(config);
-  if (!result.success) {
+export function validateConfig(config: unknown): Config {
+  const { data, success, error } = schema.safeParse(config);
+  if (!success) {
     throw new ConfigError(
       "Failed schema validation",
       ConfigErrorCode.INVALID_CONFIG,
-      result.error.flatten(),
+      error.flatten(),
     );
   }
+  return data;
 }

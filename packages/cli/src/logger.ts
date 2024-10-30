@@ -5,12 +5,11 @@ import {
   formatters,
   getLevelName,
   info,
-  type LevelName,
-  type LogLevel,
-  type LogRecord,
   setup,
   warn,
 } from "@std/log";
+
+import type { LevelName, LogLevel, LogRecord } from "@std/log";
 
 const {
   jsonFormatter,
@@ -23,13 +22,19 @@ function prettyFormatter(logRecord: LogRecord) {
   }`;
 }
 
-function configure(level: LevelName, jsonFormat: boolean = false): void {
+export function configure(level: LevelName, jsonFormat: boolean = false): void {
   setup({
     handlers: {
       default: new ConsoleHandler(level, {
         formatter: jsonFormat ? jsonFormatter : prettyFormatter,
         useColors: false,
       }),
+    },
+    loggers: {
+      default: {
+        level,
+        handlers: ["default"],
+      },
     },
   });
 }

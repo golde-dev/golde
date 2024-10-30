@@ -52,9 +52,9 @@ export class GoldeClientBase {
     }).then(async (r) => {
       if (!r.ok) {
         logger.debug("Golde client error", {
-          path,
           method,
           body,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -63,6 +63,9 @@ export class GoldeClientBase {
           status: r.status,
           statusText: r.statusText,
         });
+      }
+      if (r.status === 204) {
+        return null as T;
       }
       return await r.json() as T;
     });
@@ -82,9 +85,9 @@ export class GoldeClientBase {
     }).then((r) => {
       if (!r.ok) {
         logger.debug("Golde failed to fetch", {
-          path,
           method,
           body,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });

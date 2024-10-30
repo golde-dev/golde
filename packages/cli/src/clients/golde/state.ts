@@ -1,12 +1,16 @@
+import { GoldeClientBase } from "./base.ts";
 import type { StateConfig } from "../../state/types.ts";
 import type { Lock } from "../../types/lock.ts";
 import type { Changes } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
-import { GoldeClientBase } from "./base.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
-  public getState(project: string, branch: string): Promise<State> {
+  public getState(_project: string): Promise<State | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
+  public getBranchState(project: string, branch: string): Promise<State> {
     const query = new URLSearchParams({ branch }).toString();
 
     return this.makeRequest<State>(

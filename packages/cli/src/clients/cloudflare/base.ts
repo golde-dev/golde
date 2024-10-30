@@ -71,7 +71,7 @@ export class CloudflareBase {
     }).then(async (r) => {
       if (!r.ok) {
         logger.debug("Cloudflare request error", {
-          path,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -92,8 +92,8 @@ export class CloudflareBase {
         return result;
       } else {
         logger.debug("Cloudflare request error", {
-          path,
           errors,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -117,9 +117,9 @@ export class CloudflareBase {
     }).then(async (r) => {
       if (!r.ok) {
         logger.debug("Cloudflare request error", {
-          path,
           method,
           body,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -140,10 +140,10 @@ export class CloudflareBase {
         return result;
       } else {
         logger.debug("Cloudflare response error", {
-          path,
           method,
           body,
           errors,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
