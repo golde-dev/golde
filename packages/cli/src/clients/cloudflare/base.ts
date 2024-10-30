@@ -62,7 +62,7 @@ export class CloudflareBase {
       ...extraQuery,
     }).toString();
 
-    logger.debug("Cloudflare list request", {
+    logger.debug("[Cloudflare] list request", {
       path,
       query,
       method: "GET",
@@ -101,7 +101,7 @@ export class CloudflareBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
-    logger.debug("Cloudflare list request", {
+    logger.debug("[Cloudflare] list request", {
       path,
       body,
       method: "GET",

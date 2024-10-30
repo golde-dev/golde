@@ -104,6 +104,7 @@ export function applyChanges(state: State = {}, changes: Changes[]): State {
 }
 
 export async function updateState(context: Context, changes: Changes[]): Promise<void> {
+  logger.info("Updating state");
   const {
     state,
     config: {
@@ -114,7 +115,8 @@ export async function updateState(context: Context, changes: Changes[]): Promise
     },
   } = context;
 
-  await state.applyChanges(branchName, name, changes);
+  await state.applyChanges(name, branchName, changes);
+  logger.info("Successfully updated state");
 }
 
 export function printResult(changes: Changes[]): void {
@@ -126,10 +128,13 @@ export function printResult(changes: Changes[]): void {
 
     switch (type) {
       case Type.Update:
+        logger.info(`Updated ${path} in ${change.executionTime}ms`);
+        break;
       case Type.Create:
+        logger.info(`Created ${path} in ${change.executionTime}ms`);
         break;
       case Type.Delete:
-        logger.info(`Deleted ${path}`);
+        logger.info(`Deleted ${path} in ${change.executionTime}ms`);
         break;
       default:
         throw new Error("Unknown type");

@@ -99,7 +99,7 @@ export async function createCloudflareBucketsPlan(
   state?: CloudflareBucketsState,
   config?: CloudflareBuckets,
 ): Promise<Plan> {
-  logger.debug("Creating cloudflare buckets plan", {
+  logger.debug("[Cloudflare] Creating buckets plan", {
     state,
     config,
   });

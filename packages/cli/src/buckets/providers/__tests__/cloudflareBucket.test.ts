@@ -107,6 +107,52 @@ describe("cloudflare buckets", () => {
       };
       expect(result).toEqual([execution]);
     });
+
+    it("should delete and create bucket when bucket is renamed", async () => {
+      const state: CloudflareBucketsState = {
+        "bucket1": {
+          storageClass: "Standard",
+          location: "apac",
+          createdAt: "2022-01-01T00:00:00.000Z",
+          config: {
+            branch: "master",
+          },
+        },
+      };
+
+      const config: CloudflareBuckets = {
+        "bucket2": {
+          storageClass: "InfrequentAccess",
+          locationHint: "eeur",
+          branch: "master",
+        },
+      };
+
+      const created: CreateUnit<CloudflareBucket, CloudflareBucketState, CreateBucket> = {
+        type: Type.Create,
+        executor: executors.createBucket,
+        args: ["bucket2", config.bucket2],
+        path: "buckets.cloudflare.bucket2",
+        config: config.bucket2,
+        dependsOn: [],
+      };
+
+      const deleted: DeleteUnit<CloudflareBucketState, DeleteBucket> = {
+        type: Type.Delete,
+        executor: executors.deleteBucket,
+        args: ["bucket1"],
+        path: "buckets.cloudflare.bucket1",
+        state: state.bucket1,
+      };
+
+      const result = await createCloudflareBucketsPlan(
+        executors,
+        state,
+        config,
+      );
+
+      expect(result).toEqual([created, deleted]);
+    });
   });
 
   describe("noop changes on bucket", () => {

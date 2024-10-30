@@ -17,7 +17,7 @@ const {
 
 function prettyFormatter(logRecord: LogRecord) {
   const { msg, args, level } = logRecord;
-  return `${getLevelName(level as LogLevel)} | ${msg} ${
+  return `${getLevelName(level as LogLevel).padEnd(5)}| ${msg} ${
     args.map((arg: unknown) => JSON.stringify(arg, null, 2)).join(" ")
   }`;
 }

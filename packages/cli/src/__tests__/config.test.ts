@@ -9,7 +9,7 @@ describe("resolveConfig", () => {
 
   it("should resolve env variables", () => {
     const gitInfo = getGitInfo();
-    
+
     const config = resolveConfig({
       name: "test",
       providers: {
@@ -38,13 +38,14 @@ describe("resolveConfig", () => {
       buckets: {
         cloudflare: {
           bucket_name: {
+            branch: "master",
             storageClass: "Standard",
           },
         },
       },
     });
   });
-  
+
   it("should resolve files", () => {
   });
 
@@ -55,7 +56,7 @@ describe("resolveConfig", () => {
     } as GitInfo;
 
     const config = resolveConfig({
-      name: "test", 
+      name: "test",
       tags: {
         "BRANCH_NAME": "{{ git.BRANCH_NAME }}",
         "BRANCH_SLUG": "{{ git.BRANCH_SLUG }}",
@@ -78,13 +79,13 @@ describe("resolveConfig", () => {
       },
       buckets: {
         cloudflare: {
-          "master-master": { 
+          "master-master": {
             storageClass: "Standard",
             branch: "master",
           },
         },
       },
-    }); 
+    });
   });
 
   it("should include resources only for selected branch", () => {
@@ -93,26 +94,30 @@ describe("resolveConfig", () => {
       branchSlug: "feature-test",
     } as GitInfo;
 
-    const config = resolveConfig({
-      name: "test",
-      buckets: {
-        cloudflare: {
-          [`bucket`]: {
-            storageClass: "Standard",
-            branch: "master",
-          },
-          [`bucket_branch_{{ git.BRANCH_SLUG }}`]: {
-            storageClass: "Standard",
-            branch: "{{ git.BRANCH_NAME }}",
-          },
-          [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
-            storageClass: "Standard",
-            branchPattern: "feature/*",
-            branch: "{{ git.BRANCH_NAME }}",
+    const config = resolveConfig(
+      {
+        name: "test",
+        buckets: {
+          cloudflare: {
+            [`bucket`]: {
+              storageClass: "Standard",
+              branch: "master",
+            },
+            [`bucket_branch_{{ git.BRANCH_SLUG }}`]: {
+              storageClass: "Standard",
+              branch: "{{ git.BRANCH_NAME }}",
+            },
+            [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
+              storageClass: "Standard",
+              branchPattern: "feature/*",
+              branch: "{{ git.BRANCH_NAME }}",
+            },
           },
         },
       },
-    }, gitInfo,"feature/test");
+      gitInfo,
+      "feature/test",
+    );
 
     expect(config).toEqual({
       name: "test",
@@ -138,18 +143,22 @@ describe("resolveConfig", () => {
       branchSlug: "dependencies-test",
     } as GitInfo;
 
-    const config = resolveConfig({
-      name: "test",
-      buckets: {
-        cloudflare: {
-          [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
-            storageClass: "Standard",
-            branchPattern: "feature/*",
-            branch: "{{ git.BRANCH_NAME }}",
+    const config = resolveConfig(
+      {
+        name: "test",
+        buckets: {
+          cloudflare: {
+            [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
+              storageClass: "Standard",
+              branchPattern: "feature/*",
+              branch: "{{ git.BRANCH_NAME }}",
+            },
           },
         },
       },
-    }, gitInfo,"feature/test");
+      gitInfo,
+      "feature/test",
+    );
 
     expect(config).toEqual({
       name: "test",

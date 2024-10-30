@@ -23,7 +23,7 @@ export class R2Client extends CloudflareBase {
    * Create bucket in r2
    */
   public async createBucket(config: BucketRequest): Promise<Bucket> {
-    logger.debug("Creating r2 bucket", config);
+    logger.debug("[Cloudflare] Creating r2 bucket", config);
     try {
       const bucket = await this.makeRequest<Bucket>(
         `/accounts/${this.accountId}/r2/buckets`,
@@ -33,7 +33,7 @@ export class R2Client extends CloudflareBase {
       return bucket;
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("Cloudflare: failed to create r2 bucket", e.cause);
+        logger.error("[Cloudflare] Failed to create r2 bucket", e.cause);
       }
       throw e;
     }
@@ -43,7 +43,7 @@ export class R2Client extends CloudflareBase {
    * Delete bucket in R2
    */
   public async deleteBucket(name: string): Promise<void> {
-    logger.debug("Deleting r2 bucket", { name });
+    logger.debug("[Cloudflare] Deleting r2 bucket", { name });
     try {
       await this.makeRequest(
         `/accounts/${this.accountId}/r2/buckets/${name}`,
@@ -51,7 +51,7 @@ export class R2Client extends CloudflareBase {
       );
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("Cloudflare: failed to delete r2 bucket", e.cause);
+        logger.error("[Cloudflare] Failed to delete r2 bucket", e.cause);
       }
       throw e;
     }

@@ -30,6 +30,6 @@ describe("validateConfig for project", () => {
       },
     };
 
-    expect(validateConfig(validConfig)).toBeUndefined();
+    expect(validateConfig(validConfig)).toEqual(validConfig);
   });
 });
