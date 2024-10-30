@@ -6,9 +6,10 @@ const config: Config = {
     type: "fs"
   },
   providers: {
-    golde: {
-      apiKey: "{{ env.GOLDE_API_KEY }}",
-    }
+    cloudflare: {
+      apiToken: "{{ env.CLOUDFLARE_API_TOKEN }}",
+      accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
+    },
   },
   buckets: {
     cloudflare: {
