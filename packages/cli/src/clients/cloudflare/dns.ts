@@ -1,3 +1,5 @@
+import { memoize } from "moderndash";
+import { logger } from "../../logger.ts";
 import { CloudflareBase, CloudflareError } from "./base.ts";
 
 /**
@@ -56,10 +58,9 @@ export class DNSClient extends CloudflareBase {
   /**
    * Get list of zones that account have access to
    */
-  // @decMemoize()
-  public getZones(query?: object): Promise<Zone[]> {
+  public getZones = memoize((query?: object): Promise<Zone[]> => {
     return this.makeListRequest<Zone[]>("/zones", query);
-  }
+  }, { resolver: (query = {}) => JSON.stringify(query) });
 
   /**
    * Gen zone id by zone name
@@ -80,12 +81,20 @@ export class DNSClient extends CloudflareBase {
     config: ZoneRecordRequest,
   ): Promise<ZoneRecord> {
     const zoneId = await this.getZoneId(zoneName);
-
-    return this.makeRequest<ZoneRecord>(
-      `/zones/${zoneId}/dns_records`,
-      "POST",
-      config,
-    );
+    logger.debug("Creating dns record", { zoneName, config });
+    try {
+      const record = await this.makeRequest<ZoneRecord>(
+        `/zones/${zoneId}/dns_records`,
+        "POST",
+        config,
+      );
+      return record;
+    } catch (e) {
+      if (e instanceof CloudflareError) {
+        logger.error("Cloudflare: failed to dns record", e.cause);
+      }
+      throw e;
+    }
   }
 
   /**
@@ -97,12 +106,20 @@ export class DNSClient extends CloudflareBase {
     config: ZoneRecordRequest,
   ): Promise<ZoneRecord> {
     const zoneId = await this.getZoneId(zoneName);
-
-    return this.makeRequest<ZoneRecord>(
-      `/zones/${zoneId}/dns_records/${recordId}`,
-      "PATCH",
-      config,
-    );
+    logger.debug("Updating dns record", { zoneId, recordId, config });
+    try {
+      const record = await this.makeRequest<ZoneRecord>(
+        `/zones/${zoneId}/dns_records/${recordId}`,
+        "PATCH",
+        config,
+      );
+      return record;
+    } catch (e) {
+      if (e instanceof CloudflareError) {
+        logger.error("Cloudflare: failed to update dns record", e.cause);
+      }
+      throw e;
+    }
   }
 
   /**
@@ -113,10 +130,17 @@ export class DNSClient extends CloudflareBase {
     recordId: string,
   ): Promise<void> {
     const zoneId = await this.getZoneId(zoneName);
-
-    return this.makeRequest(
-      `/zones/${zoneId}/dns_records/${recordId}`,
-      "DELETE",
-    );
+    logger.debug("Deleting dns record", { zoneId, recordId });
+    try {
+      await this.makeRequest(
+        `/zones/${zoneId}/dns_records/${recordId}`,
+        "DELETE",
+      );
+    } catch (e) {
+      if (e instanceof CloudflareError) {
+        logger.error("Cloudflare: failed to delete dns record", e.cause);
+      }
+      throw e;
+    }
   }
 }

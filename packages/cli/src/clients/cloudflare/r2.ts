@@ -1,6 +1,6 @@
 import { logger } from "../../logger.ts";
 import type { Region, StorageClass } from "./types.ts";
-import { CloudflareBase } from "./base.ts";
+import { CloudflareBase, CloudflareError } from "./base.ts";
 
 /**
  * @see https://developers.cloudflare.com/api/operations/r2-create-bucket
@@ -22,23 +22,38 @@ export class R2Client extends CloudflareBase {
   /**
    * Create bucket in r2
    */
-  public createBucket(config: BucketRequest): Promise<Bucket> {
+  public async createBucket(config: BucketRequest): Promise<Bucket> {
     logger.debug("Creating r2 bucket", config);
-    return this.makeRequest<Bucket>(
-      `/accounts/${this.accountId}/r2/buckets`,
-      "POST",
-      config,
-    );
+    try {
+      const bucket = await this.makeRequest<Bucket>(
+        `/accounts/${this.accountId}/r2/buckets`,
+        "POST",
+        config,
+      );
+      return bucket;
+    } catch (e) {
+      if (e instanceof CloudflareError) {
+        logger.error("Cloudflare: failed to create r2 bucket", e.cause);
+      }
+      throw e;
+    }
   }
 
   /**
    * Delete bucket in R2
    */
-  public deleteBucket(name: string): Promise<void> {
-    logger.debug(name, "Deleting r2 bucket");
-    return this.makeRequest(
-      `/accounts/${this.accountId}/r2/buckets/${name}`,
-      "DELETE",
-    );
+  public async deleteBucket(name: string): Promise<void> {
+    logger.debug("Deleting r2 bucket", { name });
+    try {
+      await this.makeRequest(
+        `/accounts/${this.accountId}/r2/buckets/${name}`,
+        "DELETE",
+      );
+    } catch (e) {
+      if (e instanceof CloudflareError) {
+        logger.error("Cloudflare: failed to delete r2 bucket", e.cause);
+      }
+      throw e;
+    }
   }
 }

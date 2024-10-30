@@ -32,7 +32,7 @@ interface VerifyTokenResult {
 }
 
 interface FetchErrorCause {
-  path: string;
+  url: string;
   status: number;
   statusText: string;
 }
@@ -62,6 +62,11 @@ export class CloudflareBase {
       ...extraQuery,
     }).toString();
 
+    logger.debug("Cloudflare list request", {
+      path,
+      query,
+      method: "GET",
+    });
     return fetch(`${this.baseUrl}/${path}?${query}`, {
       method: "GET",
       headers: {
@@ -70,13 +75,8 @@ export class CloudflareBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        logger.debug("Cloudflare request error", {
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
         throw new CloudflareError("Cloudflare request error", {
-          path,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -91,12 +91,6 @@ export class CloudflareBase {
       if (success && result) {
         return result;
       } else {
-        logger.debug("Cloudflare request error", {
-          errors,
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
         throw new CloudflareError("Cloudflare request error", errors);
       }
     });
@@ -107,6 +101,12 @@ export class CloudflareBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
+    logger.debug("Cloudflare list request", {
+      path,
+      body,
+      method: "GET",
+    });
+
     return fetch(`${this.baseUrl}/${path}`, {
       method,
       body: JSON.stringify(body),
@@ -116,15 +116,8 @@ export class CloudflareBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        logger.debug("Cloudflare request error", {
-          method,
-          body,
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
         throw new CloudflareError("Cloudflare request error", {
-          path,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -139,14 +132,6 @@ export class CloudflareBase {
       if (success && result) {
         return result;
       } else {
-        logger.debug("Cloudflare response error", {
-          method,
-          body,
-          errors,
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
         throw new CloudflareError("Cloudflare response error", errors);
       }
     });

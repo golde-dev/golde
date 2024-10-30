@@ -1,4 +1,5 @@
-import { GoldeClientBase, notFoundAsUndefined } from "./base.ts";
+import { logger } from "../../logger.ts";
+import { GoldeClientBase, GoldeError, notFoundAsUndefined } from "./base.ts";
 
 interface Project {
   name: string;
@@ -11,16 +12,32 @@ export class ProjectClient extends GoldeClientBase {
    * Create new project
    */
   public createProject(name: string): Promise<Project> {
-    return this.makeRequest<Project>("/projects", "POST", {
-      name,
-    });
+    logger.debug("[Golde] creating project", { name });
+    try {
+      return this.makeRequest<Project>("/projects", "POST", {
+        name,
+      });
+    } catch (e) {
+      if (e instanceof GoldeError) {
+        logger.error("[Golde] Failed to create project", e.cause);
+      }
+      throw e;
+    }
   }
 
   /**
    * Get project by name
    */
   public getProject(name: string): Promise<Project> {
-    return this.makeRequest<Project>(`/projects/${name}`, "GET");
+    logger.debug("[Golde] Fetching project", { name });
+    try {
+      return this.makeRequest<Project>(`/projects/${name}`, "GET");
+    } catch (e) {
+      if (e instanceof GoldeError) {
+        logger.error("[Golde] Failed to get project", e.cause);
+      }
+      throw e;
+    }
   }
 
   /**

@@ -2,7 +2,7 @@ import { logger } from "../../logger.ts";
 import { GOLDE_API_URL } from "../../version.ts";
 
 interface GoldeErrorCause {
-  path: string;
+  url: string;
   status: number;
   statusText: string;
 }
@@ -42,6 +42,11 @@ export class GoldeClientBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
+    logger.debug("[Golde] request", {
+      path,
+      body,
+      method,
+    });
     return fetch(`${this.baseUrl}${path}`, {
       method,
       body: JSON.stringify(body),
@@ -51,15 +56,8 @@ export class GoldeClientBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        logger.debug("Golde client error", {
-          method,
-          body,
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
         throw new GoldeError(`Golde request to: ${path} failed`, {
-          path,
+          url: r.url,
           status: r.status,
           statusText: r.statusText,
         });
@@ -76,6 +74,10 @@ export class GoldeClientBase {
     method: "POST",
     body: FormData,
   ): Promise<void> {
+    logger.debug("[Golde] file request", {
+      path,
+      method: "GET",
+    });
     return fetch(`${this.baseUrl}${path}`, {
       method,
       body,
@@ -84,15 +86,8 @@ export class GoldeClientBase {
       },
     }).then((r) => {
       if (!r.ok) {
-        logger.debug("Golde failed to fetch", {
-          method,
-          body,
+        throw new GoldeError(`Golde request failed`, {
           url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
-        throw new GoldeError(`Golde request to: ${path} failed`, {
-          path,
           status: r.status,
           statusText: r.statusText,
         });
@@ -105,7 +100,7 @@ export class GoldeClientBase {
       "/verify-token",
     );
     if (status !== "active") {
-      throw new GoldeError(`Token status is not active: ${status}`);
+      throw new GoldeError(`Golde token status is not active: ${status}`);
     }
   }
 }

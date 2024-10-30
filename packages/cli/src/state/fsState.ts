@@ -18,10 +18,10 @@ export class FSStateClient implements AbstractStateClient {
   }
 
   /**
-   * Ensure that state and lock parent directories exist
+   * Ensure that state directory exists
    */
   public async ensureLocation() {
-    await ensureDir(dirname(this.path));
+    await ensureDir(this.path);
   }
 
   /**

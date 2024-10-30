@@ -10,6 +10,7 @@ import type {
   ListHostedZonesCommandOutput,
   ResourceRecordSet,
 } from "@aws-sdk/client-route-53";
+import { logger } from "../../logger.ts";
 
 export class Route53Client extends AWSClientBase {
   private getRoute53Client = memoize((region: string) => {
@@ -30,7 +31,7 @@ export class Route53Client extends AWSClientBase {
 
     const Id = result.HostedZones?.find(({ Name }) => Name === zoneName)?.Id;
     if (!Id) {
-      throw new Error(`Hosted zone ${zoneName} not found`);
+      throw new Error(`AWS hosted zone ${zoneName} not found`);
     }
     return Id;
   });
@@ -41,18 +42,31 @@ export class Route53Client extends AWSClientBase {
     resourceRecordSet: ResourceRecordSet,
   ) {
     const hostedZoneId = await this.getHostedZoneIdByName(region, hostedZoneName);
-    const command = new ChangeResourceRecordSetsCommand({
-      HostedZoneId: hostedZoneId,
-      ChangeBatch: {
-        Changes: [
-          {
-            Action: "CREATE",
-            ResourceRecordSet: resourceRecordSet,
-          },
-        ],
-      },
+    logger.debug("[AWS] creating DNS record", {
+      region,
+      hostedZoneName,
+      hostedZoneId,
+      resourceRecordSet,
     });
-    await this.getRoute53Client(region).send(command);
+    try {
+      const command = new ChangeResourceRecordSetsCommand({
+        HostedZoneId: hostedZoneId,
+        ChangeBatch: {
+          Changes: [
+            {
+              Action: "CREATE",
+              ResourceRecordSet: resourceRecordSet,
+            },
+          ],
+        },
+      });
+      await this.getRoute53Client(region).send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS] Failed to create DNS record", e);
+      }
+      throw e;
+    }
   }
 
   async updateDNSRecord(
@@ -61,18 +75,31 @@ export class Route53Client extends AWSClientBase {
     resourceRecordSet: ResourceRecordSet,
   ) {
     const hostedZoneId = await this.getHostedZoneIdByName(region, hostedZoneName);
-    const command = new ChangeResourceRecordSetsCommand({
-      HostedZoneId: hostedZoneId,
-      ChangeBatch: {
-        Changes: [
-          {
-            Action: "UPSERT",
-            ResourceRecordSet: resourceRecordSet,
-          },
-        ],
-      },
+    logger.debug("[AWS] Updating DNS record", {
+      region,
+      hostedZoneName,
+      hostedZoneId,
+      resourceRecordSet,
     });
-    await this.getRoute53Client(region).send(command);
+    try {
+      const command = new ChangeResourceRecordSetsCommand({
+        HostedZoneId: hostedZoneId,
+        ChangeBatch: {
+          Changes: [
+            {
+              Action: "UPSERT",
+              ResourceRecordSet: resourceRecordSet,
+            },
+          ],
+        },
+      });
+      await this.getRoute53Client(region).send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS] Failed to update DNS record", e);
+      }
+      throw e;
+    }
   }
 
   async deleteDNSRecord(
@@ -81,17 +108,30 @@ export class Route53Client extends AWSClientBase {
     resourceRecordSet: ResourceRecordSet,
   ) {
     const hostedZoneId = await this.getHostedZoneIdByName(region, hostedZoneName);
-    const command = new ChangeResourceRecordSetsCommand({
-      HostedZoneId: hostedZoneId,
-      ChangeBatch: {
-        Changes: [
-          {
-            Action: "DELETE",
-            ResourceRecordSet: resourceRecordSet,
-          },
-        ],
-      },
+    logger.debug("[AWS] Deleting DNS record", {
+      region,
+      hostedZoneName,
+      hostedZoneId,
+      resourceRecordSet,
     });
-    await this.getRoute53Client(region).send(command);
+    try {
+      const command = new ChangeResourceRecordSetsCommand({
+        HostedZoneId: hostedZoneId,
+        ChangeBatch: {
+          Changes: [
+            {
+              Action: "DELETE",
+              ResourceRecordSet: resourceRecordSet,
+            },
+          ],
+        },
+      });
+      await this.getRoute53Client(region).send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS]: Failed to delete DNS record", e);
+      }
+      throw e;
+    }
   }
 }
