@@ -1,0 +1,15 @@
+{
+  "buckets": {
+    "cloudflare": {
+      "example-config-fs-state": {
+        "location": "EEUR",
+        "createdAt": "2024-10-30T14:03:40.978Z",
+        "storageClass": "Standard",
+        "config": {
+          "branch": "master",
+          "storageClass": "Standard"
+        }
+      }
+    }
+  }
+}
