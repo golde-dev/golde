@@ -3,7 +3,7 @@
     "cloudflare": {
       "example-config-fs-state": {
         "location": "EEUR",
-        "createdAt": "2024-10-30T14:03:40.978Z",
+        "createdAt": "2024-10-31T13:20:36.003Z",
         "storageClass": "Standard",
         "config": {
           "branch": "master",
