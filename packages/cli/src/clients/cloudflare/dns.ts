@@ -1,4 +1,4 @@
-import { memoize } from "moderndash";
+import { memoize } from "@es-toolkit/es-toolkit";
 import { logger } from "../../logger.ts";
 import { CloudflareBase, CloudflareError } from "./base.ts";
 
@@ -60,7 +60,7 @@ export class DNSClient extends CloudflareBase {
    */
   public getZones = memoize((query?: object): Promise<Zone[]> => {
     return this.makeListRequest<Zone[]>("/zones", query);
-  }, { resolver: (query = {}) => JSON.stringify(query) });
+  }, { getCacheKey: (query = {}) => JSON.stringify(query) });
 
   /**
    * Gen zone id by zone name

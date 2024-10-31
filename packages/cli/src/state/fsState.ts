@@ -1,12 +1,12 @@
 import slugify from "@sindresorhus/slugify";
 import { ensureDir } from "@std/fs";
 import { exists } from "@std/fs/exists";
-import { dirname, join } from "@std/path";
+import { join } from "@std/path";
 import { readJSON, writeJSON } from "../utils/fs.ts";
-import { applyChanges } from "../apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Changes } from "../types/plan.ts";
+import { applyChangeSet } from "../utils/object.ts";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -61,11 +61,12 @@ export class FSStateClient implements AbstractStateClient {
   /**
    * Update state by applying changes to state
    */
-  public async applyChanges(project: string, branch: string, result: Changes[]): Promise<void> {
+  public async applyChanges(project: string, branch: string, changes: Changes[]): Promise<State> {
     const currentState = await this.getBranchState(project, branch);
-    const updatedState = applyChanges(currentState, result);
+    const updatedState = applyChangeSet(currentState, changes);
 
     await this.saveState(branch, updatedState);
+    return updatedState;
   }
 
   /**

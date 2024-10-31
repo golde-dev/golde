@@ -1,5 +1,5 @@
 import { logger } from "../../logger.ts";
-import { isEqual } from "moderndash";
+import { isEqual } from "@es-toolkit/es-toolkit";
 import { mergeTags, toTagsArray } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import type { CloudflareClient } from "../../clients/cloudflare/client.ts";

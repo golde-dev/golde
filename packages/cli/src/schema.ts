@@ -17,6 +17,8 @@ export const projectNameSchema = z
     "Projects name may include alphanumeric characters and the following special symbols: -, _, @, ., /, #, &, +.",
   );
 
+export const outputSchema = z.record(z.string());
+
 export const schema: ZodType<Config> = z
   .object({
     name: projectNameSchema,
@@ -26,7 +28,9 @@ export const schema: ZodType<Config> = z
     dns: dnsSchema.optional(),
     buckets: bucketSchema.optional(),
     artifacts: artifactsSchema.optional(),
-  }).strict();
+    output: outputSchema.optional(),
+  })
+  .strict();
 
 export function validateConfig(config: unknown): Config {
   const { data, success, error } = schema.safeParse(config);

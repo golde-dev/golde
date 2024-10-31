@@ -25,7 +25,6 @@
     "@std/path": "jsr:@std/path@^1.0.6",
     "hono": "jsr:@hono/hono",
     "hono/types": "jsr:@hono/hono/types",
-    "moderndash": "npm:moderndash@^3.11.1",
     "@systemd-js/conf": "npm:@systemd-js/conf@^0.8.0",
     "@systemd-js/ctl": "npm:@systemd-js/ctl@^0.8.0",
     "commander": "npm:commander@^12.1.0",

@@ -1,4 +1,4 @@
-import { isEqual } from "moderndash";
+import { isEqual } from "@es-toolkit/es-toolkit";
 import type { CloudflareClient } from "../../clients/cloudflare/client.ts";
 import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
 import { type CreateUnit, type Plan, Type } from "../../types/plan.ts";
@@ -143,7 +143,6 @@ export async function createCloudflareBucketsPlan(
     const { config: previousConfig, state } = previous[key];
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
-
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<CloudflareBucket, CloudflareBucketState> = {
         type: Type.Noop,
@@ -152,7 +151,6 @@ export async function createCloudflareBucketsPlan(
         state,
       };
       plan.push(noopUnit);
-      continue;
     } else {
       throw new Error("It is not possible to update r2 bucket, create new and migrate data");
     }

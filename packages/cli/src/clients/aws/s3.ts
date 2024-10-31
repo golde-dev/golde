@@ -1,4 +1,4 @@
-import { memoize } from "moderndash";
+import { memoize } from "@es-toolkit/es-toolkit";
 import { AWSClientBase } from "./base.ts";
 import {
   CreateBucketCommand,

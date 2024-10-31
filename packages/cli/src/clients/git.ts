@@ -1,6 +1,6 @@
 import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
-import { memoize } from "moderndash";
+import { memoize } from "@es-toolkit/es-toolkit";
 import { decode } from "../utils/text.ts";
 
 export interface GitInfo {

@@ -22,7 +22,10 @@ function prettyFormatter(logRecord: LogRecord) {
   }`;
 }
 
-export function configure(level: LevelName, jsonFormat: boolean = false): void {
+let level: LevelName = "INFO";
+
+export function configure(newLevel: LevelName, jsonFormat: boolean = false): void {
+  level = newLevel;
   setup({
     handlers: {
       default: new ConsoleHandler(level, {
@@ -39,7 +42,7 @@ export function configure(level: LevelName, jsonFormat: boolean = false): void {
   });
 }
 
-configure("INFO");
+configure(level);
 
 export const logger = {
   configure,
@@ -47,6 +50,9 @@ export const logger = {
   error,
   debug,
   warn,
+  get level() {
+    return level;
+  },
 };
 
 export type Logger = typeof logger;

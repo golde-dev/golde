@@ -2,11 +2,17 @@ import { load } from "@std/dotenv";
 import { logger } from "../logger.ts";
 import { Command } from "commander";
 import { getConfig, getFinalConfig } from "../config.ts";
-import { createPlan, printPlan } from "../plan.ts";
+import { createPlan, hasChanges, printPlan } from "../plan.ts";
 import { getFinalContext, initializeContext } from "../context.ts";
 import { initConfig } from "../init.ts";
 import { VERSION } from "../version.ts";
-import { executePlan, printResult, updateState } from "../apply.ts";
+import {
+  confirmExecutePlan,
+  createOutput,
+  executePlan,
+  printChanges,
+  updateState,
+} from "../apply.ts";
 import { verifyInstalled } from "../clients/git.ts";
 import { getDependencies } from "../dependencies.ts";
 import { lockDependencies, releaseLocks } from "../lock.ts";
@@ -23,12 +29,12 @@ const program = new Command();
 
 program
   .name("golde")
-  .description("CLI to golde")
+  .description("Golde CLI")
   .version(VERSION);
 
 program
   .command("init")
-  .description("Initialize new configuration")
+  .description("Initialize new golde project")
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-j, --json", "log output as json")
   .action(
@@ -149,7 +155,10 @@ program
       const finalContext = getFinalContext(context, finalConfig);
 
       const finalPlan = await createPlan(finalContext);
-
+      if (!hasChanges(finalPlan)) {
+        logger.info("No changes detected");
+        return;
+      }
       printPlan(finalPlan);
     },
   );
@@ -161,10 +170,9 @@ program
   .option("-c, --config <config>", "location of config file")
   .option("-y, --yes", "apply plan without prompting")
   .option("-j, --json", "log output as json")
-  .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { logLevel, json, config, yes }: {
+      { logLevel, json, config, yes: autoConfirm }: {
         logLevel: LevelName;
         yes: boolean;
         config: string;
@@ -173,24 +181,33 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(config);
-      const context = await initializeContext(loadedConfig, yes);
+      const initialConfig = await getConfig(config);
+      const initialContext = await initializeContext(initialConfig, autoConfirm);
+      const initialPlan = await createPlan(initialContext);
+      const initialDependencies = await getDependencies(initialContext, initialPlan);
 
-      const initialPlan = await createPlan(context);
-      const initialDependencies = await getDependencies(context, initialPlan);
-      const locks = await lockDependencies(context, initialDependencies);
-      const dependencies = await getDependencies(context, initialPlan);
+      if (!hasChanges(initialPlan)) {
+        logger.info("No changes detected");
+        return;
+      }
+      printPlan(initialPlan);
 
-      const finalConfig = getFinalConfig(loadedConfig, dependencies);
-      const finalContext = getFinalContext(context, finalConfig);
-
+      const locks = await lockDependencies(initialContext, initialDependencies);
+      const finalDependencies = await getDependencies(initialContext, initialPlan);
+      const finalConfig = getFinalConfig(initialConfig, finalDependencies);
+      const finalContext = getFinalContext(initialContext, finalConfig);
       const finalPlan = await createPlan(finalContext);
-      printPlan(finalPlan);
-      const result = await executePlan(finalPlan);
-      printResult(result);
 
-      await updateState(context, result);
-      await releaseLocks(context, locks);
+      const shouldExecute = autoConfirm || await confirmExecutePlan();
+
+      if (shouldExecute) {
+        const changes = await executePlan(finalPlan);
+        printChanges(changes);
+
+        const state = await updateState(finalContext, changes);
+        createOutput(finalConfig, state);
+      }
+      await releaseLocks(finalContext, locks);
     },
   );
 

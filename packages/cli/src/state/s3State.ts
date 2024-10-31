@@ -1,11 +1,11 @@
+import slugify from "@sindresorhus/slugify";
 import { notFoundAsUndefined } from "../clients/s3.ts";
-import { applyChanges } from "../apply.ts";
 import type { S3 } from "../clients/s3.ts";
 import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Changes } from "../types/plan.ts";
-import slugify from "@sindresorhus/slugify";
+import { applyChangeSet } from "../utils/object.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
   `/${projectName}/${slugify(branch)}.state.json`;
@@ -42,10 +42,12 @@ export class S3StateClient implements AbstractStateClient {
   /**
    * Apply changes to state for a branch and project
    */
-  public async applyChanges(project: string, branch: string, state: Changes[]): Promise<void> {
+  public async applyChanges(project: string, branch: string, state: Changes[]): Promise<State> {
     const currentState = await this.getBranchState(branch, project);
-    const updatedState = applyChanges(currentState, state);
+    const updatedState = applyChangeSet(currentState, state);
+
     await this.saveState(branch, project, updatedState);
+    return updatedState;
   }
 
   public getStateLock(project: string, branch: string): Promise<Lock[] | undefined> {

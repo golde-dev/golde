@@ -1,4 +1,4 @@
-import { isPlainObject } from "moderndash";
+import { isPlainObject } from "@es-toolkit/es-toolkit";
 
 export function writeJSON(path: string, data: object | unknown[]): Promise<void> {
   if (!isPlainObject(data) && !Array.isArray(data)) {

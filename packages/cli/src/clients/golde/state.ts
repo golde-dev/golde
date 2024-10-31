@@ -11,14 +11,15 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     throw new Error("Method not implemented.");
   }
 
-  public getBranchState(project: string, branch: string): Promise<State> {
+  public async getBranchState(project: string, branch: string): Promise<State> {
     const query = new URLSearchParams({ branch }).toString();
-    logger.debug("Golde fetching golde state", { project, branch });
+    logger.debug("[Golde] fetching golde state", { project, branch });
     try {
-      return this.makeRequest<State>(
+      const result = await this.makeRequest<State>(
         `/projects/${project}/state?${query}`,
         "GET",
       );
+      return result;
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("Golde failed to get branch state", e.cause);
@@ -27,18 +28,19 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     }
   }
 
-  public applyChanges(
+  public async applyChanges(
     project: string,
     branch: string,
     changes: Changes[],
-  ): Promise<void> {
-    logger.debug("Golde Applying changes to golde state", { project, branch, changes });
+  ): Promise<State> {
+    logger.debug("[Golde] Applying changes to golde state", { project, branch, changes });
     try {
-      return this.makeRequest<void>(
+      const state = await this.makeRequest<State>(
         `/projects/${project}/state`,
         "POST",
         { branch, changes },
       );
+      return state;
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("Golde failed to apply changes", e.cause);
@@ -47,15 +49,16 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     }
   }
 
-  public getStateLock(project: string, branch: string): Promise<Lock[] | undefined> {
+  public async getStateLock(project: string, branch: string): Promise<Lock[] | undefined> {
     const query = new URLSearchParams({ branch }).toString();
-    logger.debug("Golde fetching state lock", { project, branch });
+    logger.debug("[Golde] fetching state lock", { project, branch });
     try {
-      return this.makeRequest<Lock[]>(
+      const result = await this.makeRequest<Lock[]>(
         `/projects/${project}/lock?${query}`,
         "GET",
         { branch },
       );
+      return result;
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("Golde failed to get state lock", e.cause);
@@ -64,14 +67,15 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     }
   }
 
-  public getStateConfig(
+  public async getStateConfig(
     project: string,
   ): Promise<StateConfig | undefined> {
-    logger.debug("Golde fetching state config", { project });
+    logger.debug("[Golde] fetching state config", { project });
     try {
-      return this.makeRequest<StateConfig | undefined>(
+      const result = await this.makeRequest<StateConfig | undefined>(
         `/projects/${project}/state-config`,
       );
+      return result;
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("Golde failed to get state config", e.cause);
@@ -88,7 +92,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     project: string,
     stateConfig: StateConfig,
   ): Promise<void> {
-    logger.debug("Golde changing state config", { project, stateConfig });
+    logger.debug("[Golde] changing state config", { project, stateConfig });
     try {
       await this.makeRequest(
         `/projects/${project}/state-config`,

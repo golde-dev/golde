@@ -6,6 +6,7 @@ import type { ServersConfig } from "../servers/types.ts";
 import type { StateConfig } from "../state/types.ts";
 
 export type Tags = Record<string, string>;
+export type Output = Record<string, string>;
 
 export type Config = {
   /**
@@ -29,6 +30,7 @@ export type Config = {
   buckets?: BucketsConfig;
   servers?: ServersConfig;
   artifacts?: ArtifactsConfig;
+  output?: Output;
 };
 
 export interface ConfigLock {

@@ -15,7 +15,7 @@ export abstract class AbstractStateClient {
 
   public abstract getState(project: string): Promise<State | undefined>;
 
-  public abstract applyChanges(project: string, branch: string, state: Changes[]): Promise<void>;
+  public abstract applyChanges(project: string, branch: string, state: Changes[]): Promise<State>;
 
   public abstract getStateLock(project: string, branch: string): Promise<Lock[] | undefined>;
 }

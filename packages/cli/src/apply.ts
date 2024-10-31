@@ -1,19 +1,31 @@
 import { Queue } from "moderndash";
-import { removeEmpty } from "./utils/object.ts";
-import { set } from "moderndash";
+import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
 import type { Changes, Plan } from "./types/plan.ts";
 import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
+import type { Config } from "./types/config.ts";
+
+export async function confirmExecutePlan(): Promise<boolean> {
+  try {
+    return await confirm({
+      message: `Do you want to execute plan?`,
+      default: true,
+    });
+  } catch {
+    return false;
+  }
+}
 
 export async function executePlan(plan: Plan): Promise<Changes[]> {
   logger.info("Start plan execution");
+
   try {
     const queue = new Queue(20);
 
-    const result: Changes[] = await queue.add(
+    const changes: Changes[] = await queue.add(
       plan
         .filter((unit) => unit.type !== Type.Noop)
         .map((unit) => async (): Promise<Changes> => {
@@ -62,8 +74,6 @@ export async function executePlan(plan: Plan): Promise<Changes[]> {
           }
         }),
     );
-
-    const changes = await result;
     logger.info("Successfully executed plan");
     return changes;
   } catch (error) {
@@ -74,36 +84,7 @@ export async function executePlan(plan: Plan): Promise<Changes[]> {
   }
 }
 
-/**
- * Given a state and changes, apply changes to state and return new state
- */
-export function applyChanges(state: State = {}, changes: Changes[]): State {
-  const newState = structuredClone(state);
-  const emptyObject = {};
-
-  for (const unit of changes) {
-    const {
-      type,
-      path,
-      state,
-    } = unit;
-
-    switch (type) {
-      case Type.Update:
-      case Type.Create:
-        set(newState, path, state);
-        break;
-      case Type.Delete:
-        set(newState, path, emptyObject);
-        break;
-      default:
-        throw new Error("Unknown type");
-    }
-  }
-  return removeEmpty(newState) as State;
-}
-
-export async function updateState(context: Context, changes: Changes[]): Promise<void> {
+export async function updateState(context: Context, changes: Changes[]): Promise<State> {
   logger.info("Updating state");
   const {
     state,
@@ -114,30 +95,45 @@ export async function updateState(context: Context, changes: Changes[]): Promise
       branchName,
     },
   } = context;
+  const start = performance.now();
+  const updatedState = await state.applyChanges(name, branchName, changes);
+  const end = performance.now();
 
-  await state.applyChanges(name, branchName, changes);
-  logger.info("Successfully updated state");
+  if (logger.level === "DEBUG") {
+    logger.debug(`Successfully updated state in ${end - start}ms`, { state: updateState });
+  } else {
+    logger.info(`Successfully updated state in ${end - start}ms`);
+  }
+  return updatedState;
 }
 
-export function printResult(changes: Changes[]): void {
+export function printChanges(changes: Changes[]): void {
   for (const change of changes) {
     const {
       type,
       path,
+      executionTime,
     } = change;
 
     switch (type) {
       case Type.Update:
-        logger.info(`Updated ${path} in ${change.executionTime}ms`);
+        logger.info(`Updated ${path} in ${executionTime}ms`);
         break;
       case Type.Create:
-        logger.info(`Created ${path} in ${change.executionTime}ms`);
+        logger.info(`Created ${path} in ${executionTime}ms`);
         break;
       case Type.Delete:
-        logger.info(`Deleted ${path} in ${change.executionTime}ms`);
+        logger.info(`Deleted ${path} in ${executionTime}ms`);
         break;
       default:
         throw new Error("Unknown type");
     }
   }
+}
+
+export function createOutput(config: Config, state: State): void {
+  console.log({
+    config,
+    state,
+  });
 }
