@@ -107,7 +107,7 @@ export interface DeleteResult<
   executionTime: number;
 }
 
-export type Changes =
+export type Change =
   | CreateResult
   | UpdateResult
   | DeleteResult;

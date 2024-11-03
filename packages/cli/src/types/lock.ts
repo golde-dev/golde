@@ -1,3 +1,5 @@
 export interface Lock {
-  todo: string;
+  id: number;
+  branch: string;
+  resources: string[];
 }

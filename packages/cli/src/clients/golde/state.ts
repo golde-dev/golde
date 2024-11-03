@@ -1,14 +1,26 @@
 import { GoldeClientBase, GoldeError } from "./base.ts";
 import type { StateConfig } from "../../state/types.ts";
 import type { Lock } from "../../types/lock.ts";
-import type { Changes } from "../../types/plan.ts";
+import type { Change } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
 import { logger } from "../../logger.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
-  public getState(_project: string): Promise<State | undefined> {
-    throw new Error("Method not implemented.");
+  public async getState(project: string): Promise<State | undefined> {
+    logger.debug("[Golde] fetching project state", { project });
+    try {
+      const result = await this.makeRequest<State>(
+        `/projects/${project}/state`,
+        "GET",
+      );
+      return result;
+    } catch (e) {
+      if (e instanceof GoldeError) {
+        logger.error("Golde failed to get project state", e.cause);
+      }
+      throw e;
+    }
   }
 
   public async getBranchState(project: string, branch: string): Promise<State> {
@@ -31,14 +43,21 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   public async applyChanges(
     project: string,
     branch: string,
-    changes: Changes[],
+    changes: Change[],
+    locks: Lock[],
   ): Promise<State> {
-    logger.debug("[Golde] Applying changes to golde state", { project, branch, changes });
+    logger.debug("[Golde] Applying changes to golde state", { project, branch, changes, locks });
     try {
+      const { id } = locks.find((lock) => lock.branch === branch) ?? {};
+
       const state = await this.makeRequest<State>(
         `/projects/${project}/state`,
-        "POST",
-        { branch, changes },
+        "PATCH",
+        {
+          branch,
+          changes,
+          lock: id,
+        },
       );
       return state;
     } catch (e) {

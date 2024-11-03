@@ -4,7 +4,7 @@ import type { S3 } from "../clients/s3.ts";
 import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
-import type { Changes } from "../types/plan.ts";
+import type { Change } from "../types/plan.ts";
 import { applyChangeSet } from "../utils/object.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
@@ -42,7 +42,7 @@ export class S3StateClient implements AbstractStateClient {
   /**
    * Apply changes to state for a branch and project
    */
-  public async applyChanges(project: string, branch: string, state: Changes[]): Promise<State> {
+  public async applyChanges(project: string, branch: string, state: Change[]): Promise<State> {
     const currentState = await this.getBranchState(branch, project);
     const updatedState = applyChangeSet(currentState, state);
 

@@ -3,10 +3,11 @@ import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
-import type { Changes, Plan } from "./types/plan.ts";
+import type { Change, Plan } from "./types/plan.ts";
 import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Config } from "./types/config.ts";
+import type { Lock } from "./types/lock.ts";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -19,16 +20,16 @@ export async function confirmExecutePlan(): Promise<boolean> {
   }
 }
 
-export async function executePlan(plan: Plan): Promise<Changes[]> {
+export async function executePlan(plan: Plan): Promise<Change[]> {
   logger.info("Start plan execution");
 
   try {
     const queue = new Queue(20);
 
-    const changes: Changes[] = await queue.add(
+    const changes: Change[] = await queue.add(
       plan
         .filter((unit) => unit.type !== Type.Noop)
-        .map((unit) => async (): Promise<Changes> => {
+        .map((unit) => async (): Promise<Change> => {
           if (unit.type === Type.Create) {
             const start = performance.now();
             const state = await unit.executor(...unit.args);
@@ -84,7 +85,11 @@ export async function executePlan(plan: Plan): Promise<Changes[]> {
   }
 }
 
-export async function updateState(context: Context, changes: Changes[]): Promise<State> {
+export async function updateState(
+  context: Context,
+  changes: Change[],
+  locks: Lock[],
+): Promise<State> {
   logger.info("Updating state");
   const {
     state,
@@ -96,7 +101,7 @@ export async function updateState(context: Context, changes: Changes[]): Promise
     },
   } = context;
   const start = performance.now();
-  const updatedState = await state.applyChanges(name, branchName, changes);
+  const updatedState = await state.applyChanges(name, branchName, changes, locks);
   const end = performance.now();
 
   if (logger.level === "DEBUG") {
@@ -107,7 +112,7 @@ export async function updateState(context: Context, changes: Changes[]): Promise
   return updatedState;
 }
 
-export function printChanges(changes: Changes[]): void {
+export function printChanges(changes: Change[]): void {
   for (const change of changes) {
     const {
       type,

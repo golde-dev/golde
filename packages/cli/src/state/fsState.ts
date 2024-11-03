@@ -3,10 +3,10 @@ import { ensureDir } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { join } from "@std/path";
 import { readJSON, writeJSON } from "../utils/fs.ts";
+import { applyChangeSet } from "../utils/object.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
-import type { Changes } from "../types/plan.ts";
-import { applyChangeSet } from "../utils/object.ts";
+import type { Change } from "../types/plan.ts";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -47,7 +47,7 @@ export class FSStateClient implements AbstractStateClient {
     if (!await exists(path)) {
       return;
     }
-    return readJSON<State>(path);
+    return await readJSON<State>(path);
   }
 
   /**
@@ -61,7 +61,7 @@ export class FSStateClient implements AbstractStateClient {
   /**
    * Update state by applying changes to state
    */
-  public async applyChanges(project: string, branch: string, changes: Changes[]): Promise<State> {
+  public async applyChanges(project: string, branch: string, changes: Change[]): Promise<State> {
     const currentState = await this.getBranchState(project, branch);
     const updatedState = applyChangeSet(currentState, changes);
 
