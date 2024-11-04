@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
-import type { DockerConfig } from "./types.ts";
+import type { DockerCredentials } from "./types.ts";
 
-export const dockerConfigSchema = implement<DockerConfig>()
+export const dockerConfigSchema = implement<DockerCredentials>()
   .with({
     registry: z
       .string()

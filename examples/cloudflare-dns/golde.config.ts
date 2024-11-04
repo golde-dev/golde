@@ -1,7 +1,7 @@
 import type {Config} from '@golde/cli'
 
 const config: Config = {
-  name: "example-dns-cloudflare",
+  name: "example-cloudflare-dns",
   providers: {
     golde: {
       apiKey: "{{ env.GOLDE_API_KEY }}",
@@ -11,8 +11,8 @@ const config: Config = {
       accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}"
     },
   },
-  dns: {
-    cloudflare: {
+  cloudflare: {
+    dns: {
       "golde.dev": {
         "A": {
           "dns-cloudflare": {

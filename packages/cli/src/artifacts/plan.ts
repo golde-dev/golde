@@ -1,7 +1,7 @@
 import { isEmpty } from "moderndash";
 import type { Plan } from "../types/plan.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
-import { createDockerArtifactsPlan, createDockerExecutors } from "./docker/plan.ts";
+import { createDockerExecutors } from "../docker/image/plan.ts";
 import type { Context } from "../types/context.ts";
 
 export async function createArtifactsPlan(context: Context): Promise<Plan> {

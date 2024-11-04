@@ -1,5 +1,5 @@
 {
-  "name": "@golde/example-artifacts-archive-cloudflare",
+  "name": "@golde/example-docker-image-golde",
   "packageManager": "yarn@4.5.0",
   "type": "module",
   "private": true,

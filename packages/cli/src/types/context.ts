@@ -1,5 +1,5 @@
 import type { AWSClient } from "../aws/client/client.ts";
-import type { DockerClient } from "../artifacts/client/docker.ts";
+import type { DockerClient } from "../docker/client/client.ts";
 import type { GitInfo } from "../utils/git.ts";
 import type { GoldeClient } from "../golde/client/client.ts";
 import type { CloudflareClient } from "../cloudflare/client/client.ts";

@@ -3,6 +3,9 @@ import { TextLineStream } from "@std/streams";
 import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
+import { walk } from "@std/fs/walk";
+import { existsSync } from "@std/fs/exists";
+import { basename, join } from "@std/path";
 
 const { local } = parseArgs(Deno.args, {
   boolean: ["local"],
@@ -20,16 +23,12 @@ const packages = [
   "cli-darwin-arm64",
 ];
 
-const examples = [
-  "bucket-r2",
-  "bucket-s3",
-  "config-formats",
-  "artifacts-docker",
-  "artifacts-archive",
-  "dns-cloudflare",
-  "service-vite-react-node",
-  "service-vite-react",
-];
+const examples: string[] = [];
+for await (const dirEntry of walk("../../examples", { maxDepth: 1 })) {
+  if (existsSync(join(dirEntry.path, "package.json"))) {
+    examples.push(basename(dirEntry.path));
+  }
+}
 
 const decoder = new TextDecoder();
 function decode(buffer: BufferSource): string {
@@ -105,7 +104,7 @@ async function updateLocalExamples(
     const { hostname } = new URL(registry);
     await new Deno.Command("yarn", {
       args: ["config", "set", "npmRegistryServer", registry],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
     await new Deno.Command("yarn", {
       args: [
@@ -115,32 +114,32 @@ async function updateLocalExamples(
         "--json",
         `["${hostname}"]`,
       ],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
 
     const o = await new Deno.Command("yarn", {
       args: ["up", "@golde/*", "--caret"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
     logger.info(decode(o.stdout));
     logger.error(decode(o.stderr));
 
     await new Deno.Command("yarn", {
       args: ["config", "unset", "npmRegistryServer"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
     await new Deno.Command("yarn", {
       args: ["config", "unset", "unsafeHttpWhitelist"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
 
     await new Deno.Command("git", {
       args: ["restore", "yarn.lock"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
     await new Deno.Command("git", {
       args: ["restore", "package.json"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
   }
 }
@@ -154,19 +153,19 @@ async function updateExamples(
 
     await new Deno.Command("yarn", {
       args: ["config", "set", "npmRegistryServer", registry],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
 
     const o = await new Deno.Command("yarn", {
       args: ["up", "@golde/*", "--caret"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
     logger.info(decode(o.stdout));
     logger.error(decode(o.stderr));
 
     await new Deno.Command("yarn", {
       args: ["config", "unset", "npmRegistryServer"],
-      cwd: `../examples/${example}`,
+      cwd: `../../examples/${example}`,
     }).output();
   }
 }
@@ -175,7 +174,7 @@ async function commitExamplesChanges() {
   logger.info("Committing examples changes");
   const o1 = await new Deno.Command("git", {
     args: ["add", "."],
-    cwd: `../examples`,
+    cwd: `../../examples`,
   })
     .output();
   logger.info(decode(o1.stdout));
@@ -183,7 +182,7 @@ async function commitExamplesChanges() {
 
   const o2 = await new Deno.Command("git", {
     args: ["commit", "-m", "chore(examples): update cli client"],
-    cwd: `../examples`,
+    cwd: `../../examples`,
   })
     .output();
   logger.info(decode(o2.stdout));

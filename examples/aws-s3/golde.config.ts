@@ -1,14 +1,18 @@
 import type {Config} from '@golde/cli';
 
 const config: Config = {
-  name: "example-dns-cloudflare",
+  name: "example-aws-s3",
   providers: {
     golde: {
       apiKey: "{{ env.GOLDE_API_KEY }}",
     },
   },
-  artifacts: {
-
+  aws: {
+    s3: {
+      "example-aws-s3": {
+        
+      }
+    }
   }
 };
 

@@ -1,5 +1,5 @@
 {
-  "name": "@golde/example-artifacts-docker",
+  "name": "@golde/example-docker-image-ghcr",
   "packageManager": "yarn@4.5.0",
   "type": "module",
   "private": true,

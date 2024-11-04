@@ -1,10 +1,10 @@
-import { logger } from "../logger.ts";
-import { DockerClient } from "../artifacts/client/docker.ts";
-import type { DockerConfig } from "./types.ts";
-import type { GoldeCredentials } from "../golde/types.ts";
+import { logger } from "../../logger.ts";
+import { DockerClient } from "./client.ts";
+import type { DockerCredentials } from "../types.ts";
+import type { GoldeCredentials } from "../../golde/types.ts";
 
 export async function createDockerClient(
-  config: DockerConfig | GoldeCredentials,
+  config: DockerCredentials | GoldeCredentials,
 ): Promise<DockerClient> {
   if ("apiKey" in config) {
     logger.warn("Golde docker registry not implemented");
@@ -14,7 +14,7 @@ export async function createDockerClient(
     registry,
     username,
     password,
-  } = config as DockerConfig;
+  } = config as DockerCredentials;
 
   const docker = new DockerClient(
     registry,

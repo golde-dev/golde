@@ -1,9 +1,8 @@
-import type { ArtifactsConfig } from "../artifacts/types.ts";
 import type { AWSConfig, AWSCredentials } from "../aws/types.ts";
 import type { CloudflareConfig, CloudflareCredentials } from "../cloudflare/types.ts";
 import type { GoldeCredentials } from "../golde/types.ts";
 import type { HCloudCredentials } from "../hcloud/types.ts";
-import type { DockerConfig } from "../docker/types.ts";
+import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
 
 export type Tags = Record<string, string>;
@@ -22,7 +21,7 @@ export interface ProvidersConfig {
    * Cloudflare provider config
    */
   cloudflare?: CloudflareCredentials;
-  docker?: DockerConfig;
+  docker?: DockerCredentials;
   /**
    * Hetzner cloud provider config
    */
@@ -48,8 +47,8 @@ export type Config = {
    */
   state?: StateConfig;
   aws?: AWSConfig;
+  docker?: DockerConfig;
   cloudflare?: CloudflareConfig;
-  artifacts?: ArtifactsConfig;
   output?: Output;
 };
 

@@ -9,12 +9,12 @@
 			"name": "Agent"
 		},
 		{
-			"path": "packages/examples",
-			"name": "Examples"
-		},
-		{
 			"path": "packages/docs",
 			"name": "Docs"
+		},
+		{
+			"path": "examples",
+			"name": "Examples"
 		},
 		{
 			"path": ".",

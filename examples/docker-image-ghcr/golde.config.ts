@@ -1,7 +1,7 @@
 import type {Config} from '@golde/cli';
 
 const config: Config = {
-  name: "example-artifacts-docker",
+  name: "example-docker-image-ghcr",
   providers: {
     golde: {
       apiKey: "{{ env.GOLDE_API_KEY }}",
@@ -14,7 +14,7 @@ const config: Config = {
   },
   artifacts: {
     docker: {
-      "example-artifacts-docker": {
+      "example-docker-image-ghcr": {
         tags: {"latest": ""},
       }
     }
