@@ -1,5 +1,5 @@
 import { ConfigError, ConfigErrorCode } from "../error.ts";
-import type { GitInfo } from "../clients/git.ts";
+import type { GitInfo } from "./git.ts";
 import type { Dependencies } from "../types/dependencies.ts";
 import { existsSync } from "@std/fs/exists";
 

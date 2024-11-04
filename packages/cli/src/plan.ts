@@ -1,7 +1,7 @@
 import { logger } from "./logger.ts";
 import { createArtifactsPlan } from "./artifacts/plan.ts";
-import { createBucketsPlan } from "./buckets/plan.ts";
-import { createDNSPlan } from "./dns/plan.ts";
+import { createCloudflarePlan } from "./cloudflare/plan.ts";
+import { createAWSPlan } from "./aws/plan.ts";
 import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
@@ -84,8 +84,8 @@ export async function createPlan(
     const plan: Plan = (
       await Promise.all(
         [
-          createDNSPlan(context),
-          createBucketsPlan(context),
+          createAWSPlan(context),
+          createCloudflarePlan(context),
           createArtifactsPlan(context),
         ],
       )

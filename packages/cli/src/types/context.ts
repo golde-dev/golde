@@ -1,9 +1,9 @@
-import type { AWSClient } from "../clients/aws/client.ts";
-import type { CloudflareClient } from "../clients/cloudflare/client.ts";
-import type { DockerClient } from "../clients/docker.ts";
-import type { GitInfo } from "../clients/git.ts";
-import type { GoldeClient } from "../clients/golde/client.ts";
-import type { HCloudClient } from "../clients/hcloud/client.ts";
+import type { AWSClient } from "../aws/client/client.ts";
+import type { DockerClient } from "../artifacts/client/docker.ts";
+import type { GitInfo } from "../utils/git.ts";
+import type { GoldeClient } from "../golde/client/client.ts";
+import type { CloudflareClient } from "../cloudflare/client/client.ts";
+import type { HCloudClient } from "../hcloud/client/client.ts";
 import type { Config, Tags } from "./config.ts";
 import type { AbstractStateClient, State } from "./state.ts";
 

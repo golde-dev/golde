@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Resource, WithBranch } from "../types/config.ts";
-import { getBranchName, getDefaultBranch } from "../clients/git.ts";
+import { getBranchName, getDefaultBranch } from "./git.ts";
 
 export const branchSchema = z
   .string()

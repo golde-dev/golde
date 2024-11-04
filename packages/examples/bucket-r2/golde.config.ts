@@ -7,8 +7,8 @@ const config: Config = {
       apiKey: "{{ env.GOLDE_API_KEY }}",
     },
   },
-  buckets: {
-    cloudflare: {
+  cloudflare: {
+    r2: {
       
     }
   }

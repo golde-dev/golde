@@ -2,11 +2,11 @@ import { logger } from "./logger.ts";
 import { confirm, input, select } from "@inquirer/prompts";
 import { projectNameSchema } from "./schema.ts";
 import { ZodError, type ZodSchema } from "zod";
-import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
-import { GoldeError } from "./clients/golde/base.ts";
+import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
+import { GoldeError } from "./golde/client/base.ts";
 import { resolve } from "@std/path/resolve";
 import { existsSync } from "@std/fs/exists";
-import type { GoldeClient } from "./clients/golde/client.ts";
+import type { GoldeClient } from "./golde/client/client.ts";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {

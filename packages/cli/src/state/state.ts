@@ -4,11 +4,11 @@ import { S3StateClient } from "./s3State.ts";
 import { FSStateClient } from "./fsState.ts";
 import type { AbstractStateClient } from "../types/state.ts";
 import type { S3StateConfig, StateConfig } from "./types.ts";
-import type { AWSConfig } from "../providers/types.ts";
+import type { AWSCredentials } from "../aws/types.ts";
 
 const getAWSCredentials = (
   config: S3StateConfig,
-  awsConfig?: AWSConfig,
+  awsConfig?: AWSCredentials,
 ) => {
   const {
     accessKeyId = awsConfig?.accessKeyId,
@@ -34,7 +34,7 @@ const getAWSCredentials = (
 
 export async function createStateClient(
   config: StateConfig,
-  awsConfig?: AWSConfig,
+  awsConfig?: AWSCredentials,
 ): Promise<AbstractStateClient> {
   if (config.type === "s3") {
     const {

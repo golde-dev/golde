@@ -5,7 +5,7 @@ import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { dynamicImport } from "./utils/import.ts";
-import { getBranchName, getGitInfo, type GitInfo } from "./clients/git.ts";
+import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
 import { isEmpty } from "moderndash";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
 import { extname, globToRegExp } from "@std/path";

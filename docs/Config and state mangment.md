@@ -16,8 +16,8 @@ Given a configuration like this:
 
 ```json
 {
-  "buckets": {
-    "cloudflare": {
+  "cloudflare": {
+    "r2": {
       "bucket1": { "branch": "master" },
       "bucket2": { "storageClass": "Standard" },
       "bucket3": { "branch": "develop" }
@@ -32,8 +32,8 @@ The resulting state, when executed fully on both branches, would look like this:
 
 ```json
 {
-  "buckets": {
-    "cloudflare": {
+  "cloudflare": {
+    "r2": {
       "bucket1": {
         "branch": "master",
         "createdAt": "2024-01-01T00:00:00.000Z",
@@ -53,8 +53,8 @@ The resulting state, when executed fully on both branches, would look like this:
 
 ```json
 {
-  "buckets": {
-    "cloudflare": {
+  "cloudflare": {
+    "r2": {
       "bucket3": {
         "branch": "develop",
         "createdAt": "2024-01-01T00:00:00.000Z",
@@ -78,15 +78,15 @@ plan(currentBranchState, currentBranchConfig): Plan
 ```typescript
 plan(
   {
-    "buckets": {
-      "cloudflare": {
+    "cloudflare": {
+      "r2": {
         "bucket1": { "branch": "master" }
       }
     }
   },
   {
-    "buckets": {
-      "cloudflare": {
+    "cloudflare": {
+      "r2": {
         "bucket1": {
           "branch": "master",
           "createdAt": "2024-01-01T00:00:00.000Z",
@@ -108,8 +108,8 @@ Resources can be created for each `feature/*` branch using the git template. If 
 
 ```json
 {
-  "buckets": {
-    "cloudflare": {
+  "cloudflare": {
+    "r2": {
       "bucket1": { "branch": "master" },
       "bucket2": { "branch": "develop" },
       "branch-{{git.BRANCH_SLUG}}": { 
@@ -126,8 +126,8 @@ Assume two developers are working on `feature/test` and `feature/test2` branches
 
 ```json
 {
-  "buckets": {
-    "cloudflare": {
+  "cloudflare": {
+    "r2": {
       "branch-feature--test": {
         "branch": "feature/test",
         "createdAt": "2024-01-01T00:00:00.000Z",
@@ -145,8 +145,8 @@ Assume two developers are working on `feature/test` and `feature/test2` branches
 
 ```json
 {
-  "buckets": {
-    "cloudflare": {
+  "cloudflare": {
+    "r2": {
       "branch-feature--test2": {
         "branch": "feature/test2",
         "createdAt": "2024-01-01T00:00:00.000Z",
@@ -170,16 +170,16 @@ Resources can depend on each other across branches. For instance, a staging serv
 
 ```json
 {
-  "servers": {
-    "hcloud": {
+  "hcloud": {
+    "servers": {
       "staging": {
         "type": "cpx21",
         "location": "fsn1"
       }
     }
   },
-  "dns": {
-    "cloudflare": {
+  "cloudflare": {
+    "dns": {
       "golde.dev": {
         "A": {
           "dev": {
@@ -210,12 +210,12 @@ For the `feature/test` branch, the plan calculation includes:
 ```typescript
 plan(
   {
-    "dns": {
-      "cloudflare": {
+    "cloudflare": {
+      "dns": {
         "golde.dev": {
           "A": {
             "feature--test": {
-              "value": "{{state.servers.hcloud.staging.ipv4}}",
+              "value": "{{state.hcloud.servers.staging.ipv4}}",
               "branchPattern": "feature/*",
               "branch": "feature/test"
             }
@@ -228,7 +228,7 @@ plan(
 )
 ```
 
-This plan creates a dependency on the `servers.hcloud.staging` resource:
+This plan creates a dependency on the `hcloud.severs.staging` resource:
 
 ```json
 [
@@ -236,30 +236,30 @@ This plan creates a dependency on the `servers.hcloud.staging` resource:
     "type": "Create",
     "executor": "createDnsRecord",
     "args": ["cloudflare", "golde.dev", "A", "feature--test"],
-    "dependsOn": ["servers.hcloud.staging.ipv4"]
+    "dependsOn": ["hcloud.servers.staging.ipv4"]
   }
 ]
 ```
 
-During execution, check the state of `servers.hcloud.staging.ipv4` to determine if it exists and which branch owns it:
+During execution, check the state of `hcloud.servers.staging.ipv4` to determine if it exists and which branch owns it:
 
 ```typescript
-getStateForResource("servers.hcloud.staging.ipv4")
+getStateForResource("hcloud.servers.staging.ipv4")
 ```
 
 ```json
 {
   "branch": "develop",
-  "resource": "servers.hcloud.staging",
+  "resource": "hcloud.servers.staging",
   "state": { "ipv4": "123.123.123.123" }
 }
 ```
 
-A resource lock is applied to `feature/test`, and a partial lock on `develop`. The partial lock allows changes to `develop` unless they affect `servers.hcloud.staging.ipv4`. The full lock on `feature/test` ensures state consistency during updates.
+A resource lock is applied to `feature/test`, and a partial lock on `develop`. The partial lock allows changes to `develop` unless they affect `hcloud.servers.staging.ipv4`. The full lock on `feature/test` ensures state consistency during updates.
 
 ```typescript
 lockState("feature/test");
-lockState("develop", ["servers.hcloud.staging"]);
+lockState("develop", ["hcloud.servers.staging"]);
 ```
 
 After creating locks, re-run the plan for `feature/test` and handle any state dependencies. Upon completion, release the locks and update the feature branch's state.

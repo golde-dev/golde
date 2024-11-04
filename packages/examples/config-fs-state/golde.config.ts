@@ -11,8 +11,8 @@ const config: Config = {
       accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
     },
   },
-  buckets: {
-    cloudflare: {
+  cloudflare: {
+    r2: {
       "example-config-fs-state": {
         storageClass: "Standard"
       }

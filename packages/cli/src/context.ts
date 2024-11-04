@@ -1,16 +1,16 @@
 import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
-import { createGoldeClient, getGoldeConfig } from "./providers/golde.ts";
-import { createHCloudClient } from "./providers/hcloud.ts";
+import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
+import { createHCloudClient } from "./hcloud/client/factory.ts";
 import type { Config } from "./types/config.ts";
-import { createDockerClient } from "./providers/docker.ts";
-import { createGitClient } from "./providers/git.ts";
-import type { DockerClient } from "./clients/docker.ts";
-import { createCloudflareClient } from "./providers/cloudflare.ts";
+import { createDockerClient } from "./docker/docker.ts";
+import type { DockerClient } from "./artifacts/client/docker.ts";
+import { createCloudflareClient } from "./cloudflare/client/factory.ts";
 import { createStateClient } from "./state/state.ts";
 import type { Context } from "./types/context.ts";
-import { createAWSClient } from "./providers/aws.ts";
+import { createAWSClient } from "./aws/client/factory.ts";
 import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
+import { getGitInfo } from "./utils/git.ts";
 
 export const initializeContext = async (
   config: Config,
@@ -50,7 +50,6 @@ export const initializeContext = async (
       cloudflareClient,
       awsClient,
       dockerClient,
-      gitClient,
     ] = await Promise.all([
       golde ? createGoldeClient(golde) : undefined,
       state ? createStateClient(state, aws) : undefined,
@@ -58,10 +57,9 @@ export const initializeContext = async (
       cloudflare ? createCloudflareClient(cloudflare) : undefined,
       aws ? createAWSClient(aws) : undefined,
       createDocker(),
-      createGitClient(),
     ]);
 
-    const git = gitClient.getGitInfo();
+    const git = getGitInfo();
     logger.debug("Git info", git);
 
     const {

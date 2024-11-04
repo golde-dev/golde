@@ -163,7 +163,7 @@
               "properties": {
                 "apiKey": {
                   "type": "string",
-                  "description": "Namecheap api keyhttps://www.namecheap.com/support/api/intro/"
+                  "description": "Namecheap api key https://www.namecheap.com/support/api/intro/"
                 },
                 "apiUser": {
                   "type": "string",
@@ -194,10 +194,28 @@
           },
           "additionalProperties": false
         },
-        "dns": {
+        "aws": {
           "type": "object",
           "properties": {
-            "cloudflare": {
+            "s3": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  },
+                  "region": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "route53": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",
@@ -228,10 +246,10 @@
                             "$ref": "#/definitions/golde/properties/tags"
                           },
                           "branch": {
-                            "type": "string"
+                            "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
                           },
                           "branchPattern": {
-                            "type": "string"
+                            "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
                           }
                         },
                         "required": [
@@ -243,8 +261,14 @@
                   ]
                 }
               }
-            },
-            "namecheap": {
+            }
+          },
+          "additionalProperties": false
+        },
+        "cloudflare": {
+          "type": "object",
+          "properties": {
+            "dns": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",
@@ -265,11 +289,20 @@
                             "type": "number",
                             "description": "TTL in seconds"
                           },
+                          "proxied": {
+                            "type": "boolean"
+                          },
+                          "comment": {
+                            "type": "string"
+                          },
+                          "tags": {
+                            "$ref": "#/definitions/golde/properties/tags"
+                          },
                           "branch": {
-                            "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                            "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
                           },
                           "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                            "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
                           }
                         },
                         "required": [
@@ -281,23 +314,17 @@
                   ]
                 }
               }
-            }
-          },
-          "additionalProperties": false
-        },
-        "buckets": {
-          "type": "object",
-          "properties": {
-            "cloudflare": {
+            },
+            "r2": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",
                 "properties": {
                   "branch": {
-                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
                   },
                   "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
                   },
                   "locationHint": {
                     "type": "string",
@@ -315,24 +342,6 @@
                       "Standard",
                       "InfrequentAccess"
                     ]
-                  }
-                },
-                "additionalProperties": false
-              }
-            },
-            "aws": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "branch": {
-                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
-                  },
-                  "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
-                  },
-                  "region": {
-                    "type": "string"
                   }
                 },
                 "additionalProperties": false
@@ -365,10 +374,10 @@
                     "$ref": "#/definitions/golde/properties/tags"
                   },
                   "branch": {
-                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branch"
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
                   },
                   "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/dns/properties/cloudflare/additionalProperties/additionalProperties/anyOf/1/additionalProperties/properties/branchPattern"
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
                   }
                 },
                 "additionalProperties": false

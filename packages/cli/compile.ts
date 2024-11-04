@@ -65,7 +65,7 @@ async function compile(target: Target, path: string, local: boolean) {
     target,
     "--output",
     path,
-    "./src/bin/golde.ts",
+    "./src/cli.ts",
   ];
 
   const { stderr, stdout, success } = await new Deno.Command("deno", {

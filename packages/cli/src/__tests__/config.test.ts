@@ -1,7 +1,7 @@
 import { describe, it } from "@std/testing/bdd";
 import { resolveConfig } from "../config.ts";
 import { expect } from "@std/expect/expect";
-import { getGitInfo, type GitInfo } from "../clients/git.ts";
+import { getGitInfo, type GitInfo } from "../utils/git.ts";
 
 describe("resolveConfig", () => {
   Deno.env.set("TEST", "test");
@@ -18,8 +18,8 @@ describe("resolveConfig", () => {
           secretAccessKey: "{{ env.TEST }}",
         },
       },
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           [`bucket_{{ env.NAME }}`]: {
             storageClass: "Standard",
           },
@@ -35,8 +35,8 @@ describe("resolveConfig", () => {
           secretAccessKey: "test",
         },
       },
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           bucket_name: {
             branch: "master",
             storageClass: "Standard",
@@ -61,8 +61,8 @@ describe("resolveConfig", () => {
         "BRANCH_NAME": "{{ git.BRANCH_NAME }}",
         "BRANCH_SLUG": "{{ git.BRANCH_SLUG }}",
       },
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           [`{{ git.BRANCH_NAME }}-{{ git.BRANCH_SLUG }}`]: {
             storageClass: "Standard",
             branch: "master",
@@ -77,8 +77,8 @@ describe("resolveConfig", () => {
         BRANCH_NAME: "master",
         BRANCH_SLUG: "master",
       },
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           "master-master": {
             storageClass: "Standard",
             branch: "master",
@@ -97,8 +97,8 @@ describe("resolveConfig", () => {
     const config = resolveConfig(
       {
         name: "test",
-        buckets: {
-          cloudflare: {
+        cloudflare: {
+          r2: {
             [`bucket`]: {
               storageClass: "Standard",
               branch: "master",
@@ -121,8 +121,8 @@ describe("resolveConfig", () => {
 
     expect(config).toEqual({
       name: "test",
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           "bucket_branch_feature-test": {
             storageClass: "Standard",
             branch: "feature/test",
@@ -146,8 +146,8 @@ describe("resolveConfig", () => {
     const config = resolveConfig(
       {
         name: "test",
-        buckets: {
-          cloudflare: {
+        cloudflare: {
+          r2: {
             [`bucket_pattern_{{ git.BRANCH_SLUG }}`]: {
               storageClass: "Standard",
               branchPattern: "feature/*",
@@ -173,8 +173,8 @@ describe("resolveConfig", () => {
 
     const config = resolveConfig({
       name: "test",
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           [`bucket`]: {
             storageClass: "Standard",
             branch: "master",
@@ -194,8 +194,8 @@ describe("resolveConfig", () => {
 
     expect(config).toEqual({
       name: "test",
-      buckets: {
-        cloudflare: {
+      cloudflare: {
+        r2: {
           bucket: {
             storageClass: "Standard",
             branch: "master",

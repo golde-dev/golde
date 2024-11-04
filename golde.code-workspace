@@ -27,6 +27,7 @@
 			"astrojs",
 			"Deno",
 			"hcloud",
+			"moderndash",
 			"namecheap",
 			"Nodenv"
 		],

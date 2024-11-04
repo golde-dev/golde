@@ -1,12 +1,33 @@
 import type { ArtifactsConfig } from "../artifacts/types.ts";
-import type { BucketsConfig } from "../buckets/types.ts";
-import type { DNSConfig } from "../dns/types.ts";
-import type { ProvidersConfig } from "../providers/types.ts";
-import type { ServersConfig } from "../servers/types.ts";
+import type { AWSConfig, AWSCredentials } from "../aws/types.ts";
+import type { CloudflareConfig, CloudflareCredentials } from "../cloudflare/types.ts";
+import type { GoldeCredentials } from "../golde/types.ts";
+import type { HCloudCredentials } from "../hcloud/types.ts";
+import type { DockerConfig } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
 
 export type Tags = Record<string, string>;
 export type Output = Record<string, string>;
+
+export interface ProvidersConfig {
+  /**
+   * Golde provider config
+   */
+  golde?: GoldeCredentials;
+  /**
+   * AWS access credentials
+   */
+  aws?: AWSCredentials;
+  /**
+   * Cloudflare provider config
+   */
+  cloudflare?: CloudflareCredentials;
+  docker?: DockerConfig;
+  /**
+   * Hetzner cloud provider config
+   */
+  hcloud?: HCloudCredentials;
+}
 
 export type Config = {
   /**
@@ -26,9 +47,8 @@ export type Config = {
    * Config for state management, define how projects state will be stored
    */
   state?: StateConfig;
-  dns?: DNSConfig;
-  buckets?: BucketsConfig;
-  servers?: ServersConfig;
+  aws?: AWSConfig;
+  cloudflare?: CloudflareConfig;
   artifacts?: ArtifactsConfig;
   output?: Output;
 };

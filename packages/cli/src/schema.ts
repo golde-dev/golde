@@ -1,13 +1,15 @@
 import { z } from "zod";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
-import { dnsSchema } from "./dns/schema.ts";
-import { providersSchema } from "./providers/schema.ts";
-import { bucketSchema } from "./buckets/schema.ts";
 import { artifactsSchema } from "./artifacts/schema.ts";
 import { stateSchema } from "./state/schema.ts";
 import { tagsSchema } from "./utils/tags.ts";
-import type { Config } from "./types/config.ts";
+import { awsConfigSchema, awsCredentialsSchema } from "./aws/schema.ts";
+import { cloudflareConfigSchema, cloudflareCredentialsSchema } from "./cloudflare/schema.ts";
+import type { Config, ProvidersConfig } from "./types/config.ts";
 import type { ZodType } from "zod";
+import { goldeCredentialsSchema } from "./golde/schema.ts";
+import { dockerConfigSchema } from "./docker/schema.ts";
+import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
 
 export const projectNameSchema = z
   .string()
@@ -17,6 +19,16 @@ export const projectNameSchema = z
     "Projects name may include alphanumeric characters and the following special symbols: -, _, @, ., /, #, &, +.",
   );
 
+export const providersSchema: ZodType<ProvidersConfig> = z
+  .object({
+    golde: goldeCredentialsSchema.optional(),
+    aws: awsCredentialsSchema.optional(),
+    docker: dockerConfigSchema.optional(),
+    cloudflare: cloudflareCredentialsSchema.optional(),
+    hcloud: hcloudCredentialsSchema.optional(),
+  })
+  .strict();
+
 export const outputSchema = z.record(z.string());
 
 export const schema: ZodType<Config> = z
@@ -25,8 +37,8 @@ export const schema: ZodType<Config> = z
     tags: tagsSchema.optional(),
     state: stateSchema.optional(),
     providers: providersSchema.optional(),
-    dns: dnsSchema.optional(),
-    buckets: bucketSchema.optional(),
+    aws: awsConfigSchema.optional(),
+    cloudflare: cloudflareConfigSchema.optional(),
     artifacts: artifactsSchema.optional(),
     output: outputSchema.optional(),
   })
