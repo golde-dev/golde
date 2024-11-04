@@ -13,23 +13,25 @@ const config: Config = {
   },
   cloudflare: {
     dns: {
-      "golde.dev": {
+      "golde-cf.dev": {
         "A": {
-          "dns-cloudflare": {
-            value: "",
-            ttl: 3600,
-            proxied: false, 
-          },
-          "dns-cloudflare-dev": {
-            value: "",
+          "cloudflare-dns": {
+            value: "192.168.1.1",
+            branch: "master",
             ttl: 3600,
             proxied: false,
           },
-          "{{ git.BRANCH_SLUG }}-dns-cloudflare": {
-            branchPattern: "feature/examples-dns-cloudflare*",
-            value: "",
+          "dev.cloudflare-dns": {
+            value: "192.168.1.1",
+            branch: "develop",
             ttl: 3600,
-            proxied: false, 
+            proxied: false,
+          },
+          "{{ git.BRANCH_SLUG }}-cloudflare-dns": {
+            branchPattern: "feature/examples-cloudflare-dns*",
+            value: "192.168.1.1",
+            ttl: 3600,
+            proxied: false,
           },
         }
       }
