@@ -31,3 +31,22 @@ export function toTagsArray(tags?: Tags): string[] | undefined {
     return `${name}:${value}`;
   });
 }
+
+interface TagsList {
+  Key: string;
+  Value: string;
+}
+
+export function toTagsList(tags?: Tags): TagsList[] | undefined {
+  if (!tags) {
+    return;
+  }
+  return Object
+    .entries(tags)
+    .map(([Key, Value]) => {
+      return {
+        Key,
+        Value,
+      };
+    });
+}

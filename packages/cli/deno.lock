@@ -3325,7 +3325,6 @@
       "jsr:@std/dotenv@~0.225.2",
       "jsr:@std/expect@^1.0.5",
       "jsr:@std/fs@^1.0.4",
-      "jsr:@std/io@~0.224.9",
       "jsr:@std/log@~0.224.8",
       "jsr:@std/path@^1.0.6",
       "jsr:@std/streams@^1.0.6",

@@ -17,3 +17,10 @@ export async function createRoute53Plan(
 ): Promise<Plan> {
   return await Promise.resolve([]);
 }
+
+export async function createRoute53DestroyPlan(
+  _executors: Executors,
+  _state?: Route53State,
+) {
+  return await Promise.resolve([]);
+}

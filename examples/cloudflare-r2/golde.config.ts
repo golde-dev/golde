@@ -1,15 +1,21 @@
 import type {Config} from "@golde/cli";
 
 const config: Config = {
-  name: "example-dns-cloudflare",
+  name: "example-cloudflare-r2",
   providers: {
     golde: {
       apiKey: "{{ env.GOLDE_API_KEY }}",
     },
+    cloudflare: {
+      apiToken: "{{ env.CLOUDFLARE_API_TOKEN }}",
+      accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
+    },
   },
   cloudflare: {
     r2: {
-      
+      "example-cloudflare-r2": {
+        storageClass: "Standard"
+      }
     }
   }
 };

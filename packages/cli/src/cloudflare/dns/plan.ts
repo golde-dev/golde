@@ -161,7 +161,7 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
   return records;
 }
 
-export const createCloudflareDNSPlan = (
+export const createDNSPlan = (
   executors: ReturnType<typeof createDNSExecutors>,
   tags?: Tags,
   state?: DNSState,
@@ -243,3 +243,31 @@ export const createCloudflareDNSPlan = (
 
   return Promise.resolve(plan);
 };
+
+export function createDNSDestroyPlan(
+  executors: ReturnType<typeof createDNSExecutors>,
+  state?: DNSState,
+) {
+  const plan: Plan = [];
+  logger.debug(
+    "Planning for cloudflare dns changes",
+    {
+      state,
+    },
+  );
+
+  const previous = getPrevious(state);
+  for (const key of Object.keys(previous)) {
+    const { state, zone, name } = previous[key];
+    const deleteUnit: DeleteUnit<RecordState, DeleteZoneRecord> = {
+      type: Type.Delete,
+      executor: executors.deleteZoneRecord,
+      args: [zone, name],
+      path: key,
+      state: state,
+    };
+    plan.push(deleteUnit);
+  }
+
+  return Promise.resolve(plan);
+}

@@ -118,7 +118,7 @@ export class S3Client extends AWSClientBase {
     input: CreateBucketCommandInput,
   ): Promise<CreateBucketCommandOutput> {
     try {
-      logger.debug("[AWS] Create bucket", { region, input });
+      logger.debug("[AWS] Creating bucket", { region, input });
 
       const command = new CreateBucketCommand(input);
       const result = await this

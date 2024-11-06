@@ -47,11 +47,11 @@ export const getBranchSlug = memoize((revision: string = "HEAD") =>
   slugify(getBranchName(revision))
 );
 
-export const getGitInfo = memoize((): GitInfo => {
+export const getGitInfo = memoize((branch?: string): GitInfo => {
   const defaultBranch = getDefaultBranch();
-  const branchName = getBranchName();
-  const currentHash = getRefHash();
-  const branchSlug = getBranchSlug();
+  const branchName = getBranchName(branch);
+  const currentHash = getRefHash(branch);
+  const branchSlug = getBranchSlug(branch);
 
   return {
     defaultBranch,

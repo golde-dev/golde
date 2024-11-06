@@ -2,7 +2,7 @@ import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { spy } from "@std/testing/mock";
 import { Type } from "../../../types/plan.ts";
-import { createR2BucketsPlan } from "../plan.ts";
+import { createR2Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "../plan.ts";
 import type { BucketConfig, BucketState, R2Config, R2State } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../types/plan.ts";
@@ -24,7 +24,7 @@ describe("cloudflare buckets", () => {
         },
       };
 
-      const result = await createR2BucketsPlan(
+      const result = await createR2Plan(
         executors,
         state,
         config,
@@ -64,7 +64,7 @@ describe("cloudflare buckets", () => {
           branch: "master",
         },
       };
-      await expect(createR2BucketsPlan(
+      await expect(createR2Plan(
         executors,
         state,
         config,
@@ -87,7 +87,7 @@ describe("cloudflare buckets", () => {
 
       const config: R2Config = {};
 
-      const result = await createR2BucketsPlan(
+      const result = await createR2Plan(
         executors,
         state,
         config,
@@ -140,7 +140,7 @@ describe("cloudflare buckets", () => {
         state: state.bucket1,
       };
 
-      const result = await createR2BucketsPlan(
+      const result = await createR2Plan(
         executors,
         state,
         config,
@@ -172,7 +172,7 @@ describe("cloudflare buckets", () => {
           branch: "master",
         },
       };
-      const result = await createR2BucketsPlan(
+      const result = await createR2Plan(
         executors,
         state,
         config,

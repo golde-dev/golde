@@ -1,6 +1,7 @@
 import { validateConfig } from "./schema.ts";
 import { logger } from "./logger.ts";
 import { existsSync } from "@std/fs";
+import { resolve } from "@std/path/resolve";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
@@ -8,7 +9,7 @@ import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
 import { isEmpty } from "moderndash";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
-import { extname, globToRegExp } from "@std/path";
+import { extname } from "@std/path";
 import { decode } from "./utils/text.ts";
 import {
   envTemplate,
@@ -19,7 +20,6 @@ import {
 } from "./utils/template.ts";
 import type { Dependencies } from "./types/dependencies.ts";
 import type { Config } from "./types/config.ts";
-import { resolve } from "@std/path/resolve";
 
 const loadConfig = async (
   path: string,
@@ -96,7 +96,7 @@ const testBranchPattern = (branch: unknown, pattern: unknown) => {
   if (typeof pattern !== "string") {
     throw new Error("Pattern is not a string");
   }
-  return globToRegExp(pattern).test(branch);
+  return new RegExp(pattern).test(branch);
 };
 
 const testBranchName = (branch: unknown, filterBranch: string) => {
@@ -198,13 +198,13 @@ export const resolveConfig = (config: unknown, gitInfo: GitInfo, branch?: string
   }
 };
 
-export async function getConfig(configPath?: string, all: boolean = false): Promise<Config> {
+export async function getConfig(branch: string, configPath?: string): Promise<Config> {
   const rawConfig = await getConfigRaw(configPath);
 
-  const branch = getBranchName();
-  const gitInfo = getGitInfo();
+  const branchName = getBranchName(branch);
+  const gitInfo = getGitInfo(branch);
 
-  return all ? resolveConfig(rawConfig, gitInfo) : resolveConfig(rawConfig, gitInfo, branch);
+  return resolveConfig(rawConfig, gitInfo, branchName);
 }
 
 export function getFinalConfig(config: Config, dependencies: Dependencies): Config {

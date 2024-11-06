@@ -19,3 +19,14 @@ export async function createImagePlan(
   });
   return await Promise.resolve([]);
 }
+
+export async function createImageDestroyPlan(
+  executors: ReturnType<typeof createImageExecutors>,
+  state?: ImagesState,
+) {
+  console.log({
+    executors,
+    state,
+  });
+  return await Promise.resolve([]);
+}

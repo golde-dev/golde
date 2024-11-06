@@ -2,8 +2,12 @@ import { isEmpty } from "moderndash";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import type { Plan } from "../types/plan.ts";
 import type { Context } from "../types/context.ts";
-import { createRoute53Executors, createRoute53Plan } from "./route53/plan.ts";
-import { createS3Executors, createS3Plan } from "./s3/plan.ts";
+import {
+  createRoute53DestroyPlan,
+  createRoute53Executors,
+  createRoute53Plan,
+} from "./route53/plan.ts";
+import { createS3DestroyPlan, createS3Executors, createS3Plan } from "./s3/plan.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -57,6 +61,50 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
       tags,
       s3State,
       s3Config,
+    ));
+  }
+
+  return (await Promise.all(plan)).flat();
+}
+
+export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
+  const {
+    previousState: {
+      aws: awsState,
+    } = {},
+    aws,
+  } = context;
+
+  const plan: Promise<Plan>[] = [];
+
+  if (isEmpty(awsState)) {
+    return [];
+  }
+
+  if (!aws) {
+    throw new PlanError(
+      "AWS provider is required when using aws, ensure that providers.aws is defined",
+      PlanErrorCode.PROVIDER_MISSING,
+    );
+  }
+  const {
+    route53: route53State,
+    s3: s3State,
+  } = awsState ?? {};
+
+  if (!isEmpty(route53State)) {
+    const executors = createRoute53Executors(aws);
+    plan.push(createRoute53DestroyPlan(
+      executors,
+      route53State,
+    ));
+  }
+
+  if (!isEmpty(s3State)) {
+    const executors = createS3Executors(aws);
+    plan.push(createS3DestroyPlan(
+      executors,
+      s3State,
     ));
   }
 

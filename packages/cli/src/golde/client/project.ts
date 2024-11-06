@@ -11,10 +11,10 @@ export class ProjectClient extends GoldeClientBase {
   /**
    * Create new project
    */
-  public createProject(name: string): Promise<Project> {
+  public async createProject(name: string): Promise<Project> {
     logger.debug("[Golde] creating project", { name });
     try {
-      return this.makeRequest<Project>("/projects", "POST", {
+      return await this.makeRequest<Project>("/projects", "POST", {
         name,
       });
     } catch (e) {
@@ -28,10 +28,10 @@ export class ProjectClient extends GoldeClientBase {
   /**
    * Get project by name
    */
-  public getProject(name: string): Promise<Project> {
+  public async getProject(name: string): Promise<Project> {
     logger.debug("[Golde] Fetching project", { name });
     try {
-      return this.makeRequest<Project>(`/projects/${name}`, "GET");
+      return await this.makeRequest<Project>(`/projects/${name}`, "GET");
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("[Golde] Failed to get project", e.cause);
@@ -44,6 +44,8 @@ export class ProjectClient extends GoldeClientBase {
    * Check if project exists
    */
   public async hasProject(name: string): Promise<boolean> {
-    return Boolean(await notFoundAsUndefined(this.getProject(name)));
+    return Boolean(
+      await notFoundAsUndefined(this.makeRequest<Project>(`/projects/${name}`, "GET")),
+    );
   }
 }

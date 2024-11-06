@@ -1,7 +1,8 @@
-import type { Resource, WithBranch } from "../../types/config.ts";
+import type { Resource, Tags, WithBranch } from "../../types/config.ts";
 
 export interface S3BucketConfig extends Resource {
   region?: string;
+  tags?: Tags;
 }
 
 export interface S3Config {
@@ -10,8 +11,8 @@ export interface S3Config {
 
 export interface S3BucketState {
   createdAt: string;
-  location: string;
   arn: string;
+  region: string;
   config: WithBranch<S3BucketConfig>;
 }
 

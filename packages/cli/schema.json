@@ -158,31 +158,12 @@
               "additionalProperties": false,
               "description": "Cloudflare provider config"
             },
-            "namecheap": {
-              "type": "object",
-              "properties": {
-                "apiKey": {
-                  "type": "string",
-                  "description": "Namecheap api key https://www.namecheap.com/support/api/intro/"
-                },
-                "apiUser": {
-                  "type": "string",
-                  "description": "Your Namecheap account username will act as API username"
-                }
-              },
-              "required": [
-                "apiKey",
-                "apiUser"
-              ],
-              "additionalProperties": false,
-              "description": "Hetzner provider config"
-            },
             "hcloud": {
               "type": "object",
               "properties": {
                 "apiKey": {
                   "type": "string",
-                  "description": "Hetzner api key https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"
+                  "description": "Hetzner API token https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"
                 }
               },
               "required": [
@@ -342,60 +323,6 @@
                       "Standard",
                       "InfrequentAccess"
                     ]
-                  }
-                },
-                "additionalProperties": false
-              }
-            }
-          },
-          "additionalProperties": false
-        },
-        "artifacts": {
-          "type": "object",
-          "properties": {
-            "docker": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "context": {
-                    "type": "string"
-                  },
-                  "dockerfile": {
-                    "type": "string"
-                  },
-                  "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "string"
-                    }
-                  },
-                  "tags": {
-                    "$ref": "#/definitions/golde/properties/tags"
-                  },
-                  "branch": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
-                  },
-                  "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
-                  }
-                },
-                "additionalProperties": false
-              }
-            },
-            "archive": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "context": {
-                    "type": "string"
-                  },
-                  "branch": {
-                    "type": "string"
-                  },
-                  "branchPattern": {
-                    "type": "string"
                   }
                 },
                 "additionalProperties": false

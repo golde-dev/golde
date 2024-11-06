@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
-import { artifactsSchema } from "./artifacts/schema.ts";
 import { stateSchema } from "./state/schema.ts";
 import { tagsSchema } from "./utils/tags.ts";
 import { awsConfigSchema, awsCredentialsSchema } from "./aws/schema.ts";
@@ -39,7 +38,6 @@ export const schema: ZodType<Config> = z
     providers: providersSchema.optional(),
     aws: awsConfigSchema.optional(),
     cloudflare: cloudflareConfigSchema.optional(),
-    artifacts: artifactsSchema.optional(),
     output: outputSchema.optional(),
   })
   .strict();

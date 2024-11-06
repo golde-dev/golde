@@ -13,6 +13,7 @@ import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
 import { getGitInfo } from "./utils/git.ts";
 
 export const initializeContext = async (
+  branchName: string,
   config: Config,
   yes: boolean = false,
 ): Promise<Context> => {
@@ -59,12 +60,8 @@ export const initializeContext = async (
       createDocker(),
     ]);
 
-    const git = getGitInfo();
+    const git = getGitInfo(branchName);
     logger.debug("Git info", git);
-
-    const {
-      branchName,
-    } = git;
 
     const contextBase = {
       tags,

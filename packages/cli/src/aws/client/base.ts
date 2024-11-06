@@ -14,6 +14,8 @@ export class AWSClientBase {
   public accountId?: string;
   public arn?: string;
 
+  public defaultRegion = "us-east-2";
+
   constructor(accessKeyId: string, secretAccessKey: string, region?: string) {
     this.accessKeyId = accessKeyId;
     this.secretAccessKey = secretAccessKey;
@@ -24,7 +26,7 @@ export class AWSClientBase {
     try {
       const command = new GetCallerIdentityCommand();
       const stsClient = new STSClient({
-        region: this.region ?? "us-east-2",
+        region: this.region ?? this.defaultRegion,
         credentials: {
           accessKeyId: this.accessKeyId,
           secretAccessKey: this.secretAccessKey,

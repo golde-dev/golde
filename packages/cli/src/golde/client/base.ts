@@ -56,7 +56,7 @@ export class GoldeClientBase {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        throw new GoldeError(`Golde request to: ${path} failed`, {
+        throw new GoldeError(`Golde request failed`, {
           url: r.url,
           status: r.status,
           statusText: r.statusText,

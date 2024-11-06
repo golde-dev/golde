@@ -41,14 +41,14 @@ export async function deleteBucket(this: CloudflareClient, name: string) {
 }
 export type DeleteBucket = typeof deleteBucket;
 
-export const createR2BucketsExecutors = (cloudflare: CloudflareClient) => {
+export const createR2Executors = (cloudflare: CloudflareClient) => {
   return {
     createBucket: createBucket.bind(cloudflare),
     deleteBucket: deleteBucket.bind(cloudflare),
   };
 };
 
-export type Executors = ReturnType<typeof createR2BucketsExecutors>;
+export type Executors = ReturnType<typeof createR2Executors>;
 
 function getCurrent(buckets: R2State = {}) {
   const previous: {
@@ -89,7 +89,7 @@ function getNext(config: R2Config = {}) {
   return next;
 }
 
-export async function createR2BucketsPlan(
+export async function createR2Plan(
   executors: Executors,
   state?: R2State,
   config?: R2Config,
@@ -152,4 +152,29 @@ export async function createR2BucketsPlan(
   }
 
   return await Promise.resolve(plan);
+}
+
+export function createR2DestroyPlan(
+  executors: Executors,
+  state?: R2State,
+) {
+  const plan: Plan = [];
+  logger.debug("[Cloudflare] Creating buckets plan", {
+    state,
+  });
+
+  const previous = getCurrent(state);
+  for (const key of Object.keys(previous)) {
+    const { state, name } = previous[key];
+    const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
+      type: Type.Delete,
+      executor: executors.deleteBucket,
+      args: [name],
+      path: key,
+      state: state,
+    };
+    plan.push(deleteUnit);
+  }
+
+  return Promise.resolve(plan);
 }

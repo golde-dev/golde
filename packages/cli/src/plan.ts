@@ -1,7 +1,7 @@
 import { logger } from "./logger.ts";
-import { createArtifactsPlan } from "./artifacts/plan.ts";
-import { createCloudflarePlan } from "./cloudflare/plan.ts";
-import { createAWSPlan } from "./aws/plan.ts";
+import { createCloudflareDestroyPlan, createCloudflarePlan } from "./cloudflare/plan.ts";
+import { createAWSDestroyPlan, createAWSPlan } from "./aws/plan.ts";
+import { createDockerDestroyPlan, createDockerPlan } from "./docker/plan.ts";
 import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
@@ -80,18 +80,43 @@ export async function createPlan(
   context: Context,
 ): Promise<Plan> {
   try {
-    logger.info("Creating plan");
+    logger.debug("Creating plan");
     const plan: Plan = (
       await Promise.all(
         [
           createAWSPlan(context),
           createCloudflarePlan(context),
-          createArtifactsPlan(context),
+          createDockerPlan(context),
         ],
       )
     ).flat();
 
-    logger.info("Successfully created plan");
+    logger.debug("Successfully created plan");
+    return sortByPath(plan);
+  } catch (error) {
+    if (error instanceof PlanError) {
+      logger.error(`Failed to plan changes: ${error.message}`);
+    } else if (error instanceof Error) {
+      logger.error(`Unknown plan error: ${error.message}`);
+    }
+    return Deno.exit(1);
+  }
+}
+
+export async function createDestroyPlan(context: Context): Promise<Plan> {
+  try {
+    logger.debug("Creating destroy plan");
+    const plan: Plan = (
+      await Promise.all(
+        [
+          createAWSDestroyPlan(context),
+          createCloudflareDestroyPlan(context),
+          createDockerDestroyPlan(context),
+        ],
+      )
+    ).flat();
+
+    logger.debug("Successfully created destroy plan");
     return sortByPath(plan);
   } catch (error) {
     if (error instanceof PlanError) {

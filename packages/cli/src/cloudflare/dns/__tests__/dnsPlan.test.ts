@@ -1,6 +1,6 @@
 import { expect } from "@std/expect";
 import { describe, it } from "@std/testing/bdd";
-import { createCloudflareDNSPlan, createDNSExecutors } from "../plan.ts";
+import { createDNSExecutors, createDNSPlan } from "../plan.ts";
 import { Type } from "../../../types/plan.ts";
 import type { CreateZoneRecord, DeleteZoneRecord, UpdateZoneRecord } from "../plan.ts";
 import type { CloudflareClient } from "../../client/client.ts";
@@ -28,7 +28,7 @@ describe.skip("cloudflare dsn", () => {
       };
       const state: DNSState = {};
 
-      const result = await createCloudflareDNSPlan(
+      const result = await createDNSPlan(
         executors,
         {},
         state,
@@ -68,7 +68,7 @@ describe.skip("cloudflare dsn", () => {
         "Environment": "production",
       };
 
-      const result = await createCloudflareDNSPlan(
+      const result = await createDNSPlan(
         executors,
         tags,
         state,
@@ -137,7 +137,7 @@ describe.skip("cloudflare dsn", () => {
         },
       };
 
-      const result = await createCloudflareDNSPlan(
+      const result = await createDNSPlan(
         executors,
         {},
         state,
@@ -190,7 +190,7 @@ describe.skip("cloudflare dsn", () => {
         },
       };
 
-      const result = await createCloudflareDNSPlan(
+      const result = await createDNSPlan(
         executors,
         {},
         state,
@@ -242,7 +242,7 @@ describe.skip("cloudflare dsn", () => {
         },
       };
 
-      const result = await createCloudflareDNSPlan(
+      const result = await createDNSPlan(
         executors,
         {},
         state,

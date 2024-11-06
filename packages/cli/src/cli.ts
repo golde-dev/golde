@@ -2,7 +2,7 @@ import { load } from "@std/dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig, getFinalConfig } from "./config.ts";
-import { createPlan, hasChanges, printPlan } from "./plan.ts";
+import { createDestroyPlan, createPlan, hasChanges, printPlan } from "./plan.ts";
 import { getFinalContext, initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
@@ -13,7 +13,7 @@ import {
   printChanges,
   updateState,
 } from "./apply.ts";
-import { verifyInstalled } from "./utils/git.ts";
+import { getBranchName, verifyInstalled } from "./utils/git.ts";
 import { getDependencies } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
 import type { LevelName } from "@std/log";
@@ -58,18 +58,23 @@ program
   .option("-j, --json", "logging output as json")
   .action(
     async function (
-      { logLevel, json, config, all }: {
+      options: {
         logLevel: LevelName;
         config: string;
         json: boolean;
-        all: boolean;
         format: "json" | "yaml" | "toml";
       },
     ) {
-      logger.configure(logLevel, json);
+      const {
+        logLevel,
+        json,
+        config,
+      } = options;
 
-      const loadedConfig = await getConfig(config, all);
-      const context = await initializeContext(loadedConfig);
+      logger.configure(logLevel, json);
+      const branchName = getBranchName();
+      const loadedConfig = await getConfig(branchName, config);
+      const context = await initializeContext(branchName, loadedConfig);
 
       logger.info("Config", context.config);
     },
@@ -91,10 +96,11 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(config);
+      const branchName = getBranchName();
+      const loadedConfig = await getConfig(branchName, config);
       const {
         previousState,
-      } = await initializeContext(loadedConfig);
+      } = await initializeContext(branchName, loadedConfig);
 
       logger.info("Current state", previousState);
     },
@@ -116,8 +122,9 @@ program
     ) {
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(config);
-      const context = await initializeContext(loadedConfig);
+      const branchName = getBranchName();
+      const loadedConfig = await getConfig(branchName, config);
+      const context = await initializeContext(branchName, loadedConfig);
 
       const initialPlan = await createPlan(context);
       const dependencies = await getDependencies(context, initialPlan);
@@ -129,24 +136,73 @@ program
   );
 
 program
+  .command("destroy")
+  .description("Destroy current resources")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
+  .option("-j, --json", "log output as json")
+  .option("-y, --yes", "destroy without prompting")
+  .option("-a, --all", "destroy all resources across all branches")
+  .action(
+    async function (
+      options: {
+        logLevel: LevelName;
+        config: string;
+        json: boolean;
+        yes: boolean;
+        all: boolean;
+      },
+    ) {
+      const {
+        logLevel,
+        json,
+        config,
+        yes,
+        all,
+      } = options;
+      logger.configure(logLevel, json);
+
+      const branchName = getBranchName();
+
+      const loadedConfig = await getConfig(branchName, config);
+      const context = await initializeContext(branchName, loadedConfig, yes);
+
+      const destroyPlan = await createDestroyPlan(context);
+      printPlan(destroyPlan);
+    },
+  );
+
+program
+  .command("prune")
+  .description("Search for deleted upstream branches and remove resources")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-c, --config <config>", "location of config file")
+  .option("-j, --json", "log output as json")
+  .option("-y, --yes", "destroy without prompting");
+
+program
   .command("plan")
   .description("Plan changes required by the current configuration")
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-c, --config <config>", "location of config file")
-  .option("-j, --json", "log output as json")
-  .option("-p, --prune", "remove branch based resources")
   .action(
     async function (
-      { logLevel, json, config }: {
+      options: {
         logLevel: LevelName;
         config: string;
         json: boolean;
       },
     ) {
+      const {
+        logLevel,
+        json,
+        config,
+      } = options;
       logger.configure(logLevel, json);
 
-      const loadedConfig = await getConfig(config);
-      const context = await initializeContext(loadedConfig);
+      const branchName = getBranchName();
+      const loadedConfig = await getConfig(branchName, config);
+      const context = await initializeContext(branchName, loadedConfig);
 
       const initialPlan = await createPlan(context);
       const dependencies = await getDependencies(context, initialPlan);
@@ -172,17 +228,25 @@ program
   .option("-j, --json", "log output as json")
   .action(
     async function (
-      { logLevel, json, config, yes: autoConfirm }: {
+      options: {
         logLevel: LevelName;
         yes: boolean;
         config: string;
         json: boolean;
       },
     ) {
+      const {
+        logLevel,
+        json,
+        config,
+        yes,
+      } = options;
       logger.configure(logLevel, json);
 
-      const initialConfig = await getConfig(config);
-      const initialContext = await initializeContext(initialConfig, autoConfirm);
+      const branchName = getBranchName();
+
+      const initialConfig = await getConfig(branchName, config);
+      const initialContext = await initializeContext(branchName, initialConfig, yes);
       const initialPlan = await createPlan(initialContext);
       const initialDependencies = await getDependencies(initialContext, initialPlan);
 
@@ -198,7 +262,7 @@ program
       const finalContext = getFinalContext(initialContext, finalConfig);
       const finalPlan = await createPlan(finalContext);
 
-      const shouldExecute = autoConfirm || await confirmExecutePlan();
+      const shouldExecute = yes || await confirmExecutePlan();
 
       if (shouldExecute) {
         const changes = await executePlan(finalPlan);
