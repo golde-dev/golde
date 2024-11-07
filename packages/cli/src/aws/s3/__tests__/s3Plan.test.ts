@@ -11,7 +11,12 @@ import { mergeProjectTags, mergeTags } from "../../../utils/tags.ts";
 import { addDefaultRegion } from "../../utils.ts";
 
 const executors = {
-  region: "us-east-1",
+  getDefaultRegion: () => "us-east-1",
+  assertBucketExist: spy(),
+  assertBucketNotExist: spy(),
+  assertCreatePermission: spy(),
+  assertDeletePermission: spy(),
+  assertUpdatePermission: spy(),
   createBucket: spy(),
   deleteBucket: spy(),
   updateBucket: spy(),
@@ -38,9 +43,9 @@ describe("aws s3 buckets", () => {
         state,
         config,
       );
-
+      const region = executors.getDefaultRegion();
       const configWithTags = mergeProjectTags(config.bucket1, projectTags);
-      const configWithRegion = addDefaultRegion(configWithTags, executors.region);
+      const configWithRegion = addDefaultRegion(configWithTags, region);
 
       assertBranch(configWithRegion);
 
@@ -77,9 +82,9 @@ describe("aws s3 buckets", () => {
           region: "us-east-1",
         },
       };
-
+      const region = executors.getDefaultRegion();
       const configWithTags = mergeProjectTags(config.bucket1, projectTags);
-      const configWithRegion = addDefaultRegion(configWithTags, executors.region);
+      const configWithRegion = addDefaultRegion(configWithTags, region);
 
       assertBranch(configWithRegion);
       const updateUnit: UpdateUnit<
@@ -189,9 +194,9 @@ describe("aws s3 buckets", () => {
           branch: "master",
         },
       };
-
+      const region = executors.getDefaultRegion();
       const configWithTags = mergeProjectTags(config.bucket2, projectTags);
-      const configWithRegion = addDefaultRegion(configWithTags, executors.region);
+      const configWithRegion = addDefaultRegion(configWithTags, region);
 
       assertBranch(configWithRegion);
 

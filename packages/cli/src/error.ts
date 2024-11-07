@@ -70,6 +70,18 @@ export enum PlanErrorCode {
    * Provider is missing
    */
   PROVIDER_MISSING = "PROVIDER_MISSING",
+
+  /**
+   * Resource is already exists
+   * eg: create bucket when bucket already exists
+   */
+  RESOURCE_EXISTS = "RESOURCE_EXISTS",
+
+  /**
+   * Resource is not found
+   * eg: delete bucket when bucket does not exist
+   */
+  RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND",
 }
 
 export class PlanError extends Error {

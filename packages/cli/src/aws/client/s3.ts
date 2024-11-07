@@ -1,9 +1,11 @@
 import { logger } from "../../logger.ts";
-import { memoize } from "@es-toolkit/es-toolkit";
 import { AWSClientBase } from "./base.ts";
 import {
   CreateBucketCommand,
   DeleteBucketCommand,
+  GetBucketAclCommand,
+  HeadBucketCommand,
+  NotFound,
   PutBucketCorsCommand,
   PutBucketPolicyCommand,
   PutBucketTaggingCommand,
@@ -21,16 +23,44 @@ import type {
   Tag,
 } from "@aws-sdk/client-s3";
 
+const clients = new Map<string, Client>();
+
 export class S3Client extends AWSClientBase {
-  private getS3Client = memoize((region: string) => {
-    return new Client({
-      region,
-      credentials: {
-        accessKeyId: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey,
-      },
-    });
-  });
+  public getS3Client(region: string = this.defaultRegion) {
+    if (!clients.has(region)) {
+      clients.set(
+        region,
+        new Client({
+          region,
+          credentials: {
+            accessKeyId: this.accessKeyId,
+            secretAccessKey: this.secretAccessKey,
+          },
+        }),
+      );
+    }
+    return clients.get(region)!;
+  }
+
+  public async checkBucketExists(bucket: string) {
+    try {
+      logger.debug("[AWS] Check bucket exists", { bucket });
+      const command = new HeadBucketCommand({
+        Bucket: bucket,
+      });
+      await this.getS3Client().send(command);
+      return true;
+    } catch (e) {
+      if (e instanceof NotFound) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
+  public async checkCreateBucketPermission(_region: string, _name: string) {
+    // TODO: check if user has create permission
+  }
 
   public updateBucketVersioning(region: string, bucket: string, versioning: boolean) {
     try {
@@ -41,7 +71,8 @@ export class S3Client extends AWSClientBase {
           Status: versioning ? "Enabled" : "Suspended",
         },
       });
-      this.getS3Client(region).send(command);
+      this.getS3Client(region)
+        .send(command);
     } catch (e) {
       if (e instanceof Error) {
         logger.error("[AWS] Failed to update bucket versioning", e);
@@ -119,7 +150,6 @@ export class S3Client extends AWSClientBase {
   ): Promise<CreateBucketCommandOutput> {
     try {
       logger.debug("[AWS] Creating bucket", { region, input });
-
       const command = new CreateBucketCommand(input);
       const result = await this
         .getS3Client(region)

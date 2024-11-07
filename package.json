@@ -3,7 +3,7 @@
   "packageManager": "yarn@4.5.0",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/docs"
   ],
   "scripts": {
     "verdaccio": "runner verdaccio",

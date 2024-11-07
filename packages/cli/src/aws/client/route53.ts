@@ -12,16 +12,24 @@ import type {
 } from "@aws-sdk/client-route-53";
 import { logger } from "../../logger.ts";
 
+const clients = new Map<string, Client>();
+
 export class Route53Client extends AWSClientBase {
-  private getRoute53Client = memoize((region: string) => {
-    return new Client({
-      region,
-      credentials: {
-        accessKeyId: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey,
-      },
-    });
-  });
+  private getRoute53Client(region: string) {
+    if (!clients.has(region)) {
+      clients.set(
+        region,
+        new Client({
+          region,
+          credentials: {
+            accessKeyId: this.accessKeyId,
+            secretAccessKey: this.secretAccessKey,
+          },
+        }),
+      );
+    }
+    return clients.get(region)!;
+  }
 
   private getHostedZoneIdByName = memoize(async (region: string, zoneName: string) => {
     const command = new ListHostedZonesCommand();

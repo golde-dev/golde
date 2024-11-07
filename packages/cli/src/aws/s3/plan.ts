@@ -9,6 +9,8 @@ import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
 import type { WithRegion } from "../types.ts";
+import { PlanError } from "../../error.ts";
+import { PlanErrorCode } from "../../error.ts";
 
 export async function createBucket(
   this: AWSClient,
@@ -78,12 +80,54 @@ export async function updateBucket(
 
 export type UpdateBucket = typeof updateBucket;
 
+export async function assertBucketExist(this: AWSClient, name: string) {
+  logger.debug(`[AWS]: checking bucket ${name} exists`);
+  const start = performance.now();
+  const exists = await this.checkBucketExists(name);
+  const end = performance.now();
+  logger.debug(`[AWS]: checked bucket ${name} exists in ${end - start}ms`);
+  if (!exists) {
+    throw new PlanError(`Bucket ${name} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
+  }
+}
+
+export async function assertBucketNotExist(this: AWSClient, name: string) {
+  logger.debug(`[AWS]: checking bucket ${name} not exists`);
+  const start = performance.now();
+  const exists = await this.checkBucketExists(name);
+  const end = performance.now();
+  logger.debug(`[AWS]: checked bucket ${name} not exists in ${end - start}ms`);
+
+  if (exists) {
+    throw new PlanError(`Bucket ${name} already exists`, PlanErrorCode.RESOURCE_EXISTS);
+  }
+}
+
+export async function assertCreatePermission(this: AWSClient, _name: string, _region?: string) {
+  // TODO: check if user has create permission
+}
+export async function assertDeletePermission(this: AWSClient, _name: string, _region?: string) {
+  // TODO: check if user has delete permission
+}
+export async function assertUpdatePermission(this: AWSClient, _name: string, _region?: string) {
+  // TODO: check if user has update permission
+}
+
+export function getDefaultRegion(this: AWSClient) {
+  return this.region ?? this.defaultRegion;
+}
+
 export const createS3Executors = (aws: AWSClient) => {
   return {
-    region: aws.region ?? aws.defaultRegion,
+    getDefaultRegion: getDefaultRegion.bind(aws),
     createBucket: createBucket.bind(aws),
     deleteBucket: deleteBucket.bind(aws),
     updateBucket: updateBucket.bind(aws),
+    assertCreatePermission: assertCreatePermission.bind(aws),
+    assertDeletePermission: assertDeletePermission.bind(aws),
+    assertUpdatePermission: assertUpdatePermission.bind(aws),
+    assertBucketExist: assertBucketExist.bind(aws),
+    assertBucketNotExist: assertBucketNotExist.bind(aws),
   };
 };
 
@@ -132,27 +176,45 @@ function getNext(config: S3Config = {}, region: string, tags?: Tags) {
 }
 
 export async function createS3Plan(
-  {
-    region,
-    createBucket,
-    deleteBucket,
-    updateBucket,
-  }: Executors,
+  executors: Executors,
   tags?: Tags,
   state?: S3State,
   config?: S3Config,
 ): Promise<Plan> {
+  const {
+    getDefaultRegion,
+    createBucket,
+    deleteBucket,
+    updateBucket,
+    assertBucketExist,
+    assertBucketNotExist,
+    assertCreatePermission,
+    assertDeletePermission,
+    assertUpdatePermission,
+  } = executors;
+  logger.debug(
+    "Planning for s3 changes",
+    {
+      state,
+      config,
+    },
+  );
   const plan: Plan = [];
 
+  const region = getDefaultRegion();
   const previous = getCurrent(state);
   const next = getNext(config, region, tags);
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
     const { config, name } = next[key];
+    const { region } = config;
 
     assertRegion(config);
     assertBranch(config);
+
+    await assertBucketNotExist(name);
+    await assertCreatePermission(name, region);
 
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
       type: Type.Create,
@@ -169,6 +231,10 @@ export async function createS3Plan(
   for (const key of deleting) {
     const { state, name } = previous[key];
     const { config: { region } } = state;
+
+    await assertBucketExist(name);
+    await assertDeletePermission(name, region);
+
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
       type: Type.Delete,
       executor: deleteBucket,
@@ -183,6 +249,7 @@ export async function createS3Plan(
   for (const key of updating) {
     const { config: nextConfig } = next[key];
     const { config: previousConfig, state, name } = previous[key];
+    const { region } = nextConfig;
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
@@ -199,6 +266,9 @@ export async function createS3Plan(
           "It is not possible to update s3 bucket region, create new and migrate data",
         );
       }
+
+      await assertBucketExist(name);
+      await assertUpdatePermission(name, region);
 
       assertRegion(nextConfig);
       assertBranch(nextConfig);
@@ -223,10 +293,15 @@ export async function createS3Plan(
   return await Promise.resolve(plan);
 }
 
-export function createS3DestroyPlan(
+export async function createS3DestroyPlan(
   executors: Executors,
   state?: S3State,
 ) {
+  const {
+    deleteBucket,
+    assertBucketExist,
+  } = executors;
+
   const plan: Plan = [];
   logger.debug("[AWS] Creating destroy buckets plan", {
     state,
@@ -236,9 +311,12 @@ export function createS3DestroyPlan(
   for (const key of Object.keys(previous)) {
     const { state, name } = previous[key];
     const { config: { region } } = state;
+
+    await assertBucketExist(name);
+
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
       type: Type.Delete,
-      executor: executors.deleteBucket,
+      executor: deleteBucket,
       args: [region, name],
       path: key,
       state: state,
