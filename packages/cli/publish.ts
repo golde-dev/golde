@@ -5,10 +5,11 @@ import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
 import { walk } from "@std/fs/walk";
 import { existsSync } from "@std/fs/exists";
-import { basename, join } from "@std/path";
+import { basename, join, resolve } from "@std/path";
+import { copy } from "@std/fs/copy";
 
-const { local } = parseArgs(Deno.args, {
-  boolean: ["local"],
+const { local, quick } = parseArgs(Deno.args, {
+  boolean: ["local", "quick"],
 });
 
 const localRegistry = "http://localhost:4873/";
@@ -24,9 +25,9 @@ const packages = [
 ];
 
 const examples: string[] = [];
-for await (const dirEntry of walk("../../examples", { maxDepth: 1 })) {
-  if (existsSync(join(dirEntry.path, "package.json"))) {
-    examples.push(basename(dirEntry.path));
+for await (const { path } of walk("../../examples", { maxDepth: 1 })) {
+  if (existsSync(join(path, "package.json"))) {
+    examples.push(basename(path));
   }
 }
 
@@ -93,6 +94,28 @@ async function publishNPMPackages(
       logger.error(line);
     }
   }
+}
+
+function quickUpdateExamples(examples: string[]) {
+  const exampleBaseDir = resolve("../../examples/");
+
+  return Promise.all(
+    examples.map((example) => {
+      logger.info(`Updating ${example}`);
+
+      const goldeModules = `/node_modules/@golde`;
+      const npmDistDir = "./dist/npm/@golde";
+
+      const from = resolve(npmDistDir);
+      const to = join(exampleBaseDir, example, goldeModules);
+
+      return copy(
+        from,
+        to,
+        { overwrite: true },
+      );
+    }),
+  );
 }
 
 async function updateLocalExamples(
@@ -243,7 +266,14 @@ async function publishLocal() {
   }
 }
 
-if (local) {
+async function publishLocalQuick() {
+  logger.info("Publishing to local registry");
+  await quickUpdateExamples(examples);
+}
+
+if (quick) {
+  publishLocalQuick();
+} else if (local) {
   publishLocal();
 } else {
   publish();

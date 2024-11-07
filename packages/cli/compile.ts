@@ -3,11 +3,13 @@ import { ensureDir } from "@std/fs/ensure-dir";
 import { decode } from "./src/utils/text.ts";
 import { logger } from "./src/logger.ts";
 
-const { local } = parseArgs(Deno.args, {
-  boolean: ["local"],
+const { local, quick } = parseArgs(Deno.args, {
+  boolean: ["local", "quick"],
 });
 
-if (local) {
+if (quick) {
+  compileQuick();
+} else if (local) {
   compileLocal();
 } else {
   compileProd();
@@ -22,6 +24,29 @@ async function compileLocal() {
     compile("x86_64-apple-darwin", "./dist/bin/cli-darwin-x64", true),
     compile("aarch64-apple-darwin", "./dist/bin/cli-darwin-arm64", true),
   ]);
+}
+
+/**
+ * Detect and only compile for current arch
+ */
+async function compileQuick() {
+  await ensureDir("./dist/bin");
+  if (Deno.build.os === "linux") {
+    await Promise.all([
+      compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", true),
+    ]);
+  }
+  if (Deno.build.os === "darwin") {
+    await Promise.all([
+      compile("x86_64-apple-darwin", "./dist/bin/cli-darwin-x64", true),
+      compile("aarch64-apple-darwin", "./dist/bin/cli-darwin-arm64", true),
+    ]);
+  }
+  if (Deno.build.os === "windows") {
+    await Promise.all([
+      compile("x86_64-pc-windows-msvc", "./dist/bin/cli-win32-x64", true),
+    ]);
+  }
 }
 
 async function compileProd() {

@@ -68,9 +68,21 @@ spawnTask("dist:cli:local",
   }
 );
 
+spawnTask("dist:cli:quick", 
+  "deno", ["task", "dist:quick"], 
+  {
+    cwd: "./packages/cli",
+  }
+);
+
+
 parallelTask("dist:local", [
   "dist:agent:local", 
   "dist:cli:local",
+]);
+
+parallelTask("dist:quick", [
+  "dist:cli:quick",
 ]);
 
 spawnTask("test:agent", 
@@ -155,6 +167,12 @@ spawnTask("publish:cli:local",
     cwd: "./packages/cli",
   }
 );
+spawnTask("publish:cli:quick",
+  "deno", ["task", "publish:quick"],
+  {
+    cwd: "./packages/cli",
+  }
+);
 
 spawnTask("publish:agent",
   "deno", ["task", "publish"],
@@ -180,6 +198,10 @@ parallelTask("publish:local", [
   "publish:agent:local",
 ]);
 
+parallelTask("publish:quick", [
+  "publish:cli:quick",
+]);
+
 seriesTask("local", [
   "version:local",
   "dist:local",
@@ -187,6 +209,12 @@ seriesTask("local", [
   "version:clean"
 ]);
 
+seriesTask("quick", [
+  "version:local",
+  "dist:quick",
+  "publish:quick",
+  "version:clean"
+]);
 
 seriesTask("local:cli", [
   "version:local",

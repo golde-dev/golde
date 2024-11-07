@@ -67,7 +67,7 @@ export class CloudflareBase {
       query,
       method: "GET",
     });
-    return fetch(`${this.baseUrl}/${path}?${query}`, {
+    return fetch(`${this.baseUrl}${path}?${query}`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${this.apiToken}`,
@@ -107,7 +107,7 @@ export class CloudflareBase {
       method: "GET",
     });
 
-    return fetch(`${this.baseUrl}/${path}`, {
+    return fetch(`${this.baseUrl}${path}`, {
       method,
       body: JSON.stringify(body),
       headers: {

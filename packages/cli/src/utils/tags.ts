@@ -1,10 +1,12 @@
 import { z } from "zod";
 import type { Tags } from "../types/config.ts";
+import { isEmpty } from "moderndash";
+import { isUndefined } from "@es-toolkit/es-toolkit";
 
 export const tagsSchema = z.record(z.string()).optional();
 
-export function mergeTags(tags?: Tags, other?: Tags) {
-  if (!tags && !other) {
+export function mergeTags(tags?: Tags, other?: Tags): Tags | undefined {
+  if (isEmpty(tags) && isEmpty(other)) {
     return;
   }
   if (!tags) {
@@ -20,7 +22,7 @@ export function mergeTags(tags?: Tags, other?: Tags) {
 }
 
 export function toTagsArray(tags?: Tags): string[] | undefined {
-  if (!tags) {
+  if (isEmpty(tags) || isUndefined(tags)) {
     return;
   }
 
@@ -32,13 +34,13 @@ export function toTagsArray(tags?: Tags): string[] | undefined {
   });
 }
 
-interface TagsList {
+interface Tag {
   Key: string;
   Value: string;
 }
 
-export function toTagsList(tags?: Tags): TagsList[] | undefined {
-  if (!tags) {
+export function toTagsList(tags?: Tags): Tag[] | undefined {
+  if (isEmpty(tags) || isUndefined(tags)) {
     return;
   }
   return Object
@@ -49,4 +51,14 @@ export function toTagsList(tags?: Tags): TagsList[] | undefined {
         Value,
       };
     });
+}
+
+export function mergeProjectTags<C extends { tags?: Tags }>(
+  { tags, ...config }: C,
+  projectTags?: Tags,
+) {
+  return {
+    ...config,
+    tags: mergeTags(projectTags, tags),
+  };
 }

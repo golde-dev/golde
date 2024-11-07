@@ -6,6 +6,7 @@ import { createR2Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "../plan.ts";
 import type { BucketConfig, BucketState, R2Config, R2State } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../types/plan.ts";
+import { assertBranch } from "../../../utils/resource.ts";
 
 const executors = {
   createBucket: spy(),
@@ -30,6 +31,7 @@ describe("cloudflare buckets", () => {
         config,
       );
 
+      assertBranch(config.bucket1);
       const execution: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
@@ -123,6 +125,7 @@ describe("cloudflare buckets", () => {
         },
       };
 
+      assertBranch(config.bucket2);
       const created: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,

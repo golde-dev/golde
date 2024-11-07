@@ -8,6 +8,7 @@
   "scripts": {
     "verdaccio": "runner verdaccio",
     "start": "runner start",
+    "quick": "runner quick",
     "local": "runner local",
     "local:cli": "runner local:cli",
     "test": "runner test",

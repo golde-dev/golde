@@ -189,6 +189,9 @@
                   "branchPattern": {
                     "type": "string"
                   },
+                  "tags": {
+                    "$ref": "#/definitions/golde/properties/tags"
+                  },
                   "region": {
                     "type": "string"
                   }

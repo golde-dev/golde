@@ -8,13 +8,13 @@ import type {
 export class AWSClientBase {
   protected readonly accessKeyId: string;
   protected readonly secretAccessKey: string;
-  protected readonly region?: string;
+
+  public readonly region?: string;
+  public readonly defaultRegion = "us-east-2";
 
   public userId?: string;
   public accountId?: string;
   public arn?: string;
-
-  public defaultRegion = "us-east-2";
 
   constructor(accessKeyId: string, secretAccessKey: string, region?: string) {
     this.accessKeyId = accessKeyId;

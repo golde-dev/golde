@@ -48,7 +48,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   ): Promise<State> {
     logger.debug("[Golde] Applying changes to golde state", { project, branch, changes, locks });
     try {
-      const { id } = locks.find((lock) => lock.branch === branch) ?? {};
+      const { id = 1 } = locks.find((lock) => lock.branch === branch) ?? {};
 
       const state = await this.makeRequest<State>(
         `/projects/${project}/state`,

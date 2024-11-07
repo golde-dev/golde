@@ -90,26 +90,33 @@ export async function updateState(
   changes: Change[],
   locks: Lock[],
 ): Promise<State> {
-  logger.info("Updating state");
-  const {
-    state,
-    config: {
-      name,
-    },
-    git: {
-      branchName,
-    },
-  } = context;
-  const start = performance.now();
-  const updatedState = await state.applyChanges(name, branchName, changes, locks);
-  const end = performance.now();
+  try {
+    logger.info("Updating state");
+    const {
+      state,
+      config: {
+        name,
+      },
+      git: {
+        branchName,
+      },
+    } = context;
+    const start = performance.now();
+    const updatedState = await state.applyChanges(name, branchName, changes, locks);
+    const end = performance.now();
 
-  if (logger.level === "DEBUG") {
-    logger.debug(`Successfully updated state in ${end - start}ms`, { state: updateState });
-  } else {
-    logger.info(`Successfully updated state in ${end - start}ms`);
+    if (logger.level === "DEBUG") {
+      logger.debug(`Successfully updated state in ${end - start}ms`, { state: updateState });
+    } else {
+      logger.info(`Successfully updated state in ${end - start}ms`);
+    }
+    return updatedState;
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.error(`Failed to update state: ${error.message}`);
+    }
+    Deno.exit(1);
   }
-  return updatedState;
 }
 
 export function printChanges(changes: Change[]): void {
