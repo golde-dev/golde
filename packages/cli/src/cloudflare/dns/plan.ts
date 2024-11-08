@@ -107,53 +107,75 @@ export const createDNSExecutors = (client: CloudflareClient) => {
   };
 };
 
+interface PrevRecord {
+  config: RecordConfig & { value: string };
+  state: RecordState;
+  zone: string;
+  type: RecordType;
+  name: string;
+}
+
 function getPrevious(state: DNSState = {}) {
   const records: {
-    [path: string]: {
-      config: RecordConfig;
-      state: RecordState;
-      zone: string;
-      type: RecordType;
-      name: string;
-    };
+    [path: string]: PrevRecord | PrevRecord[];
   } = {};
 
   for (const [zone, zoneState] of Object.entries(state)) {
     for (const [type, recordState] of Object.entries(zoneState)) {
       for (const [name, record] of Object.entries(recordState)) {
-        records[`cloudflare.dns.${zone}.${type}.${name}`] = {
-          state: record,
-          config: record.config,
-          zone,
-          type: type as RecordType,
-          name,
-        };
+        if (Array.isArray(record)) {
+          records[`cloudflare.dns.${zone}.${type}.${name}`] = record.map((s) => ({
+            state: s,
+            config: s.config,
+            zone,
+            type: type as RecordType,
+            name,
+          }));
+        } else {
+          records[`cloudflare.dns.${zone}.${type}.${name}`] = {
+            state: record,
+            config: record.config,
+            zone,
+            type: type as RecordType,
+            name,
+          };
+        }
       }
     }
   }
 
   return records;
 }
+interface NextRecord {
+  config: RecordConfig & { value: string };
+  zone: string;
+  type: RecordType;
+  name: string;
+}
 
 function getNext(config: DNSConfig = {}, tags: Tags = {}) {
   const records: {
-    [path: string]: {
-      config: RecordConfig;
-      zone: string;
-      type: RecordType;
-      name: string;
-    };
+    [path: string]: NextRecord | NextRecord[];
   } = {};
 
   for (const [zone, zoneConfig] of Object.entries(config)) {
     for (const [type, recordConfig] of Object.entries(zoneConfig)) {
       for (const [name, { tags: recordTags, ...record }] of Object.entries(recordConfig)) {
-        records[`cloudflare.dns.${zone}.${type}.${name}`] = {
-          config: { ...record, tags: mergeTags(tags, recordTags) },
-          zone,
-          type: type as RecordType,
-          name,
-        };
+        if (Array.isArray(record.value)) {
+          records[`cloudflare.dns.${zone}.${type}.${name}`] = record.value.map((value) => ({
+            config: { ...record, value, tags: mergeTags(tags, recordTags) },
+            zone,
+            type: type as RecordType,
+            name,
+          }));
+        } else {
+          records[`cloudflare.dns.${zone}.${type}.${name}`] = {
+            config: { ...record, tags: mergeTags(tags, recordTags) },
+            zone,
+            type: type as RecordType,
+            name,
+          };
+        }
       }
     }
   }

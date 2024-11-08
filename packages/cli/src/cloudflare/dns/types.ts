@@ -27,7 +27,7 @@ export interface RecordConfig extends Resource {
   /**
    * IP address or value
    */
-  value: string;
+  value: string | string[];
   proxied?: boolean;
   comment?: string;
   tags?: Tags;
@@ -53,7 +53,7 @@ export interface RecordState {
 }
 
 export type ZoneRecordsState = Partial<
-  Record<RecordType, Record<string, RecordState>>
+  Record<RecordType, Record<string, RecordState | RecordState[]>>
 >;
 
 export interface DNSState {
