@@ -8,6 +8,7 @@ import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Config } from "./types/config.ts";
 import type { Lock } from "./types/lock.ts";
+import { printDuration } from "./utils/duration.ts";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -21,11 +22,11 @@ export async function confirmExecutePlan(): Promise<boolean> {
 }
 
 export async function executePlan(plan: Plan): Promise<Change[]> {
-  logger.info("Start plan execution");
+  logger.info("[Execute] Start plan execution");
 
   try {
     const queue = new Queue(20);
-
+    const start = performance.now();
     const changes: Change[] = await queue.add(
       plan
         .filter((unit) => unit.type !== Type.Noop)
@@ -75,7 +76,8 @@ export async function executePlan(plan: Plan): Promise<Change[]> {
           }
         }),
     );
-    logger.info("Successfully executed plan");
+    const end = performance.now();
+    logger.info(`[Execute] Successfully executed plan in ${printDuration(start, end)}`);
     return changes;
   } catch (error) {
     if (error instanceof Error) {
@@ -91,7 +93,7 @@ export async function updateState(
   locks: Lock[],
 ): Promise<State> {
   try {
-    logger.info("Updating state");
+    logger.info("[Apply] Updating state");
     const {
       state,
       config: {
@@ -106,14 +108,16 @@ export async function updateState(
     const end = performance.now();
 
     if (logger.level === "DEBUG") {
-      logger.debug(`Successfully updated state in ${end - start}ms`, { state: updateState });
+      logger.debug(`[Apply] Successfully updated state in ${printDuration(start, end)}`, {
+        state: updateState,
+      });
     } else {
-      logger.info(`Successfully updated state in ${end - start}ms`);
+      logger.info(`[Apply] Successfully updated state in ${printDuration(start, end)}`);
     }
     return updatedState;
   } catch (error) {
     if (error instanceof Error) {
-      logger.error(`Failed to update state: ${error.message}`);
+      logger.error(`[Apply] Failed to update state: ${error.message}`);
     }
     Deno.exit(1);
   }

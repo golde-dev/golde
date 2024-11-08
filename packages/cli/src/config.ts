@@ -24,7 +24,7 @@ import type { Config } from "./types/config.ts";
 const loadConfig = async (
   path: string,
 ): Promise<unknown> => {
-  logger.debug(`Loading config from: ${path}`);
+  logger.debug(`[Config] Loading config from: ${path}`);
 
   switch (extname(path)) {
     case ".cjs":
@@ -48,7 +48,7 @@ const loadConfig = async (
       return parseYaml(yamlConfig);
     }
     default:
-      throw new Error("Unknown extension");
+      throw new Error(`Unsupported extension ${extname(path)}`);
   }
 };
 
@@ -138,23 +138,23 @@ export const filterToBranch = (config: unknown, filterBranch: string): unknown =
 
 export const resolveConfig = (config: unknown, gitInfo: GitInfo, branch?: string): Config => {
   try {
-    logger.debug("Resolving config");
+    logger.debug("[Config] Resolving config");
 
     const configWithEnv = resolveTemplate(config, envTemplate);
-    logger.debug("Resolved env vars templates in config", {
+    logger.debug("[Config] Resolved env vars templates in config", {
       config: configWithEnv,
     });
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
-    logger.debug("Resolved files templates in config", {
+    logger.debug("[Config] Resolved files templates in config", {
       config: configWithFiles,
     });
 
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
-    logger.debug("Resolved git templates in config", { config: configWithGit });
+    logger.debug("[Config] Resolved git templates in config", { config: configWithGit });
 
     const validatedConfig = validateConfig(configWithGit);
-    logger.debug("Validated config with schema");
+    logger.debug("[Config] Validated config with schema");
 
     if (!branch) {
       return validatedConfig;
@@ -165,34 +165,34 @@ export const resolveConfig = (config: unknown, gitInfo: GitInfo, branch?: string
       switch (error.code) {
         case ConfigErrorCode.NO_CONFIG:
           logger.error(
-            "Failed to find config, please verify the location or syntax",
+            "[Config] Failed to find config, please verify the location or syntax",
           );
           break;
         case ConfigErrorCode.NO_CUSTOM_CONFIG:
           logger.error(
-            `Failed to find config on path: ${error.cause as string}`,
+            `[Config] Failed to find config on path: ${error.cause as string}`,
           );
           break;
         case ConfigErrorCode.ENV_MISSING:
-          logger.error(`Env variable is missing: ${error.cause as string}`);
+          logger.error(`[Config] Env variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.TEMPLATE_ERROR:
-          logger.error(`Config template error: ${error.message}`);
+          logger.error(`[Config] Config template error: ${error.message}`);
           break;
         case ConfigErrorCode.FILE_MISSING:
-          logger.error(`File is missing: ${error.cause as string}`);
+          logger.error(`[Config] File is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.GIT_MISSING:
-          logger.error(`git variable is missing: ${error.cause as string}`);
+          logger.error(`[Config] git variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error("Config failed validation", error.cause);
+          logger.error("[Config] Config failed validation", error.cause);
           break;
         default:
-          logger.error(`Configuration error: ${error.message}`);
+          logger.error(`[Config] Configuration error: ${error.message}`);
       }
     } else {
-      logger.error(`Unknown error: ${(error as Error).message}`, error);
+      logger.error(`[Config] Unknown error: ${(error as Error).message}`, error);
     }
     return Deno.exit(1);
   }
@@ -210,23 +210,23 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
 export function getFinalConfig(config: Config, dependencies: Dependencies): Config {
   try {
     const configWithDeps = resolveTemplate(config, stateTemplate(dependencies));
-    logger.debug("Resolved state dependencies in config", { config: configWithDeps });
+    logger.debug("[Config] Resolved state dependencies in config", { config: configWithDeps });
     const validatedConfig = validateConfig(configWithDeps);
     return validatedConfig;
   } catch (error) {
     if (error instanceof ConfigError) {
       switch (error.code) {
         case ConfigErrorCode.STATE_MISSING:
-          logger.error(`State variable is missing: ${error.cause as string}`);
+          logger.error(`[Config] State variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error("Config failed validation", error.cause);
+          logger.error("[Config] Config failed validation", error.cause);
           break;
         default:
-          logger.error(`Configuration error: ${error.message}`);
+          logger.error(`[Config] Configuration error: ${error.message}`);
       }
     } else {
-      logger.error(`Unknown error: ${(error as Error).message}`, error);
+      logger.error(`[Config] Unknown error: ${(error as Error).message}`, error);
     }
     return Deno.exit(1);
   }

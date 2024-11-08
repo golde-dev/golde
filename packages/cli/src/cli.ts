@@ -204,13 +204,13 @@ program
       const loadedConfig = await getConfig(branchName, config);
       const context = await initializeContext(branchName, loadedConfig);
 
-      const initialPlan = await createPlan(context);
+      const initialPlan = await createPlan(context, false);
       const dependencies = await getDependencies(context, initialPlan);
 
       const finalConfig = getFinalConfig(loadedConfig, dependencies);
       const finalContext = getFinalContext(context, finalConfig);
 
-      const finalPlan = await createPlan(finalContext);
+      const finalPlan = await createPlan(finalContext, true);
       if (!hasChanges(finalPlan)) {
         logger.info("No changes detected");
         return;
@@ -247,7 +247,7 @@ program
 
       const initialConfig = await getConfig(branchName, config);
       const initialContext = await initializeContext(branchName, initialConfig, yes);
-      const initialPlan = await createPlan(initialContext);
+      const initialPlan = await createPlan(initialContext, false);
       const initialDependencies = await getDependencies(initialContext, initialPlan);
 
       if (!hasChanges(initialPlan)) {
@@ -260,7 +260,7 @@ program
       const finalDependencies = await getDependencies(initialContext, initialPlan);
       const finalConfig = getFinalConfig(initialConfig, finalDependencies);
       const finalContext = getFinalContext(initialContext, finalConfig);
-      const finalPlan = await createPlan(finalContext);
+      const finalPlan = await createPlan(finalContext, true);
 
       const shouldExecute = yes || await confirmExecutePlan();
 

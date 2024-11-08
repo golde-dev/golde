@@ -1,9 +1,9 @@
 import { logger } from "../../logger.ts";
 import { AWSClientBase } from "./base.ts";
 import {
+  BucketAlreadyExists,
   CreateBucketCommand,
   DeleteBucketCommand,
-  GetBucketAclCommand,
   HeadBucketCommand,
   NotFound,
   PutBucketCorsCommand,
@@ -26,7 +26,7 @@ import type {
 const clients = new Map<string, Client>();
 
 export class S3Client extends AWSClientBase {
-  public getS3Client(region: string = this.defaultRegion) {
+  public getS3Client(region: string = this.region ?? this.defaultRegion) {
     if (!clients.has(region)) {
       clients.set(
         region,
@@ -42,24 +42,41 @@ export class S3Client extends AWSClientBase {
     return clients.get(region)!;
   }
 
-  public async checkBucketExists(bucket: string) {
+  public async checkBucketExists(bucket: string, region?: string) {
     try {
       logger.debug("[AWS] Check bucket exists", { bucket });
       const command = new HeadBucketCommand({
         Bucket: bucket,
       });
-      await this.getS3Client().send(command);
+      await this.getS3Client(region).send(command);
       return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Check if bucket name is available
+   */
+  public async checkBucketNameAvailable(bucket: string, region?: string) {
+    try {
+      logger.debug("[AWS] Check bucket exists", { bucket });
+      const command = new HeadBucketCommand({
+        Bucket: bucket,
+      });
+      await this.getS3Client(region).send(command);
+      return false;
     } catch (e) {
       if (e instanceof NotFound) {
+        logger.debug(`[AWS] Bucket name ${name} can be used`);
+        return true;
+      }
+      if (e instanceof BucketAlreadyExists) {
+        logger.error(`[AWS] Bucket ${name} is not unique globally in s3`);
         return false;
       }
       throw e;
     }
-  }
-
-  public async checkCreateBucketPermission(_region: string, _name: string) {
-    // TODO: check if user has create permission
   }
 
   public updateBucketVersioning(region: string, bucket: string, versioning: boolean) {

@@ -7,7 +7,7 @@ export async function createDockerClient(
   config: DockerCredentials | GoldeCredentials,
 ): Promise<DockerClient> {
   if ("apiKey" in config) {
-    logger.warn("Golde docker registry not implemented");
+    logger.warn("[Golde] Docker registry not implemented");
     return {} as DockerClient;
   }
   const {

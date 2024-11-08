@@ -76,6 +76,16 @@ export enum PlanErrorCode {
    * eg: create bucket when bucket already exists
    */
   RESOURCE_EXISTS = "RESOURCE_EXISTS",
+  /**
+   * Permission denied,
+   *  eg: when user credentials are lack required permissions to perform action
+   */
+  PERMISSION_DENIED = "PERMISSION_DENIED",
+  /**
+   * Resource is already exists
+   * eg: create bucket when bucket already exists in s3 global namespace
+   */
+  RESOURCE_CONFLICT = "RESOURCE_CONFLICT",
 
   /**
    * Resource is not found

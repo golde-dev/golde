@@ -205,16 +205,16 @@ export async function initConfig() {
         const golde = await createGoldeClient(goldeConfig);
         const hasProject = await golde.hasProject(name);
         if (hasProject) {
-          logger.info(`Project ${projectName} already exists`);
+          logger.info(`[Init] Project ${projectName} already exists`);
           return;
         }
         await golde.createProject(projectName);
       } catch (error) {
         if (error instanceof GoldeError) {
           if (error.cause?.status === 409) {
-            logger.error(`Project: ${projectName} already exists`);
+            logger.error(`[Init] Project: ${projectName} already exists`);
           } else {
-            logger.error("Failed to create project in golde", {
+            logger.error("[Init] Failed to create project in golde", {
               error,
             });
           }

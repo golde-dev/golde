@@ -7,6 +7,7 @@ import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { ExecutionGroups } from "./types/plan.ts";
+import { printDuration } from "./utils/duration.ts";
 
 export function sortByPath<T extends ExecutionUnit>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
@@ -19,13 +20,13 @@ export function hasChanges(plan: Plan): boolean {
 export function printPlan(flatPlan: Plan) {
   const plan = Object.groupBy(flatPlan, ({ type }) => type) as ExecutionGroups;
 
-  logger.info("Execution plan");
+  logger.info("[Plan] Execution plan");
 
   if (plan[Type.Noop]) {
     logger.info(`${plan[Type.Noop].length} resources that are already up to date`);
     sortByPath(plan[Type.Noop]).forEach((noop) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${noop.path}`, {
+        logger.debug(`${noop.path}`, {
           config: noop.config,
           state: noop.state,
         });
@@ -78,9 +79,11 @@ export function printPlan(flatPlan: Plan) {
 
 export async function createPlan(
   context: Context,
+  print = false,
 ): Promise<Plan> {
   try {
-    logger.debug("Creating plan");
+    logger.debug("[Plan] Creating plan");
+    const start = performance.now();
     const plan: Plan = (
       await Promise.all(
         [
@@ -90,8 +93,13 @@ export async function createPlan(
         ],
       )
     ).flat();
+    const end = performance.now();
 
-    logger.debug("Successfully created plan");
+    if (print) {
+      logger.info(`[Plan] Created plan in ${printDuration(start, end)}`);
+    } else {
+      logger.debug(`[Plan] Created plan in ${printDuration(start, end)}`);
+    }
     return sortByPath(plan);
   } catch (error) {
     if (error instanceof PlanError) {

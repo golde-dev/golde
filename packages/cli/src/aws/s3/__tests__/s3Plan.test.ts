@@ -3,7 +3,7 @@ import { expect } from "@std/expect";
 import { spy } from "@std/testing/mock";
 import { Type } from "../../../types/plan.ts";
 import { createS3Plan } from "../plan.ts";
-import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "../plan.ts";
+import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "../executor.ts";
 import type { BucketConfig, BucketState, S3Config, S3State } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../types/plan.ts";
 import { assertBranch } from "../../../utils/resource.ts";
@@ -17,6 +17,7 @@ const executors = {
   assertCreatePermission: spy(),
   assertDeletePermission: spy(),
   assertUpdatePermission: spy(),
+  assertBucketNameAvailable: spy(),
   createBucket: spy(),
   deleteBucket: spy(),
   updateBucket: spy(),

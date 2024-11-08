@@ -7,7 +7,8 @@ import {
   createRoute53Executors,
   createRoute53Plan,
 } from "./route53/plan.ts";
-import { createS3DestroyPlan, createS3Executors, createS3Plan } from "./s3/plan.ts";
+import { createS3DestroyPlan, createS3Plan } from "./s3/plan.ts";
+import { createS3Executors } from "./s3/executor.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -55,7 +56,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
   }
 
   if (!isEmpty(s3State) || !isEmpty(s3Config)) {
-    const executors = createS3Executors(aws!);
+    const executors = createS3Executors(aws);
     plan.push(createS3Plan(
       executors,
       tags,

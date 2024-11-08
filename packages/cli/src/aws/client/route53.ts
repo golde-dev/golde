@@ -137,7 +137,7 @@ export class Route53Client extends AWSClientBase {
       await this.getRoute53Client(region).send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS]: Failed to delete DNS record", e);
+        logger.error("[AWS] Failed to delete DNS record", e);
       }
       throw e;
     }

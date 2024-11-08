@@ -1,137 +1,13 @@
 import { logger } from "../../logger.ts";
-import { mergeProjectTags, toTagsList } from "../../utils/tags.ts";
-import type { AWSClient } from "../client/client.ts";
-import type { Tags, WithBranch } from "../../types/config.ts";
+import { mergeProjectTags } from "../../utils/tags.ts";
+import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
 import type { BucketConfig, BucketState, S3Config, S3State } from "./types.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
-import type { WithRegion } from "../types.ts";
-import { PlanError } from "../../error.ts";
-import { PlanErrorCode } from "../../error.ts";
-
-export async function createBucket(
-  this: AWSClient,
-  name: string,
-  config: WithBranch<WithRegion<BucketConfig>>,
-): Promise<BucketState> {
-  assertBranch(config);
-
-  const {
-    region,
-    tags,
-  } = config;
-
-  const start = Date.now();
-  await this.createBucket(region, {
-    Bucket: name,
-  });
-
-  const tagList = toTagsList(tags);
-  if (tagList) {
-    await this.updateBucketTags(region, name, tagList);
-  }
-  const end = Date.now();
-  logger.debug(`[AWS]: created bucket ${name} in ${end - start}ms`);
-
-  return {
-    arn: `arn:aws:s3:::${name}`,
-    createdAt: new Date().toISOString(),
-    config,
-  };
-}
-export type CreateBucket = typeof createBucket;
-
-export async function deleteBucket(
-  this: AWSClient,
-  region: string,
-  name: string,
-): Promise<void> {
-  const start = Date.now();
-  await this.deleteBucket(region, name);
-  const end = Date.now();
-  logger.debug(`[AWS]: deleted bucket ${name} in ${end - start}ms`);
-}
-
-export type DeleteBucket = typeof deleteBucket;
-
-export async function updateBucket(
-  this: AWSClient,
-  region: string,
-  name: string,
-  config: WithBranch<WithRegion<BucketConfig>>,
-): Promise<BucketState> {
-  const {
-    tags,
-  } = config;
-
-  const tagList = toTagsList(tags);
-  if (tagList) {
-    await this.updateBucketTags(region, name, tagList);
-  }
-  return {
-    arn: `arn:aws:s3:::${name}`,
-    createdAt: new Date().toISOString(),
-    config,
-  };
-}
-
-export type UpdateBucket = typeof updateBucket;
-
-export async function assertBucketExist(this: AWSClient, name: string) {
-  logger.debug(`[AWS]: checking bucket ${name} exists`);
-  const start = performance.now();
-  const exists = await this.checkBucketExists(name);
-  const end = performance.now();
-  logger.debug(`[AWS]: checked bucket ${name} exists in ${end - start}ms`);
-  if (!exists) {
-    throw new PlanError(`Bucket ${name} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
-  }
-}
-
-export async function assertBucketNotExist(this: AWSClient, name: string) {
-  logger.debug(`[AWS]: checking bucket ${name} not exists`);
-  const start = performance.now();
-  const exists = await this.checkBucketExists(name);
-  const end = performance.now();
-  logger.debug(`[AWS]: checked bucket ${name} not exists in ${end - start}ms`);
-
-  if (exists) {
-    throw new PlanError(`Bucket ${name} already exists`, PlanErrorCode.RESOURCE_EXISTS);
-  }
-}
-
-export async function assertCreatePermission(this: AWSClient, _name: string, _region?: string) {
-  // TODO: check if user has create permission
-}
-export async function assertDeletePermission(this: AWSClient, _name: string, _region?: string) {
-  // TODO: check if user has delete permission
-}
-export async function assertUpdatePermission(this: AWSClient, _name: string, _region?: string) {
-  // TODO: check if user has update permission
-}
-
-export function getDefaultRegion(this: AWSClient) {
-  return this.region ?? this.defaultRegion;
-}
-
-export const createS3Executors = (aws: AWSClient) => {
-  return {
-    getDefaultRegion: getDefaultRegion.bind(aws),
-    createBucket: createBucket.bind(aws),
-    deleteBucket: deleteBucket.bind(aws),
-    updateBucket: updateBucket.bind(aws),
-    assertCreatePermission: assertCreatePermission.bind(aws),
-    assertDeletePermission: assertDeletePermission.bind(aws),
-    assertUpdatePermission: assertUpdatePermission.bind(aws),
-    assertBucketExist: assertBucketExist.bind(aws),
-    assertBucketNotExist: assertBucketNotExist.bind(aws),
-  };
-};
-
-export type Executors = ReturnType<typeof createS3Executors>;
+import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
 
 function getCurrent(buckets: S3State = {}) {
   const previous: {
@@ -187,13 +63,13 @@ export async function createS3Plan(
     deleteBucket,
     updateBucket,
     assertBucketExist,
-    assertBucketNotExist,
+    assertBucketNameAvailable,
     assertCreatePermission,
     assertDeletePermission,
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "Planning for s3 changes",
+    "[AWS] Planning for s3 changes",
     {
       state,
       config,
@@ -213,7 +89,7 @@ export async function createS3Plan(
     assertRegion(config);
     assertBranch(config);
 
-    await assertBucketNotExist(name);
+    await assertBucketNameAvailable(name, region);
     await assertCreatePermission(name, region);
 
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
@@ -232,7 +108,7 @@ export async function createS3Plan(
     const { state, name } = previous[key];
     const { config: { region } } = state;
 
-    await assertBucketExist(name);
+    await assertBucketExist(name, region);
     await assertDeletePermission(name, region);
 
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
@@ -267,7 +143,7 @@ export async function createS3Plan(
         );
       }
 
-      await assertBucketExist(name);
+      await assertBucketExist(name, region);
       await assertUpdatePermission(name, region);
 
       assertRegion(nextConfig);
@@ -300,6 +176,7 @@ export async function createS3DestroyPlan(
   const {
     deleteBucket,
     assertBucketExist,
+    assertDeletePermission,
   } = executors;
 
   const plan: Plan = [];
@@ -313,6 +190,7 @@ export async function createS3DestroyPlan(
     const { config: { region } } = state;
 
     await assertBucketExist(name);
+    await assertDeletePermission(name, region);
 
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
       type: Type.Delete,
