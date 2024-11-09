@@ -11,7 +11,7 @@ import type { Context } from "./types/context.ts";
 import { createAWSClient } from "./aws/client/factory.ts";
 import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
 import { getGitInfo } from "./utils/git.ts";
-import { printDuration } from "./utils/duration.ts";
+import { formatDuration } from "./utils/duration.ts";
 
 export const initializeContext = async (
   branchName: string,
@@ -92,7 +92,7 @@ export const initializeContext = async (
       const previousState = await stateClient.getBranchState(name, branchName);
 
       const end = performance.now();
-      logger.info(`[Context] Initialized in ${printDuration(start, end)}`);
+      logger.info(`[Context] Initialized in ${formatDuration(end - start)}`);
 
       return {
         ...contextBase,
@@ -103,7 +103,7 @@ export const initializeContext = async (
       const previousState = await goldeClient.getBranchState(name, branchName);
 
       const end = performance.now();
-      logger.info(`[Context] Initialized in ${printDuration(start, end)}`);
+      logger.info(`[Context] Initialized in ${formatDuration(end - start)}`);
 
       return {
         ...contextBase,

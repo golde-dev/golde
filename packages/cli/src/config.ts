@@ -12,6 +12,7 @@ import { isPlainObject } from "@es-toolkit/es-toolkit";
 import { extname } from "@std/path";
 import { decode } from "./utils/text.ts";
 import {
+  configTemplate,
   envTemplate,
   fileTemplate,
   gitTemplate,
@@ -136,25 +137,57 @@ export const filterToBranch = (config: unknown, filterBranch: string): unknown =
   );
 };
 
-export const resolveConfig = (config: unknown, gitInfo: GitInfo, branch?: string): Config => {
+export interface ManagedConfig {
+  [key: string]: string | number | boolean;
+}
+
+export const getManagedConfig = async (_config: Config): Promise<ManagedConfig> => {
+  return {};
+};
+
+export const resolveManagedConfig = (config: Config, managedConfig: ManagedConfig): Config => {
+  try {
+    const configWithConfig = resolveTemplate(config, configTemplate(managedConfig));
+    logger.debug("[Config] Resolved managed config templates in config", {
+      config: configWithConfig,
+    });
+    const validatedConfig = validateConfig(configWithConfig);
+    logger.debug("[Config] Validated config with schema", { config: validatedConfig });
+
+    return validatedConfig;
+  } catch (error) {
+    if (error instanceof ConfigError) {
+      switch (error.code) {
+        case ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND:
+          logger.warn("[Config] No managed config value found", { error });
+          return config;
+      }
+    } else {
+      logger.error(`[Config] Unknown error: ${(error as Error).message}`, error);
+    }
+    return Deno.exit(1);
+  }
+};
+
+export const resolveConfig = (
+  config: unknown,
+  gitInfo: GitInfo,
+  branch?: string,
+): Config => {
   try {
     logger.debug("[Config] Resolving config");
 
     const configWithEnv = resolveTemplate(config, envTemplate);
-    logger.debug("[Config] Resolved env vars templates in config", {
-      config: configWithEnv,
-    });
+    logger.debug("[Config] Resolved env vars templates in config", { config: configWithEnv });
 
     const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
-    logger.debug("[Config] Resolved files templates in config", {
-      config: configWithFiles,
-    });
+    logger.debug("[Config] Resolved file templates in config", { config: configWithFiles });
 
     const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
     logger.debug("[Config] Resolved git templates in config", { config: configWithGit });
 
     const validatedConfig = validateConfig(configWithGit);
-    logger.debug("[Config] Validated config with schema");
+    logger.debug("[Config] Validated config with schema", { config: validatedConfig });
 
     if (!branch) {
       return validatedConfig;
@@ -204,7 +237,11 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
   const branchName = getBranchName(branch);
   const gitInfo = getGitInfo(branch);
 
-  return resolveConfig(rawConfig, gitInfo, branchName);
+  const resolvedBase = resolveConfig(rawConfig, gitInfo, branchName);
+  const managedConfig = await getManagedConfig(resolvedBase);
+  const resolvedManaged = resolveManagedConfig(resolvedBase, managedConfig);
+
+  return resolvedManaged;
 }
 
 export function getFinalConfig(config: Config, dependencies: Dependencies): Config {

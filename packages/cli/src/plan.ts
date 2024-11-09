@@ -7,7 +7,7 @@ import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { ExecutionGroups } from "./types/plan.ts";
-import { printDuration } from "./utils/duration.ts";
+import { formatDuration } from "./utils/duration.ts";
 
 export function sortByPath<T extends ExecutionUnit>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
@@ -93,15 +93,22 @@ export async function createPlan(
         ],
       )
     ).flat();
+
     const end = performance.now();
+    if (!hasChanges(plan)) {
+      logger.info(`[Plan] No changes detected in ${formatDuration(end - start)}`);
+      Deno.exit(0);
+    }
 
     if (print) {
-      logger.info(`[Plan] Created plan in ${printDuration(start, end)}`);
+      logger.info(`[Plan] Created plan in ${formatDuration(end - start)}`);
+      printPlan(plan);
     } else {
-      logger.debug(`[Plan] Created plan in ${printDuration(start, end)}`);
+      logger.debug(`[Plan] Created plan in ${formatDuration(end - start)}`);
     }
     return sortByPath(plan);
   } catch (error) {
+    ``;
     if (error instanceof PlanError) {
       logger.error(`Failed to plan changes: ${error.message}`);
     } else if (error instanceof Error) {

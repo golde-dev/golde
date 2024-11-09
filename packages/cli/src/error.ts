@@ -15,6 +15,11 @@ export enum ConfigErrorCode {
   INVALID_CONFIG = "INVALID_CONFIG",
 
   /**
+   * When managed config value is not found
+   */
+  MANAGED_CONFIG_NOT_FOUND = "MANAGED_CONFIG_NOT_FOUND",
+
+  /**
    * Env variable missing
    */
   ENV_MISSING = "ENV_MISSING",

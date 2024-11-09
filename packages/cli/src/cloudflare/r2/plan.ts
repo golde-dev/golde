@@ -6,6 +6,7 @@ import { assertBranch } from "../../utils/resource.ts";
 import type { BucketConfig, BucketState, R2Config, R2State } from "./types.ts";
 import { logger } from "../../logger.ts";
 import type { WithBranch } from "../../types/config.ts";
+import { formatDuration } from "../../utils/duration.ts";
 
 export async function createBucket(
   this: CloudflareClient,
@@ -26,7 +27,7 @@ export async function createBucket(
     };
   });
   const end = Date.now();
-  logger.debug(`[Cloudflare]: created bucket ${name} in ${end - start}ms`);
+  logger.debug(`[Cloudflare]: created bucket ${name} in ${formatDuration(end - start)}`);
   return bucket;
 }
 export type CreateBucket = typeof createBucket;
@@ -36,7 +37,7 @@ export async function deleteBucket(this: CloudflareClient, name: string) {
   await this.deleteBucket(name);
   const end = Date.now();
 
-  logger.debug(`[Cloudflare]: deleting bucket ${name} in ${end - start}ms`);
+  logger.debug(`[Cloudflare]: deleting bucket ${name} in ${formatDuration(end - start)}`);
 }
 export type DeleteBucket = typeof deleteBucket;
 

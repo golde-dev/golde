@@ -1,11 +1,11 @@
 import { assertEquals, assertThrows } from "@std/assert";
-// import { stub } from "@std/testing/mock";
-import { resolveTemplate } from "../template.ts";
-// import * as git from "../git.ts";
+import { configTemplate, gitTemplate, resolveTemplate } from "../template.ts";
 import { ConfigError } from "../../error.ts";
+import type { GitInfo } from "../git.ts";
+import { describe, it } from "@std/testing/bdd";
 
-Deno.test("resolveTemplate", async (t) => {
-  await t.step(
+describe("resolveTemplate", () => {
+  it(
     "should return the same value if it's undefined, null, boolean, number, or bigint",
     () => {
       const f = (t: string) => t;
@@ -17,7 +17,7 @@ Deno.test("resolveTemplate", async (t) => {
     },
   );
 
-  await t.step("should replace template placeholders in a string", () => {
+  it("should replace template placeholders in a string", () => {
     const onTemplate = () => "replaced";
     assertEquals(
       resolveTemplate("Hello {{name}}!", onTemplate),
@@ -25,7 +25,7 @@ Deno.test("resolveTemplate", async (t) => {
     );
   });
 
-  await t.step(
+  it(
     "should throw an error for symbols, sets, maps and functions",
     () => {
       const onTemplate = (t: string) => t;
@@ -39,7 +39,7 @@ Deno.test("resolveTemplate", async (t) => {
     },
   );
 
-  await t.step("should recursively resolve templates in arrays", () => {
+  it("should recursively resolve templates in arrays", () => {
     const onTemplate = () => "resolved";
     const input = [1, "Hello {{name}}!", [true, "{{value}}"], {
       key: "{{key}}",
@@ -50,7 +50,7 @@ Deno.test("resolveTemplate", async (t) => {
     assertEquals(resolveTemplate(input, onTemplate), expected);
   });
 
-  await t.step("should recursively resolve templates in objects", () => {
+  it("should recursively resolve templates in objects", () => {
     const onTemplate = () => "resolved";
     const input = {
       name: "{{name}}",
@@ -71,7 +71,7 @@ Deno.test("resolveTemplate", async (t) => {
     assertEquals(resolveTemplate(input, onTemplate), expected);
   });
 
-  await t.step("should resolve templates object keys", () => {
+  it("should resolve templates object keys", () => {
     const onTemplate = () => "resolved";
     const input = {
       "{{name}}": "name",
@@ -82,7 +82,7 @@ Deno.test("resolveTemplate", async (t) => {
     assertEquals(resolveTemplate(input, onTemplate), expected);
   });
 
-  await t.step("should handle multiple templates in string", () => {
+  it("should handle multiple templates in string", () => {
     const onTemplate = (t: string): string => {
       if (t === "name") return "John";
       if (t === "surname") return "Knight";
@@ -98,17 +98,65 @@ Deno.test("resolveTemplate", async (t) => {
     assertEquals(resolveTemplate(input, onTemplate), expected);
   });
 
-  // await t.step("should resolve git template variables", () => {
-  //   stub(git, "getBranchSlug", () => "feature/branch");
-  //   stub(git, "getBranchName", () => "main");
+  it("should resolve git template variables", () => {
+    const gitInfo = {
+      branchSlug: "feature/branch",
+      branchName: "main",
+    } as GitInfo;
+    const input = "This is the {{git.BRANCH_SLUG}} branch on {{git.BRANCH_NAME}}";
+    const expected = "This is the feature/branch branch on main";
+    assertEquals(resolveTemplate(input, gitTemplate(gitInfo)), expected);
 
-  //   const input = "This is the {{git.BRANCH_SLUG}} branch on {{git.BRANCH}}";
-  //   const expected = "This is the feature/branch branch on main";
-  //   assertEquals(resolveTemplate(input, gitTemplate), expected);
+    const input2 = { "{{git.BRANCH_SLUG}}-test": "branch on {{git.BRANCH_NAME}}" };
+    const expected2 = { "feature/branch-test": "branch on main" };
 
-  //   const input2 = { "{{git.BRANCH_SLUG}}-test": "branch on {{git.BRANCH}}" };
-  //   const expected2 = { "feature/branch-test": "branch on main" };
+    assertEquals(resolveTemplate(input2, gitTemplate(gitInfo)), expected2);
+  });
 
-  //   assertEquals(resolveTemplate(input2, gitTemplate), expected2);
-  // });
+  it("should resolve nested config template variables", () => {
+    const managedConfig = {
+      "branch": "feature/branch",
+      "name-main": "John",
+      "age": 42,
+      "boolean": true,
+    };
+    const gitInfo = {
+      branchSlug: "main",
+      branchName: "main",
+    } as GitInfo;
+
+    const input = {
+      "fullName": "test-{{config.name-{{ git.BRANCH_NAME }}}}-end",
+      "age": "{{config.age}}",
+      "boolean": "{{config.boolean}}",
+    };
+    const expected = {
+      "fullName": "test-John-end",
+      "age": 42,
+      "boolean": true,
+    };
+    const withGitInfo = resolveTemplate(input, gitTemplate(gitInfo));
+    assertEquals(resolveTemplate(withGitInfo, configTemplate(managedConfig)), expected);
+  });
+
+  it("should resolve managed config template variables of different types", () => {
+    const managedConfig = {
+      "branch": "feature/branch",
+      "name": "John",
+      "age": 42,
+      "boolean": true,
+    };
+
+    const input = {
+      "fullName": "{{config.name}} - {{config.name}}",
+      "age": "{{config.age}}",
+      "boolean": "{{config.boolean}}",
+    };
+    const expected = {
+      "fullName": "John - John",
+      "age": 42,
+      "boolean": true,
+    };
+    assertEquals(resolveTemplate(input, configTemplate(managedConfig)), expected);
+  });
 });

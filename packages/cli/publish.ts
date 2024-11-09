@@ -7,6 +7,7 @@ import { walk } from "@std/fs/walk";
 import { existsSync } from "@std/fs/exists";
 import { basename, join, resolve } from "@std/path";
 import { copy } from "@std/fs/copy";
+import { homedir } from "node:os";
 
 const { local, quick } = parseArgs(Deno.args, {
   boolean: ["local", "quick"],
@@ -231,6 +232,19 @@ function updateLocalCLI(): Promise<void> {
   });
 }
 
+async function quickLocalCLI(): Promise<void> {
+  logger.info("Updating local CLI");
+
+  const home = homedir();
+  const from = resolve("./dist/bin/cli-linux-x64");
+  const to = join(home, ".local/bin/golde");
+  await copy(
+    from,
+    to,
+    { overwrite: true },
+  );
+}
+
 async function publish() {
   logger.info("Publishing to remote registry");
   await publishNPMPackages(
@@ -269,6 +283,7 @@ async function publishLocal() {
 async function publishLocalQuick() {
   logger.info("Publishing to local registry");
   await quickUpdateExamples(examples);
+  await quickLocalCLI();
 }
 
 if (quick) {

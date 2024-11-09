@@ -1,7 +1,7 @@
 import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
 import type { WithBranch } from "../../types/config.ts";
-import { printDuration } from "../../utils/duration.ts";
+import { formatDuration } from "../../utils/duration.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { toTagsList } from "../../utils/tags.ts";
 import type { AWSClient } from "../client/client.ts";
@@ -30,7 +30,7 @@ export async function createBucket(
     await this.updateBucketTags(region, name, tagList);
   }
   const end = Date.now();
-  logger.debug(`[AWS] Created bucket ${name} in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Created bucket ${name} in ${formatDuration(end - start)}`);
 
   return {
     arn: `arn:aws:s3:::${name}`,
@@ -48,7 +48,7 @@ export async function deleteBucket(
   const start = Date.now();
   await this.deleteBucket(region, name);
   const end = Date.now();
-  logger.debug(`[AWS] deleted bucket ${name} in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Deleted bucket ${name} in ${formatDuration(end - start)}`);
 }
 
 export type DeleteBucket = typeof deleteBucket;
@@ -80,7 +80,7 @@ export async function assertBucketExist(this: AWSClient, name: string, region?: 
   const start = performance.now();
   const exists = await this.checkBucketExists(name, region);
   const end = performance.now();
-  logger.debug(`[AWS] Checked bucket ${name} exists in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Checked bucket ${name} exists in ${formatDuration(end - start)}`);
   if (!exists) {
     throw new PlanError(`Bucket ${name} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
   }
@@ -90,7 +90,7 @@ export async function assertBucketNameAvailable(this: AWSClient, name: string, r
   const start = performance.now();
   const available = await this.checkBucketNameAvailable(name, region);
   const end = performance.now();
-  logger.debug(`[AWS] Checked bucket ${name} exists in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Checked bucket ${name} exists in ${formatDuration(end - start)}`);
   if (!available) {
     throw new PlanError(`Cannot use bucket name ${name}`, PlanErrorCode.RESOURCE_CONFLICT);
   }
@@ -104,7 +104,7 @@ export async function assertCreatePermission(this: AWSClient, name: string, _reg
     this.region,
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${name} in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
   if (!allowed) {
     logger.error(`[AWS] Create permission denied for bucket ${name}`, reason);
     throw new PlanError(`Cannot create bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
@@ -118,7 +118,7 @@ export async function assertDeletePermission(this: AWSClient, name: string, _reg
     this.region,
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${name} in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
   if (!allowed) {
     logger.error(`[AWS] Delete permission denied for bucket ${name}`);
     throw new PlanError(`Cannot delete bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
@@ -132,7 +132,7 @@ export async function assertUpdatePermission(this: AWSClient, name: string, _reg
     this.region,
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${name} in ${printDuration(start, end)}`);
+  logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
   if (!allowed) {
     logger.error(`[AWS] Update tags permission denied for bucket ${name}`);
     throw new PlanError(`Cannot update bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
@@ -146,6 +146,7 @@ export function getDefaultRegion(this: AWSClient) {
 export const createS3Executors = (aws: AWSClient) => {
   return {
     getDefaultRegion: getDefaultRegion.bind(aws),
+
     createBucket: createBucket.bind(aws),
     deleteBucket: deleteBucket.bind(aws),
     updateBucket: updateBucket.bind(aws),

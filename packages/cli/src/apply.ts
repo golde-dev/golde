@@ -8,7 +8,7 @@ import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Config } from "./types/config.ts";
 import type { Lock } from "./types/lock.ts";
-import { printDuration } from "./utils/duration.ts";
+import { formatDuration } from "./utils/duration.ts";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -77,11 +77,11 @@ export async function executePlan(plan: Plan): Promise<Change[]> {
         }),
     );
     const end = performance.now();
-    logger.info(`[Execute] Successfully executed plan in ${printDuration(start, end)}`);
+    logger.info(`[Execute] Successfully executed plan in ${formatDuration(end - start)}`);
     return changes;
   } catch (error) {
     if (error instanceof Error) {
-      logger.error(`Failed to execute plan: ${error.message}`);
+      logger.error(`[Execute] Failed to execute plan: ${error.message}`);
     }
     return Deno.exit(1);
   }
@@ -108,11 +108,11 @@ export async function updateState(
     const end = performance.now();
 
     if (logger.level === "DEBUG") {
-      logger.debug(`[Apply] Successfully updated state in ${printDuration(start, end)}`, {
+      logger.debug(`[Apply] Updated state in ${formatDuration(end - start)}`, {
         state: updateState,
       });
     } else {
-      logger.info(`[Apply] Successfully updated state in ${printDuration(start, end)}`);
+      logger.info(`[Apply] Updated state in ${formatDuration(end - start)}`);
     }
     return updatedState;
   } catch (error) {

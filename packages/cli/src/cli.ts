@@ -2,7 +2,7 @@ import { load } from "@std/dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig, getFinalConfig } from "./config.ts";
-import { createDestroyPlan, createPlan, hasChanges, printPlan } from "./plan.ts";
+import { createDestroyPlan, createPlan } from "./plan.ts";
 import { getFinalContext, initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
@@ -167,8 +167,7 @@ program
       const loadedConfig = await getConfig(branchName, config);
       const context = await initializeContext(branchName, loadedConfig, yes);
 
-      const destroyPlan = await createDestroyPlan(context);
-      printPlan(destroyPlan);
+      const _destroyPlan = await createDestroyPlan(context);
     },
   );
 
@@ -210,12 +209,7 @@ program
       const finalConfig = getFinalConfig(loadedConfig, dependencies);
       const finalContext = getFinalContext(context, finalConfig);
 
-      const finalPlan = await createPlan(finalContext, true);
-      if (!hasChanges(finalPlan)) {
-        logger.info("No changes detected");
-        return;
-      }
-      printPlan(finalPlan);
+      await createPlan(finalContext, true);
     },
   );
 
@@ -249,12 +243,6 @@ program
       const initialContext = await initializeContext(branchName, initialConfig, yes);
       const initialPlan = await createPlan(initialContext, false);
       const initialDependencies = await getDependencies(initialContext, initialPlan);
-
-      if (!hasChanges(initialPlan)) {
-        logger.info("No changes detected");
-        return;
-      }
-      printPlan(initialPlan);
 
       const locks = await lockDependencies(initialContext, initialDependencies);
       const finalDependencies = await getDependencies(initialContext, initialPlan);
