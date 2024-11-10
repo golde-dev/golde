@@ -13,14 +13,15 @@ import { basename, extname } from "@std/path";
 import { decode } from "./utils/text.ts";
 import {
   configTemplate,
+  dependenciesTemplate,
   envTemplate,
   fileTemplate,
   gitTemplate,
   resolveTemplate,
-  stateTemplate,
 } from "./utils/template.ts";
 import type { Dependencies } from "./types/dependencies.ts";
 import type { Config } from "./types/config.ts";
+import { formatDuration } from "./utils/duration.ts";
 
 const loadConfig = async (
   path: string,
@@ -56,7 +57,7 @@ const loadConfig = async (
 export const getConfigRaw = (
   path?: string,
 ): Promise<unknown> => {
-  logger.debug(`Loading config`);
+  logger.debug(`[Config] Searching for config file`);
   if (path) {
     if (existsSync(resolve(path))) {
       return loadConfig(path);
@@ -232,21 +233,25 @@ export const resolveConfig = (
 };
 
 export async function getConfig(branch: string, configPath?: string): Promise<Config> {
-  const rawConfig = await getConfigRaw(configPath);
+  logger.info("[Config] Start config initialization");
+  const start = performance.now();
 
   const branchName = getBranchName(branch);
+  const rawConfig = await getConfigRaw(configPath);
   const gitInfo = getGitInfo(branch);
 
   const resolvedBase = resolveConfig(rawConfig, gitInfo, branchName);
   const managedConfig = await getManagedConfig(resolvedBase);
   const resolvedManaged = resolveManagedConfig(resolvedBase, managedConfig);
-  logger.info("[Config] Resolved config");
+
+  const end = performance.now();
+  logger.info(`[Config] Initialized config in ${formatDuration(end - start)}`);
   return resolvedManaged;
 }
 
 export function getFinalConfig(config: Config, dependencies: Dependencies): Config {
   try {
-    const configWithDeps = resolveTemplate(config, stateTemplate(dependencies));
+    const configWithDeps = resolveTemplate(config, dependenciesTemplate(dependencies));
     logger.debug("[Config] Resolved state dependencies in config", { config: configWithDeps });
     const validatedConfig = validateConfig(configWithDeps);
     return validatedConfig;

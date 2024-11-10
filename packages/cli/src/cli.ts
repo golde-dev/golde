@@ -6,17 +6,12 @@ import { createDestroyPlan, createPlan } from "./plan.ts";
 import { getFinalContext, initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
-import {
-  confirmExecutePlan,
-  createOutput,
-  executePlan,
-  printChanges,
-  updateState,
-} from "./apply.ts";
+import { confirmExecutePlan, executePlan, printChanges, updateState } from "./apply.ts";
 import { getBranchName, verifyInstalled } from "./utils/git.ts";
 import { getDependencies } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
 import type { LevelName } from "@std/log";
+import { createOutput } from "./output.ts";
 
 // TODO: handel .env.example errors
 await load({
@@ -158,7 +153,6 @@ program
         json,
         config,
         yes,
-        all,
       } = options;
       logger.configure(logLevel, json);
 
@@ -177,7 +171,26 @@ program
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
-  .option("-y, --yes", "destroy without prompting");
+  .option("-y, --yes", "destroy without prompting")
+  .action(
+    async function (
+      options: {
+        logLevel: LevelName;
+        config: string;
+        json: boolean;
+        yes: boolean;
+      },
+    ) {
+      const {
+        logLevel,
+        json,
+        config: _,
+        yes: __,
+      } = options;
+      logger.configure(logLevel, json);
+      logger.warn("This command is not implemented yet");
+    },
+  );
 
 program
   .command("plan")
@@ -257,7 +270,7 @@ program
         printChanges(changes);
 
         const state = await updateState(finalContext, changes, locks);
-        createOutput(finalConfig, state);
+        createOutput(finalContext, state);
       }
       await releaseLocks(finalContext, locks);
     },

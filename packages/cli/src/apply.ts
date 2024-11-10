@@ -6,7 +6,6 @@ import type { Context } from "./types/context.ts";
 import type { Change, Plan } from "./types/plan.ts";
 import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
-import type { Config } from "./types/config.ts";
 import type { Lock } from "./types/lock.ts";
 import { formatDuration } from "./utils/duration.ts";
 
@@ -146,8 +145,4 @@ export function printChanges(changes: Change[]): void {
         throw new Error("Unknown type");
     }
   }
-}
-
-export function createOutput(_config: Config, _state: State): void {
-  logger.warn("Output is not implemented yet");
 }

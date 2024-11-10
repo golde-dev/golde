@@ -3,6 +3,7 @@ import type { GitInfo } from "./git.ts";
 import type { Dependencies } from "../types/dependencies.ts";
 import { existsSync } from "@std/fs/exists";
 import type { ManagedConfig } from "../config.ts";
+import type { State } from "../types/state.ts";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
@@ -192,6 +193,10 @@ export const fileTemplate = (value: string): string => {
 
 const _stateRe = new RegExp(/(?<=state.)(.*)/);
 
-export const stateTemplate = (_dependencies: Dependencies) => (value: string): string => {
+export const dependenciesTemplate = (_dependencies: Dependencies) => (value: string): string => {
+  return originalTemplateString(value);
+};
+
+export const stateTemplate = (_state: State) => (value: string): string => {
   return originalTemplateString(value);
 };
