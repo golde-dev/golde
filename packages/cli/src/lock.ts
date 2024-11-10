@@ -10,4 +10,5 @@ export async function lockDependencies(
 }
 
 export async function releaseLocks(_context: Context, _locks: Lock[]): Promise<void> {
+  return await Promise.resolve();
 }

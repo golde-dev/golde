@@ -1,12 +1,13 @@
 import { logger } from "../../logger.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { mergeTags, toTagsArray } from "../../utils/tags.ts";
+import { mergeProjectTags, toTagsArray } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import type { CloudflareClient } from "../client/client.ts";
 import { Type } from "../../types/plan.ts";
 import type { Tags } from "../../types/config.ts";
 import type { DNSConfig, DNSState, RecordConfig, RecordState, RecordType } from "./types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
+import { omitUndefined } from "../../utils/object.ts";
 
 async function createZoneRecord(
   this: CloudflareClient,
@@ -121,7 +122,7 @@ function getPrevious(state: DNSState = {}) {
   for (const [zone, zoneState] of Object.entries(state)) {
     for (const [type, recordState] of Object.entries(zoneState)) {
       for (const [name, record] of Object.entries(recordState)) {
-        records[`cloudflare.dns.${zone}.${type}.${name}`] = {
+        records[`cloudflare.dns['${zone}'].${type}.${name}`] = {
           state: record,
           config: record.config,
           zone,
@@ -147,9 +148,11 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
 
   for (const [zone, zoneConfig] of Object.entries(config)) {
     for (const [type, recordConfig] of Object.entries(zoneConfig)) {
-      for (const [name, { tags: recordTags, ...record }] of Object.entries(recordConfig)) {
-        records[`cloudflare.dns.${zone}.${type}.${name}`] = {
-          config: { ...record, tags: mergeTags(tags, recordTags) },
+      for (const [name, record] of Object.entries(recordConfig)) {
+        const withTags = mergeProjectTags(record, tags);
+
+        records[`cloudflare.dns['${zone}'].${type}.${name}`] = {
+          config: omitUndefined(withTags),
           zone,
           type: type as RecordType,
           name,
@@ -195,6 +198,7 @@ export const createDNSPlan = (
   }
 
   const deleting = Object.keys(previous).filter((key) => !(key in next));
+  console.log({ deleting });
   for (const key of deleting) {
     const { state, zone, name } = previous[key];
     const deleteUnit: DeleteUnit<RecordState, DeleteZoneRecord> = {

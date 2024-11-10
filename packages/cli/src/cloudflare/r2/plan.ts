@@ -7,6 +7,7 @@ import type { BucketConfig, BucketState, R2Config, R2State } from "./types.ts";
 import { logger } from "../../logger.ts";
 import type { WithBranch } from "../../types/config.ts";
 import { formatDuration } from "../../utils/duration.ts";
+import { omitUndefined } from "../../utils/object.ts";
 
 export async function createBucket(
   this: CloudflareClient,
@@ -83,7 +84,7 @@ function getNext(config: R2Config = {}) {
   for (const [name, bucket] of Object.entries(config)) {
     next[`cloudflare.r2.${name}`] = {
       name,
-      config: bucket,
+      config: omitUndefined(bucket),
     };
   }
   return next;

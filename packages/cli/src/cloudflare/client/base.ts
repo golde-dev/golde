@@ -58,7 +58,7 @@ export class CloudflareBase {
     extraQuery?: object,
   ): Promise<T> {
     const query = new URLSearchParams({
-      per_page: "10000",
+      per_page: "20",
       ...extraQuery,
     }).toString();
 
@@ -93,6 +93,8 @@ export class CloudflareBase {
       } else {
         throw new CloudflareError("Cloudflare request error", errors);
       }
+    }).catch((error) => {
+      throw new CloudflareError("Cloudflare request error", error);
     });
   }
 
@@ -101,7 +103,7 @@ export class CloudflareBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
-    logger.debug("[Cloudflare] list request", {
+    logger.debug("[Cloudflare] request", {
       path,
       body,
       method: "GET",
@@ -134,6 +136,8 @@ export class CloudflareBase {
       } else {
         throw new CloudflareError("Cloudflare response error", errors);
       }
+    }).catch((error) => {
+      throw new CloudflareError("Cloudflare request error", error);
     });
   }
 

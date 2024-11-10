@@ -1,5 +1,7 @@
 # Golde
 
+GitOps based infrastructure as code and deployment tool.
+
 ![Check](https://github.com/golde-dev/golde/actions/workflows/checks.yaml/badge.svg)
 
 ## What is it?

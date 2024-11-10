@@ -1,4 +1,3 @@
-import { memoize } from "@es-toolkit/es-toolkit";
 import { logger } from "../../logger.ts";
 import { CloudflareBase, CloudflareError } from "./base.ts";
 
@@ -54,13 +53,19 @@ interface ZoneRecord {
   zone_name: string;
 }
 
+const zonesCache: Record<string, Zone[]> = {};
+
 export class DNSClient extends CloudflareBase {
   /**
    * Get list of zones that account have access to
    */
-  public getZones = memoize((query?: object): Promise<Zone[]> => {
-    return this.makeListRequest<Zone[]>("/zones", query);
-  }, { getCacheKey: (query = {}) => JSON.stringify(query) });
+  public async getZones(query?: object): Promise<Zone[]> {
+    const cacheKey = JSON.stringify(query);
+    if (!zonesCache[cacheKey]) {
+      zonesCache[cacheKey] = await this.makeListRequest<Zone[]>("/zones", query);
+    }
+    return zonesCache[cacheKey];
+  }
 
   /**
    * Gen zone id by zone name

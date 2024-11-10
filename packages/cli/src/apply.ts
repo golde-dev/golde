@@ -141,15 +141,13 @@ export function printChanges(changes: Change[]): void {
       case Type.Delete:
         logger.info(`Deleted ${path} in ${executionTime}ms`);
         break;
+
       default:
         throw new Error("Unknown type");
     }
   }
 }
 
-export function createOutput(config: Config, state: State): void {
-  console.log({
-    config,
-    state,
-  });
+export function createOutput(_config: Config, _state: State): void {
+  logger.warn("Output is not implemented yet");
 }

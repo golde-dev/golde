@@ -4,14 +4,14 @@ import { isPlainObject } from "@es-toolkit/es-toolkit";
 /**
  * Remove properties of empty objects
  */
-export const removeEmpty = (state: unknown): unknown => {
+export const omitEmptyObjects = (state: unknown): unknown => {
   if (!isPlainObject(state)) {
     return state;
   }
   return Object.fromEntries(
     Object.entries(state)
       .filter(([_, value]) => !isPlainObject(value) || !isEmpty(value))
-      .map(([key, value]) => [key, removeEmpty(value)]),
+      .map(([key, value]) => [key, omitEmptyObjects(value)]),
   );
 };
 
@@ -47,5 +47,23 @@ export function applyChangeSet<T extends object>(state: T = {} as T, changes: Ch
         throw new Error("Unknown type");
     }
   }
-  return removeEmpty(newState) as T;
+  return omitEmptyObjects(newState) as T;
+}
+
+/**
+ * Recursively remove undefined properties
+ */
+export function omitUndefined<T extends object>(object: T): T {
+  if (!isPlainObject(object)) {
+    return object;
+  }
+  return Object.fromEntries(
+    Object.entries(object)
+      .filter(([_, value]) => value !== undefined)
+      .map(([key, value]) => [key, omitUndefined(value)]),
+  ) as T;
+}
+
+export function safePath(path: string): string {
+  return path.includes(".") ? `['${path}']` : path;
 }

@@ -63,7 +63,7 @@ export function printPlan(flatPlan: Plan) {
   }
 
   if (plan[Type.Update]) {
-    logger.info(`${plan[Type.Update].length} Resources to delete`);
+    logger.info(`${plan[Type.Update].length} Resources to update`);
     sortByPath(plan[Type.Update]).forEach((update) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${update.path}`, {
@@ -110,9 +110,9 @@ export async function createPlan(
   } catch (error) {
     ``;
     if (error instanceof PlanError) {
-      logger.error(`Failed to plan changes: ${error.message}`);
+      logger.error(`[Plan] Failed to plan changes: ${error.message}`);
     } else if (error instanceof Error) {
-      logger.error(`Unknown plan error: ${error.message}`);
+      logger.error(`[Plan] Unknown plan error: ${error.message}`);
     }
     return Deno.exit(1);
   }
@@ -120,7 +120,7 @@ export async function createPlan(
 
 export async function createDestroyPlan(context: Context): Promise<Plan> {
   try {
-    logger.debug("Creating destroy plan");
+    logger.debug("[Plan] Creating destroy plan");
     const plan: Plan = (
       await Promise.all(
         [
@@ -131,13 +131,13 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
       )
     ).flat();
 
-    logger.debug("Successfully created destroy plan");
+    logger.debug("[Plan] Created destroy plan");
     return sortByPath(plan);
   } catch (error) {
     if (error instanceof PlanError) {
-      logger.error(`Failed to plan changes: ${error.message}`);
+      logger.error(`[Plan] Failed to plan changes: ${error.message}`);
     } else if (error instanceof Error) {
-      logger.error(`Unknown plan error: ${error.message}`);
+      logger.error(`[Plan] Unknown plan error: ${error.message}`);
     }
     return Deno.exit(1);
   }

@@ -333,12 +333,6 @@
             }
           },
           "additionalProperties": false
-        },
-        "output": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
         }
       },
       "required": [

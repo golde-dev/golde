@@ -1065,6 +1065,8 @@ __metadata:
     "@lerna-lite/version": "npm:^3.9.2"
     "@types/node": "npm:^22.7.4"
     "@vitest/coverage-v8": "npm:^2.1.1"
+    chokidar: "npm:^4.0.1"
+    es-toolkit: "npm:^1.26.1"
     eslint: "npm:^9.11.1"
     globals: "npm:^15.9.0"
     husky: "npm:^9.1.6"
@@ -3503,6 +3505,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chokidar@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "chokidar@npm:4.0.1"
+  dependencies:
+    readdirp: "npm:^4.0.1"
+  checksum: 10c2/00042eb0bb51f603c9b3a36aad7e06c00d234dbffef028544da3a5d065bc79b4d6734817cc0b91995375d6b4c213ee2dd621d0cd822bd2d38b96da3e126fcfa7
+  languageName: node
+  linkType: hard
+
 "chownr@npm:^2.0.0":
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
@@ -4192,6 +4203,18 @@ __metadata:
   version: 1.5.4
   resolution: "es-module-lexer@npm:1.5.4"
   checksum: 10c2/021cffd842ffdc6ffa1a91de06fc867a839d6c98cdf5747408ed0dd1964d6dde4109651d5a9c702987a7d0a894906363ea795c1d3b4f7ea4bf43944d192fdcd5
+  languageName: node
+  linkType: hard
+
+"es-toolkit@npm:^1.26.1":
+  version: 1.26.1
+  resolution: "es-toolkit@npm:1.26.1"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 10c2/a249966a8db0c111f24d4aed5bf7e8ec37d4edaa6ce1b727384f5315c9c0427c3e70aaa0998bf41def2ea646869af13fa40f7d0eb8755f892eb4659b167d9eaf
   languageName: node
   linkType: hard
 
@@ -8205,6 +8228,13 @@ __metadata:
     type-fest: "npm:^4.6.0"
     unicorn-magic: "npm:^0.1.0"
   checksum: 10c2/5e0105bf0ca4af64f33b6d4d83d51c57309177c7e04dcd1e622a8d6e6e15be1797efb79358f99cbb06e957ee90427cc2c94ce807c501fd926a1adefcf1ab4ad3
+  languageName: node
+  linkType: hard
+
+"readdirp@npm:^4.0.1":
+  version: 4.0.2
+  resolution: "readdirp@npm:4.0.2"
+  checksum: 10c2/de2dc7b48df43eef26442ee1d6c5f6a89a48bc672bb07cec2519898d133eece785f7f6749174f70605379ce299e5e01899cc13f3ac9d3e696435d606104a721b
   languageName: node
   linkType: hard
 

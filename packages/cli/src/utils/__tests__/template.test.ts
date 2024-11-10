@@ -82,7 +82,7 @@ describe("resolveTemplate", () => {
     assertEquals(resolveTemplate(input, onTemplate), expected);
   });
 
-  it("should handle multiple templates in string", () => {
+  it("should handle multiple templates in strings", () => {
     const onTemplate = (t: string): string => {
       if (t === "name") return "John";
       if (t === "surname") return "Knight";
@@ -95,6 +95,7 @@ describe("resolveTemplate", () => {
     const expected = {
       fullName: "John - Knight",
     };
+
     assertEquals(resolveTemplate(input, onTemplate), expected);
   });
 

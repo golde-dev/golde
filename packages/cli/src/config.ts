@@ -9,7 +9,7 @@ import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
 import { isEmpty } from "moderndash";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
-import { extname } from "@std/path";
+import { basename, extname } from "@std/path";
 import { decode } from "./utils/text.ts";
 import {
   configTemplate,
@@ -25,7 +25,7 @@ import type { Config } from "./types/config.ts";
 const loadConfig = async (
   path: string,
 ): Promise<unknown> => {
-  logger.debug(`[Config] Loading config from: ${path}`);
+  logger.info(`[Config] Loading config from: ${basename(path)}`);
 
   switch (extname(path)) {
     case ".cjs":
@@ -90,7 +90,7 @@ export const getConfigRaw = (
   );
 };
 
-const testBranchPattern = (branch: unknown, pattern: unknown) => {
+const testBranchPattern = (pattern: unknown, branch: unknown) => {
   if (typeof branch !== "string") {
     throw new Error("Branch is not a string");
   }
@@ -100,17 +100,17 @@ const testBranchPattern = (branch: unknown, pattern: unknown) => {
   return new RegExp(pattern).test(branch);
 };
 
-const testBranchName = (branch: unknown, filterBranch: string) => {
+const testBranchName = (branch: unknown, filter: string) => {
   if (typeof branch !== "string") {
     throw new Error("Branch is not a string");
   }
-  return branch === filterBranch;
+  return branch === filter;
 };
 
 /**
  * Recursively filter config to only include resources for the given branch
  */
-export const filterToBranch = (config: unknown, filterBranch: string): unknown => {
+export const filterToBranch = (config: unknown, filter: string): unknown => {
   if (!isPlainObject(config)) {
     return config;
   }
@@ -126,13 +126,13 @@ export const filterToBranch = (config: unknown, filterBranch: string): unknown =
         } = value;
 
         if (branch && branchPattern) {
-          return testBranchName(branch, filterBranch) || testBranchPattern(branch, branchPattern);
+          return testBranchName(branch, filter) && testBranchPattern(branchPattern, filter);
         } else if (branch) {
-          return testBranchName(branch, filterBranch);
+          return testBranchName(branch, filter);
         }
         return true;
       })
-      .map(([key, value]) => [key, filterToBranch(value, filterBranch)])
+      .map(([key, value]) => [key, filterToBranch(value, filter)])
       .filter(([_, value]) => !isPlainObject(value) || !isEmpty(value)),
   );
 };
@@ -141,9 +141,9 @@ export interface ManagedConfig {
   [key: string]: string | number | boolean;
 }
 
-export const getManagedConfig = async (_config: Config): Promise<ManagedConfig> => {
-  return {};
-};
+export async function getManagedConfig(_config: Config): Promise<ManagedConfig> {
+  return await Promise.resolve({});
+}
 
 export const resolveManagedConfig = (config: Config, managedConfig: ManagedConfig): Config => {
   try {
@@ -240,7 +240,7 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
   const resolvedBase = resolveConfig(rawConfig, gitInfo, branchName);
   const managedConfig = await getManagedConfig(resolvedBase);
   const resolvedManaged = resolveManagedConfig(resolvedBase, managedConfig);
-
+  logger.info("[Config] Resolved config");
   return resolvedManaged;
 }
 

@@ -38,7 +38,7 @@ export const schema: ZodType<Config> = z
     providers: providersSchema.optional(),
     aws: awsConfigSchema.optional(),
     cloudflare: cloudflareConfigSchema.optional(),
-    output: outputSchema.optional(),
+    // output: outputSchema.optional(),
   })
   .strict();
 

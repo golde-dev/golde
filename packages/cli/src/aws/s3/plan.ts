@@ -8,6 +8,7 @@ import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
+import { omitUndefined } from "../../utils/object.ts";
 
 function getCurrent(buckets: S3State = {}) {
   const previous: {
@@ -45,7 +46,7 @@ function getNext(config: S3Config = {}, region: string, tags?: Tags) {
 
     next[`aws.s3.${name}`] = {
       name,
-      config: withTagsAndRegion,
+      config: omitUndefined(withTagsAndRegion),
     };
   }
   return next;

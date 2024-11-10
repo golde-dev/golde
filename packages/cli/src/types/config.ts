@@ -4,9 +4,9 @@ import type { GoldeCredentials } from "../golde/types.ts";
 import type { HCloudCredentials } from "../hcloud/types.ts";
 import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
+import type { Output } from "./output.ts";
 
 export type Tags = Record<string, string>;
-export type Output = Record<string, string>;
 
 export interface ProvidersConfig {
   /**

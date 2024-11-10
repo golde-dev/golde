@@ -1,5 +1,8 @@
+import chokidar from 'chokidar';
 import {spawnTask, parallelTask, seriesTask, task} from "@chyzwar/runner";
+import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
+import {debounce} from "es-toolkit";
 
 spawnTask("verdaccio", 
   "yarn", ["dlx", "verdaccio@6.0.0-rc.1"],
@@ -216,9 +219,35 @@ seriesTask("quick", [
   "version:clean"
 ]);
 
+
 seriesTask("local:cli", [
   "version:local",
   "dist:cli:local",
   "publish:cli:local",
   "version:clean"
 ]);
+
+
+task("quick:watch", () => {
+  return new Promise(() => {
+    let quickProcess;
+    const quick = debounce(() => {
+      if (quickProcess) {
+        quickProcess.kill();
+      }
+      quickProcess = spawn('yarn', ['quick'])
+      quickProcess.stdout.on('data', (data) => {
+        if(data.toString().trim()) {
+          console.log(`[quick:watch] ${data}`);
+        }
+      });
+    }, 2000);
+
+    chokidar
+      .watch('./packages/cli/src', {ignoreInitial: true})
+      .on('all', (event, path) => {
+        console.log(`[quick:watch] ${event} ${path}`);
+        quick();
+    });
+  });
+});
