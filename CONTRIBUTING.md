@@ -1,17 +1,17 @@
 
-## Prerequisites
+# Prerequisites
 
 This project require number of tools available.
 
 - [Deno](https://docs.deno.com/runtime/fundamentals/installation/)
 - [Nodenv](https://github.com/nodenv/nodenv)
 
-
 ## Initialize env
 
 Once above are installed
 
 Install node version specified in .node-version
+
 ```sh
 nodenv install
 ```
@@ -31,9 +31,11 @@ yarn install
 ## Configure verdaccio
 
 Start verdaccio (local npm proxy)
+
 ```sh
 yarn verdaccio
 ```
+
 Add local user to local verdaccio
 
 ```sh
@@ -41,6 +43,7 @@ npm adduser --registry http://localhost:4873/
 ```
 
 Verify user is logged in verdaccio registry
+
 ```sh
 npm whoami --registry http://localhost:4873/
 ```
@@ -51,12 +54,12 @@ Open verdaccio config file
 code ~/.config/verdaccio/config.yaml
 
 ```
+
 And change max body size to 100mb
 
 ```yaml
 max_body_size: 100mb
 ```
-
 
 ## Start project
 
@@ -67,10 +70,24 @@ yarn start
 ```
 
 Create build artifacts and install then on locally
+
 - npm packages will be published to local verdaccio
 
 ```sh
 yarn local
+```
+
+Quick varian will only build for current local platform,
+It would update examples by overwriting files in node_modules
+
+```sh
+yarn quick
+```
+
+Watch for for changes in CLI package and rebuild using quick
+
+```sh
+yarn quick:watch
 ```
 
 Create build artifacts
@@ -78,4 +95,3 @@ Create build artifacts
 ```sh
 yarn dist
 ```
-
