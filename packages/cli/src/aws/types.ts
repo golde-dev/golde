@@ -1,4 +1,5 @@
 import type { S3Config, S3State } from "./s3/types.ts";
+import type { S3ObjectConfig, S3ObjectState } from "./s3Object/types.ts";
 import type { Route53Config, Route53State } from "./route53/types.ts";
 import type { Resource } from "../types/config.ts";
 
@@ -14,6 +15,12 @@ export interface AWSConfig {
    * S3 config
    */
   s3?: S3Config;
+
+  /**
+   * S3 Object config
+   */
+  s3Object?: S3ObjectConfig;
+
   /**
    * Route53 config
    */
@@ -25,6 +32,12 @@ export interface AWSState {
    * S3 state
    */
   s3?: S3State;
+
+  /**
+   * S3 Object state
+   */
+  s3Object?: S3ObjectState;
+
   /**
    * Route53 state
    */
