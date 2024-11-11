@@ -44,6 +44,25 @@ const config: Config = {
         branchPattern: "feature/*",
         bucket: "{{ state.aws.s3.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
       },
+    },
+    iamRole: {
+      
+    },
+    lambda: {
+      "example-aws-lambda-next-js": {
+        name: "example-aws-lambda-next-js",
+        description: "Example AWS Lambda Next.js",
+        runtime: "nodejs22.x",
+        handler: "index.handler",
+        memorySize: 128,
+        timeout: 30,
+        role: "arn:aws:iam::{{ state.aws.accountId }}:role/example-aws-lambda-next-js",
+        tags: {
+          "Branch": "master",
+        },
+        bucket: "{{ state.aws.s3.example-aws-lambda-next-js.arn }}",
+        key: "lambda.zip",
+      },
     }
   }
 };

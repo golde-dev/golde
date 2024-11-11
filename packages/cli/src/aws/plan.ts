@@ -9,6 +9,11 @@ import {
 } from "./route53/plan.ts";
 import { createS3DestroyPlan, createS3Plan } from "./s3/plan.ts";
 import { createS3Executors } from "./s3/executor.ts";
+import {
+  createS3ObjectDestroyPlan,
+  createS3ObjectExecutors,
+  createS3ObjectPlan,
+} from "./s3Object/plan.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -38,11 +43,13 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
     route53: route53Config,
     s3: s3Config,
+    s3Object: s3ObjectConfig,
   } = awsConfig ?? {};
 
   const {
     route53: route53State,
     s3: s3State,
+    s3Object: s3ObjectState,
   } = awsState ?? {};
 
   if (!isEmpty(route53State) || !isEmpty(route53Config)) {
@@ -62,6 +69,15 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
       tags,
       s3State,
       s3Config,
+    ));
+  }
+
+  if (!isEmpty(s3ObjectState) || !isEmpty(s3ObjectConfig)) {
+    const executors = createS3ObjectExecutors(aws);
+    plan.push(createS3ObjectPlan(
+      executors,
+      s3ObjectState,
+      s3ObjectConfig,
     ));
   }
 
@@ -91,6 +107,7 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
   const {
     route53: route53State,
     s3: s3State,
+    s3Object: s3ObjectState,
   } = awsState ?? {};
 
   if (!isEmpty(route53State)) {
@@ -106,6 +123,14 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     plan.push(createS3DestroyPlan(
       executors,
       s3State,
+    ));
+  }
+
+  if (!isEmpty(s3ObjectState)) {
+    const executors = createS3ObjectExecutors(aws);
+    plan.push(createS3ObjectDestroyPlan(
+      executors,
+      s3ObjectState,
     ));
   }
 
