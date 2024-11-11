@@ -2,7 +2,10 @@
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Deployment will user [Golde](golde.dev) and AWS Lambda using the [Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter)
+Deployment will user [Golde](golde.dev) and AWS  lambda adapter.
+
+- [Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter)
+- [Web Adapter Next.js zip](https://github.com/awslabs/aws-lambda-web-adapter/tree/main/examples/nextjs-zip)
 
 ## Getting Started
 

@@ -3,7 +3,7 @@ import type {Config} from '@golde/cli';
 const config: Config = {
   name: "example-aws-lambda-next-js",
   tags: {
-    Project: "GoldeExamples"
+    Project: "AWSLambdaNextJsExample"
   },
   providers: {
     golde: {
@@ -16,11 +16,34 @@ const config: Config = {
   },
   aws: {
     s3: {
-      "golde-example-aws-s3": {
+      "example-aws-lambda-next-js": {
+        branch: "master",
         tags: {
-          "BucketTag": "Example",
+          "Branch": "master",
+        },
+      },
+      "example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
+        branchPattern: "feature/*",
+        tags: {
+          "Branch": `{{ git.BRANCH_NAME }}`,
         },
       }
+    },
+    s3Object: {
+      "example-aws-lambda-next-js": {
+        type: "zip",
+        key: "lambda.zip",
+        include: [".next/standalone/**", "public/**"],
+        branch: "master",
+        bucket: "{{ state.aws.s3.example-aws-lambda-next-js.arn }}",
+      },
+      "example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
+        type: "zip",
+        key: "lambda.zip",
+        include: ["dist/**"],
+        branchPattern: "feature/*",
+        bucket: "{{ state.aws.s3.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
+      },
     }
   }
 };
