@@ -94,6 +94,9 @@ export class CloudflareBase {
         throw new CloudflareError("Cloudflare request error", errors);
       }
     }).catch((error) => {
+      if (error instanceof CloudflareError) {
+        throw error;
+      }
       throw new CloudflareError("Cloudflare request error", error);
     });
   }
@@ -137,6 +140,9 @@ export class CloudflareBase {
         throw new CloudflareError("Cloudflare response error", errors);
       }
     }).catch((error) => {
+      if (error instanceof CloudflareError) {
+        throw error;
+      }
       throw new CloudflareError("Cloudflare request error", error);
     });
   }

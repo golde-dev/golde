@@ -67,3 +67,10 @@ export function omitUndefined<T extends object>(object: T): T {
 export function safePath(path: string): string {
   return path.includes(".") ? `['${path}']` : path;
 }
+
+/**
+ * Narrow down to object
+ */
+export function stringify(value: object): string {
+  return JSON.stringify(value);
+}

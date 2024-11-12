@@ -2,25 +2,25 @@ import { logger } from "../../logger.ts";
 import { mergeProjectTags } from "../../utils/tags.ts";
 import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
-import type { BucketConfig, BucketState, S3Config, S3State } from "./types.ts";
+import type { IAMRoleConfig, IAMRoleState, RoleConfig, RoleState } from "./types.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
-import { addDefaultRegion, assertRegion } from "../utils.ts";
-import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
+import { assertRegion } from "../utils.ts";
+import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
 
-function getCurrent(buckets: S3State = {}) {
+function getCurrent(roles: IAMRoleState = {}) {
   const previous: {
     [path: string]: {
       name: string;
-      config: BucketConfig;
-      state: BucketState;
+      config: RoleConfig;
+      state: RoleState;
     };
   } = {};
 
-  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
-    previous[`aws.s3.${name}`] = {
+  for (const [name, { config, ...rest }] of Object.entries(roles)) {
+    previous[`aws.iamRole.${name}`] = {
       name,
       config,
       state: {
@@ -32,45 +32,43 @@ function getCurrent(buckets: S3State = {}) {
   return previous;
 }
 
-function getNext(config: S3Config = {}, region: string, tags?: Tags) {
+function getNext(config: IAMRoleConfig = {}, tags?: Tags) {
   const next: {
     [path: string]: {
       name: string;
-      config: BucketConfig;
+      config: RoleConfig;
     };
   } = {};
 
   for (const [name, bucket] of Object.entries(config)) {
     const withTags = mergeProjectTags(bucket, tags);
-    const withTagsAndRegion = addDefaultRegion(withTags, region);
 
-    next[`aws.s3.${name}`] = {
+    next[`aws.iamRole.${name}`] = {
       name,
-      config: omitUndefined(withTagsAndRegion),
+      config: omitUndefined(withTags),
     };
   }
   return next;
 }
 
-export async function createS3Plan(
+export async function createIAMRolePlan(
   executors: Executors,
   tags?: Tags,
-  state?: S3State,
-  config?: S3Config,
+  state?: IAMRoleState,
+  config?: IAMRoleConfig,
 ): Promise<Plan> {
   const {
-    getDefaultRegion,
-    createBucket,
-    deleteBucket,
-    updateBucket,
-    assertBucketExist,
-    assertBucketNameAvailable,
+    createRole,
+    deleteRole,
+    updateRole,
+    assertRoleExist,
+    assertRoleNotExist,
     assertCreatePermission,
     assertDeletePermission,
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[AWS] Planning for s3 changes",
+    "[AWS] Planning for IAM roles changes",
     {
       state,
       config,
@@ -78,25 +76,20 @@ export async function createS3Plan(
   );
   const plan: Plan = [];
 
-  const region = getDefaultRegion();
   const previous = getCurrent(state);
-  const next = getNext(config, region, tags);
+  const next = getNext(config, tags);
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
     const { config, name } = next[key];
 
-    assertRegion(config);
     assertBranch(config);
+    await assertRoleNotExist(name);
+    await assertCreatePermission(name);
 
-    const { region } = config;
-
-    await assertBucketNameAvailable(name, region);
-    await assertCreatePermission(name, region);
-
-    const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
+    const createUnit: CreateUnit<RoleConfig, RoleState, CreateRole> = {
       type: Type.Create,
-      executor: createBucket,
+      executor: createRole,
       args: [name, config],
       path: key,
       config,
@@ -108,15 +101,14 @@ export async function createS3Plan(
   const deleting = Object.keys(previous).filter((key) => !(key in next));
   for (const key of deleting) {
     const { state, name } = previous[key];
-    const { config: { region } } = state;
 
-    await assertBucketExist(name, region);
-    await assertDeletePermission(name, region);
+    await assertRoleExist(name);
+    await assertDeletePermission(name);
 
-    const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
+    const deleteUnit: DeleteUnit<RoleState, DeleteRole> = {
       type: Type.Delete,
-      executor: deleteBucket,
-      args: [region, name],
+      executor: deleteRole,
+      args: [name],
       path: key,
       state,
     };
@@ -130,7 +122,7 @@ export async function createS3Plan(
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
-      const noopUnit: NoopUnit<BucketConfig, BucketState> = {
+      const noopUnit: NoopUnit<RoleConfig, RoleState> = {
         type: Type.Noop,
         path: key,
         config: previousConfig,
@@ -138,28 +130,26 @@ export async function createS3Plan(
       };
       plan.push(noopUnit);
     } else {
-      if (nextConfig.region !== previousConfig.region) {
+      if (nextConfig.path !== previousConfig.path) {
         throw new Error(
-          "It is not possible to update s3 bucket region, create new and migrate data",
+          "It is not possible to update IAM role PATH, create new and migrate",
         );
       }
 
-      assertBranch(nextConfig);
+      await assertRoleExist(name);
+      await assertUpdatePermission(name);
+
       assertRegion(nextConfig);
-
-      const { region } = nextConfig;
-
-      await assertBucketExist(name, region);
-      await assertUpdatePermission(name, region);
+      assertBranch(nextConfig);
 
       const updateUnit: UpdateUnit<
-        BucketConfig,
-        BucketState,
-        UpdateBucket
+        RoleConfig,
+        RoleState,
+        UpdateRole
       > = {
         type: Type.Update,
-        executor: updateBucket,
-        args: [nextConfig.region, name, nextConfig, state],
+        executor: updateRole,
+        args: [name, nextConfig, state],
         path: key,
         state,
         config: nextConfig,
@@ -172,13 +162,13 @@ export async function createS3Plan(
   return await Promise.resolve(plan);
 }
 
-export async function createS3DestroyPlan(
+export async function createIAMRoleDestroyPlan(
   executors: Executors,
-  state?: S3State,
+  state?: IAMRoleState,
 ) {
   const {
-    deleteBucket,
-    assertBucketExist,
+    deleteRole,
+    assertRoleExist,
     assertDeletePermission,
   } = executors;
 
@@ -190,15 +180,14 @@ export async function createS3DestroyPlan(
   const previous = getCurrent(state);
   for (const key of Object.keys(previous)) {
     const { state, name } = previous[key];
-    const { config: { region } } = state;
 
-    await assertBucketExist(name);
-    await assertDeletePermission(name, region);
+    await assertRoleExist(name);
+    await assertDeletePermission(name);
 
-    const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
+    const deleteUnit: DeleteUnit<RoleState, DeleteRole> = {
       type: Type.Delete,
-      executor: deleteBucket,
-      args: [region, name],
+      executor: deleteRole,
+      args: [name],
       path: key,
       state: state,
     };

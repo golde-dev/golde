@@ -233,7 +233,7 @@ export const resolveConfig = (
 };
 
 export async function getConfig(branch: string, configPath?: string): Promise<Config> {
-  logger.info("[Config] Start config initialization");
+  logger.debug("[Config] Start config initialization");
   const start = performance.now();
 
   const branchName = getBranchName(branch);

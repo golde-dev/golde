@@ -67,6 +67,9 @@ export class GoldeClientBase {
       }
       return await r.json() as T;
     }).catch((error) => {
+      if (error instanceof GoldeError) {
+        throw error;
+      }
       throw new GoldeError(`Golde request failed`, error);
     });
   }

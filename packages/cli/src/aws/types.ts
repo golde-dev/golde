@@ -2,6 +2,7 @@ import type { S3Config, S3State } from "./s3/types.ts";
 import type { S3ObjectConfig, S3ObjectState } from "./s3Object/types.ts";
 import type { Route53Config, Route53State } from "./route53/types.ts";
 import type { Resource } from "../types/config.ts";
+import type { IAMRoleConfig, IAMRoleState } from "./iamRole/types.ts";
 
 export interface AWSResource extends Resource {
   region?: string;
@@ -25,6 +26,11 @@ export interface AWSConfig {
    * Route53 config
    */
   route53?: Route53Config;
+
+  /**
+   * IAM role config
+   */
+  iamRole?: IAMRoleConfig;
 }
 
 export interface AWSState {
@@ -42,6 +48,11 @@ export interface AWSState {
    * Route53 state
    */
   route53?: Route53State;
+
+  /**
+   * IAM role state
+   */
+  iamRole?: IAMRoleState;
 }
 
 export interface AWSCredentials {

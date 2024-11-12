@@ -1,3 +1,4 @@
+import { isEqual } from "@es-toolkit/es-toolkit";
 import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
 import type { WithBranch } from "../../types/config.ts";
@@ -58,20 +59,27 @@ export async function updateBucket(
   region: string,
   name: string,
   config: WithBranch<WithRegion<BucketConfig>>,
+  state: BucketState,
 ): Promise<BucketState> {
   const {
     tags,
   } = config;
+  const {
+    createdAt,
+  } = state;
 
-  const tagList = toTagsList(tags);
-  if (tagList) {
+  if (!isEqual(config.tags, state.config.tags)) {
+    const tagList = toTagsList(tags) ?? [];
     await this.updateBucketTags(region, name, tagList);
+    const updatedAt = new Date().toISOString();
+    return {
+      arn: `arn:aws:s3:::${name}`,
+      createdAt,
+      updatedAt,
+      config,
+    };
   }
-  return {
-    arn: `arn:aws:s3:::${name}`,
-    createdAt: new Date().toISOString(),
-    config,
-  };
+  return state;
 }
 
 export type UpdateBucket = typeof updateBucket;
@@ -96,12 +104,18 @@ export async function assertBucketNameAvailable(this: AWSClient, name: string, r
   }
 }
 
-export async function assertCreatePermission(this: AWSClient, name: string, _region?: string) {
+export async function assertCreatePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
   const [allowed, reason] = await this.checkPermission(
     ["s3:CreateBucket"],
     [`arn:aws:s3:::${name}`],
-    this.region,
+    [
+      {
+        ContextKeyName: "aws:RequestedRegion",
+        ContextKeyValues: [region],
+        ContextKeyType: "string",
+      },
+    ],
   );
   const end = performance.now();
   logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
@@ -110,12 +124,18 @@ export async function assertCreatePermission(this: AWSClient, name: string, _reg
     throw new PlanError(`Cannot create bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
-export async function assertDeletePermission(this: AWSClient, name: string, _region?: string) {
+export async function assertDeletePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
   const allowed = await this.checkPermission(
     ["s3:DeleteBucket"],
     [`arn:aws:s3:::${name}`],
-    this.region,
+    [
+      {
+        ContextKeyName: "aws:RequestedRegion",
+        ContextKeyValues: [region],
+        ContextKeyType: "string",
+      },
+    ],
   );
   const end = performance.now();
   logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
@@ -124,12 +144,18 @@ export async function assertDeletePermission(this: AWSClient, name: string, _reg
     throw new PlanError(`Cannot delete bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
-export async function assertUpdatePermission(this: AWSClient, name: string, _region?: string) {
+export async function assertUpdatePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
   const allowed = await this.checkPermission(
     ["s3:PutBucketTagging"],
     [`arn:aws:s3:::${name}`],
-    this.region,
+    [
+      {
+        ContextKeyName: "aws:RequestedRegion",
+        ContextKeyValues: [region],
+        ContextKeyType: "string",
+      },
+    ],
   );
   const end = performance.now();
   logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);

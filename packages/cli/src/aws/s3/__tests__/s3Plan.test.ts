@@ -95,7 +95,7 @@ describe("aws s3 buckets", () => {
       > = {
         type: Type.Update,
         executor: executors.updateBucket,
-        args: [configWithRegion.region, "bucket1", configWithRegion],
+        args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1],
         path: "aws.s3.bucket1",
         state: state.bucket1,
         config: configWithRegion,

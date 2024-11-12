@@ -1,6 +1,7 @@
-import type { Resource, WithBranch } from "../../types/config.ts";
+import type { Resource, Tags, WithBranch } from "../../types/config.ts";
 
 export interface ObjectConfig extends Resource {
+  tags?: Tags;
 }
 
 export interface S3ObjectConfig {

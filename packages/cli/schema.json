@@ -199,6 +199,24 @@
                 "additionalProperties": false
               }
             },
+            "s3Object": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
+                  },
+                  "tags": {
+                    "$ref": "#/definitions/golde/properties/tags"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
             "route53": {
               "type": "object",
               "additionalProperties": {
@@ -244,6 +262,170 @@
                     }
                   ]
                 }
+              }
+            },
+            "iamRole": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3/additionalProperties/properties/branchPattern"
+                  },
+                  "tags": {
+                    "$ref": "#/definitions/golde/properties/tags"
+                  },
+                  "assumeRolePolicy": {
+                    "type": "object",
+                    "properties": {
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2012-10-17"
+                        ]
+                      },
+                      "Statement": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "Sid": {
+                              "type": "string"
+                            },
+                            "Principal": {
+                              "type": "object",
+                              "properties": {
+                                "AWS": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "Service": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "Federated": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "CanonicalUser": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "Action": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              ]
+                            },
+                            "Resource": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              ]
+                            },
+                            "Effect": {
+                              "type": "string",
+                              "enum": [
+                                "Allow",
+                                "Deny"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "Action",
+                            "Effect"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "Version",
+                      "Statement"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "inlinePolicy": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/iamRole/additionalProperties/properties/assumeRolePolicy"
+                  },
+                  "permissionsBoundaryArn": {
+                    "type": "string"
+                  },
+                  "managedPoliciesArns": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/golde/properties/aws/properties/iamRole/additionalProperties/properties/permissionsBoundaryArn"
+                    }
+                  }
+                },
+                "required": [
+                  "assumeRolePolicy"
+                ],
+                "additionalProperties": false
               }
             }
           },

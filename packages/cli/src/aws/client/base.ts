@@ -2,6 +2,7 @@ import { logger } from "../../logger.ts";
 import { GetCallerIdentityCommand, STSClient } from "@aws-sdk/client-sts";
 import { IAMClient, SimulatePrincipalPolicyCommand } from "@aws-sdk/client-iam";
 import type {
+  ContextEntry,
   SimulatePrincipalPolicyCommandInput,
   SimulatePrincipalPolicyCommandOutput,
 } from "@aws-sdk/client-iam";
@@ -60,7 +61,7 @@ export class AWSClientBase {
     }
   }
 
-  public getIAMClient(region: string = this.defaultRegion) {
+  public getIAMClient(region: string = this.region ?? this.defaultRegion) {
     if (!iamClients.has(region)) {
       iamClients.set(
         region,
@@ -76,24 +77,28 @@ export class AWSClientBase {
     return iamClients.get(region)!;
   }
 
-  public async checkPermission(actions: string[], resources: string[], region?: string) {
+  public async checkPermission(
+    actions: string[],
+    resources: string[],
+    contextEntries: ContextEntry[] = [],
+  ) {
     try {
       if (this.isRoot) {
         logger.debug("[AWS] Skipping permission simulation for root account", {
           actions,
           resources,
-          region,
         });
         return [true, []];
       }
-      logger.debug("[AWS] Checking permission", { actions, resources, region });
+      logger.debug("[AWS] Checking permission", { actions, resources, contextEntries });
       const command = new SimulatePrincipalPolicyCommand({
         PolicySourceArn: this.arn,
         ActionNames: actions,
         ResourceArns: resources,
+        ContextEntries: contextEntries,
       });
       const { EvaluationResults } = await this
-        .getIAMClient(region)
+        .getIAMClient()
         .send<SimulatePrincipalPolicyCommandInput, SimulatePrincipalPolicyCommandOutput>(command);
 
       const Result = actions.every((action) => {

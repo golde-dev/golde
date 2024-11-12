@@ -12,6 +12,7 @@ export interface S3Config {
 
 export interface BucketState {
   createdAt: string;
+  updatedAt?: string;
   arn: string;
   config: WithRegion<WithBranch<BucketConfig>>;
 }

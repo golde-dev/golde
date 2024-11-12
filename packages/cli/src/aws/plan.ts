@@ -14,6 +14,8 @@ import {
   createS3ObjectExecutors,
   createS3ObjectPlan,
 } from "./s3Object/plan.ts";
+import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./iamRole/plan.ts";
+import { createIAMRoleExecutors } from "./iamRole/executor.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -44,12 +46,14 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     route53: route53Config,
     s3: s3Config,
     s3Object: s3ObjectConfig,
+    iamRole: iamRoleConfig,
   } = awsConfig ?? {};
 
   const {
     route53: route53State,
     s3: s3State,
     s3Object: s3ObjectState,
+    iamRole: iamRoleState,
   } = awsState ?? {};
 
   if (!isEmpty(route53State) || !isEmpty(route53Config)) {
@@ -81,6 +85,16 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     ));
   }
 
+  if (!isEmpty(iamRoleConfig) || !isEmpty(iamRoleState)) {
+    const executors = createIAMRoleExecutors(aws);
+    plan.push(createIAMRolePlan(
+      executors,
+      tags,
+      iamRoleState,
+      iamRoleConfig,
+    ));
+  }
+
   return (await Promise.all(plan)).flat();
 }
 
@@ -108,6 +122,7 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     route53: route53State,
     s3: s3State,
     s3Object: s3ObjectState,
+    iamRole: iamRoleState,
   } = awsState ?? {};
 
   if (!isEmpty(route53State)) {
@@ -131,6 +146,14 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     plan.push(createS3ObjectDestroyPlan(
       executors,
       s3ObjectState,
+    ));
+  }
+
+  if (!isEmpty(iamRoleState)) {
+    const executors = createIAMRoleExecutors(aws);
+    plan.push(createIAMRoleDestroyPlan(
+      executors,
+      iamRoleState,
     ));
   }
 

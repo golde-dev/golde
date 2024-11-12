@@ -132,13 +132,13 @@ export function printChanges(changes: Change[]): void {
 
     switch (type) {
       case Type.Update:
-        logger.info(`Updated ${path} in ${executionTime}ms`);
+        logger.info(`[Execute] Updated ${path} in ${executionTime}ms`);
         break;
       case Type.Create:
-        logger.info(`Created ${path} in ${executionTime}ms`);
+        logger.info(`[Execute] Created ${path} in ${executionTime}ms`);
         break;
       case Type.Delete:
-        logger.info(`Deleted ${path} in ${executionTime}ms`);
+        logger.info(`[Execute] Deleted ${path} in ${executionTime}ms`);
         break;
 
       default:

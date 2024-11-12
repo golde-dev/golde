@@ -3,11 +3,15 @@ import { implement } from "../utils/zod.ts";
 import { route53ConfigSchema } from "./route53/schema.ts";
 import { s3ConfigSchema } from "./s3/schema.ts";
 import type { AWSConfig, AWSCredentials } from "./types.ts";
+import { s3ObjectSchema } from "./s3Object/schema.ts";
+import { iamRoleSchema } from "./iamRole/schema.ts";
 
 export const awsConfigSchema = implement<AWSConfig>()
   .with({
     s3: s3ConfigSchema.optional(),
+    s3Object: s3ObjectSchema.optional(),
     route53: route53ConfigSchema.optional(),
+    iamRole: iamRoleSchema.optional(),
   })
   .strict();
 
