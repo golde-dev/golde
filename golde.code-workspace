@@ -27,9 +27,11 @@
 			"astrojs",
 			"Deno",
 			"hcloud",
+			"Marcin",
 			"moderndash",
 			"namecheap",
-			"Nodenv"
+			"Nodenv",
+			"terragrunt"
 		],
 		"search.exclude": {
 			"**/node_modules": true,

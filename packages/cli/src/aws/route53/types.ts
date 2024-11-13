@@ -37,7 +37,7 @@ export type ZoneRecordsConfig = Partial<
   Record<RecordType, Record<string, RecordConfig>>
 >;
 
-export interface Route53Config {
+export interface Route53RecordConfig {
   [zone: string]: ZoneRecordsConfig;
 }
 
@@ -55,6 +55,6 @@ export type ZoneRecordsState = Partial<
   Record<RecordType, Record<string, RecordState>>
 >;
 
-export interface Route53State {
+export interface Route53RecordState {
   [zone: string]: ZoneRecordsState;
 }

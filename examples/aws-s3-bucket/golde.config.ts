@@ -1,9 +1,11 @@
 import type {Config} from '@golde/cli';
 
 const config: Config = {
-  name: "example-aws-s3",
+  name: "example-aws-s3-bucket",
   tags: {
-    Project: "GoldeExamples"
+    Project: "GoldeExamples",
+    Example: "example-aws-s3-bucket",
+    Branch: "{{ git.BRANCH_NAME }}",
   },
   providers: {
     golde: {
@@ -15,8 +17,8 @@ const config: Config = {
     },
   },
   aws: {
-    s3: {
-      "golde-example-aws-s3": {
+    s3Bucket: {
+      "golde-example-aws-s3-bucket": {
         tags: {
           "BucketTag": "Example",
         },

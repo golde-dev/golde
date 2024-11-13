@@ -16,7 +16,7 @@ const config: Config = {
     },
   },
   aws: {
-    s3: {
+    s3Bucket: {
       "example-aws-lambda-next-js": {
         branch: "master",
       },
@@ -61,18 +61,12 @@ const config: Config = {
             },
           ]
         }, 
-        policies: [
-          {
-            "Action": [
-              "logs:PutLogEvents",
-            ],
-            "Resource": "arn:aws:logs:*:*:*",
-            "Effect": "Allow"
-          }
+        managedPoliciesArns: [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         ]
       }
     },
-    cloudWatchLogGroup: {
+    cloudwatchLogGroup: {
       "/aws/lambda/example-aws-lambda-next-js": {
         branch: "master",
         retentionInDays: 60,

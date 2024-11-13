@@ -1,0 +1,13 @@
+{
+  "name": "@golde/example-aws-s3-bucket",
+  "packageManager": "yarn@4.5.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "golde:show": "golde show",
+    "golde:apply": "golde apply"
+  },
+  "devDependencies": {
+    "@golde/cli": "*"
+  }
+}

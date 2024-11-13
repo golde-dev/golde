@@ -1,6 +1,6 @@
-import type { S3Config, S3State } from "./s3/types.ts";
+import type { S3Config, S3State } from "./s3Bucket/types.ts";
 import type { S3ObjectConfig, S3ObjectState } from "./s3Object/types.ts";
-import type { Route53Config, Route53State } from "./route53/types.ts";
+import type { Route53RecordConfig, Route53RecordState } from "./route53/types.ts";
 import type { Resource } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./iamRole/types.ts";
 
@@ -15,7 +15,7 @@ export interface AWSConfig {
   /**
    * S3 config
    */
-  s3?: S3Config;
+  s3Bucket?: S3Config;
 
   /**
    * S3 Object config
@@ -25,7 +25,7 @@ export interface AWSConfig {
   /**
    * Route53 config
    */
-  route53?: Route53Config;
+  route53Record?: Route53RecordConfig;
 
   /**
    * IAM role config
@@ -37,7 +37,7 @@ export interface AWSState {
   /**
    * S3 state
    */
-  s3?: S3State;
+  s3Bucket?: S3State;
 
   /**
    * S3 Object state
@@ -47,7 +47,7 @@ export interface AWSState {
   /**
    * Route53 state
    */
-  route53?: Route53State;
+  route53Record?: Route53RecordState;
 
   /**
    * IAM role state

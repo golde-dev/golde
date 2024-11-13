@@ -18,13 +18,41 @@ GitOps based infrastructure as code and deployment tool.
 
 - Fly/Vercel. It will not provided fully managed services like databases, storage, CI/CD, etc.
 
+## Why it is better
+
+### Than terraform
+
+- Easier to learn, no custom [configuration language](https://www.reddit.com/r/Terraform/comments/15pxr54/why_do_folks_hate_hcl_so_much/), no package manager, plugin system and different extensions tfstate, tfvars, etc.
+
+- Easy to create higher level abstractions using standard language like typescript, javascript, python, etc. No need to for another orchestration layer like [terragrunt](https://terragrunt.gruntwork.io/)
+
+- Map directly to common Git based deployment workflows, eliminate need for [multiple workspaces or env specific directories](https://medium.com/@b0ld8/terraform-manage-multiple-environments-63939f41c454)
+
+- Deep schema validations and type safety of config. Planning performs permission simulations and existence checks. Reduce chances of failed apply.
+
+- Config have better self documenting structure, name of resource is part of config, not a separate property. Easier to understand if resource will be created on not.
+
+- Properly open-sourced, so you can contribute and extend it without worrying about rug pulls. Monolithic structure and typescript makes it very easy to contribute.
+
+### Planned premium features
+
+- State locking and concurrency control for state
+- Cross project state references
+- Managed docker registry,
+- Infrastructure agent to manage dedicated infrastructure.
+- Uptime monitoring and alerting
+- Resources previews and infrastructure diagrams
+- Feature flags and config management
+- Logging and monitoring on top of deployed infrastructure
+
 ## Ok, give me examples
 
 ### Serverless next.js deploy
 
-- it would create necessary infrastructure in AWS
-- deploy next.js app on master branch and branches starting feature/*
-- handle cleanup of merged feature branches
+- Create necessary infrastructure in AWS
+- Package artifacts and upload to s3
+- Deploy next.js app on master branch and branches starting feature/*
+- Pruning of feature branches resources
 
 ```ts
 import type {Config} from '@golde/cli';
@@ -32,7 +60,8 @@ import type {Config} from '@golde/cli';
 const config: Config = {
   name: "example-aws-lambda-next-js",
   tags: {
-    Project: "AWSLambdaNextJsExample",
+    Project: "GoldeExamples",
+    Example: "example-aws-lambda-next-js",
     Branch: "{{ git.BRANCH_NAME }}",
   },
   providers: {
@@ -45,7 +74,7 @@ const config: Config = {
     },
   },
   aws: {
-    s3: {
+    s3Bucket: {
       "example-aws-lambda-next-js": {
         branch: "master",
       },
@@ -162,6 +191,62 @@ const config: Config = {
         }
       ]
     }
+  }
+};
+
+export default config
+
+```
+
+But Marcin, how this is no different than cloudformation or terraform?.
+Because config is not yaml or json it is actually very easy to build abstraction.
+
+```ts
+import type {Config} from '@golde/cli';
+import {
+  createAWSDeployment, 
+  createAWSDeploymentOutputData
+} from '@golde/nextjs';
+
+const name = "example-aws-lambda-next-js"
+const region = "us-east-1"
+const aws = createAWSDeployment({
+  name,
+  region,
+  customsAWS: {
+    // Add any custom aws beside standard next js deployment
+  }
+});
+
+const output = createAWSDeploymentOutputData({
+  name,
+  region,
+  customOutput: {
+    // Add any custom output beside standard next js deployment
+  }
+})
+
+const config: Config = {
+  name: "example-aws-lambda-next-js",
+  tags: {
+    Project: "GoldeExamples",
+    Example: "example-aws-lambda-next-js",
+    Branch: "{{ git.BRANCH_NAME }}",
+  },
+  providers: {
+    golde: {
+      apiKey: "{{ env.GOLDE_API_KEY }}",
+    },
+    aws: {
+      accessKeyId: "{{ env.AWS_ACCESS_KEY_ID }}",
+      secretAccessKey: "{{ env.AWS_SECRET_ACCESS_KEY }}",
+    },
+  },
+  aws,
+  output: {
+    type: "file",
+    path: "./output.json",
+    data: output,
   }
 };
 

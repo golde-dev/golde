@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { RecordConfig, RecordType, Route53Config } from "./types.ts";
+import type { RecordConfig, RecordType, Route53RecordConfig } from "./types.ts";
 import type { ZodType } from "zod";
 import { tagsSchema } from "../../utils/tags.ts";
 import { branchPatternSchema, branchSchema, transformBranch } from "../../utils/resource.ts";
@@ -43,7 +43,7 @@ const dnsRecordsSchema = z
   .record(dnsRecordSchema)
   .optional();
 
-export const route53ConfigSchema: ZodType<Route53Config> = z
+export const route53ConfigSchema: ZodType<Route53RecordConfig> = z
   .record(
     z.record(
       recordTypeSchema,

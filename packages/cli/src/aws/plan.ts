@@ -7,8 +7,8 @@ import {
   createRoute53Executors,
   createRoute53Plan,
 } from "./route53/plan.ts";
-import { createS3DestroyPlan, createS3Plan } from "./s3/plan.ts";
-import { createS3Executors } from "./s3/executor.ts";
+import { createS3DestroyPlan, createS3Plan } from "./s3Bucket/plan.ts";
+import { createS3Executors } from "./s3Bucket/executor.ts";
 import {
   createS3ObjectDestroyPlan,
   createS3ObjectExecutors,
@@ -43,36 +43,36 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
   }
 
   const {
-    route53: route53Config,
-    s3: s3Config,
+    route53Record: route53RecordConfig,
+    s3Bucket: s3BucketConfig,
     s3Object: s3ObjectConfig,
     iamRole: iamRoleConfig,
   } = awsConfig ?? {};
 
   const {
-    route53: route53State,
-    s3: s3State,
+    route53Record: route53RecordState,
+    s3Bucket: s3BucketState,
     s3Object: s3ObjectState,
     iamRole: iamRoleState,
   } = awsState ?? {};
 
-  if (!isEmpty(route53State) || !isEmpty(route53Config)) {
+  if (!isEmpty(route53RecordState) || !isEmpty(route53RecordConfig)) {
     const executors = createRoute53Executors(aws);
     plan.push(createRoute53Plan(
       executors,
       tags,
-      route53State,
-      route53Config,
+      route53RecordState,
+      route53RecordConfig,
     ));
   }
 
-  if (!isEmpty(s3State) || !isEmpty(s3Config)) {
+  if (!isEmpty(s3BucketState) || !isEmpty(s3BucketConfig)) {
     const executors = createS3Executors(aws);
     plan.push(createS3Plan(
       executors,
       tags,
-      s3State,
-      s3Config,
+      s3BucketState,
+      s3BucketConfig,
     ));
   }
 
@@ -119,8 +119,8 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     );
   }
   const {
-    route53: route53State,
-    s3: s3State,
+    route53Record: route53State,
+    s3Bucket: s3BucketState,
     s3Object: s3ObjectState,
     iamRole: iamRoleState,
   } = awsState ?? {};
@@ -133,11 +133,11 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     ));
   }
 
-  if (!isEmpty(s3State)) {
+  if (!isEmpty(s3BucketState)) {
     const executors = createS3Executors(aws);
     plan.push(createS3DestroyPlan(
       executors,
-      s3State,
+      s3BucketState,
     ));
   }
 
