@@ -2,25 +2,30 @@ import { logger } from "../../logger.ts";
 import { mergeProjectTags } from "../../utils/tags.ts";
 import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
-import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
+import type {
+  CloudwatchLogGroupConfig,
+  CloudwatchLogGroupState,
+  LogGroupConfig,
+  LogGroupState,
+} from "./types.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
-import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
+import type { CreateLogGroup, DeleteLogGroup, Executors, UpdateLogGroup } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
 
-function getCurrent(buckets: S3BucketState = {}) {
+function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   const previous: {
     [path: string]: {
       name: string;
-      config: BucketConfig;
-      state: BucketState;
+      config: LogGroupConfig;
+      state: LogGroupState;
     };
   } = {};
 
-  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
-    previous[`aws.s3Bucket.${name}`] = {
+  for (const [name, { config, ...rest }] of Object.entries(logGroups)) {
+    previous[`aws.cloudwatchLogGroup.${name}`] = {
       name,
       config,
       state: {
@@ -32,19 +37,19 @@ function getCurrent(buckets: S3BucketState = {}) {
   return previous;
 }
 
-function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
+function getNext(config: CloudwatchLogGroupConfig = {}, region: string, tags?: Tags) {
   const next: {
     [path: string]: {
       name: string;
-      config: BucketConfig;
+      config: LogGroupConfig;
     };
   } = {};
 
-  for (const [name, bucket] of Object.entries(config)) {
-    const withTags = mergeProjectTags(bucket, tags);
+  for (const [name, logGroup] of Object.entries(config)) {
+    const withTags = mergeProjectTags(logGroup, tags);
     const withTagsAndRegion = addDefaultRegion(withTags, region);
 
-    next[`aws.s3Bucket.${name}`] = {
+    next[`aws.cloudwatchLogGroup.${name}`] = {
       name,
       config: omitUndefined(withTagsAndRegion),
     };
@@ -52,25 +57,25 @@ function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
   return next;
 }
 
-export async function createS3Plan(
+export async function createCloudwatchLogGroupPlan(
   executors: Executors,
   tags?: Tags,
-  state?: S3BucketState,
-  config?: S3BucketConfig,
+  state?: CloudwatchLogGroupState,
+  config?: CloudwatchLogGroupConfig,
 ): Promise<Plan> {
   const {
     getDefaultRegion,
-    createBucket,
-    deleteBucket,
-    updateBucket,
-    assertBucketExist,
-    assertBucketNameAvailable,
+    createLogGroup,
+    deleteLogGroup,
+    updateLogGroup,
+    assertLogGroupExists,
+    assertLogGroupNotExists,
     assertCreatePermission,
     assertDeletePermission,
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[AWS] Planning for s3 changes",
+    "[AWS] Planning for cloudwatch log group changes",
     {
       state,
       config,
@@ -91,12 +96,12 @@ export async function createS3Plan(
 
     const { region } = config;
 
-    await assertBucketNameAvailable(name, region);
+    await assertLogGroupNotExists(name, region);
     await assertCreatePermission(name, region);
 
-    const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
+    const createUnit: CreateUnit<LogGroupConfig, LogGroupState, CreateLogGroup> = {
       type: Type.Create,
-      executor: createBucket,
+      executor: createLogGroup,
       args: [name, config],
       path: key,
       config,
@@ -110,12 +115,12 @@ export async function createS3Plan(
     const { state, name } = previous[key];
     const { config: { region } } = state;
 
-    await assertBucketExist(name, region);
+    await assertLogGroupExists(name, region);
     await assertDeletePermission(name, region);
 
-    const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
+    const deleteUnit: DeleteUnit<LogGroupState, DeleteLogGroup> = {
       type: Type.Delete,
-      executor: deleteBucket,
+      executor: deleteLogGroup,
       args: [region, name],
       path: key,
       state,
@@ -130,7 +135,7 @@ export async function createS3Plan(
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
-      const noopUnit: NoopUnit<BucketConfig, BucketState> = {
+      const noopUnit: NoopUnit<LogGroupConfig, LogGroupState> = {
         type: Type.Noop,
         path: key,
         config: previousConfig,
@@ -140,7 +145,7 @@ export async function createS3Plan(
     } else {
       if (nextConfig.region !== previousConfig.region) {
         throw new Error(
-          "It is not possible to update s3 bucket region, create new and migrate data",
+          "It is not possible to update cloudwatch log group region, create new and migrate",
         );
       }
 
@@ -149,16 +154,16 @@ export async function createS3Plan(
 
       const { region } = nextConfig;
 
-      await assertBucketExist(name, region);
+      await assertLogGroupExists(name, region);
       await assertUpdatePermission(name, region);
 
       const updateUnit: UpdateUnit<
-        BucketConfig,
-        BucketState,
-        UpdateBucket
+        LogGroupConfig,
+        LogGroupState,
+        UpdateLogGroup
       > = {
         type: Type.Update,
-        executor: updateBucket,
+        executor: updateLogGroup,
         args: [nextConfig.region, name, nextConfig, state],
         path: key,
         state,
@@ -172,18 +177,18 @@ export async function createS3Plan(
   return await Promise.resolve(plan);
 }
 
-export async function createS3DestroyPlan(
+export async function createCloudwatchLogGroupDestroyPlan(
   executors: Executors,
-  state?: S3BucketState,
+  state?: CloudwatchLogGroupState,
 ) {
   const {
-    deleteBucket,
-    assertBucketExist,
+    deleteLogGroup,
+    assertLogGroupExists,
     assertDeletePermission,
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[AWS] Creating destroy buckets plan", {
+  logger.debug("[AWS] Creating destroy cloudwatch log group plan", {
     state,
   });
 
@@ -192,12 +197,12 @@ export async function createS3DestroyPlan(
     const { state, name } = previous[key];
     const { config: { region } } = state;
 
-    await assertBucketExist(name);
+    await assertLogGroupExists(name);
     await assertDeletePermission(name, region);
 
-    const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
+    const deleteUnit: DeleteUnit<LogGroupState, DeleteLogGroup> = {
       type: Type.Delete,
-      executor: deleteBucket,
+      executor: deleteLogGroup,
       args: [region, name],
       path: key,
       state: state,

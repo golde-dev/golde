@@ -197,6 +197,21 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              "propertyNames": {
+                "minLength": 3,
+                "maxLength": 63,
+                "allOf": [
+                  {
+                    "pattern": "^[a-z0-9]([a-z0-9\\-]*[a-z0-9])?$"
+                  },
+                  {
+                    "pattern": "^[^0-9]+|[^0-9]+$"
+                  },
+                  {
+                    "pattern": "^(?!.*\\.\\.)[a-z0-9\\-.]*$"
+                  }
+                ]
               }
             },
             "s3Object": {
@@ -407,7 +422,9 @@
                   },
                   "path": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 512,
+                    "pattern": "^\\/[A-Za-z0-9=,.\\-@/]*\\/$"
                   },
                   "inlinePolicy": {
                     "$ref": "#/definitions/golde/properties/aws/properties/iamRole/additionalProperties/properties/assumeRolePolicy"
@@ -426,6 +443,128 @@
                   "assumeRolePolicy"
                 ],
                 "additionalProperties": false
+              },
+              "propertyNames": {
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9+=,.@-]+$"
+              }
+            },
+            "cloudwatchLogGroup": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branchPattern"
+                  },
+                  "tags": {
+                    "$ref": "#/definitions/golde/properties/tags"
+                  },
+                  "retentionInDays": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "const": 1
+                      },
+                      {
+                        "type": "number",
+                        "const": 3
+                      },
+                      {
+                        "type": "number",
+                        "const": 5
+                      },
+                      {
+                        "type": "number",
+                        "const": 7
+                      },
+                      {
+                        "type": "number",
+                        "const": 14
+                      },
+                      {
+                        "type": "number",
+                        "const": 30
+                      },
+                      {
+                        "type": "number",
+                        "const": 60
+                      },
+                      {
+                        "type": "number",
+                        "const": 90
+                      },
+                      {
+                        "type": "number",
+                        "const": 120
+                      },
+                      {
+                        "type": "number",
+                        "const": 150
+                      },
+                      {
+                        "type": "number",
+                        "const": 180
+                      },
+                      {
+                        "type": "number",
+                        "const": 365
+                      },
+                      {
+                        "type": "number",
+                        "const": 400
+                      },
+                      {
+                        "type": "number",
+                        "const": 545
+                      },
+                      {
+                        "type": "number",
+                        "const": 731
+                      },
+                      {
+                        "type": "number",
+                        "const": 1827
+                      },
+                      {
+                        "type": "number",
+                        "const": 2192
+                      },
+                      {
+                        "type": "number",
+                        "const": 2557
+                      },
+                      {
+                        "type": "number",
+                        "const": 2922
+                      },
+                      {
+                        "type": "number",
+                        "const": 3288
+                      },
+                      {
+                        "type": "number",
+                        "const": 3653
+                      },
+                      {
+                        "not": {}
+                      }
+                    ]
+                  },
+                  "region": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "propertyNames": {
+                "minLength": 1,
+                "maxLength": 512,
+                "pattern": "^[\\w./-]+$"
               }
             }
           },

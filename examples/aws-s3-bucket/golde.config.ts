@@ -4,7 +4,7 @@ const config: Config = {
   name: "example-aws-s3-bucket",
   tags: {
     Project: "GoldeExamples",
-    Example: "example-aws-s3-bucket",
+    Stack: "example-aws-s3-bucket",
     Branch: "{{ git.BRANCH_NAME }}",
   },
   providers: {

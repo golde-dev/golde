@@ -9,14 +9,13 @@ import type { AWSClient } from "../client/client.ts";
 import type { RoleConfig, RoleState } from "./types.ts";
 import { stringify } from "../../utils/object.ts";
 import { nowStringDate } from "../../utils/date.ts";
+import { join } from "@std/path";
 
-function aimRoleArn(roleName: string, accountId?: string, path?: string) {
+function aimRoleArn({ accountId }: AWSClient, roleName: string, path: string = "/") {
   if (!accountId) {
-    throw new Error("Account id is required");
+    throw new Error("AWS client not initialized");
   }
-  return path
-    ? `arn:aws:iam::${accountId}:role/${path}/${roleName}`
-    : `arn:aws:iam::${accountId}:role/${roleName}`;
+  return `arn:aws:iam::${accountId}:role${join(path, roleName)}`;
 }
 
 export async function createRole(
@@ -35,10 +34,6 @@ export async function createRole(
     assumeRolePolicy,
     managedPoliciesArns = [],
   } = config;
-
-  const {
-    accountId,
-  } = this;
 
   const start = Date.now();
 
@@ -71,7 +66,7 @@ export async function createRole(
   const end = Date.now();
   logger.debug(`[AWS] Created AIM role ${roleName} in ${formatDuration(end - start)}`);
 
-  const arn = aimRoleArn(roleName, accountId, path);
+  const arn = aimRoleArn(this, roleName, path);
   const createdAt = nowStringDate();
   return {
     arn,
@@ -200,7 +195,7 @@ export async function assertRoleNotExist(this: AWSClient, name: string) {
 
 export async function assertCreatePermission(this: AWSClient, name: string, path?: string) {
   const start = performance.now();
-  const roleArn = aimRoleArn(name, this.accountId, path);
+  const roleArn = aimRoleArn(this, name, path);
   const [allowed, reason] = await this.checkPermission(
     [
       "iam:GetPolicy",
@@ -223,8 +218,8 @@ export async function assertCreatePermission(this: AWSClient, name: string, path
 }
 export async function assertDeletePermission(this: AWSClient, name: string, path?: string) {
   const start = performance.now();
-  const roleArn = aimRoleArn(name, this.accountId, path);
-  const allowed = await this.checkPermission(
+  const roleArn = aimRoleArn(this, name, path);
+  const [allowed, reason] = await this.checkPermission(
     ["iam:DeleteRole"],
     [roleArn],
   );
@@ -233,15 +228,15 @@ export async function assertDeletePermission(this: AWSClient, name: string, path
     `[AWS] Checked permission to delete role ${roleArn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[AWS] Delete permission denied for role ${roleArn}`);
+    logger.error(`[AWS] Delete permission denied for role ${roleArn}`, reason);
     throw new PlanError(`Cannot delete role ${roleArn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
 
 export async function assertUpdatePermission(this: AWSClient, name: string, path?: string) {
   const start = performance.now();
-  const roleArn = aimRoleArn(name, this.accountId, path);
-  const allowed = await this.checkPermission(
+  const roleArn = aimRoleArn(this, name, path);
+  const [allowed, reason] = await this.checkPermission(
     [
       "iam:UpdateAssumeRolePolicy",
       "iam:PutRolePolicy",
@@ -258,7 +253,7 @@ export async function assertUpdatePermission(this: AWSClient, name: string, path
     `[AWS] Checked permission for update role ${roleArn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[AWS] Update permissions denied for ${roleArn}`);
+    logger.error(`[AWS] Update permissions denied for ${roleArn}`, reason);
     throw new PlanError(`Cannot update role ${roleArn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

@@ -42,9 +42,9 @@ export class S3Client extends AWSClientBase {
     return clients.get(region)!;
   }
 
-  public async checkBucketExists(bucket: string, region?: string) {
+  public async checkS3BucketExists(bucket: string, region?: string) {
     try {
-      logger.debug("[AWS] Check bucket exists", { bucket });
+      logger.debug("[AWS] Check s3 bucket exists", { bucket });
       const command = new HeadBucketCommand({
         Bucket: bucket,
       });
@@ -58,7 +58,7 @@ export class S3Client extends AWSClientBase {
   /**
    * Check if bucket name is available
    */
-  public async checkBucketNameAvailable(bucket: string, region?: string) {
+  public async checkS3BucketNameAvailable(bucket: string, region?: string) {
     try {
       logger.debug("[AWS] Check bucket exists", { bucket });
       const command = new HeadBucketCommand({
@@ -79,16 +79,17 @@ export class S3Client extends AWSClientBase {
     }
   }
 
-  public updateBucketVersioning(region: string, bucket: string, versioning: boolean) {
+  public updateS3BucketVersioning(region: string, bucket: string, versioning: boolean) {
     try {
-      logger.debug("[AWS] Update bucket versioning", { region, bucket, versioning });
+      logger.debug("[AWS] Update s3 bucket versioning", { region, bucket, versioning });
       const command = new PutBucketVersioningCommand({
         Bucket: bucket,
         VersioningConfiguration: {
           Status: versioning ? "Enabled" : "Suspended",
         },
       });
-      this.getS3Client(region)
+      this
+        .getS3Client(region)
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
@@ -98,9 +99,9 @@ export class S3Client extends AWSClientBase {
     }
   }
 
-  public async updateBucketCors(region: string, bucket: string, cors: CORSConfiguration) {
+  public async updateS3BucketCors(region: string, bucket: string, cors: CORSConfiguration) {
     try {
-      logger.debug("[AWS] Update bucket versioning", { region, bucket, cors });
+      logger.debug("[AWS] Update s3 bucket versioning", { region, bucket, cors });
 
       const command = new PutBucketCorsCommand({
         Bucket: bucket,
@@ -111,7 +112,7 @@ export class S3Client extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update bucket cors policy", e);
+        logger.error("[AWS] Failed to update s3 bucket cors policy", e);
       }
       throw e;
     }
@@ -119,7 +120,7 @@ export class S3Client extends AWSClientBase {
 
   public async updateBucketPolicy(region: string, bucket: string, policy: string) {
     try {
-      logger.debug("[AWS] Update bucket policy", { region, bucket, policy });
+      logger.debug("[AWS] Update s3 bucket policy", { region, bucket, policy });
 
       const command = new PutBucketPolicyCommand({
         Bucket: bucket,
@@ -132,15 +133,15 @@ export class S3Client extends AWSClientBase {
         );
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update bucket policy", e);
+        logger.error("[AWS] Failed to update s3 bucket policy", e);
       }
       throw e;
     }
   }
 
-  public async updateBucketTags(region: string, bucket: string, tags: Tag[]) {
+  public async updateS3BucketTags(region: string, bucket: string, tags: Tag[]) {
     try {
-      logger.debug("[AWS] Update bucket tags", { region, bucket, tags });
+      logger.debug("[AWS] Update s3 bucket tags", { region, bucket, tags });
 
       const command = new PutBucketTaggingCommand({
         Bucket: bucket,
@@ -155,18 +156,18 @@ export class S3Client extends AWSClientBase {
         );
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update bucket tags", e);
+        logger.error("[AWS] Failed to update s3 bucket tags", e);
       }
       throw e;
     }
   }
 
-  public async createBucket(
+  public async createS3Bucket(
     region: string,
     input: CreateBucketCommandInput,
   ): Promise<CreateBucketCommandOutput> {
     try {
-      logger.debug("[AWS] Creating bucket", { region, input });
+      logger.debug("[AWS] Creating s3 bucket", { region, input });
       const command = new CreateBucketCommand(input);
       const result = await this
         .getS3Client(region)
@@ -176,7 +177,7 @@ export class S3Client extends AWSClientBase {
       return result;
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to create bucket", e);
+        logger.error("[AWS] Failed to create s3 bucket", e);
       }
       throw e;
     }
@@ -184,7 +185,7 @@ export class S3Client extends AWSClientBase {
 
   public async deleteBucket(region: string, bucket: string): Promise<void> {
     try {
-      logger.debug("[AWS] delete bucket", { region, bucket });
+      logger.debug("[AWS] delete s3 bucket", { region, bucket });
 
       const command = new DeleteBucketCommand({
         Bucket: bucket,

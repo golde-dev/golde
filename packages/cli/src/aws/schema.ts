@@ -1,17 +1,19 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
-import { route53ConfigSchema } from "./route53/schema.ts";
-import { s3ConfigSchema } from "./s3Bucket/schema.ts";
+import { route53RecordSchema } from "./route53/schema.ts";
+import { s3BucketSchema } from "./s3Bucket/schema.ts";
 import type { AWSConfig, AWSCredentials } from "./types.ts";
 import { s3ObjectSchema } from "./s3Object/schema.ts";
 import { iamRoleSchema } from "./iamRole/schema.ts";
+import { cloudwatchLogGroupSchema } from "./cloudwatchLogGroup/schema.ts";
 
 export const awsConfigSchema = implement<AWSConfig>()
   .with({
-    s3Bucket: s3ConfigSchema.optional(),
+    s3Bucket: s3BucketSchema.optional(),
     s3Object: s3ObjectSchema.optional(),
-    route53Record: route53ConfigSchema.optional(),
+    route53Record: route53RecordSchema.optional(),
     iamRole: iamRoleSchema.optional(),
+    cloudwatchLogGroup: cloudwatchLogGroupSchema.optional(),
   })
   .strict();
 

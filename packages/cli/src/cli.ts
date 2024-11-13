@@ -255,10 +255,10 @@ program
       const initialConfig = await getConfig(branchName, config);
       const initialContext = await initializeContext(branchName, initialConfig, yes);
       const initialPlan = await createPlan(initialContext, false);
-      const initialDependencies = await getDependencies(initialContext, initialPlan);
+      const initialDependencies = await getDependencies(initialContext, initialPlan, false);
 
       const locks = await lockDependencies(initialContext, initialDependencies);
-      const finalDependencies = await getDependencies(initialContext, initialPlan);
+      const finalDependencies = await getDependencies(initialContext, initialPlan, true);
       const finalConfig = getFinalConfig(initialConfig, finalDependencies);
       const finalContext = getFinalContext(initialContext, finalConfig);
       const finalPlan = await createPlan(finalContext, true);

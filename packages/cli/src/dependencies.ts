@@ -6,7 +6,10 @@ import type { Plan } from "./types/plan.ts";
 export function getDependencies(
   _context: Context,
   _plan: Plan,
+  print = false,
 ): Promise<Dependencies> {
-  logger.info("[Dependencies] Resolving dependencies");
+  if (print) {
+    logger.info("[Dependencies] Resolving dependencies");
+  }
   return Promise.resolve({});
 }

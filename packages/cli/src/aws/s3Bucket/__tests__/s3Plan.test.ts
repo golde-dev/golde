@@ -4,7 +4,7 @@ import { spy } from "@std/testing/mock";
 import { Type } from "../../../types/plan.ts";
 import { createS3Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "../executor.ts";
-import type { BucketConfig, BucketState, S3Config, S3State } from "../types.ts";
+import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../types/plan.ts";
 import { assertBranch } from "../../../utils/resource.ts";
 import { mergeProjectTags, mergeTags } from "../../../utils/tags.ts";
@@ -31,7 +31,7 @@ describe("aws s3 buckets", () => {
   describe("create bucket", () => {
     it("should create bucket for new config on default branch", async () => {
       const state = {};
-      const config: S3Config = {
+      const config: S3BucketConfig = {
         "bucket1": {
           branch: "master",
           tags: { Type: "Test" },
@@ -64,7 +64,7 @@ describe("aws s3 buckets", () => {
 
   describe("update bucket", () => {
     it("should allow to update tags", async () => {
-      const state: S3State = {
+      const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
@@ -76,7 +76,7 @@ describe("aws s3 buckets", () => {
         },
       };
 
-      const config: S3Config = {
+      const config: S3BucketConfig = {
         "bucket1": {
           tags: { Type: "new" },
           branch: "master",
@@ -113,7 +113,7 @@ describe("aws s3 buckets", () => {
     });
 
     it("should throw when trying to update a bucket with different region", async () => {
-      const state: S3State = {
+      const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
@@ -125,7 +125,7 @@ describe("aws s3 buckets", () => {
         },
       };
 
-      const config: S3Config = {
+      const config: S3BucketConfig = {
         "bucket1": {
           tags: { Type: "new" },
           region: "us-west-1",
@@ -145,7 +145,7 @@ describe("aws s3 buckets", () => {
 
   describe("delete bucket", () => {
     it("should delete previously created bucket", async () => {
-      const state: S3State = {
+      const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
@@ -157,7 +157,7 @@ describe("aws s3 buckets", () => {
         },
       };
 
-      const config: S3Config = {};
+      const config: S3BucketConfig = {};
 
       const result = await createS3Plan(
         executors,
@@ -177,7 +177,7 @@ describe("aws s3 buckets", () => {
     });
 
     it("should delete and create bucket when bucket is renamed", async () => {
-      const state: S3State = {
+      const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
@@ -189,7 +189,7 @@ describe("aws s3 buckets", () => {
         },
       };
 
-      const config: S3Config = {
+      const config: S3BucketConfig = {
         "bucket2": {
           region: "us-east-1",
           branch: "master",
@@ -231,7 +231,7 @@ describe("aws s3 buckets", () => {
 
   describe("noop changes on bucket", () => {
     it("when state and config are the same", async () => {
-      const state: S3State = {
+      const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
@@ -243,7 +243,7 @@ describe("aws s3 buckets", () => {
         },
       };
 
-      const config: S3Config = {
+      const config: S3BucketConfig = {
         "bucket1": {
           region: "us-east-1",
           branch: "master",

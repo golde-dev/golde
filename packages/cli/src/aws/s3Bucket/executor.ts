@@ -8,6 +8,11 @@ import { toTagsList } from "../../utils/tags.ts";
 import type { AWSClient } from "../client/client.ts";
 import type { WithRegion } from "../types.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
+import { nowStringDate } from "../../utils/date.ts";
+
+function s3BucketArn(name: string) {
+  return `arn:aws:s3:::${name}`;
+}
 
 export async function createBucket(
   this: AWSClient,
@@ -22,20 +27,22 @@ export async function createBucket(
   } = config;
 
   const start = Date.now();
-  await this.createBucket(region, {
+  await this.createS3Bucket(region, {
     Bucket: name,
   });
 
   const tagList = toTagsList(tags);
   if (tagList) {
-    await this.updateBucketTags(region, name, tagList);
+    await this.updateS3BucketTags(region, name, tagList);
   }
   const end = Date.now();
   logger.debug(`[AWS] Created bucket ${name} in ${formatDuration(end - start)}`);
 
+  const arn = s3BucketArn(name);
+  const createdAt = nowStringDate();
   return {
-    arn: `arn:aws:s3:::${name}`,
-    createdAt: new Date().toISOString(),
+    arn,
+    createdAt,
     config,
   };
 }
@@ -65,15 +72,19 @@ export async function updateBucket(
     tags,
   } = config;
   const {
+    arn,
     createdAt,
+    config: {
+      tags: previousTags,
+    },
   } = state;
 
-  if (!isEqual(config.tags, state.config.tags)) {
+  if (!isEqual(tags, previousTags)) {
     const tagList = toTagsList(tags) ?? [];
-    await this.updateBucketTags(region, name, tagList);
+    await this.updateS3BucketTags(region, name, tagList);
     const updatedAt = new Date().toISOString();
     return {
-      arn: `arn:aws:s3:::${name}`,
+      arn,
       createdAt,
       updatedAt,
       config,
@@ -86,7 +97,7 @@ export type UpdateBucket = typeof updateBucket;
 
 export async function assertBucketExist(this: AWSClient, name: string, region?: string) {
   const start = performance.now();
-  const exists = await this.checkBucketExists(name, region);
+  const exists = await this.checkS3BucketExists(name, region);
   const end = performance.now();
   logger.debug(`[AWS] Checked bucket ${name} exists in ${formatDuration(end - start)}`);
   if (!exists) {
@@ -96,7 +107,7 @@ export async function assertBucketExist(this: AWSClient, name: string, region?: 
 
 export async function assertBucketNameAvailable(this: AWSClient, name: string, region?: string) {
   const start = performance.now();
-  const available = await this.checkBucketNameAvailable(name, region);
+  const available = await this.checkS3BucketNameAvailable(name, region);
   const end = performance.now();
   logger.debug(`[AWS] Checked bucket ${name} exists in ${formatDuration(end - start)}`);
   if (!available) {
@@ -118,15 +129,15 @@ export async function assertCreatePermission(this: AWSClient, name: string, regi
     ],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS] Checked permission for s3 bucket ${name} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Create permission denied for bucket ${name}`, reason);
-    throw new PlanError(`Cannot create bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
+    logger.error(`[AWS] Create permission s3 denied for bucket ${name}`, reason);
+    throw new PlanError(`Cannot create s3 bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
 export async function assertDeletePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
-  const allowed = await this.checkPermission(
+  const [allowed, reason] = await this.checkPermission(
     ["s3:DeleteBucket"],
     [`arn:aws:s3:::${name}`],
     [
@@ -140,13 +151,13 @@ export async function assertDeletePermission(this: AWSClient, name: string, regi
   const end = performance.now();
   logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Delete permission denied for bucket ${name}`);
+    logger.error(`[AWS] Delete permission denied for bucket ${name}`, reason);
     throw new PlanError(`Cannot delete bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
 export async function assertUpdatePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
-  const allowed = await this.checkPermission(
+  const [allowed, reason] = await this.checkPermission(
     ["s3:PutBucketTagging"],
     [`arn:aws:s3:::${name}`],
     [
@@ -160,7 +171,7 @@ export async function assertUpdatePermission(this: AWSClient, name: string, regi
   const end = performance.now();
   logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Update tags permission denied for bucket ${name}`);
+    logger.error(`[AWS] Update tags permission denied for bucket ${name}`, reason);
     throw new PlanError(`Cannot update bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

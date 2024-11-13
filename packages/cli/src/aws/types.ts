@@ -1,8 +1,12 @@
-import type { S3Config, S3State } from "./s3Bucket/types.ts";
+import type { S3BucketConfig, S3BucketState } from "./s3Bucket/types.ts";
 import type { S3ObjectConfig, S3ObjectState } from "./s3Object/types.ts";
 import type { Route53RecordConfig, Route53RecordState } from "./route53/types.ts";
 import type { Resource } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./iamRole/types.ts";
+import type {
+  CloudwatchLogGroupConfig,
+  CloudwatchLogGroupState,
+} from "./cloudwatchLogGroup/types.ts";
 
 export interface AWSResource extends Resource {
   region?: string;
@@ -15,7 +19,7 @@ export interface AWSConfig {
   /**
    * S3 config
    */
-  s3Bucket?: S3Config;
+  s3Bucket?: S3BucketConfig;
 
   /**
    * S3 Object config
@@ -23,7 +27,7 @@ export interface AWSConfig {
   s3Object?: S3ObjectConfig;
 
   /**
-   * Route53 config
+   * Route53 record config
    */
   route53Record?: Route53RecordConfig;
 
@@ -31,13 +35,18 @@ export interface AWSConfig {
    * IAM role config
    */
   iamRole?: IAMRoleConfig;
+
+  /**
+   * Cloudwatch log group config
+   */
+  cloudwatchLogGroup?: CloudwatchLogGroupConfig;
 }
 
 export interface AWSState {
   /**
    * S3 state
    */
-  s3Bucket?: S3State;
+  s3Bucket?: S3BucketState;
 
   /**
    * S3 Object state
@@ -53,6 +62,11 @@ export interface AWSState {
    * IAM role state
    */
   iamRole?: IAMRoleState;
+
+  /**
+   * Cloudwatch log group state
+   */
+  cloudwatchLogGroup?: CloudwatchLogGroupState;
 }
 
 export interface AWSCredentials {

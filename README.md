@@ -30,7 +30,7 @@ GitOps based infrastructure as code and deployment tool.
 
 - Deep schema validations and type safety of config. Planning performs permission simulations and existence checks. Reduce chances of failed apply.
 
-- Config have better self documenting structure, name of resource is part of config, not a separate property. Easier to understand if resource will be created on not.
+- Config have better self documenting structure, name of resource is part of config, not a separate property. Config map directly to physical resources unlike terraform where resources are often meta resources created for a sake of partitioning config.
 
 - Properly open-sourced, so you can contribute and extend it without worrying about rug pulls. Monolithic structure and typescript makes it very easy to contribute.
 

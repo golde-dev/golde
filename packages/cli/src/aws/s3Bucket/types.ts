@@ -6,7 +6,7 @@ export interface BucketConfig extends Resource {
   tags?: Tags;
 }
 
-export interface S3Config {
+export interface S3BucketConfig {
   [bucketName: string]: BucketConfig;
 }
 
@@ -17,6 +17,6 @@ export interface BucketState {
   config: WithRegion<WithBranch<BucketConfig>>;
 }
 
-export interface S3State {
+export interface S3BucketState {
   [bucketName: string]: BucketState;
 }

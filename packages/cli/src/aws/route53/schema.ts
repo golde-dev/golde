@@ -43,7 +43,7 @@ const dnsRecordsSchema = z
   .record(dnsRecordSchema)
   .optional();
 
-export const route53ConfigSchema: ZodType<Route53RecordConfig> = z
+export const route53RecordSchema: ZodType<Route53RecordConfig> = z
   .record(
     z.record(
       recordTypeSchema,

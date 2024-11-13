@@ -23,7 +23,7 @@ export function printPlan(flatPlan: Plan) {
   logger.info("[Plan] Execution plan");
 
   if (plan[Type.Noop]) {
-    logger.info(`${plan[Type.Noop].length} resources that are already up to date`);
+    logger.info(`[Plan] ${plan[Type.Noop].length} resources that are already up to date`);
     sortByPath(plan[Type.Noop]).forEach((noop) => {
       if (logger.level === "DEBUG") {
         logger.debug(`${noop.path}`, {
@@ -37,7 +37,7 @@ export function printPlan(flatPlan: Plan) {
   }
 
   if (plan[Type.Create]) {
-    logger.info(`${plan[Type.Create].length} resources to create`);
+    logger.info(`[Plan] ${plan[Type.Create].length} resources to create`);
     sortByPath(plan[Type.Create]).forEach((create) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${create.path}`, {
@@ -50,7 +50,7 @@ export function printPlan(flatPlan: Plan) {
   }
 
   if (plan[Type.Delete]) {
-    logger.info(`${plan[Type.Delete].length} resources to delete`);
+    logger.info(`[Plan] ${plan[Type.Delete].length} resources to delete`);
     sortByPath(plan[Type.Delete]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${deleted.path}`, {
@@ -63,7 +63,7 @@ export function printPlan(flatPlan: Plan) {
   }
 
   if (plan[Type.Update]) {
-    logger.info(`${plan[Type.Update].length} Resources to update`);
+    logger.info(`[Plan] ${plan[Type.Update].length} Resources to update`);
     sortByPath(plan[Type.Update]).forEach((update) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${update.path}`, {

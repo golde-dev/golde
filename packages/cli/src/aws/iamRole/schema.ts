@@ -33,6 +33,14 @@ export const policyDocumentSchema = implement<PolicyDocument>()
     Statement: z.array(policyStatementSchema),
   });
 
+const pathSchema = z
+  .string()
+  .min(1, { message: "Path must be at least 1 character long" })
+  .max(512, { message: "Path must be at most 512 characters long" })
+  .regex(/^\/[A-Za-z0-9=,.\-@/]*\/$/, {
+    message: "Path must start and end with '/' and contain only valid characters",
+  });
+
 export const roleConfigSchema = implement<RoleConfig>()
   .with({
     branch: branchSchema,
@@ -40,7 +48,7 @@ export const roleConfigSchema = implement<RoleConfig>()
     tags: tagsSchema,
     assumeRolePolicy: policyDocumentSchema,
     description: z.string().min(1).optional(),
-    path: z.string().min(1).optional(),
+    path: pathSchema.optional(),
     inlinePolicy: policyDocumentSchema.optional(),
     permissionsBoundaryArn: policyArn.optional(),
     managedPoliciesArns: z
@@ -50,4 +58,12 @@ export const roleConfigSchema = implement<RoleConfig>()
   .strict()
   .transform(transformBranch);
 
-export const iamRoleSchema = z.record(roleConfigSchema);
+export const roleNameSchema = z
+  .string()
+  .min(1, { message: "Role name must be at least 1 character long" })
+  .max(64, { message: "Role name must be at most 64 characters long" })
+  .regex(/^[A-Za-z0-9+=,.@-]+$/, {
+    message: "Role name can only contain alphanumeric characters and +=,.@-",
+  });
+
+export const iamRoleSchema = z.record(roleNameSchema, roleConfigSchema);

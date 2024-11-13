@@ -16,6 +16,11 @@ import {
 } from "./s3Object/plan.ts";
 import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./iamRole/plan.ts";
 import { createIAMRoleExecutors } from "./iamRole/executor.ts";
+import { createCloudwatchLogGroupExecutors } from "./cloudwatchLogGroup/executor.ts";
+import {
+  createCloudwatchLogGroupDestroyPlan,
+  createCloudwatchLogGroupPlan,
+} from "./cloudwatchLogGroup/plan.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -47,6 +52,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     s3Bucket: s3BucketConfig,
     s3Object: s3ObjectConfig,
     iamRole: iamRoleConfig,
+    cloudwatchLogGroup: cloudwatchLogGroupConfig,
   } = awsConfig ?? {};
 
   const {
@@ -54,6 +60,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     s3Bucket: s3BucketState,
     s3Object: s3ObjectState,
     iamRole: iamRoleState,
+    cloudwatchLogGroup: cloudwatchLogGroupState,
   } = awsState ?? {};
 
   if (!isEmpty(route53RecordState) || !isEmpty(route53RecordConfig)) {
@@ -95,6 +102,16 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     ));
   }
 
+  if (!isEmpty(cloudwatchLogGroupConfig) || !isEmpty(cloudwatchLogGroupState)) {
+    const executors = createCloudwatchLogGroupExecutors(aws);
+    plan.push(createCloudwatchLogGroupPlan(
+      executors,
+      tags,
+      cloudwatchLogGroupState,
+      cloudwatchLogGroupConfig,
+    ));
+  }
+
   return (await Promise.all(plan)).flat();
 }
 
@@ -123,6 +140,7 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     s3Bucket: s3BucketState,
     s3Object: s3ObjectState,
     iamRole: iamRoleState,
+    cloudwatchLogGroup: cloudwatchLogGroupState,
   } = awsState ?? {};
 
   if (!isEmpty(route53State)) {
@@ -154,6 +172,13 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     plan.push(createIAMRoleDestroyPlan(
       executors,
       iamRoleState,
+    ));
+  }
+  if (!isEmpty(cloudwatchLogGroupState)) {
+    const executors = createCloudwatchLogGroupExecutors(aws);
+    plan.push(createCloudwatchLogGroupDestroyPlan(
+      executors,
+      cloudwatchLogGroupState,
     ));
   }
 

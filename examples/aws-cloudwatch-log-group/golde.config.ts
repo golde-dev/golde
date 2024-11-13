@@ -4,7 +4,7 @@ const config: Config = {
   name: "aws-cloudwatch-log-group",
   tags: {
     Project: "GoldeExamples",
-    Example: "example-aws-cloudwatch-log-group",
+    Stack: "example-aws-cloudwatch-log-group",
     Branch: "{{ git.BRANCH_NAME }}",
   },
   providers: {
@@ -19,6 +19,7 @@ const config: Config = {
   aws: {
     cloudwatchLogGroup: {
       "golde-example-aws-s3-bucket": {
+        retentionInDays: 30,
         tags: {
           "GroupTag": "Example",
         },
