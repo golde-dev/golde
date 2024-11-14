@@ -28,10 +28,14 @@ export function createOutput(context: Context, state: State): void {
     return;
   }
 
-  logger.debug("[Output] Start output creation");
-  const start = performance.now();
-  const _data = resolveOutput(output, state);
-  const end = performance.now();
+  const outputs = Array.isArray(output) ? output : [output];
 
+  logger.debug("[Output] Start output creation");
+
+  const start = performance.now();
+  for (const output of outputs) {
+    const _data = resolveOutput(output, state);
+  }
+  const end = performance.now();
   logger.info(`[Output] Created output in ${formatDuration(end - start)}`);
 }

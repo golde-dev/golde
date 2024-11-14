@@ -5,6 +5,7 @@ import type { HCloudCredentials } from "../hcloud/types.ts";
 import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Output } from "./output.ts";
+import type { SlackCredentials } from "../slack/types.ts";
 
 export type Tags = Record<string, string>;
 
@@ -21,7 +22,17 @@ export interface ProvidersConfig {
    * Cloudflare provider config
    */
   cloudflare?: CloudflareCredentials;
+
+  /**
+   * Slack provider config
+   */
+  slack?: SlackCredentials;
+
+  /**
+   * Docker registry credentials
+   */
   docker?: DockerCredentials;
+
   /**
    * Hetzner cloud provider config
    */
@@ -49,7 +60,7 @@ export type Config = {
   aws?: AWSConfig;
   docker?: DockerConfig;
   cloudflare?: CloudflareConfig;
-  output?: Output;
+  output?: Output | Output[];
 };
 
 export interface ConfigLock {

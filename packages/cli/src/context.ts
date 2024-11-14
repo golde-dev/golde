@@ -12,6 +12,7 @@ import { createAWSClient } from "./aws/client/factory.ts";
 import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
 import { getGitInfo } from "./utils/git.ts";
 import { formatDuration } from "./utils/duration.ts";
+import { createSlackClient } from "./slack/client/factory.ts";
 
 export const initializeContext = async (
   branchName: string,
@@ -28,6 +29,7 @@ export const initializeContext = async (
       hcloud,
       cloudflare,
       docker,
+      slack,
     } = {},
   } = config;
 
@@ -52,6 +54,7 @@ export const initializeContext = async (
       hcloudClient,
       cloudflareClient,
       awsClient,
+      slackClient,
       dockerClient,
     ] = await Promise.all([
       golde ? createGoldeClient(golde) : undefined,
@@ -59,6 +62,7 @@ export const initializeContext = async (
       hcloud ? createHCloudClient(hcloud) : undefined,
       cloudflare ? createCloudflareClient(cloudflare) : undefined,
       aws ? createAWSClient(aws) : undefined,
+      slack ? createSlackClient(slack) : undefined,
       createDocker(),
     ]);
 
@@ -74,6 +78,7 @@ export const initializeContext = async (
       golde: goldeClient,
       cloudflare: cloudflareClient,
       hcloud: hcloudClient,
+      slack: slackClient,
     };
 
     if (goldeClient) {
