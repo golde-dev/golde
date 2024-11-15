@@ -1,4 +1,5 @@
 import type { Tags } from "../../types/config.ts";
+import { tagEntriesTags } from "../../utils/tags.ts";
 import { AWSClientBase } from "./base.ts";
 import {
   ResourceGroupsTaggingAPIClient,
@@ -42,12 +43,7 @@ export class TaggingClient extends AWSClientBase {
     if (tagsToAddOrUpdate.length) {
       const tagCommand = new TagResourcesCommand({
         ResourceARNList: [resourceARN],
-        Tags: tagsToAddOrUpdate.reduce((acc, [key, value]) => {
-          return {
-            ...acc,
-            [key]: value,
-          };
-        }, {}),
+        Tags: tagEntriesTags(tagsToAddOrUpdate),
       });
       await this
         .getResourceGroupsTaggingAPIClient()

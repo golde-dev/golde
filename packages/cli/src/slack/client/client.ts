@@ -61,6 +61,15 @@ export class SlackClient {
   }
 
   public async verifyToken(): Promise<void> {
+    logger.debug("[Slack] verifying token");
+    try {
+      await this.makeRequest<void>(`auth.test`, "GET");
+    } catch (error) {
+      if (error instanceof SlackError) {
+        throw error;
+      }
+      throw new SlackError(`Slack token verification failed`);
+    }
   }
 
   public async sendMessage(channel: string, message: string): Promise<void> {

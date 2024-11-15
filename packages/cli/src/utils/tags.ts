@@ -21,6 +21,15 @@ export function mergeTags(tags?: Tags, other?: Tags): Tags | undefined {
   };
 }
 
+export function tagEntriesTags(tags: [string, string][]): Tags {
+  return tags.reduce((acc, [key, value]) => {
+    return {
+      ...acc,
+      [key]: value,
+    };
+  }, {});
+}
+
 export function toTagsArray(tags?: Tags): string[] | undefined {
   if (isEmpty(tags) || isUndefined(tags)) {
     return;

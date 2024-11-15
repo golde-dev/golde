@@ -279,6 +279,35 @@
                 }
               }
             },
+            "iamUser": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branchPattern"
+                  },
+                  "managedPoliciesArns": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "tags": {
+                    "$ref": "#/definitions/golde/properties/tags"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "propertyNames": {
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9+=,.@-]+$"
+              }
+            },
             "iamRole": {
               "type": "object",
               "additionalProperties": {
@@ -565,6 +594,178 @@
                 "minLength": 1,
                 "maxLength": 512,
                 "pattern": "^[\\w./-]+$"
+              }
+            },
+            "lambdaFunction": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "packageType": {
+                        "type": "string",
+                        "const": "Image"
+                      },
+                      "branch": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branch"
+                      },
+                      "branchPattern": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branchPattern"
+                      },
+                      "code": {
+                        "type": "object",
+                        "properties": {
+                          "ImageUri": {
+                            "type": "string",
+                            "format": "uri"
+                          }
+                        },
+                        "required": [
+                          "ImageUri"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "roleArn": {
+                        "type": "string"
+                      },
+                      "timeout": {
+                        "type": "number"
+                      },
+                      "memorySize": {
+                        "type": "number"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "region": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "packageType",
+                      "code",
+                      "roleArn"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "packageType": {
+                        "type": "string",
+                        "const": "Zip"
+                      },
+                      "branch": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branch"
+                      },
+                      "branchPattern": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branchPattern"
+                      },
+                      "code": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "ZipFile": {}
+                            },
+                            "required": [
+                              "ZipFile"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "S3Bucket": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "S3Key": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "S3ObjectVersion": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "S3Bucket",
+                              "S3Key"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "runtime": {
+                        "type": "string",
+                        "enum": [
+                          "nodejs20.x",
+                          "nodejs18.x",
+                          "nodejs14.x",
+                          "python3.13",
+                          "python3.12",
+                          "python3.11",
+                          "python3.10",
+                          "python3.9",
+                          "java21",
+                          "java17",
+                          "java11",
+                          "java8.al2",
+                          "dotnet8",
+                          "dotnet6",
+                          "ruby3.3",
+                          "ruby3.2",
+                          "provided.al2023",
+                          "provided.al2"
+                        ]
+                      },
+                      "handler": {
+                        "type": "string"
+                      },
+                      "roleArn": {
+                        "type": "string"
+                      },
+                      "timeout": {
+                        "type": "number"
+                      },
+                      "memorySize": {
+                        "type": "number"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "region": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "packageType",
+                      "code",
+                      "runtime",
+                      "handler",
+                      "roleArn"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "propertyNames": {
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_-]+$"
               }
             }
           },
