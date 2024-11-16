@@ -15,6 +15,7 @@ import { addDefaultRegion, assertRegion } from "../utils.ts";
 import { isLambdaConfigEqual } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import type { CreateFunction, DeleteFunction, Executors, UpdateFunction } from "./executor.ts";
+import { lambdaFunctionPath } from "./path.ts";
 
 function findDependencies<T extends object>(_config: T): string[] {
   return [];
@@ -30,7 +31,7 @@ function getCurrent(functions: LambdaFunctionState = {}) {
   } = {};
 
   for (const [name, { config, ...rest }] of Object.entries(functions)) {
-    previous[`aws.lambdaFunction.${name}`] = {
+    previous[lambdaFunctionPath(name)] = {
       name,
       config,
       state: {
@@ -55,7 +56,7 @@ function getNext(config: LambdaFunctionConfig = {}, region: string, tags?: Tags)
     const withTags = mergeProjectTags(func, tags);
     const withTagsAndRegion = addDefaultRegion(withTags, region);
 
-    next[`aws.lambdaFunction.${name}`] = {
+    next[lambdaFunctionPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion) as FunctionConfig,
       dependsOn: findDependencies(withTagsAndRegion),

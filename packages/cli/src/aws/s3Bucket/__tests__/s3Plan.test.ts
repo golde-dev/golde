@@ -54,7 +54,7 @@ describe("aws s3 buckets", () => {
         type: Type.Create,
         executor: executors.createBucket,
         args: ["bucket1", configWithRegion],
-        path: "aws.s3.bucket1",
+        path: "aws.s3Bucket.bucket1",
         config: configWithRegion,
         dependsOn: [],
       };
@@ -96,7 +96,7 @@ describe("aws s3 buckets", () => {
         type: Type.Update,
         executor: executors.updateBucket,
         args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1],
-        path: "aws.s3.bucket1",
+        path: "aws.s3Bucket.bucket1",
         state: state.bucket1,
         config: configWithRegion,
         dependsOn: [],
@@ -170,7 +170,7 @@ describe("aws s3 buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["us-east-1", "bucket1"],
-        path: "aws.s3.bucket1",
+        path: "aws.s3Bucket.bucket1",
         state: state.bucket1,
       };
       expect(result).toEqual([execution]);
@@ -205,7 +205,7 @@ describe("aws s3 buckets", () => {
         type: Type.Create,
         executor: executors.createBucket,
         args: ["bucket2", configWithRegion],
-        path: "aws.s3.bucket2",
+        path: "aws.s3Bucket.bucket2",
         config: configWithRegion,
         dependsOn: [],
       };
@@ -214,7 +214,7 @@ describe("aws s3 buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["us-east-1", "bucket1"],
-        path: "aws.s3.bucket1",
+        path: "aws.s3Bucket.bucket1",
         state: state.bucket1,
       };
 
@@ -259,7 +259,7 @@ describe("aws s3 buckets", () => {
 
       const noop: NoopUnit = {
         type: Type.Noop,
-        path: "aws.s3.bucket1",
+        path: "aws.s3Bucket.bucket1",
         config: config.bucket1,
         state: state.bucket1,
       };

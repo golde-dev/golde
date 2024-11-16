@@ -22,21 +22,21 @@ type LambdaRuntime =
   | "provided.al2";
 
 export type ImageLambdaCode = {
-  ImageUri: string;
+  imageUri: string;
 };
 
 export type S3LambdaCode = {
-  S3Bucket: string;
-  S3Key: string;
-  S3ObjectVersion?: string;
+  s3Bucket: string;
+  s3Key: string;
+  s3ObjectVersion?: string;
 };
 
 export type ZipFileLambdaCode = {
-  ZipFile: Uint8Array | string;
+  zipFile: Uint8Array | string;
 };
 
 export type ZipFileLambdaCodeHash = {
-  ZipFile: string;
+  zipFile: string;
 };
 
 /**
