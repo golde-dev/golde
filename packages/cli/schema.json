@@ -806,7 +806,7 @@
                 }
               }
             },
-            "r2": {
+            "r2Bucket": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",
@@ -836,6 +836,21 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              "propertyNames": {
+                "minLength": 3,
+                "maxLength": 63,
+                "allOf": [
+                  {
+                    "pattern": "^[a-z0-9]"
+                  },
+                  {
+                    "pattern": "[a-z0-9]$"
+                  },
+                  {
+                    "pattern": "^[a-z0-9-]*$"
+                  }
+                ]
               }
             }
           },

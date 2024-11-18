@@ -1,13 +1,17 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
-import type { CloudflareClient } from "../client/client.ts";
-import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
-import { type CreateUnit, type Plan, Type } from "../../types/plan.ts";
+import { Type } from "../../types/plan.ts";
 import { assertBranch } from "../../utils/resource.ts";
-import type { BucketConfig, BucketState, R2Config, R2State } from "./types.ts";
 import { logger } from "../../logger.ts";
-import type { WithBranch } from "../../types/config.ts";
 import { formatDuration } from "../../utils/duration.ts";
 import { omitUndefined } from "../../utils/object.ts";
+import { r2BucketPath } from "./path.ts";
+import { findConfigDependencies } from "../../dependencies.ts";
+import type { CreateUnit, Plan } from "../../types/plan.ts";
+import type { ConfigDependency } from "../../types/dependencies.ts";
+import type { CloudflareClient } from "../client/client.ts";
+import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
+import type { WithBranch } from "../../types/config.ts";
+import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "./types.ts";
 
 export async function createBucket(
   this: CloudflareClient,
@@ -23,7 +27,6 @@ export async function createBucket(
     return {
       location: b.location,
       createdAt: b.creation_date,
-      storageClass: b.storage_class,
       config,
     };
   });
@@ -51,7 +54,7 @@ export const createR2Executors = (cloudflare: CloudflareClient) => {
 
 export type Executors = ReturnType<typeof createR2Executors>;
 
-function getCurrent(buckets: R2State = {}) {
+function getCurrent(buckets: R2BucketState = {}) {
   const previous: {
     [path: string]: {
       name: string;
@@ -61,7 +64,7 @@ function getCurrent(buckets: R2State = {}) {
   } = {};
 
   for (const [name, { config, ...rest }] of Object.entries(buckets)) {
-    previous[`cloudflare.r2.${name}`] = {
+    previous[r2BucketPath(name)] = {
       name,
       config,
       state: {
@@ -73,18 +76,20 @@ function getCurrent(buckets: R2State = {}) {
   return previous;
 }
 
-function getNext(config: R2Config = {}) {
+function getNext(config: R2BucketConfig = {}) {
   const next: {
     [path: string]: {
       name: string;
       config: BucketConfig;
+      dependsOn: ConfigDependency[];
     };
   } = {};
 
   for (const [name, bucket] of Object.entries(config)) {
-    next[`cloudflare.r2.${name}`] = {
+    next[r2BucketPath(name)] = {
       name,
       config: omitUndefined(bucket),
+      dependsOn: findConfigDependencies(bucket),
     };
   }
   return next;
@@ -92,8 +97,8 @@ function getNext(config: R2Config = {}) {
 
 export async function createR2Plan(
   executors: Executors,
-  state?: R2State,
-  config?: R2Config,
+  state?: R2BucketState,
+  config?: R2BucketConfig,
 ): Promise<Plan> {
   logger.debug("[Cloudflare] Creating buckets plan", {
     state,
@@ -107,7 +112,7 @@ export async function createR2Plan(
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
-    const { config, name } = next[key];
+    const { config, name, dependsOn } = next[key];
 
     assertBranch(config);
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
@@ -116,7 +121,7 @@ export async function createR2Plan(
       args: [name, config],
       path: key,
       config,
-      dependsOn: [],
+      dependsOn,
     };
     plan.push(createUnit);
   }
@@ -158,7 +163,7 @@ export async function createR2Plan(
 
 export function createR2DestroyPlan(
   executors: Executors,
-  state?: R2State,
+  state?: R2BucketState,
 ) {
   const plan: Plan = [];
   logger.debug("[Cloudflare] Creating buckets plan", {

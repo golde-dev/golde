@@ -6,17 +6,17 @@ export interface BucketConfig extends Resource {
   storageClass?: StorageClass;
 }
 
-export interface R2Config {
+export interface R2BucketConfig {
   [bucketName: string]: BucketConfig;
 }
 
 export interface BucketState {
   location: Region;
+  updatedAt?: string;
   createdAt: string;
-  storageClass: StorageClass;
   config: WithBranch<BucketConfig>;
 }
 
-export interface R2State {
+export interface R2BucketState {
   [bucketName: string]: BucketState;
 }

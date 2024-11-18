@@ -27,7 +27,7 @@ const bucketNameSchema = z
   .refine(
     (name) => !/^\d+\.\d+\.\d+\.\d+$/.test(name),
     {
-      message: "Bucket name cannot be formatted like an IP address.",
+      message: "Invalid S3 bucket name. Name cannot be formatted like an IP address.",
     },
   );
 

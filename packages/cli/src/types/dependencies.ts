@@ -6,6 +6,13 @@ export interface ConfigDependency {
   attribute: string | null;
 }
 
+// export interface ConfigDependency {
+//   [path: string]: {
+//     name: string;
+//     attribute: string | null;
+//   }[]
+// }
+
 export interface External {
   type: "external";
   value: Resource;

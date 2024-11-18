@@ -10,6 +10,8 @@ import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
+import { findConfigDependencies } from "../../dependencies.ts";
+import type { ConfigDependency } from "../../types/dependencies.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
   const previous: {
@@ -38,6 +40,7 @@ function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
     [path: string]: {
       name: string;
       config: BucketConfig;
+      dependsOn: ConfigDependency[];
     };
   } = {};
 
@@ -48,6 +51,7 @@ function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
     next[s3BucketPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion),
+      dependsOn: findConfigDependencies(bucket),
     };
   }
   return next;
@@ -85,7 +89,7 @@ export async function createS3Plan(
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
-    const { config, name } = next[key];
+    const { config, name, dependsOn } = next[key];
 
     assertRegion(config);
     assertBranch(config);
@@ -101,7 +105,7 @@ export async function createS3Plan(
       args: [name, config],
       path: key,
       config,
-      dependsOn: [],
+      dependsOn,
     };
     plan.push(createUnit);
   }
@@ -126,7 +130,7 @@ export async function createS3Plan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig } = next[key];
+    const { config: nextConfig, dependsOn } = next[key];
     const { config: previousConfig, state, name } = previous[key];
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
@@ -164,7 +168,7 @@ export async function createS3Plan(
         path: key,
         state,
         config: nextConfig,
-        dependsOn: [],
+        dependsOn,
       };
       plan.push(updateUnit);
     }

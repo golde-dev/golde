@@ -2,12 +2,12 @@ import { logger } from "../../logger.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { mergeProjectTags, toTagsArray } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
-import type { CloudflareClient } from "../client/client.ts";
+import { omitUndefined } from "../../utils/object.ts";
 import { Type } from "../../types/plan.ts";
+import type { CloudflareClient } from "../client/client.ts";
 import type { Tags } from "../../types/config.ts";
 import type { DNSConfig, DNSState, RecordConfig, RecordState, RecordType } from "./types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
-import { omitUndefined } from "../../utils/object.ts";
 
 async function createZoneRecord(
   this: CloudflareClient,

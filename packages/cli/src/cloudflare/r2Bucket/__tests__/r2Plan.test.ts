@@ -4,7 +4,7 @@ import { spy } from "@std/testing/mock";
 import { Type } from "../../../types/plan.ts";
 import { createR2Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "../plan.ts";
-import type { BucketConfig, BucketState, R2Config, R2State } from "../types.ts";
+import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../types/plan.ts";
 import { assertBranch } from "../../../utils/resource.ts";
 
@@ -18,7 +18,7 @@ describe("cloudflare buckets", () => {
   describe("create bucket", () => {
     it("should create bucket for new config on default branch", async () => {
       const state = {};
-      const config: R2Config = {
+      const config: R2BucketConfig = {
         "bucket1": {
           branch: "master",
           storageClass: "Standard",
@@ -46,9 +46,8 @@ describe("cloudflare buckets", () => {
 
   describe("update bucket", () => {
     it("should throw when trying to update a bucket", async () => {
-      const state: R2State = {
+      const state: R2BucketState = {
         "bucket1": {
-          storageClass: "Standard",
           location: "eeur",
           createdAt: "2022-01-01T00:00:00.000Z",
           config: {
@@ -59,7 +58,7 @@ describe("cloudflare buckets", () => {
         },
       };
 
-      const config: R2Config = {
+      const config: R2BucketConfig = {
         "bucket1": {
           storageClass: "InfrequentAccess",
           locationHint: "eeur",
@@ -76,9 +75,8 @@ describe("cloudflare buckets", () => {
 
   describe("delete bucket", () => {
     it("should delete previously created bucket", async () => {
-      const state: R2State = {
+      const state: R2BucketState = {
         "bucket1": {
-          storageClass: "Standard",
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           config: {
@@ -87,7 +85,7 @@ describe("cloudflare buckets", () => {
         },
       };
 
-      const config: R2Config = {};
+      const config: R2BucketConfig = {};
 
       const result = await createR2Plan(
         executors,
@@ -106,9 +104,8 @@ describe("cloudflare buckets", () => {
     });
 
     it("should delete and create bucket when bucket is renamed", async () => {
-      const state: R2State = {
+      const state: R2BucketState = {
         "bucket1": {
-          storageClass: "Standard",
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           config: {
@@ -117,7 +114,7 @@ describe("cloudflare buckets", () => {
         },
       };
 
-      const config: R2Config = {
+      const config: R2BucketConfig = {
         "bucket2": {
           storageClass: "InfrequentAccess",
           locationHint: "eeur",
@@ -155,9 +152,8 @@ describe("cloudflare buckets", () => {
 
   describe("noop changes on bucket", () => {
     it("when state and config are the same", async () => {
-      const state: R2State = {
+      const state: R2BucketState = {
         "bucket1": {
-          storageClass: "Standard",
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           config: {
@@ -168,7 +164,7 @@ describe("cloudflare buckets", () => {
         },
       };
 
-      const config: R2Config = {
+      const config: R2BucketConfig = {
         "bucket1": {
           storageClass: "Standard",
           locationHint: "apac",

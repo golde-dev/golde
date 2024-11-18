@@ -1,8 +1,8 @@
 import { z } from "zod";
-import type { DNSConfig, RecordConfig, RecordType } from "./types.ts";
-import type { ZodType } from "zod";
 import { tagsSchema } from "../../utils/tags.ts";
 import { branchPatternSchema, branchSchema, transformBranch } from "../../utils/resource.ts";
+import type { DNSConfig, RecordConfig, RecordType } from "./types.ts";
+import type { ZodType } from "zod";
 
 const recordTypeSchema: ZodType<RecordType> = z.union([
   z.literal("A"),

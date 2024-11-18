@@ -1,13 +1,13 @@
 import { implement } from "../utils/zod.ts";
 import type { CloudflareConfig, CloudflareCredentials } from "./types.ts";
-import { r2Schema } from "./r2/schema.ts";
+import { r2Schema } from "./r2Bucket/schema.ts";
 import { dnsSchema } from "./dns/schema.ts";
 import { z } from "zod";
 
 export const cloudflareConfigSchema = implement<CloudflareConfig>()
   .with({
     dns: dnsSchema.optional(),
-    r2: r2Schema.optional(),
+    r2Bucket: r2Schema.optional(),
   })
   .strict();
 

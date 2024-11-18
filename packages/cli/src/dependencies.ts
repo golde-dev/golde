@@ -4,6 +4,7 @@ import type { Context } from "./types/context.ts";
 import type { ConfigDependency, Dependencies } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 import { matchAWSPath } from "./aws/path.ts";
+import { matchCloudflarePath } from "./cloudflare/path.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
@@ -20,8 +21,8 @@ export function dependenciesSearch(
     if (placeholder === trimmed) {
       const match = stateRe.exec(key);
       if (match) {
-        const [deps] = match;
-        const depsMatch = matchAWSPath(deps);
+        const [statePath] = match;
+        const depsMatch = matchAWSPath(statePath) ?? matchCloudflarePath(statePath);
         if (depsMatch) {
           const [path, name, attribute] = depsMatch;
           dependencies.push({

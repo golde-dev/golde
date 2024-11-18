@@ -117,9 +117,10 @@ export async function assertBucketNameAvailable(this: AWSClient, name: string, r
 
 export async function assertCreatePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
+  const arn = s3BucketArn(name);
   const [allowed, reason] = await this.checkPermission(
     ["s3:CreateBucket"],
-    [`arn:aws:s3:::${name}`],
+    [arn],
     [
       {
         ContextKeyName: "aws:RequestedRegion",
@@ -129,17 +130,18 @@ export async function assertCreatePermission(this: AWSClient, name: string, regi
     ],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for s3 bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS] Checked permission for s3 bucket ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Create permission s3 denied for bucket ${name}`, reason);
-    throw new PlanError(`Cannot create s3 bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
+    logger.error(`[AWS] Create permission s3 denied for bucket ${arn}`, reason);
+    throw new PlanError(`Cannot create s3 bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
 export async function assertDeletePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
+  const arn = s3BucketArn(name);
   const [allowed, reason] = await this.checkPermission(
     ["s3:DeleteBucket"],
-    [`arn:aws:s3:::${name}`],
+    [arn],
     [
       {
         ContextKeyName: "aws:RequestedRegion",
@@ -149,17 +151,18 @@ export async function assertDeletePermission(this: AWSClient, name: string, regi
     ],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Delete permission denied for bucket ${name}`, reason);
-    throw new PlanError(`Cannot delete bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
+    logger.error(`[AWS] Delete permission denied for bucket ${arn}`, reason);
+    throw new PlanError(`Cannot delete bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
 export async function assertUpdatePermission(this: AWSClient, name: string, region: string) {
   const start = performance.now();
+  const arn = s3BucketArn(name);
   const [allowed, reason] = await this.checkPermission(
     ["s3:PutBucketTagging"],
-    [`arn:aws:s3:::${name}`],
+    [arn],
     [
       {
         ContextKeyName: "aws:RequestedRegion",
@@ -169,10 +172,10 @@ export async function assertUpdatePermission(this: AWSClient, name: string, regi
     ],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Update tags permission denied for bucket ${name}`, reason);
-    throw new PlanError(`Cannot update bucket ${name}`, PlanErrorCode.PERMISSION_DENIED);
+    logger.error(`[AWS] Update tags permission denied for bucket ${arn}`, reason);
+    throw new PlanError(`Cannot update bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
 
