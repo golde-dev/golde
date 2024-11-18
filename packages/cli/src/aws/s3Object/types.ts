@@ -10,6 +10,8 @@ export interface S3ObjectConfig {
 
 export interface ObjectState {
   createdAt: string;
+  updatedAt?: string;
+  key: string;
   arn: string;
   config: WithBranch<ObjectConfig>;
 }

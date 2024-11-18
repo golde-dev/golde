@@ -64,8 +64,21 @@ export function omitUndefined<T extends object>(object: T): T {
   ) as T;
 }
 
-export function safePath(path: string): string {
-  return path.includes(".") ? `['${path}']` : path;
+/**
+ * Construct array with all properties based on interface
+ */
+export function ensureAllKeys<T>(obj: { [K in keyof T]: true }): (keyof T)[] {
+  return Object.keys(obj) as (keyof T)[];
+}
+
+export function prefixPath(prefix: string, path: string): string {
+  return path.includes(".") ? `${prefix}['${path}']` : `${prefix}.${path}`;
+}
+
+export function removePrefix(prefix: string, path: string): string {
+  return path.startsWith(`${prefix}.`)
+    ? path.replace(`${prefix}.`, "")
+    : path.replace(`${prefix}`, "");
 }
 
 /**

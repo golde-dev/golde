@@ -1,11 +1,13 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
-import type { WithBranch } from "../../types/config.ts";
 import { formatDuration } from "../../utils/duration.ts";
 import { assertBranch } from "../../utils/resource.ts";
+import { nowStringDate } from "../../utils/date.ts";
+import { hashByteArray } from "../../utils/hash.ts";
 import type { AWSClient } from "../client/client.ts";
 import type { WithRegion } from "../types.ts";
+import type { WithBranch } from "../../types/config.ts";
 import type {
   FunctionConfig,
   FunctionConfigState,
@@ -13,8 +15,6 @@ import type {
   S3LambdaCode,
   ZipFileLambdaCodeHash,
 } from "./types.ts";
-import { nowStringDate } from "../../utils/date.ts";
-import { hashByteArray } from "../../utils/hash.ts";
 
 function lambdaFunctionArn({ accountId }: AWSClient, name: string, region: string) {
   return `arn:aws:lambda:${region}:${accountId}:function:${name}`;
@@ -24,26 +24,26 @@ async function isCodeEqual(
   previousCode: FunctionConfigState["code"],
   code: FunctionConfig["code"],
 ) {
-  if ("ZipFile" in previousCode) {
-    if ("ZipFile" in code) {
-      const hash = await hashByteArray(code.ZipFile);
-      return previousCode.ZipFile === hash;
+  if ("zipFile" in previousCode) {
+    if ("zipFile" in code) {
+      const hash = await hashByteArray(code.zipFile);
+      return previousCode.zipFile === hash;
     }
     return false;
   }
-  if ("S3Bucket" in previousCode) {
-    if ("S3Bucket" in code) {
+  if ("s3Bucket" in previousCode) {
+    if ("s3Bucket" in code) {
       return (
-        previousCode.S3Bucket === code.S3Bucket &&
-        previousCode.S3Key === code.S3Key &&
-        previousCode.S3ObjectVersion === code.S3ObjectVersion
+        previousCode.s3Bucket === code.s3Bucket &&
+        previousCode.s3Key === code.s3Key &&
+        previousCode.s3ObjectVersion === code.s3ObjectVersion
       );
     }
     return false;
   }
-  if ("ImageUri" in previousCode) {
-    if ("ImageUri" in code) {
-      return previousCode.ImageUri === code.ImageUri;
+  if ("imageUri" in previousCode) {
+    if ("imageUri" in code) {
+      return previousCode.imageUri === code.imageUri;
     }
     return false;
   }
@@ -102,7 +102,9 @@ export async function createFunction(
       PackageType: packageType,
       Role: roleArn,
       MemorySize: memorySize,
-      Code: code,
+      Code: {
+        ImageUri: code.imageUri,
+      },
     });
 
     const end = Date.now();
@@ -124,6 +126,16 @@ export async function createFunction(
       code,
     } = config;
 
+    const Code = "zipFile" in code
+      ? {
+        ZipFile: code.zipFile,
+      }
+      : {
+        S3Bucket: code.s3Bucket,
+        S3ObjectVersion: code.s3ObjectVersion,
+        S3Key: code.s3Key,
+      };
+
     await this.createLambdaFunction(region, {
       FunctionName: functionName,
       Runtime: runtime,
@@ -133,17 +145,17 @@ export async function createFunction(
       Role: roleArn,
       Handler: handler,
       MemorySize: memorySize,
-      Code: code,
+      Code,
     });
     const end = Date.now();
     logger.debug(`[AWS] Created function ${functionName} in ${formatDuration(end - start)}`);
 
     const createdAt = nowStringDate();
 
-    if ("ZipFile" in code) {
-      const hash = await hashByteArray(code.ZipFile);
+    if ("zipFile" in code) {
+      const hash = await hashByteArray(code.zipFile);
       const zipCode: ZipFileLambdaCodeHash = {
-        ZipFile: hash,
+        zipFile: hash,
       };
 
       return {
@@ -156,7 +168,7 @@ export async function createFunction(
       };
     }
 
-    if ("S3Bucket" in code) {
+    if ("s3Bucket" in code) {
       const s3Code: S3LambdaCode = code;
 
       return {
@@ -222,32 +234,32 @@ export async function updateFunction(
   if (!await isCodeEqual(previousCode, code)) {
     logger.debug(`[AWS] Updating code for lambda function ${arn}`);
 
-    if ("ZipFile" in code) {
+    if ("zipFile" in code) {
       const zipCode: ZipFileLambdaCodeHash = {
-        ZipFile: await hashByteArray(code.ZipFile),
+        zipFile: await hashByteArray(code.zipFile),
       };
       configState.code = zipCode;
       await this.updateLambdaFunctionCode(arn, {
         FunctionName: arn,
-        ZipFile: code.ZipFile,
+        ZipFile: code.zipFile,
         Publish: true,
       });
     }
-    if ("S3Bucket" in code) {
+    if ("s3Bucket" in code) {
       configState.code = code;
       await this.updateLambdaFunctionCode(arn, {
         FunctionName: arn,
-        S3Bucket: code.S3Bucket,
-        S3Key: code.S3Key,
-        S3ObjectVersion: code.S3ObjectVersion,
+        S3Bucket: code.s3Bucket,
+        S3Key: code.s3Key,
+        S3ObjectVersion: code.s3ObjectVersion,
         Publish: true,
       });
     }
-    if ("ImageUri" in code) {
+    if ("imageUri" in code) {
       configState.code = code;
       await this.updateLambdaFunctionCode(arn, {
         FunctionName: arn,
-        ImageUri: code.ImageUri,
+        ImageUri: code.imageUri,
         Publish: true,
       });
     }
@@ -349,7 +361,7 @@ export function getDefaultRegion(this: AWSClient) {
   return this.region ?? this.defaultRegion;
 }
 
-export const createS3Executors = (aws: AWSClient) => {
+export const createLambdaFunctionExecutors = (aws: AWSClient) => {
   return {
     getDefaultRegion: getDefaultRegion.bind(aws),
 
@@ -365,4 +377,4 @@ export const createS3Executors = (aws: AWSClient) => {
   };
 };
 
-export type Executors = ReturnType<typeof createS3Executors>;
+export type Executors = ReturnType<typeof createLambdaFunctionExecutors>;

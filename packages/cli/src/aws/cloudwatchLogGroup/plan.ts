@@ -1,6 +1,13 @@
 import { logger } from "../../logger.ts";
 import { mergeProjectTags } from "../../utils/tags.ts";
+import { assertBranch } from "../../utils/resource.ts";
+import { isEqual } from "@es-toolkit/es-toolkit";
+import { Type } from "../../types/plan.ts";
+import { addDefaultRegion, assertRegion } from "../utils.ts";
+import { omitUndefined } from "../../utils/object.ts";
+import { cloudwatchLogGroupPath } from "./path.ts";
 import type { Tags } from "../../types/config.ts";
+import type { CreateLogGroup, DeleteLogGroup, Executors, UpdateLogGroup } from "./executor.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
 import type {
   CloudwatchLogGroupConfig,
@@ -8,12 +15,6 @@ import type {
   LogGroupConfig,
   LogGroupState,
 } from "./types.ts";
-import { assertBranch } from "../../utils/resource.ts";
-import { isEqual } from "@es-toolkit/es-toolkit";
-import { Type } from "../../types/plan.ts";
-import { addDefaultRegion, assertRegion } from "../utils.ts";
-import type { CreateLogGroup, DeleteLogGroup, Executors, UpdateLogGroup } from "./executor.ts";
-import { omitUndefined } from "../../utils/object.ts";
 
 function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   const previous: {
@@ -25,7 +26,7 @@ function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   } = {};
 
   for (const [name, { config, ...rest }] of Object.entries(logGroups)) {
-    previous[`aws.cloudwatchLogGroup.${name}`] = {
+    previous[cloudwatchLogGroupPath(name)] = {
       name,
       config,
       state: {
@@ -49,7 +50,7 @@ function getNext(config: CloudwatchLogGroupConfig = {}, region: string, tags?: T
     const withTags = mergeProjectTags(logGroup, tags);
     const withTagsAndRegion = addDefaultRegion(withTags, region);
 
-    next[`aws.cloudwatchLogGroup.${name}`] = {
+    next[cloudwatchLogGroupPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion),
     };

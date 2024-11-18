@@ -16,10 +16,8 @@ import { isLambdaConfigEqual } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import type { CreateFunction, DeleteFunction, Executors, UpdateFunction } from "./executor.ts";
 import { lambdaFunctionPath } from "./path.ts";
-
-function findDependencies<T extends object>(_config: T): string[] {
-  return [];
-}
+import { findConfigDependencies } from "../../dependencies.ts";
+import type { ConfigDependency } from "../../types/dependencies.ts";
 
 function getCurrent(functions: LambdaFunctionState = {}) {
   const previous: {
@@ -48,7 +46,7 @@ function getNext(config: LambdaFunctionConfig = {}, region: string, tags?: Tags)
     [path: string]: {
       name: string;
       config: FunctionConfig;
-      dependsOn: string[];
+      dependsOn: ConfigDependency[];
     };
   } = {};
 
@@ -59,13 +57,13 @@ function getNext(config: LambdaFunctionConfig = {}, region: string, tags?: Tags)
     next[lambdaFunctionPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion) as FunctionConfig,
-      dependsOn: findDependencies(withTagsAndRegion),
+      dependsOn: findConfigDependencies(withTagsAndRegion),
     };
   }
   return next;
 }
 
-export async function createLambdaPlan(
+export async function createLambdaFunctionPlan(
   executors: Executors,
   tags?: Tags,
   state?: LambdaFunctionState,
@@ -185,7 +183,7 @@ export async function createLambdaPlan(
   return await Promise.resolve(plan);
 }
 
-export async function createLambdaDestroyPlan(
+export async function createLambdaFunctionDestroyPlan(
   executors: Executors,
   state?: LambdaFunctionState,
 ) {

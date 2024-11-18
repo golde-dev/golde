@@ -8,6 +8,7 @@ import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { ExecutionGroups } from "./types/plan.ts";
+import { noop } from "@es-toolkit/es-toolkit";
 
 export function sortByPath<T extends ExecutionUnit>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
@@ -42,6 +43,7 @@ export function printPlan(flatPlan: Plan) {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${create.path}`, {
           config: create.config,
+          dependsOn: create.dependsOn,
         });
       } else {
         logger.info(`   ${create.path}`);
@@ -69,6 +71,7 @@ export function printPlan(flatPlan: Plan) {
         logger.debug(`    ${update.path}`, {
           config: update.config,
           state: update.state,
+          dependsOn: update.dependsOn,
         });
       } else {
         logger.info(`   ${update.path}`);

@@ -197,21 +197,6 @@
                   }
                 },
                 "additionalProperties": false
-              },
-              "propertyNames": {
-                "minLength": 3,
-                "maxLength": 63,
-                "allOf": [
-                  {
-                    "pattern": "^[a-z0-9]([a-z0-9\\-]*[a-z0-9])?$"
-                  },
-                  {
-                    "pattern": "^[^0-9]+|[^0-9]+$"
-                  },
-                  {
-                    "pattern": "^(?!.*\\.\\.)[a-z0-9\\-.]*$"
-                  }
-                ]
               }
             },
             "s3Object": {
@@ -616,13 +601,13 @@
                       "code": {
                         "type": "object",
                         "properties": {
-                          "ImageUri": {
+                          "imageUri": {
                             "type": "string",
                             "format": "uri"
                           }
                         },
                         "required": [
-                          "ImageUri"
+                          "imageUri"
                         ],
                         "additionalProperties": false
                       },
@@ -673,31 +658,31 @@
                           {
                             "type": "object",
                             "properties": {
-                              "ZipFile": {}
+                              "zipFile": {}
                             },
                             "required": [
-                              "ZipFile"
+                              "zipFile"
                             ],
                             "additionalProperties": false
                           },
                           {
                             "type": "object",
                             "properties": {
-                              "S3Bucket": {
+                              "s3Bucket": {
                                 "type": "string",
                                 "minLength": 1
                               },
-                              "S3Key": {
+                              "s3Key": {
                                 "type": "string",
                                 "minLength": 1
                               },
-                              "S3ObjectVersion": {
+                              "s3ObjectVersion": {
                                 "type": "string"
                               }
                             },
                             "required": [
-                              "S3Bucket",
-                              "S3Key"
+                              "s3Bucket",
+                              "s3Key"
                             ],
                             "additionalProperties": false
                           }

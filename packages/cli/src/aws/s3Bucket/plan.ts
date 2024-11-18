@@ -1,14 +1,15 @@
 import { logger } from "../../logger.ts";
 import { mergeProjectTags } from "../../utils/tags.ts";
-import type { Tags } from "../../types/config.ts";
-import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
-import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
-import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
+import { s3BucketPath } from "./path.ts";
+import type { Tags } from "../../types/config.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
+import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
+import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
   const previous: {
@@ -20,7 +21,7 @@ function getCurrent(buckets: S3BucketState = {}) {
   } = {};
 
   for (const [name, { config, ...rest }] of Object.entries(buckets)) {
-    previous[`aws.s3Bucket.${name}`] = {
+    previous[s3BucketPath(name)] = {
       name,
       config,
       state: {
@@ -44,7 +45,7 @@ function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
     const withTags = mergeProjectTags(bucket, tags);
     const withTagsAndRegion = addDefaultRegion(withTags, region);
 
-    next[`aws.s3Bucket.${name}`] = {
+    next[s3BucketPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion),
     };

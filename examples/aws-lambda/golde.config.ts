@@ -47,7 +47,8 @@ const config: Config = {
         timeout: 30,
         roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
         code: {
-          ZipFile: "{{ file.lambda.zip }}",
+          s3Bucket: "example-aws-lambda-code",
+          s3Key: "example-aws-lambda-function.zip", 
         },
       },
     }

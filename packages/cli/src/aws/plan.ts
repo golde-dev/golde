@@ -21,6 +21,11 @@ import {
   createCloudwatchLogGroupDestroyPlan,
   createCloudwatchLogGroupPlan,
 } from "./cloudwatchLogGroup/plan.ts";
+import {
+  createLambdaFunctionDestroyPlan,
+  createLambdaFunctionPlan,
+} from "./lambdaFunction/plan.ts";
+import { createLambdaFunctionExecutors } from "./lambdaFunction/executor.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -53,6 +58,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     s3Object: s3ObjectConfig,
     iamRole: iamRoleConfig,
     cloudwatchLogGroup: cloudwatchLogGroupConfig,
+    lambdaFunction: lambdaFunctionConfig,
   } = awsConfig ?? {};
 
   const {
@@ -61,6 +67,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     s3Object: s3ObjectState,
     iamRole: iamRoleState,
     cloudwatchLogGroup: cloudwatchLogGroupState,
+    lambdaFunction: lambdaFunctionState,
   } = awsState ?? {};
 
   if (!isEmpty(route53RecordState) || !isEmpty(route53RecordConfig)) {
@@ -112,6 +119,16 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     ));
   }
 
+  if (!isEmpty(lambdaFunctionConfig) || !isEmpty(lambdaFunctionState)) {
+    const executors = createLambdaFunctionExecutors(aws);
+    plan.push(createLambdaFunctionPlan(
+      executors,
+      tags,
+      lambdaFunctionState,
+      lambdaFunctionConfig,
+    ));
+  }
+
   return (await Promise.all(plan)).flat();
 }
 
@@ -141,6 +158,7 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     s3Object: s3ObjectState,
     iamRole: iamRoleState,
     cloudwatchLogGroup: cloudwatchLogGroupState,
+    lambdaFunction: lambdaFunctionState,
   } = awsState ?? {};
 
   if (!isEmpty(route53State)) {
@@ -179,6 +197,13 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     plan.push(createCloudwatchLogGroupDestroyPlan(
       executors,
       cloudwatchLogGroupState,
+    ));
+  }
+  if (!isEmpty(lambdaFunctionState)) {
+    const executors = createLambdaFunctionExecutors(aws);
+    plan.push(createLambdaFunctionDestroyPlan(
+      executors,
+      lambdaFunctionState,
     ));
   }
 

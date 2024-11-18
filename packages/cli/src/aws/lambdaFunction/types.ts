@@ -32,7 +32,7 @@ export type S3LambdaCode = {
 };
 
 export type ZipFileLambdaCode = {
-  zipFile: Uint8Array | string;
+  zipFile: Uint8Array;
 };
 
 export type ZipFileLambdaCodeHash = {

@@ -1,51 +1,46 @@
-import type { FunctionState } from "./types.ts";
+import { ensureAllKeys, prefixPath, removePrefix } from "../../utils/object.ts";
+import type { FunctionState, ZipLambdaCodeState } from "./types.ts";
 import type { ZipFunctionConfigState } from "./types.ts";
 import type { ImageFunctionConfig } from "./types.ts";
-import type { S3LambdaCode } from "./types.ts";
 import type { ImageLambdaCode } from "./types.ts";
-import type { ZipFileLambdaCodeHash } from "./types.ts";
 
-export const BASE_PATH = "state.aws.lambdaFunction";
-export const BASE_PATH_DOT = "state.aws.lambdaFunction.";
+export const BASE_PATH = "aws.lambdaFunction";
 
 export function lambdaFunctionPath(name: string) {
-  return `${BASE_PATH}.${name}`;
+  return prefixPath(BASE_PATH, name);
 }
 export function removeFunctionPrefix(path: string) {
-  return path.replace(BASE_PATH_DOT, "");
+  return removePrefix(BASE_PATH, path);
 }
 
-type StateAttr = keyof FunctionState;
-const stateAttributes: StateAttr[] = [
-  "arn",
-  "createdAt",
-  "updatedAt",
-  "config",
-];
+const stateAttributes = ensureAllKeys<FunctionState>({
+  "arn": true,
+  "createdAt": true,
+  "updatedAt": true,
+  "config": true,
+});
 
-type ConfigAttr = keyof ImageFunctionConfig | keyof ZipFunctionConfigState;
-const configAttributes: ConfigAttr[] = [
-  "description",
-  "packageType",
-  "handler",
-  "runtime",
-  "timeout",
-  "roleArn",
-  "region",
-  "tags",
-  "memorySize",
-  "code",
-];
+const configAttributes = ensureAllKeys<ImageFunctionConfig | ZipFunctionConfigState>({
+  "description": true,
+  "packageType": true,
+  "handler": true,
+  "runtime": true,
+  "timeout": true,
+  "roleArn": true,
+  "region": true,
+  "tags": true,
+  "memorySize": true,
+  "code": true,
+});
 const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
 
-type CodeAttr = keyof ImageLambdaCode | keyof S3LambdaCode | keyof ZipFileLambdaCodeHash;
-const codeAttributes: CodeAttr[] = [
-  "imageUri",
-  "zipFile",
-  "s3Bucket",
-  "s3Key",
-  "s3ObjectVersion",
-];
+const codeAttributes = ensureAllKeys<ZipLambdaCodeState | ImageLambdaCode>({
+  "imageUri": true,
+  "zipFile": true,
+  "s3Bucket": true,
+  "s3Key": true,
+  "s3ObjectVersion": true,
+});
 const codePaths = codeAttributes.map((attribute) => `config.code.${attribute}`);
 
 export const possibleAttributes = [
@@ -60,7 +55,7 @@ const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$
 
 const pattern = new RegExp(functionNamePattern + attributePattern);
 
-export function matchLambdaFunction(path: string): [string, string | null] | undefined {
+export function matchLambdaFunction(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -75,6 +70,7 @@ export function matchLambdaFunction(path: string): [string, string | null] | und
   } = match;
 
   return [
+    lambdaFunctionPath(functionName),
     functionName,
     attributePath,
   ];

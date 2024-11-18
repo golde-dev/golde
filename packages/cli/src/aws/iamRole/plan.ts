@@ -7,8 +7,9 @@ import { assertBranch } from "../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { assertRegion } from "../utils.ts";
-import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
+import { iamRolePath } from "./path.ts";
+import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
 
 function getCurrent(roles: IAMRoleState = {}) {
   const previous: {
@@ -20,7 +21,7 @@ function getCurrent(roles: IAMRoleState = {}) {
   } = {};
 
   for (const [name, { config, ...rest }] of Object.entries(roles)) {
-    previous[`aws.iamRole.${name}`] = {
+    previous[iamRolePath(name)] = {
       name,
       config,
       state: {
@@ -43,7 +44,7 @@ function getNext(config: IAMRoleConfig = {}, tags?: Tags) {
   for (const [name, bucket] of Object.entries(config)) {
     const withTags = mergeProjectTags(bucket, tags);
 
-    next[`aws.iamRole.${name}`] = {
+    next[iamRolePath(name)] = {
       name,
       config: omitUndefined(withTags),
     };
