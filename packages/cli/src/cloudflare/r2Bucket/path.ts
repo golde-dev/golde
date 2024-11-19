@@ -29,8 +29,7 @@ const possibleAttributes = [
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const bucketNamePattern =
-  `^(?:\\['(?<bucketName>[A-Za-z0-9._-]+)'\\]|(?<bucketName>[A-Za-z0-9_-]+))`;
+const bucketNamePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
 const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
 
 const pattern = new RegExp(bucketNamePattern + attributePattern);
@@ -43,15 +42,15 @@ export function matchR2Bucket(path: string): [string, string, string | null] | u
   const match = pattern.exec(groupPath);
 
   if (!match) {
-    throw new Error(`Incorrect AWS Bucket path: ${path}`);
+    throw new Error(`Incorrect Cloudflare R2 Bucket path: ${path}`);
   }
   const {
-    groups: { bucketName, attributePath = null } = {},
+    groups: { name, attributePath = null } = {},
   } = match;
 
   return [
-    r2BucketPath(bucketName),
-    bucketName,
+    r2BucketPath(name),
+    name,
     attributePath,
   ];
 }

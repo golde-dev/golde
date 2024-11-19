@@ -1,7 +1,12 @@
 import type {Config} from '@golde/cli'
 
 const config: Config = {
-  name: "example-cloudflare-dns",
+  name: "example-cloudflare-dns-record",
+  tags: {
+    Project: "GoldeExamples",
+    Stack: "example-cloudflare-dns-record",
+    Branch: "{{ git.BRANCH_NAME }}",
+  },
   providers: {
     golde: {
       apiKey: "{{ env.GOLDE_API_KEY }}",
@@ -12,7 +17,7 @@ const config: Config = {
     },
   },
   cloudflare: {
-    dns: {
+    dnsRecord: {
       "golde-cf.dev": {
         "A": {
           "cloudflare-dns": {

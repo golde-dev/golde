@@ -1,4 +1,4 @@
-import { isEmpty } from "moderndash";
+import { isEmpty } from "../utils/object.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import type { Plan } from "../types/plan.ts";
 import type { Context } from "../types/context.ts";
@@ -6,7 +6,7 @@ import {
   createRoute53DestroyPlan,
   createRoute53Executors,
   createRoute53Plan,
-} from "./route53/plan.ts";
+} from "./route53Record/plan.ts";
 import { createS3DestroyPlan, createS3Plan } from "./s3Bucket/plan.ts";
 import { createS3Executors } from "./s3Bucket/executor.ts";
 import {

@@ -1,9 +1,10 @@
-import { isEmpty } from "moderndash";
 import { PlanError, PlanErrorCode } from "../error.ts";
-import { createDNSDestroyPlan, createDNSExecutors, createDNSPlan } from "./dns/plan.ts";
+import { createDNSDestroyPlan, createDNSPlan } from "./dnsRecord/plan.ts";
 import { createR2DestroyPlan, createR2Executors, createR2Plan } from "./r2Bucket/plan.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
+import { createDNSExecutors } from "./dnsRecord/executor.ts";
+import { isEmpty } from "../utils/object.ts";
 
 export async function createCloudflarePlan(context: Context): Promise<Plan> {
   const {
@@ -31,22 +32,22 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
   }
 
   const {
-    dns: dnsConfig,
+    dnsRecord: dnsRecordConfig,
     r2Bucket: r2BucketConfig,
   } = cloudflareConfig ?? {};
 
   const {
-    dns: dnsState,
+    dnsRecord: dnsRecordState,
     r2Bucket: r2BucketState,
   } = cloudflareState ?? {};
 
-  if (!isEmpty(dnsState) || !isEmpty(dnsConfig)) {
+  if (!isEmpty(dnsRecordState) || !isEmpty(dnsRecordConfig)) {
     const executors = createDNSExecutors(cloudflare);
     plan.push(createDNSPlan(
       executors,
       tags,
-      dnsState,
-      dnsConfig,
+      dnsRecordState,
+      dnsRecordConfig,
     ));
   }
 
@@ -83,15 +84,15 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
     );
   }
   const {
-    dns: dnsState,
+    dnsRecord: dnsRecordState,
     r2Bucket: r2BucketState,
   } = cloudflareState ?? {};
 
-  if (!isEmpty(dnsState)) {
+  if (!isEmpty(dnsRecordState)) {
     const executors = createDNSExecutors(cloudflare);
     plan.push(createDNSDestroyPlan(
       executors,
-      dnsState,
+      dnsRecordState,
     ));
   }
 

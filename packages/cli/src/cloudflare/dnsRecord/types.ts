@@ -43,11 +43,8 @@ export interface DNSConfig {
 
 export interface RecordState {
   id: string;
-  value: string;
-  ttl: number;
-  proxied: boolean;
   zoneId: string;
-  modifiedAt: string;
+  updatedAt: string;
   createdAt: string;
   config: WithBranch<RecordConfig>;
 }

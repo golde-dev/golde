@@ -1,10 +1,10 @@
 import { isPlainObject } from "@es-toolkit/es-toolkit";
 import { logger } from "./logger.ts";
+import { matchAWSPath } from "./aws/path.ts";
+import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
 import type { ConfigDependency, Dependencies } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
-import { matchAWSPath } from "./aws/path.ts";
-import { matchCloudflarePath } from "./cloudflare/path.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
-import { route53RecordSchema } from "./route53/schema.ts";
+import { route53RecordSchema } from "./route53Record/schema.ts";
 import { s3BucketSchema } from "./s3Bucket/schema.ts";
 import type { AWSConfig, AWSCredentials } from "./types.ts";
 import { s3ObjectSchema } from "./s3Object/schema.ts";

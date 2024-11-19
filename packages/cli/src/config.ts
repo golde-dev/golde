@@ -1,5 +1,7 @@
 import { validateConfig } from "./schema.ts";
 import { logger } from "./logger.ts";
+import { formatDuration } from "./utils/duration.ts";
+import { isEmpty } from "./utils/object.ts";
 import { existsSync } from "@std/fs";
 import { resolve } from "@std/path/resolve";
 import { parse as parseToml } from "@std/toml";
@@ -7,7 +9,6 @@ import { parse as parseYaml } from "@std/yaml";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
-import { isEmpty } from "moderndash";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
 import { basename, extname } from "@std/path";
 import { decode } from "./utils/text.ts";
@@ -21,7 +22,6 @@ import {
 } from "./utils/template.ts";
 import type { Dependencies } from "./types/dependencies.ts";
 import type { Config } from "./types/config.ts";
-import { formatDuration } from "./utils/duration.ts";
 
 const loadConfig = async (
   path: string,
@@ -80,7 +80,7 @@ export const getConfigRaw = (
   ];
 
   for (const configPath of possiblePaths) {
-    logger.debug(`Checking config path: ${configPath}`);
+    logger.debug(`[Config] Checking config path: ${configPath}`);
     if (existsSync(configPath)) {
       return loadConfig(configPath);
     }
@@ -163,8 +163,8 @@ export const resolveManagedConfig = (config: Config, managedConfig: ManagedConfi
           logger.warn("[Config] No managed config value found", { error });
           return config;
       }
-    } else {
-      logger.error(`[Config] Unknown error: ${(error as Error).message}`, error);
+    } else if (error instanceof Error) {
+      logger.error(`[Config] Unknown error: ${error.message}`, error);
     }
     return Deno.exit(1);
   }
@@ -225,8 +225,8 @@ export const resolveConfig = (
         default:
           logger.error(`[Config] Configuration error: ${error.message}`);
       }
-    } else {
-      logger.error(`[Config] Unknown error: ${(error as Error).message}`, error);
+    } else if (error instanceof Error) {
+      logger.error(`[Config] Unknown error: ${error.message}`, error);
     }
     return Deno.exit(1);
   }
@@ -267,8 +267,8 @@ export function getFinalConfig(config: Config, dependencies: Dependencies): Conf
         default:
           logger.error(`[Config] Configuration error: ${error.message}`);
       }
-    } else {
-      logger.error(`[Config] Unknown error: ${(error as Error).message}`, error);
+    } else if (error instanceof Error) {
+      logger.error(`[Config] Unknown error: ${error.message}`, error);
     }
     return Deno.exit(1);
   }

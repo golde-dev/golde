@@ -759,7 +759,7 @@
         "cloudflare": {
           "type": "object",
           "properties": {
-            "dns": {
+            "dnsRecord": {
               "type": "object",
               "additionalProperties": {
                 "type": "object",

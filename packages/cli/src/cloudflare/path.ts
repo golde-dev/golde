@@ -1,3 +1,4 @@
+import { matchDNSRecord } from "./dnsRecord/path.ts";
 import { matchR2Bucket } from "./r2Bucket/path.ts";
 
 export function matchCloudflarePath(path: string): [string, string, string | null] | undefined {
@@ -5,7 +6,7 @@ export function matchCloudflarePath(path: string): [string, string, string | nul
     return;
   }
 
-  const match = matchR2Bucket(path);
+  const match = matchR2Bucket(path) ?? matchDNSRecord(path);
 
   if (!match) {
     throw new Error(`Unable to match Cloudflare path: ${path}`);

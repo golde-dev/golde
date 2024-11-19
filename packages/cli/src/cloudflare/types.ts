@@ -1,14 +1,14 @@
-import type { DNSConfig } from "./dns/types.ts";
-import type { DNSState } from "./dns/types.ts";
+import type { DNSConfig } from "./dnsRecord/types.ts";
+import type { DNSState } from "./dnsRecord/types.ts";
 import type { R2BucketConfig, R2BucketState } from "./r2Bucket/types.ts";
 
 export interface CloudflareConfig {
-  dns?: DNSConfig;
+  dnsRecord?: DNSConfig;
   r2Bucket?: R2BucketConfig;
 }
 
 export interface CloudflareState {
-  dns?: DNSState;
+  dnsRecord?: DNSState;
   r2Bucket?: R2BucketState;
 }
 

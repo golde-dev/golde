@@ -2,17 +2,17 @@ import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
 import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
 import { createHCloudClient } from "./hcloud/client/factory.ts";
-import type { Config } from "./types/config.ts";
 import { createDockerClient } from "./docker/client/factory.ts";
-import type { DockerClient } from "./docker/client/client.ts";
 import { createCloudflareClient } from "./cloudflare/client/factory.ts";
 import { createStateClient } from "./state/state.ts";
-import type { Context } from "./types/context.ts";
 import { createAWSClient } from "./aws/client/factory.ts";
 import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
 import { getGitInfo } from "./utils/git.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { createSlackClient } from "./slack/client/factory.ts";
+import type { Context } from "./types/context.ts";
+import type { DockerClient } from "./docker/client/client.ts";
+import type { Config } from "./types/config.ts";
 
 export const initializeContext = async (
   branchName: string,
@@ -33,17 +33,17 @@ export const initializeContext = async (
     } = {},
   } = config;
 
-  logger.debug("Start context initialization");
+  logger.debug("[Context] Start context initialization");
 
   const createDocker = async (): Promise<DockerClient | undefined> => {
     if (docker) {
-      logger.debug("Using docker provider to create docker client");
+      logger.debug("[Context] Using docker provider to create docker client");
       return await createDockerClient(docker);
     } else if (golde) {
-      logger.debug("Using golde provider to create docker client");
+      logger.debug("[Context] Using golde provider to create docker client");
       return await createDockerClient(golde);
     }
-    logger.debug("No docker client initialized");
+    logger.debug("[Context] No docker client initialized");
   };
 
   try {
@@ -123,7 +123,7 @@ export const initializeContext = async (
     }
   } catch (error) {
     if (error instanceof Error) {
-      logger.error(`Providers initialization failed: ${error.message}`);
+      logger.error(`[Context] Providers initialization failed: ${error.message}`);
     }
     return Deno.exit(1);
   }

@@ -1,112 +1,14 @@
 import { logger } from "../../logger.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { mergeProjectTags, toTagsArray } from "../../utils/tags.ts";
+import { dnsPath } from "./path.ts";
+import { mergeProjectTags } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { Type } from "../../types/plan.ts";
-import type { CloudflareClient } from "../client/client.ts";
 import type { Tags } from "../../types/config.ts";
 import type { DNSConfig, DNSState, RecordConfig, RecordState, RecordType } from "./types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
-
-async function createZoneRecord(
-  this: CloudflareClient,
-  zoneName: string,
-  type: RecordType,
-  name: string,
-  config: RecordConfig,
-): Promise<RecordState> {
-  assertBranch(config);
-
-  const {
-    id,
-    ttl,
-    proxied,
-    zone_id: zoneId,
-    modified_on: modifiedAt,
-    created_on: createdAt,
-    content: value,
-  } = await this.createZoneRecord(zoneName, {
-    type,
-    name,
-    tags: toTagsArray(config.tags),
-    ttl: config.ttl,
-    content: config.value,
-    proxied: config.proxied,
-    comment: config.comment,
-  });
-
-  return {
-    id,
-    ttl,
-    proxied,
-    zoneId,
-    modifiedAt,
-    createdAt,
-    value,
-    config,
-  };
-}
-export type CreateZoneRecord = typeof createZoneRecord;
-
-async function updateZoneRecord(
-  this: CloudflareClient,
-  zoneName: string,
-  type: RecordType,
-  name: string,
-  recordId: string,
-  config: RecordConfig,
-): Promise<RecordState> {
-  assertBranch(config);
-  const {
-    id,
-    ttl,
-    proxied,
-    zone_id: zoneId,
-    modified_on: modifiedAt,
-    created_on: createdAt,
-    content: value,
-  } = await this.updateZoneRecord(zoneName, recordId, {
-    type,
-    name,
-    tags: toTagsArray(config.tags),
-    ttl: config.ttl,
-    content: config.value,
-    proxied: config.proxied,
-    comment: config.comment,
-  });
-
-  return {
-    id,
-    ttl,
-    proxied,
-    zoneId,
-    modifiedAt,
-    createdAt,
-    value,
-    config,
-  };
-}
-
-export type UpdateZoneRecord = typeof updateZoneRecord;
-
-async function deleteZoneRecord(
-  this: CloudflareClient,
-  zoneName: string,
-  recordId: string,
-): Promise<void> {
-  await this.deleteZoneRecord(zoneName, recordId);
-}
-
-export type DeleteZoneRecord = typeof deleteZoneRecord;
-
-export const createDNSExecutors = (client: CloudflareClient) => {
-  return {
-    createZoneRecord: createZoneRecord.bind(client),
-    updateZoneRecord: updateZoneRecord.bind(client),
-    deleteZoneRecord: deleteZoneRecord.bind(client),
-  };
-};
+import type { CreateZoneRecord, DeleteZoneRecord, Executor, UpdateZoneRecord } from "./executor.ts";
 
 function getPrevious(state: DNSState = {}) {
   const records: {
@@ -122,7 +24,7 @@ function getPrevious(state: DNSState = {}) {
   for (const [zone, zoneState] of Object.entries(state)) {
     for (const [type, recordState] of Object.entries(zoneState)) {
       for (const [name, record] of Object.entries(recordState)) {
-        records[`cloudflare.dns['${zone}'].${type}.${name}`] = {
+        records[dnsPath(zone, type, name)] = {
           state: record,
           config: record.config,
           zone,
@@ -151,7 +53,7 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
       for (const [name, record] of Object.entries(recordConfig)) {
         const withTags = mergeProjectTags(record, tags);
 
-        records[`cloudflare.dns['${zone}'].${type}.${name}`] = {
+        records[dnsPath(zone, type, name)] = {
           config: omitUndefined(withTags),
           zone,
           type: type as RecordType,
@@ -165,7 +67,7 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
 }
 
 export const createDNSPlan = (
-  executors: ReturnType<typeof createDNSExecutors>,
+  executors: Executor,
   tags?: Tags,
   state?: DNSState,
   config?: DNSConfig,
@@ -186,6 +88,8 @@ export const createDNSPlan = (
   for (const key of create) {
     const { config, zone, type, name } = next[key];
 
+    assertBranch(config);
+
     const createUnit: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
       type: Type.Create,
       executor: executors.createZoneRecord,
@@ -198,7 +102,7 @@ export const createDNSPlan = (
   }
 
   const deleting = Object.keys(previous).filter((key) => !(key in next));
-  console.log({ deleting });
+
   for (const key of deleting) {
     const { state, zone, name } = previous[key];
     const deleteUnit: DeleteUnit<RecordState, DeleteZoneRecord> = {
@@ -215,6 +119,8 @@ export const createDNSPlan = (
   for (const key of updating) {
     const { config: nextConfig, zone, type, name } = next[key];
     const { config: prevConfig, state } = previous[key];
+
+    assertBranch(nextConfig);
 
     if (!isEqual(prevConfig, nextConfig)) {
       const updateUnit: UpdateUnit<
@@ -249,7 +155,7 @@ export const createDNSPlan = (
 };
 
 export function createDNSDestroyPlan(
-  executors: ReturnType<typeof createDNSExecutors>,
+  executors: Executor,
   state?: DNSState,
 ) {
   const plan: Plan = [];

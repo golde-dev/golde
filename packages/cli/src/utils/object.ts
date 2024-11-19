@@ -1,10 +1,51 @@
-import { isEmpty, set } from "moderndash";
+import { set } from "moderndash";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
+
+/**
+ * Check if object is empty
+ */
+export function isEmptyObject(value: object): boolean {
+  return Object.keys(value).length === 0;
+}
+
+/**
+ * Check if value is empty
+ * Internally use instanceof operator, cross frame objects will not get properly detected as empty
+ * @example
+ * isEmpty(null) //true
+ * isEmpty(undefined) //true
+ * isEmpty("") //true
+ * isEmpty({}) //true
+ * isEmpty([]) //true
+ * isEmpty(new Set()) //true
+ * isEmpty(new Map()) //true
+ */
+export function isEmpty(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === "string") {
+    return value.length === 0;
+  }
+  if (value instanceof Set) {
+    return value.size === 0;
+  }
+  if (value instanceof Map) {
+    return value.size === 0;
+  }
+  if (value instanceof Array) {
+    return value.length === 0;
+  }
+  if (isPlainObject(value)) {
+    return isEmptyObject(value);
+  }
+  return false;
+}
 
 /**
  * Remove properties of empty objects
  */
-export const omitEmptyObjects = (state: unknown): unknown => {
+const omitEmptyObjects = (state: unknown): unknown => {
   if (!isPlainObject(state)) {
     return state;
   }
@@ -71,10 +112,16 @@ export function ensureAllKeys<T>(obj: { [K in keyof T]: true }): (keyof T)[] {
   return Object.keys(obj) as (keyof T)[];
 }
 
+/**
+ * Add prefix to path, if path contain . wrap it in ['path']
+ */
 export function prefixPath(prefix: string, path: string): string {
   return path.includes(".") ? `${prefix}['${path}']` : `${prefix}.${path}`;
 }
 
+/**
+ * Remove prefix from path, handle ['path'] case
+ */
 export function removePrefix(prefix: string, path: string): string {
   return path.startsWith(`${prefix}.`)
     ? path.replace(`${prefix}.`, "")

@@ -1,4 +1,3 @@
-import { isEmpty } from "moderndash";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import {
   createImageDestroyPlan,
@@ -7,6 +6,7 @@ import {
 } from "../docker/image/plan.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
+import { isEmpty } from "../utils/object.ts";
 
 export async function createDockerPlan(context: Context): Promise<Plan> {
   const {

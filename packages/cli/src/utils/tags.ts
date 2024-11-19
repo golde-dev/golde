@@ -1,7 +1,8 @@
 import { z } from "zod";
 import type { Tags } from "../types/config.ts";
-import { isEmpty } from "moderndash";
+
 import { isUndefined } from "@es-toolkit/es-toolkit";
+import { isEmpty } from "./object.ts";
 
 export const tagsSchema = z.record(z.string()).optional();
 

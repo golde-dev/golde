@@ -44,6 +44,7 @@ export const schema: ZodType<Config> = z
 
 export function validateConfig(config: unknown): Config {
   const { data, success, error } = schema.safeParse(config);
+
   if (!success) {
     throw new ConfigError(
       "Failed schema validation",

@@ -12,7 +12,7 @@ const config: Config = {
     },
   },
   cloudflare: {
-    r2: {
+    r2Bucket: {
       "example-cloudflare-r2-bucket": {
         storageClass: "Standard"
       }

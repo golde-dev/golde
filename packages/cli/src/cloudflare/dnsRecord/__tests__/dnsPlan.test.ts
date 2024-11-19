@@ -1,8 +1,10 @@
 import { expect } from "@std/expect";
 import { describe, it } from "@std/testing/bdd";
-import { createDNSExecutors, createDNSPlan } from "../plan.ts";
+import { createDNSPlan } from "../plan.ts";
 import { Type } from "../../../types/plan.ts";
-import type { CreateZoneRecord, DeleteZoneRecord, UpdateZoneRecord } from "../plan.ts";
+import { createDNSExecutors } from "../executor.ts";
+import { assertBranch } from "../../../utils/resource.ts";
+import type { CreateZoneRecord, DeleteZoneRecord, UpdateZoneRecord } from "../executor.ts";
 import type { CloudflareClient } from "../../client/client.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../types/plan.ts";
 import type { DNSConfig, DNSState, RecordConfig, RecordState } from "../types.ts";
@@ -14,7 +16,8 @@ const executors = createDNSExecutors(
 describe.skip("cloudflare dsn", () => {
   describe("create new record", () => {
     it("should create bucket for new config on default branch", async () => {
-      const recordConfig = {
+      const recordConfig: RecordConfig = {
+        branch: "master",
         value: "20.10.10.1",
         ttl: 3600,
         proxied: false,
@@ -34,6 +37,8 @@ describe.skip("cloudflare dsn", () => {
         state,
         config,
       );
+
+      assertBranch(recordConfig);
 
       const create: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
         type: Type.Create,
@@ -75,7 +80,7 @@ describe.skip("cloudflare dsn", () => {
         config,
       );
 
-      const recordConfigWithTags = {
+      const recordConfigWithTags: RecordConfig = {
         ...recordConfig,
         tags: {
           "ProjectCode": "my-project",
@@ -83,6 +88,8 @@ describe.skip("cloudflare dsn", () => {
           "Type": "dns",
         },
       };
+
+      assertBranch(recordConfigWithTags);
 
       const create: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
         type: Type.Create,
@@ -121,11 +128,8 @@ describe.skip("cloudflare dsn", () => {
       const recordState = {
         id: "1234",
         zoneId: "456",
-        modifiedAt: "2022-01-01T00:00:00.000Z",
+        updatedAt: "2022-01-01T00:00:00.000Z",
         createdAt: "2022-01-01T00:00:00.000Z",
-        value: "20.10.10.2",
-        ttl: 3600,
-        proxied: false,
         config: prevRecordConfig,
       };
 
@@ -174,11 +178,9 @@ describe.skip("cloudflare dsn", () => {
       const recordState = {
         id: "1234",
         zoneId: "456",
-        modifiedAt: "2022-01-01T00:00:00.000Z",
+        updatedAt: "2022-01-01T00:00:00.000Z",
         createdAt: "2022-01-01T00:00:00.000Z",
         value: "20.10.10.1",
-        ttl: 3600,
-        proxied: false,
         config: recordConfig,
       };
 
@@ -227,11 +229,8 @@ describe.skip("cloudflare dsn", () => {
       const recordState = {
         id: "1234",
         zoneId: "456",
-        modifiedAt: "2022-01-01T00:00:00.000Z",
+        updatedAt: "2022-01-01T00:00:00.000Z",
         createdAt: "2022-01-01T00:00:00.000Z",
-        value: "20.10.10.1",
-        ttl: 3600,
-        proxied: false,
         config: prevRecordConfig,
       };
       const state: DNSState = {
