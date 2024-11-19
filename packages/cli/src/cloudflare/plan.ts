@@ -1,10 +1,12 @@
 import { PlanError, PlanErrorCode } from "../error.ts";
 import { createDNSDestroyPlan, createDNSPlan } from "./dnsRecord/plan.ts";
 import { createR2DestroyPlan, createR2Executors, createR2Plan } from "./r2Bucket/plan.ts";
-import type { Context } from "../types/context.ts";
-import type { Plan } from "../types/plan.ts";
 import { createDNSExecutors } from "./dnsRecord/executor.ts";
 import { isEmpty } from "../utils/object.ts";
+import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./d1Database/plan.ts";
+import { createD1DatabaseExecutors } from "./d1Database/executor.ts";
+import type { Context } from "../types/context.ts";
+import type { Plan } from "../types/plan.ts";
 
 export async function createCloudflarePlan(context: Context): Promise<Plan> {
   const {
@@ -34,11 +36,13 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
   const {
     dnsRecord: dnsRecordConfig,
     r2Bucket: r2BucketConfig,
+    d1Database: d1DatabaseConfig,
   } = cloudflareConfig ?? {};
 
   const {
     dnsRecord: dnsRecordState,
     r2Bucket: r2BucketState,
+    d1Database: d1DatabaseState,
   } = cloudflareState ?? {};
 
   if (!isEmpty(dnsRecordState) || !isEmpty(dnsRecordConfig)) {
@@ -57,6 +61,15 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
       executors,
       r2BucketState,
       r2BucketConfig,
+    ));
+  }
+
+  if (!isEmpty(d1DatabaseState) || !isEmpty(d1DatabaseConfig)) {
+    const executors = createD1DatabaseExecutors(cloudflare);
+    plan.push(createD1DatabasePlan(
+      executors,
+      d1DatabaseState,
+      d1DatabaseConfig,
     ));
   }
 
@@ -86,6 +99,7 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
   const {
     dnsRecord: dnsRecordState,
     r2Bucket: r2BucketState,
+    d1Database: d1DatabaseState,
   } = cloudflareState ?? {};
 
   if (!isEmpty(dnsRecordState)) {
@@ -101,6 +115,13 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
     plan.push(createR2DestroyPlan(
       executors,
       r2BucketState,
+    ));
+  }
+  if (!isEmpty(d1DatabaseState)) {
+    const executors = createD1DatabaseExecutors(cloudflare);
+    plan.push(createD1DatabaseDestroyPlan(
+      executors,
+      d1DatabaseState,
     ));
   }
 

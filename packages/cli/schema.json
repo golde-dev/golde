@@ -852,6 +852,34 @@
                   }
                 ]
               }
+            },
+            "d1Database": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "branch": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branch"
+                  },
+                  "branchPattern": {
+                    "$ref": "#/definitions/golde/properties/aws/properties/s3Bucket/additionalProperties/properties/branchPattern"
+                  },
+                  "locationHint": {
+                    "type": "string",
+                    "enum": [
+                      "apac",
+                      "eeur",
+                      "enam",
+                      "weur",
+                      "wnam"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "propertyNames": {
+                "pattern": "^[a-z0-9][a-z0-9-_]*$"
+              }
             }
           },
           "additionalProperties": false

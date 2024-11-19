@@ -97,6 +97,12 @@ export enum PlanErrorCode {
    * eg: delete bucket when bucket does not exist
    */
   RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND",
+
+  /**
+   * When resource do not support operation
+   * eg: update d1 database
+   */
+  UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION",
 }
 
 export class PlanError extends Error {

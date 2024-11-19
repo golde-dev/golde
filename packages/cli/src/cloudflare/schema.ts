@@ -3,11 +3,13 @@ import type { CloudflareConfig, CloudflareCredentials } from "./types.ts";
 import { r2Schema } from "./r2Bucket/schema.ts";
 import { dnsSchema } from "./dnsRecord/schema.ts";
 import { z } from "zod";
+import { d1DatabaseSchema } from "./d1Database/schema.ts";
 
 export const cloudflareConfigSchema = implement<CloudflareConfig>()
   .with({
     dnsRecord: dnsSchema.optional(),
     r2Bucket: r2Schema.optional(),
+    d1Database: d1DatabaseSchema.optional(),
   })
   .strict();
 
