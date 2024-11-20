@@ -1,7 +1,7 @@
 import { ensureAllKeys, prefixPath, removePrefix } from "../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
 
-export const BASE_PATH = "cloudflare.r2";
+export const BASE_PATH = "cloudflare.r2Bucket";
 
 export function r2BucketPath(name: string) {
   return prefixPath(BASE_PATH, name);

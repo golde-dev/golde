@@ -35,8 +35,8 @@ describe("cloudflare buckets", () => {
       const execution: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
-        args: ["bucket1", config.bucket1],
-        path: "cloudflare.r2.bucket1",
+        args: ["bucket1", config.bucket1, []],
+        path: "cloudflare.r2Bucket.bucket1",
         config: config.bucket1,
         dependsOn: [],
       };
@@ -99,7 +99,7 @@ describe("cloudflare buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["bucket1"],
-        path: "cloudflare.r2.bucket1",
+        path: "cloudflare.r2Bucket.bucket1",
         state: state.bucket1,
       };
       expect(result).toEqual([execution]);
@@ -129,8 +129,8 @@ describe("cloudflare buckets", () => {
       const created: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
-        args: ["bucket2", config.bucket2],
-        path: "cloudflare.r2.bucket2",
+        args: ["bucket2", config.bucket2, []],
+        path: "cloudflare.r2Bucket.bucket2",
         config: config.bucket2,
         dependsOn: [],
       };
@@ -139,7 +139,7 @@ describe("cloudflare buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["bucket1"],
-        path: "cloudflare.r2.bucket1",
+        path: "cloudflare.r2Bucket.bucket1",
         state: state.bucket1,
       };
 
@@ -183,7 +183,7 @@ describe("cloudflare buckets", () => {
 
       const noop: NoopUnit = {
         type: Type.Noop,
-        path: "cloudflare.r2.bucket1",
+        path: "cloudflare.r2Bucket.bucket1",
         config: config.bucket1,
         state: state.bucket1,
         dependsOn: [],

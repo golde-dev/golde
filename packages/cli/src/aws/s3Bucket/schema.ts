@@ -16,8 +16,8 @@ export const bucketSchema = implement<BucketConfig>()
 
 const bucketNameSchema = z
   .string()
-  .min(3, { message: "Bucket name must be at least 3 characters long" })
-  .max(63, { message: "Bucket name must be at most 63 characters long" })
+  .min(3, { message: "S3 Bucket name must be at least 3 characters long" })
+  .max(63, { message: "S3 Bucket name must be at most 63 characters long" })
   .regex(
     /^(?!.*\.\.)(?!.*\.-)(?!.*-\.)[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/,
     {

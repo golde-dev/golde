@@ -20,7 +20,7 @@ const stateAttributes = ensureAllKeys<DatabaseState>({
 });
 
 const configAttributes = ensureAllKeys<DatabaseConfig>({
-  "locationHint": true,
+  locationHint: true,
 });
 const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
 const possibleAttributes = [
@@ -42,15 +42,15 @@ export function matchD1Database(path: string): [string, string, string | null] |
   const match = pattern.exec(groupPath);
 
   if (!match) {
-    throw new Error(`Incorrect AWS Bucket path: ${path}`);
+    throw new Error(`Incorrect D1 Database path: ${path}`);
   }
   const {
-    groups: { bucketName, attributePath = null } = {},
+    groups: { name, attributePath = null } = {},
   } = match;
 
   return [
-    d1DatabasePath(bucketName),
-    bucketName,
+    d1DatabasePath(name),
+    name,
     attributePath,
   ];
 }

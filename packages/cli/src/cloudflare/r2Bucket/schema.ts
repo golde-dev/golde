@@ -25,7 +25,7 @@ export const r2BucketSchema = implement<BucketConfig>()
 const nameSchema = z
   .string()
   .min(3, { message: "R2 Bucket name must be at least 3 characters long." })
-  .max(63, { message: "R2Bucket name must be at most 63 characters long." })
+  .max(63, { message: "R2 Bucket name must be at most 63 characters long." })
   .regex(/^[a-z0-9]/, {
     message: "R2 Bucket name must start with a lowercase letter or number.",
   })

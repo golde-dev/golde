@@ -30,11 +30,10 @@ const possibleAttributes = [
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const bucketNamePattern =
-  `^(?:\\['(?<bucketName>[A-Za-z0-9._-]+)'\\]|(?<bucketName>[A-Za-z0-9_-]+))`;
+const namePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
 const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
 
-const pattern = new RegExp(bucketNamePattern + attributePattern);
+const pattern = new RegExp(namePattern + attributePattern);
 
 export function matchS3Bucket(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {
@@ -47,12 +46,12 @@ export function matchS3Bucket(path: string): [string, string, string | null] | u
     throw new Error(`Incorrect AWS Bucket path: ${path}`);
   }
   const {
-    groups: { bucketName, attributePath = null } = {},
+    groups: { name, attributePath = null } = {},
   } = match;
 
   return [
-    s3BucketPath(bucketName),
-    bucketName,
+    s3BucketPath(name),
+    name,
     attributePath,
   ];
 }

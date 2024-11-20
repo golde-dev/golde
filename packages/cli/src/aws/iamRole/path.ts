@@ -11,20 +11,20 @@ export function removeRolePrefix(path: string) {
 }
 
 const stateAttributes = ensureAllKeys<RoleState>({
-  "arn": true,
-  "createdAt": true,
-  "updatedAt": true,
-  "config": true,
-  "dependsOn": true,
+  arn: true,
+  createdAt: true,
+  updatedAt: true,
+  config: true,
+  dependsOn: true,
 });
 
 const configAttributes = ensureAllKeys<RoleConfig>({
-  "path": true,
-  "description": true,
-  "permissionsBoundaryArn": true,
-  "inlinePolicy": true,
-  "assumeRolePolicy": true,
-  "managedPoliciesArns": true,
+  path: true,
+  description: true,
+  permissionsBoundaryArn: true,
+  inlinePolicy: true,
+  assumeRolePolicy: true,
+  managedPoliciesArns: true,
 });
 
 const configPaths = configAttributes.map((attr) => `config.${attr}`);
@@ -36,10 +36,10 @@ export const possibleAttributes = [
 
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const roleNamePattern = `^(?:\\['(?<roleName>[A-Za-z0-9._-]+)'\\]|(?<roleName>[A-Za-z0-9_-]+))`;
+const namePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
 const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
 
-const pattern = new RegExp(roleNamePattern + attributePattern);
+const pattern = new RegExp(namePattern + attributePattern);
 
 export function matchIAMRole(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {
@@ -52,12 +52,12 @@ export function matchIAMRole(path: string): [string, string, string | null] | un
     throw new Error(`Incorrect AWS IAM role path: ${path}`);
   }
   const {
-    groups: { roleName, attributePath = null } = {},
+    groups: { name, attributePath = null } = {},
   } = match;
 
   return [
-    iamRolePath(roleName),
-    roleName,
+    iamRolePath(name),
+    name,
     attributePath,
   ];
 }

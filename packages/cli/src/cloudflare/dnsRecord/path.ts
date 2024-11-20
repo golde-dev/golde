@@ -31,11 +31,11 @@ const stateAttributes = ensureAllKeys<RecordState>({
 });
 
 const configAttributes = ensureAllKeys<RecordConfig>({
-  "value": true,
-  "ttl": true,
-  "proxied": true,
-  "comment": true,
-  "tags": true,
+  value: true,
+  ttl: true,
+  proxied: true,
+  comment: true,
+  tags: true,
 });
 
 const configPaths = configAttributes.map((attribute) => `config.${attribute}`);

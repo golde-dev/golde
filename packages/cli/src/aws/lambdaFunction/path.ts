@@ -51,10 +51,10 @@ export const possibleAttributes = [
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const functionNamePattern = `^(?<functionName>[A-Za-z0-9_-]+)`;
+const namePattern = `^(?<name>[A-Za-z0-9_-]+)`;
 const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
 
-const pattern = new RegExp(functionNamePattern + attributePattern);
+const pattern = new RegExp(namePattern + attributePattern);
 
 export function matchLambdaFunction(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {
@@ -67,12 +67,12 @@ export function matchLambdaFunction(path: string): [string, string, string | nul
     throw new Error(`Incorrect AWS lambda function path: ${path}`);
   }
   const {
-    groups: { functionName, attributePath = null } = {},
+    groups: { name, attributePath = null } = {},
   } = match;
 
   return [
-    lambdaFunctionPath(functionName),
-    functionName,
+    lambdaFunctionPath(name),
+    name,
     attributePath,
   ];
 }

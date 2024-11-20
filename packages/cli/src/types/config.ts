@@ -57,6 +57,9 @@ export type Config = {
    * Config for state management, define how projects state will be stored
    */
   state?: StateConfig;
+  /**
+   * Config for AWS resources
+   */
   aws?: AWSConfig;
   docker?: DockerConfig;
   cloudflare?: CloudflareConfig;

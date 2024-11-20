@@ -6,11 +6,11 @@ import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { s3BucketPath } from "./path.ts";
+import { findConfigDependencies } from "../../dependencies.ts";
 import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
 import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
@@ -140,7 +140,7 @@ export async function createS3Plan(
         path: key,
         config: previousConfig,
         state,
-        dependsOn: state.dependsOn,
+        dependsOn,
       };
       plan.push(noopUnit);
     } else {
@@ -189,7 +189,7 @@ export async function createS3DestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[AWS] Creating destroy buckets plan", {
+  logger.debug("[AWS] Creating destroy s3 buckets plan", {
     state,
   });
 
