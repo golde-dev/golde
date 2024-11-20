@@ -1,4 +1,5 @@
 import type { Resource, Tags, WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 export interface ObjectConfig extends Resource {
   tags?: Tags;
@@ -13,6 +14,7 @@ export interface ObjectState {
   updatedAt?: string;
   key: string;
   arn: string;
+  dependsOn: ResourceDependency[];
   config: WithBranch<ObjectConfig>;
 }
 

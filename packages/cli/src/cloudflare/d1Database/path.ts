@@ -16,6 +16,7 @@ const stateAttributes = ensureAllKeys<DatabaseState>({
   updatedAt: true,
   uuid: true,
   config: true,
+  dependsOn: true,
 });
 
 const configAttributes = ensureAllKeys<DatabaseConfig>({

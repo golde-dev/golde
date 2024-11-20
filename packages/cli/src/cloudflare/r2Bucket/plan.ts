@@ -2,57 +2,14 @@ import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { logger } from "../../logger.ts";
-import { formatDuration } from "../../utils/duration.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { r2BucketPath } from "./path.ts";
 import { findConfigDependencies } from "../../dependencies.ts";
 import type { CreateUnit, Plan } from "../../types/plan.ts";
-import type { ConfigDependency } from "../../types/dependencies.ts";
-import type { CloudflareClient } from "../client/client.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
-import type { WithBranch } from "../../types/config.ts";
 import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "./types.ts";
-
-export async function createBucket(
-  this: CloudflareClient,
-  name: string,
-  config: WithBranch<BucketConfig>,
-): Promise<BucketState> {
-  const start = Date.now();
-  const bucket = await this.createBucket({
-    name,
-    locationHint: config.locationHint,
-    storageClass: config.storageClass,
-  }).then((b) => {
-    return {
-      location: b.location,
-      createdAt: b.creation_date,
-      config,
-    };
-  });
-  const end = Date.now();
-  logger.debug(`[Cloudflare]: created bucket ${name} in ${formatDuration(end - start)}`);
-  return bucket;
-}
-export type CreateBucket = typeof createBucket;
-
-export async function deleteBucket(this: CloudflareClient, name: string) {
-  const start = Date.now();
-  await this.deleteBucket(name);
-  const end = Date.now();
-
-  logger.debug(`[Cloudflare]: deleting bucket ${name} in ${formatDuration(end - start)}`);
-}
-export type DeleteBucket = typeof deleteBucket;
-
-export const createR2Executors = (cloudflare: CloudflareClient) => {
-  return {
-    createBucket: createBucket.bind(cloudflare),
-    deleteBucket: deleteBucket.bind(cloudflare),
-  };
-};
-
-export type Executors = ReturnType<typeof createR2Executors>;
+import type { CreateBucket, DeleteBucket, Executors } from "./executor.ts";
 
 function getCurrent(buckets: R2BucketState = {}) {
   const previous: {
@@ -81,7 +38,7 @@ function getNext(config: R2BucketConfig = {}) {
     [path: string]: {
       name: string;
       config: BucketConfig;
-      dependsOn: ConfigDependency[];
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -118,7 +75,7 @@ export async function createR2Plan(
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
       type: Type.Create,
       executor: executors.createBucket,
-      args: [name, config],
+      args: [name, config, dependsOn],
       path: key,
       config,
       dependsOn,
@@ -151,6 +108,7 @@ export async function createR2Plan(
         path: key,
         config: previousConfig,
         state,
+        dependsOn: state.dependsOn,
       };
       plan.push(noopUnit);
     } else {

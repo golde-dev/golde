@@ -15,6 +15,7 @@ const stateAttributes = ensureAllKeys<LogGroupState>({
   "createdAt": true,
   "updatedAt": true,
   "config": true,
+  "dependsOn": true,
 });
 
 const configAttributes = ensureAllKeys<LogGroupConfig>({

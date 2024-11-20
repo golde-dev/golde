@@ -1,4 +1,5 @@
 import type { Tags, WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 import type { AWSResource, WithRegion } from "../types.ts";
 
 export interface LogGroupConfig extends AWSResource {
@@ -35,6 +36,7 @@ export interface LogGroupState {
   createdAt: string;
   updatedAt?: string;
   arn: string;
+  dependsOn: ResourceDependency[];
   config: WithRegion<WithBranch<LogGroupConfig>>;
 }
 

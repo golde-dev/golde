@@ -43,7 +43,7 @@ describe.skip("cloudflare dsn", () => {
       const create: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
         type: Type.Create,
         executor: executors.createZoneRecord,
-        args: ["golde.dev", "A", "dns-cloudflare", recordConfig],
+        args: ["golde.dev", "A", "dns-cloudflare", recordConfig, []],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         dependsOn: [],
         config: recordConfig,
@@ -94,7 +94,7 @@ describe.skip("cloudflare dsn", () => {
       const create: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
         type: Type.Create,
         executor: executors.createZoneRecord,
-        args: ["golde.dev", "A", "dns-cloudflare", recordConfigWithTags],
+        args: ["golde.dev", "A", "dns-cloudflare", recordConfigWithTags, []],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         dependsOn: [],
         config: recordConfigWithTags,
@@ -130,6 +130,7 @@ describe.skip("cloudflare dsn", () => {
         zoneId: "456",
         updatedAt: "2022-01-01T00:00:00.000Z",
         createdAt: "2022-01-01T00:00:00.000Z",
+        dependsOn: [],
         config: prevRecordConfig,
       };
 
@@ -151,7 +152,7 @@ describe.skip("cloudflare dsn", () => {
       const update: UpdateUnit<RecordConfig, RecordState, UpdateZoneRecord> = {
         type: Type.Update,
         executor: executors.updateZoneRecord,
-        args: ["golde.dev", "A", "dns-cloudflare", "1234", updatedRecordConfig],
+        args: ["golde.dev", "A", "dns-cloudflare", "1234", updatedRecordConfig, []],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         dependsOn: [],
         state: recordState,
@@ -181,6 +182,7 @@ describe.skip("cloudflare dsn", () => {
         updatedAt: "2022-01-01T00:00:00.000Z",
         createdAt: "2022-01-01T00:00:00.000Z",
         value: "20.10.10.1",
+        dependsOn: [],
         config: recordConfig,
       };
 
@@ -231,6 +233,7 @@ describe.skip("cloudflare dsn", () => {
         zoneId: "456",
         updatedAt: "2022-01-01T00:00:00.000Z",
         createdAt: "2022-01-01T00:00:00.000Z",
+        dependsOn: [],
         config: prevRecordConfig,
       };
       const state: DNSState = {
@@ -253,6 +256,7 @@ describe.skip("cloudflare dsn", () => {
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         config: prevRecordConfig,
         state: recordState,
+        dependsOn: [],
       };
 
       expect(result).toEqual([noop]);

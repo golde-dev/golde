@@ -4,12 +4,11 @@ import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../types/plan.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { d1DatabasePath } from "./path.ts";
-import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan } from "../../types/plan.ts";
 import type { D1DatabaseConfig, D1DatabaseState, DatabaseConfig, DatabaseState } from "./types.ts";
 import type { CreateDatabase, DeleteDatabase, Executors } from "./executor.ts";
 import { findConfigDependencies } from "../../dependencies.ts";
-import type { ConfigDependency } from "../../types/dependencies.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 import { PlanError } from "../../error.ts";
 import { PlanErrorCode } from "../../error.ts";
 
@@ -40,7 +39,7 @@ function getNext(config: D1DatabaseConfig = {}) {
     [path: string]: {
       name: string;
       config: DatabaseConfig;
-      dependsOn: ConfigDependency[];
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -87,7 +86,7 @@ export async function createD1DatabasePlan(
     const createUnit: CreateUnit<DatabaseConfig, DatabaseState, CreateDatabase> = {
       type: Type.Create,
       executor: createDatabase,
-      args: [name, config],
+      args: [name, config, dependsOn],
       path: key,
       config,
       dependsOn,
@@ -123,6 +122,7 @@ export async function createD1DatabasePlan(
         path: key,
         config: previousConfig,
         state,
+        dependsOn: state.dependsOn,
       };
       plan.push(noopUnit);
     } else {

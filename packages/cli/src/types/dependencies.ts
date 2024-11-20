@@ -1,17 +1,10 @@
 import type { Resource } from "./config.ts";
 
-export interface ConfigDependency {
+export interface ResourceDependency {
   path: string;
   name: string;
   attribute: string | null;
 }
-
-// export interface ConfigDependency {
-//   [path: string]: {
-//     name: string;
-//     attribute: string | null;
-//   }[]
-// }
 
 export interface External {
   type: "external";

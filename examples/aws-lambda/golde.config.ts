@@ -37,18 +37,20 @@ const config: Config = {
       }
     },
     lambdaFunction: {
-      "example-aws-lambda-function": {
+      "example-aws-lambda-function-local-zip": {
         packageType: "Zip",
         branch: "master",
-        description: "Example AWS Lambda Function",
+        description: "Example AWS Lambda Function local Zip",
         runtime: "nodejs20.x",
         handler: "lambda.handler",
         memorySize: 512,
         timeout: 30,
         roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
+        tags: {
+          "LambdaTag": "Example tag",
+        },
         code: {
-          s3Bucket: "example-aws-lambda-code",
-          s3Key: "example-aws-lambda-function.zip", 
+          zipFile: "./lambda.zip"
         },
       },
     }

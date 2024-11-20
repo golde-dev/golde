@@ -17,7 +17,7 @@ import { omitUndefined } from "../../utils/object.ts";
 import type { CreateFunction, DeleteFunction, Executors, UpdateFunction } from "./executor.ts";
 import { lambdaFunctionPath } from "./path.ts";
 import { findConfigDependencies } from "../../dependencies.ts";
-import type { ConfigDependency } from "../../types/dependencies.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getCurrent(functions: LambdaFunctionState = {}) {
   const previous: {
@@ -46,7 +46,7 @@ function getNext(config: LambdaFunctionConfig = {}, region: string, tags?: Tags)
     [path: string]: {
       name: string;
       config: FunctionConfig;
-      dependsOn: ConfigDependency[];
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -108,7 +108,7 @@ export async function createLambdaFunctionPlan(
     const createUnit: CreateUnit<FunctionConfig, FunctionState, CreateFunction> = {
       type: Type.Create,
       executor: createFunction,
-      args: [name, config],
+      args: [name, config, dependsOn],
       path: key,
       config,
       dependsOn,
@@ -146,6 +146,7 @@ export async function createLambdaFunctionPlan(
         path: key,
         config: previousConfig,
         state,
+        dependsOn,
       };
       plan.push(noopUnit);
     } else {
@@ -170,7 +171,7 @@ export async function createLambdaFunctionPlan(
       > = {
         type: Type.Update,
         executor: updateFunction,
-        args: [nextConfig, state],
+        args: [nextConfig, state, dependsOn],
         path: key,
         state,
         config: nextConfig,

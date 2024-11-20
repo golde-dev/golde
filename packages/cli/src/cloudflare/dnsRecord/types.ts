@@ -1,5 +1,6 @@
 import type { Tags } from "../../types/config.ts";
 import type { Resource, WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 export type RecordType =
   | "A"
@@ -46,6 +47,7 @@ export interface RecordState {
   zoneId: string;
   updatedAt: string;
   createdAt: string;
+  dependsOn: ResourceDependency[];
   config: WithBranch<RecordConfig>;
 }
 

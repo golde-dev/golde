@@ -61,7 +61,7 @@ export class D1Client extends CloudflareBase {
         "GET",
       );
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

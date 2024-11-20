@@ -9,12 +9,14 @@ import { cloudwatchLogGroupPath } from "./path.ts";
 import type { Tags } from "../../types/config.ts";
 import type { CreateLogGroup, DeleteLogGroup, Executors, UpdateLogGroup } from "./executor.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 import type {
   CloudwatchLogGroupConfig,
   CloudwatchLogGroupState,
   LogGroupConfig,
   LogGroupState,
 } from "./types.ts";
+import { findConfigDependencies } from "../../dependencies.ts";
 
 function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   const previous: {
@@ -43,6 +45,7 @@ function getNext(config: CloudwatchLogGroupConfig = {}, region: string, tags?: T
     [path: string]: {
       name: string;
       config: LogGroupConfig;
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -53,6 +56,7 @@ function getNext(config: CloudwatchLogGroupConfig = {}, region: string, tags?: T
     next[cloudwatchLogGroupPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion),
+      dependsOn: findConfigDependencies(withTagsAndRegion),
     };
   }
   return next;
@@ -90,7 +94,7 @@ export async function createCloudwatchLogGroupPlan(
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
-    const { config, name } = next[key];
+    const { config, name, dependsOn } = next[key];
 
     assertRegion(config);
     assertBranch(config);
@@ -103,10 +107,10 @@ export async function createCloudwatchLogGroupPlan(
     const createUnit: CreateUnit<LogGroupConfig, LogGroupState, CreateLogGroup> = {
       type: Type.Create,
       executor: createLogGroup,
-      args: [name, config],
+      args: [name, config, dependsOn],
       path: key,
       config,
-      dependsOn: [],
+      dependsOn,
     };
     plan.push(createUnit);
   }
@@ -131,7 +135,7 @@ export async function createCloudwatchLogGroupPlan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig } = next[key];
+    const { config: nextConfig, dependsOn } = next[key];
     const { config: previousConfig, state, name } = previous[key];
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
@@ -141,6 +145,7 @@ export async function createCloudwatchLogGroupPlan(
         path: key,
         config: previousConfig,
         state,
+        dependsOn: state.dependsOn,
       };
       plan.push(noopUnit);
     } else {
@@ -165,11 +170,11 @@ export async function createCloudwatchLogGroupPlan(
       > = {
         type: Type.Update,
         executor: updateLogGroup,
-        args: [nextConfig.region, name, nextConfig, state],
+        args: [nextConfig.region, name, nextConfig, state, dependsOn],
         path: key,
         state,
         config: nextConfig,
-        dependsOn: [],
+        dependsOn,
       };
       plan.push(updateUnit);
     }

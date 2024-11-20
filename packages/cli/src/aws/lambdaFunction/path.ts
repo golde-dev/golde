@@ -1,6 +1,6 @@
 import { ensureAllKeys, prefixPath, removePrefix } from "../../utils/object.ts";
-import type { FunctionState, ZipLambdaCodeState } from "./types.ts";
-import type { ZipFunctionConfigState } from "./types.ts";
+import type { FunctionState, ZipLambdaCode } from "./types.ts";
+import type { ZipFunctionConfig } from "./types.ts";
 import type { ImageFunctionConfig } from "./types.ts";
 import type { ImageLambdaCode } from "./types.ts";
 
@@ -14,32 +14,33 @@ export function removeFunctionPrefix(path: string) {
 }
 
 const stateAttributes = ensureAllKeys<FunctionState>({
-  "arn": true,
-  "createdAt": true,
-  "updatedAt": true,
-  "config": true,
+  arn: true,
+  createdAt: true,
+  updatedAt: true,
+  config: true,
+  dependsOn: true,
 });
 
-const configAttributes = ensureAllKeys<ImageFunctionConfig | ZipFunctionConfigState>({
-  "description": true,
-  "packageType": true,
-  "handler": true,
-  "runtime": true,
-  "timeout": true,
-  "roleArn": true,
-  "region": true,
-  "tags": true,
-  "memorySize": true,
-  "code": true,
+const configAttributes = ensureAllKeys<ImageFunctionConfig | ZipFunctionConfig>({
+  description: true,
+  packageType: true,
+  handler: true,
+  runtime: true,
+  timeout: true,
+  roleArn: true,
+  region: true,
+  tags: true,
+  memorySize: true,
+  code: true,
 });
 const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
 
-const codeAttributes = ensureAllKeys<ZipLambdaCodeState | ImageLambdaCode>({
-  "imageUri": true,
-  "zipFile": true,
-  "s3Bucket": true,
-  "s3Key": true,
-  "s3ObjectVersion": true,
+const codeAttributes = ensureAllKeys<ZipLambdaCode | ImageLambdaCode>({
+  imageUri: true,
+  zipFile: true,
+  s3Bucket: true,
+  s3Key: true,
+  s3ObjectVersion: true,
 });
 const codePaths = codeAttributes.map((attribute) => `config.code.${attribute}`);
 

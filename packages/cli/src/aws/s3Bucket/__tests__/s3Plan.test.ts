@@ -53,7 +53,7 @@ describe("aws s3 buckets", () => {
       const execution: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
-        args: ["bucket1", configWithRegion],
+        args: ["bucket1", configWithRegion, []],
         path: "aws.s3Bucket.bucket1",
         config: configWithRegion,
         dependsOn: [],
@@ -68,6 +68,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          dependsOn: [],
           config: {
             tags: { Type: "Old" },
             branch: "master",
@@ -95,7 +96,7 @@ describe("aws s3 buckets", () => {
       > = {
         type: Type.Update,
         executor: executors.updateBucket,
-        args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1],
+        args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1, []],
         path: "aws.s3Bucket.bucket1",
         state: state.bucket1,
         config: configWithRegion,
@@ -117,6 +118,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          dependsOn: [],
           config: {
             region: "us-east-1",
             tags: { Type: "Old" },
@@ -149,6 +151,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          dependsOn: [],
           config: {
             tags: { Type: "Old" },
             region: "us-east-1",
@@ -181,6 +184,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          dependsOn: [],
           config: {
             region: "us-east-1",
             tags: { Type: "Old" },
@@ -204,7 +208,7 @@ describe("aws s3 buckets", () => {
       const created: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
-        args: ["bucket2", configWithRegion],
+        args: ["bucket2", configWithRegion, []],
         path: "aws.s3Bucket.bucket2",
         config: configWithRegion,
         dependsOn: [],
@@ -235,6 +239,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          dependsOn: [],
           config: {
             region: "us-east-1",
             tags: mergeTags(projectTags, { Type: "Old" }),
@@ -262,6 +267,7 @@ describe("aws s3 buckets", () => {
         path: "aws.s3Bucket.bucket1",
         config: config.bucket1,
         state: state.bucket1,
+        dependsOn: state.bucket1.dependsOn,
       };
       expect(result).toEqual([noop]);
     });

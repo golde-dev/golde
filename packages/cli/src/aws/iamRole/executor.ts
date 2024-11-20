@@ -1,15 +1,16 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { PlanError, PlanErrorCode } from "../../error.ts";
 import { logger } from "../../logger.ts";
+import { stringify } from "../../utils/object.ts";
+import { nowStringDate } from "../../utils/date.ts";
+import { join } from "@std/path";
 import type { WithBranch } from "../../types/config.ts";
 import { formatDuration } from "../../utils/duration.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { toTagsList } from "../../utils/tags.ts";
 import type { AWSClient } from "../client/client.ts";
 import type { RoleConfig, RoleState } from "./types.ts";
-import { stringify } from "../../utils/object.ts";
-import { nowStringDate } from "../../utils/date.ts";
-import { join } from "@std/path";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function aimRoleArn({ accountId }: AWSClient, roleName: string, path: string = "/") {
   if (!accountId) {
@@ -22,6 +23,7 @@ export async function createRole(
   this: AWSClient,
   roleName: string,
   config: WithBranch<RoleConfig>,
+  dependsOn: ResourceDependency[],
 ): Promise<RoleState> {
   assertBranch(config);
 
@@ -71,6 +73,7 @@ export async function createRole(
   return {
     arn,
     createdAt,
+    dependsOn,
     config,
   };
 }
@@ -93,6 +96,7 @@ export async function updateRole(
   roleName: string,
   config: WithBranch<RoleConfig>,
   state: RoleState,
+  dependsOn: ResourceDependency[],
 ): Promise<RoleState> {
   const {
     tags,
@@ -167,6 +171,7 @@ export async function updateRole(
     arn,
     createdAt,
     updatedAt,
+    dependsOn,
     config,
   };
 }

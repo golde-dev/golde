@@ -10,6 +10,8 @@ import { assertRegion } from "../utils.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { iamRolePath } from "./path.ts";
 import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
+import { findConfigDependencies } from "../../dependencies.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getCurrent(roles: IAMRoleState = {}) {
   const previous: {
@@ -38,6 +40,7 @@ function getNext(config: IAMRoleConfig = {}, tags?: Tags) {
     [path: string]: {
       name: string;
       config: RoleConfig;
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -47,6 +50,7 @@ function getNext(config: IAMRoleConfig = {}, tags?: Tags) {
     next[iamRolePath(name)] = {
       name,
       config: omitUndefined(withTags),
+      dependsOn: findConfigDependencies(withTags),
     };
   }
   return next;
@@ -82,7 +86,7 @@ export async function createIAMRolePlan(
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
-    const { config, name } = next[key];
+    const { config, name, dependsOn } = next[key];
 
     assertBranch(config);
     await assertRoleNotExist(name);
@@ -91,10 +95,10 @@ export async function createIAMRolePlan(
     const createUnit: CreateUnit<RoleConfig, RoleState, CreateRole> = {
       type: Type.Create,
       executor: createRole,
-      args: [name, config],
+      args: [name, config, dependsOn],
       path: key,
       config,
-      dependsOn: [],
+      dependsOn,
     };
     plan.push(createUnit);
   }
@@ -118,7 +122,7 @@ export async function createIAMRolePlan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig } = next[key];
+    const { config: nextConfig, dependsOn } = next[key];
     const { config: previousConfig, state, name } = previous[key];
 
     const isSameBaseConfig = isEqual(nextConfig, previousConfig);
@@ -128,6 +132,7 @@ export async function createIAMRolePlan(
         path: key,
         config: previousConfig,
         state,
+        dependsOn: state.dependsOn,
       };
       plan.push(noopUnit);
     } else {
@@ -150,11 +155,11 @@ export async function createIAMRolePlan(
       > = {
         type: Type.Update,
         executor: updateRole,
-        args: [name, nextConfig, state],
+        args: [name, nextConfig, state, dependsOn],
         path: key,
         state,
         config: nextConfig,
-        dependsOn: [],
+        dependsOn,
       };
       plan.push(updateUnit);
     }

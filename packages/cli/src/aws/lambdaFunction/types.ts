@@ -1,4 +1,5 @@
 import type { Resource, Tags, WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 import type { WithRegion } from "../types.ts";
 
 type LambdaRuntime =
@@ -32,27 +33,11 @@ export type S3LambdaCode = {
 };
 
 export type ZipFileLambdaCode = {
-  zipFile: Uint8Array;
-};
-
-export type ZipFileLambdaCodeHash = {
   zipFile: string;
 };
 
-/**
- * During configuration we will read zip file into memory as Uint8Array
- * Once file is loaded we can hash it during creation and store hash in state
- */
 export type ZipLambdaCode =
   | ZipFileLambdaCode
-  | S3LambdaCode;
-
-/**
- * When storing zip function in state we do not want to store actual zip
- * Config state for will ZipFile will store hash of zip file instead
- */
-export type ZipLambdaCodeState =
-  | ZipFileLambdaCodeHash
   | S3LambdaCode;
 
 export interface BaseFunctionConfig {
@@ -81,14 +66,6 @@ export interface ZipFunctionConfig extends BaseFunctionConfig, Resource {
   code: ZipLambdaCode;
 }
 
-export interface ZipFunctionConfigState extends BaseFunctionConfig, Resource {
-  packageType: "Zip";
-  region?: string;
-  handler: string;
-  runtime: LambdaRuntime;
-  code: ZipLambdaCodeState;
-}
-
 export interface ImageFunctionConfig extends BaseFunctionConfig, Resource {
   packageType: "Image";
   region?: string;
@@ -102,12 +79,13 @@ export interface LambdaFunctionConfig {
   [functionName: string]: FunctionConfig;
 }
 
-export type FunctionConfigState = ImageFunctionConfig | ZipFunctionConfigState;
+export type FunctionConfigState = ImageFunctionConfig | ZipFunctionConfig;
 
 export interface FunctionState {
   createdAt: string;
   updatedAt?: string;
   arn: string;
+  dependsOn: ResourceDependency[];
   config: WithRegion<WithBranch<FunctionConfigState>>;
 }
 

@@ -173,7 +173,7 @@ program
   .option("-j, --json", "log output as json")
   .option("-y, --yes", "destroy without prompting")
   .action(
-    async function (
+    function (
       options: {
         logLevel: LevelName;
         config: string;

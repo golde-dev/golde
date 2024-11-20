@@ -1,4 +1,5 @@
 import type { Resource, Tags, WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 export interface PolicyDocument {
   Version: "2012-10-17";
@@ -36,6 +37,7 @@ export interface RoleState {
   createdAt: string;
   updatedAt?: string;
   arn: string;
+  dependsOn: ResourceDependency[];
   config: WithBranch<RoleConfig>;
 }
 

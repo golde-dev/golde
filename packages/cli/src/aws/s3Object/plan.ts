@@ -13,7 +13,7 @@ export async function createS3ObjectPlan(
   state?: S3ObjectState,
   config?: S3ObjectConfig,
 ): Promise<Plan> {
-  logger.debug("[S3Object] Planning changes", { state, config });
+  logger.debug("[AWS] S3Object planning changes", { state, config });
   return await Promise.resolve([]);
 }
 
@@ -21,6 +21,6 @@ export async function createS3ObjectDestroyPlan(
   _executors: Executors,
   state?: S3ObjectState,
 ): Promise<Plan> {
-  logger.debug("[S3Object] Planning destroying changes", { state });
+  logger.debug("[AWS] S3Object planning destroying changes", { state });
   return await Promise.resolve([]);
 }

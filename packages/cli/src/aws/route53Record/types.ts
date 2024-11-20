@@ -1,5 +1,6 @@
 import type { Tags } from "../../types/config.ts";
 import type { Resource, WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 export type RecordType =
   | "A"
@@ -43,11 +44,10 @@ export interface Route53RecordConfig {
 
 export interface RecordState {
   id: string;
-  value: string;
-  ttl: number;
   zoneId: string;
-  modifiedAt: string;
+  updatedAt: string;
   createdAt: string;
+  dependsOn: ResourceDependency[];
   config: WithBranch<RecordConfig>;
 }
 

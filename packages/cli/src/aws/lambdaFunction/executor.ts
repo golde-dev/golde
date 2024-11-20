@@ -8,16 +8,26 @@ import { hashByteArray } from "../../utils/hash.ts";
 import type { AWSClient } from "../client/client.ts";
 import type { WithRegion } from "../types.ts";
 import type { WithBranch } from "../../types/config.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 import type {
   FunctionConfig,
   FunctionConfigState,
   FunctionState,
   S3LambdaCode,
-  ZipFileLambdaCodeHash,
+  ZipFileLambdaCode,
 } from "./types.ts";
 
 function lambdaFunctionArn({ accountId }: AWSClient, name: string, region: string) {
   return `arn:aws:lambda:${region}:${accountId}:function:${name}`;
+}
+
+const cache: Record<string, Uint8Array> = {};
+
+async function readCode(zipFile: string) {
+  if (!cache[zipFile]) {
+    cache[zipFile] = await Deno.readFile(zipFile);
+  }
+  return cache[zipFile];
 }
 
 async function isCodeEqual(
@@ -26,7 +36,8 @@ async function isCodeEqual(
 ) {
   if ("zipFile" in previousCode) {
     if ("zipFile" in code) {
-      const hash = await hashByteArray(code.zipFile);
+      const zip = await readCode(code.zipFile);
+      const hash = await hashByteArray(zip);
       return previousCode.zipFile === hash;
     }
     return false;
@@ -74,6 +85,7 @@ export async function createFunction(
   this: AWSClient,
   functionName: string,
   config: WithBranch<WithRegion<FunctionConfig>>,
+  dependsOn: ResourceDependency[],
 ): Promise<FunctionState> {
   assertBranch(config);
 
@@ -114,6 +126,7 @@ export async function createFunction(
     return {
       arn,
       createdAt,
+      dependsOn,
       config,
     };
   } else {
@@ -128,7 +141,7 @@ export async function createFunction(
 
     const Code = "zipFile" in code
       ? {
-        ZipFile: code.zipFile,
+        ZipFile: await readCode(code.zipFile),
       }
       : {
         S3Bucket: code.s3Bucket,
@@ -153,14 +166,16 @@ export async function createFunction(
     const createdAt = nowStringDate();
 
     if ("zipFile" in code) {
-      const hash = await hashByteArray(code.zipFile);
-      const zipCode: ZipFileLambdaCodeHash = {
+      const zip = await readCode(code.zipFile);
+      const hash = await hashByteArray(zip);
+      const zipCode: ZipFileLambdaCode = {
         zipFile: hash,
       };
 
       return {
         arn,
         createdAt,
+        dependsOn,
         config: {
           ...config,
           code: zipCode,
@@ -174,6 +189,7 @@ export async function createFunction(
       return {
         arn,
         createdAt,
+        dependsOn,
         config: {
           ...config,
           code: s3Code,
@@ -202,12 +218,14 @@ export async function updateFunction(
   this: AWSClient,
   config: WithBranch<WithRegion<FunctionConfig>>,
   state: FunctionState,
+  dependsOn: ResourceDependency[],
 ): Promise<FunctionState> {
   const {
     tags,
     code,
     region,
   } = config;
+
   const {
     arn,
     createdAt,
@@ -235,13 +253,16 @@ export async function updateFunction(
     logger.debug(`[AWS] Updating code for lambda function ${arn}`);
 
     if ("zipFile" in code) {
-      const zipCode: ZipFileLambdaCodeHash = {
-        zipFile: await hashByteArray(code.zipFile),
+      const zip = await readCode(code.zipFile);
+      const hash = await hashByteArray(zip);
+
+      const zipCode: ZipFileLambdaCode = {
+        zipFile: hash,
       };
       configState.code = zipCode;
       await this.updateLambdaFunctionCode(arn, {
         FunctionName: arn,
-        ZipFile: code.zipFile,
+        ZipFile: zip,
         Publish: true,
       });
     }
@@ -273,6 +294,7 @@ export async function updateFunction(
     arn,
     createdAt,
     updatedAt,
+    dependsOn,
     config: configState,
   };
 }

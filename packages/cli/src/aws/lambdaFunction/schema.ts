@@ -26,7 +26,7 @@ const runtimeSchema = z.enum([
 
 const zipCodeSchema = z.union([
   z.object({
-    zipFile: z.instanceof(Uint8Array),
+    zipFile: z.string().min(1),
   }),
   z.object({
     s3Bucket: z.string().min(1),

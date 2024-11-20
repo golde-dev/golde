@@ -16,6 +16,7 @@ const stateAttributes = ensureAllKeys<BucketState>({
   updatedAt: true,
   arn: true,
   config: true,
+  dependsOn: true,
 });
 
 const configAttributes = ensureAllKeys<BucketConfig>({

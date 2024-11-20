@@ -3,7 +3,7 @@ import { expect } from "@std/expect";
 import { spy } from "@std/testing/mock";
 import { Type } from "../../../types/plan.ts";
 import { createR2Plan } from "../plan.ts";
-import type { CreateBucket, DeleteBucket, Executors } from "../plan.ts";
+import type { CreateBucket, DeleteBucket, Executors } from "../executor.ts";
 import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../types/plan.ts";
 import { assertBranch } from "../../../utils/resource.ts";
@@ -50,6 +50,7 @@ describe("cloudflare buckets", () => {
         "bucket1": {
           location: "eeur",
           createdAt: "2022-01-01T00:00:00.000Z",
+          dependsOn: [],
           config: {
             storageClass: "Standard",
             locationHint: "apac",
@@ -79,6 +80,7 @@ describe("cloudflare buckets", () => {
         "bucket1": {
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
+          dependsOn: [],
           config: {
             branch: "master",
           },
@@ -108,6 +110,7 @@ describe("cloudflare buckets", () => {
         "bucket1": {
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
+          dependsOn: [],
           config: {
             branch: "master",
           },
@@ -156,6 +159,7 @@ describe("cloudflare buckets", () => {
         "bucket1": {
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
+          dependsOn: [],
           config: {
             storageClass: "Standard",
             locationHint: "apac",
@@ -182,6 +186,7 @@ describe("cloudflare buckets", () => {
         path: "cloudflare.r2.bucket1",
         config: config.bucket1,
         state: state.bucket1,
+        dependsOn: [],
       };
       expect(result).toEqual([noop]);
     });

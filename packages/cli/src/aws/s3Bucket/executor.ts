@@ -5,10 +5,11 @@ import type { WithBranch } from "../../types/config.ts";
 import { formatDuration } from "../../utils/duration.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { toTagsList } from "../../utils/tags.ts";
+import { nowStringDate } from "../../utils/date.ts";
 import type { AWSClient } from "../client/client.ts";
 import type { WithRegion } from "../types.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
-import { nowStringDate } from "../../utils/date.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function s3BucketArn(name: string) {
   return `arn:aws:s3:::${name}`;
@@ -18,6 +19,7 @@ export async function createBucket(
   this: AWSClient,
   name: string,
   config: WithBranch<WithRegion<BucketConfig>>,
+  dependsOn: ResourceDependency[],
 ): Promise<BucketState> {
   assertBranch(config);
 
@@ -43,6 +45,7 @@ export async function createBucket(
   return {
     arn,
     createdAt,
+    dependsOn,
     config,
   };
 }
@@ -67,6 +70,7 @@ export async function updateBucket(
   name: string,
   config: WithBranch<WithRegion<BucketConfig>>,
   state: BucketState,
+  dependsOn: ResourceDependency[],
 ): Promise<BucketState> {
   const {
     tags,
@@ -88,6 +92,7 @@ export async function updateBucket(
       createdAt,
       updatedAt,
       config,
+      dependsOn,
     };
   }
   return state;

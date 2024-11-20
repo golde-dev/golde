@@ -27,6 +27,7 @@ const stateAttributes = ensureAllKeys<RecordState>({
   updatedAt: true,
   createdAt: true,
   config: true,
+  dependsOn: true,
 });
 
 const configAttributes = ensureAllKeys<RecordConfig>({

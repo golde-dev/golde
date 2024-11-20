@@ -15,6 +15,7 @@ const stateAttributes = ensureAllKeys<RoleState>({
   "createdAt": true,
   "updatedAt": true,
   "config": true,
+  "dependsOn": true,
 });
 
 const configAttributes = ensureAllKeys<RoleConfig>({

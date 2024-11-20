@@ -18,7 +18,7 @@ const config: Config = {
   },
   aws: {
     cloudwatchLogGroup: {
-      "golde-example-aws-s3-bucket": {
+      "/golde/aws-cloudwatch-log-group": {
         retentionInDays: 30,
         tags: {
           "GroupTag": "Example",

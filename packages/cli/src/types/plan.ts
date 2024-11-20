@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
 import type { Resource, ResourceState } from "./config.ts";
-import type { ConfigDependency } from "./dependencies.ts";
+import type { ResourceDependency } from "./dependencies.ts";
 
 export enum Type {
   Create = "Create",
@@ -20,7 +20,7 @@ export interface CreateUnit<
   args: Parameters<T>;
   config: C;
   path: string;
-  dependsOn: ConfigDependency[];
+  dependsOn: ResourceDependency[];
 }
 
 export interface DeleteUnit<
@@ -45,7 +45,7 @@ export interface UpdateUnit<
   state: S;
   config: C;
   path: string;
-  dependsOn: ConfigDependency[];
+  dependsOn: ResourceDependency[];
 }
 
 /**
@@ -59,6 +59,7 @@ export interface NoopUnit<
   path: string;
   config: C;
   state: S;
+  dependsOn: ResourceDependency[];
 }
 
 export type ExecutionUnit =

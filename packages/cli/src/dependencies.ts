@@ -3,7 +3,7 @@ import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
-import type { ConfigDependency, Dependencies } from "./types/dependencies.ts";
+import type { Dependencies, ResourceDependency } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
@@ -11,8 +11,8 @@ const stateRe = new RegExp(/(?<=state.)(.*)/);
 
 export function dependenciesSearch(
   string: string,
-  dependencies: ConfigDependency[],
-): ConfigDependency[] {
+  dependencies: ResourceDependency[],
+): ResourceDependency[] {
   const trimmed = string.trim();
   const match = templateRe.exec(trimmed);
 
@@ -42,8 +42,8 @@ export function dependenciesSearch(
 
 export function findConfigDependencies(
   value: unknown,
-  dependencies: ConfigDependency[] = [],
-): ConfigDependency[] {
+  dependencies: ResourceDependency[] = [],
+): ResourceDependency[] {
   if (typeof value === "string") {
     dependenciesSearch(value, dependencies);
   } else if (value instanceof Array) {
@@ -59,11 +59,18 @@ export function findConfigDependencies(
 
 export function getDependencies(
   _context: Context,
-  _plan: Plan,
+  plan: Plan,
   print = false,
 ): Promise<Dependencies> {
   if (print) {
     logger.info("[Dependencies] Resolving dependencies");
   }
+  plan.forEach((unit) => {
+    const {
+      path,
+    } = unit;
+    logger.debug(`[Dependencies] Resolving dependencies for ${path}`);
+  });
+
   return Promise.resolve({});
 }

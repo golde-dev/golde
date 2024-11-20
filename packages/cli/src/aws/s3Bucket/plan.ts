@@ -11,7 +11,7 @@ import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../t
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
 import { findConfigDependencies } from "../../dependencies.ts";
-import type { ConfigDependency } from "../../types/dependencies.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
   const previous: {
@@ -40,7 +40,7 @@ function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
     [path: string]: {
       name: string;
       config: BucketConfig;
-      dependsOn: ConfigDependency[];
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -102,7 +102,7 @@ export async function createS3Plan(
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
       type: Type.Create,
       executor: createBucket,
-      args: [name, config],
+      args: [name, config, dependsOn],
       path: key,
       config,
       dependsOn,
@@ -140,6 +140,7 @@ export async function createS3Plan(
         path: key,
         config: previousConfig,
         state,
+        dependsOn: state.dependsOn,
       };
       plan.push(noopUnit);
     } else {
@@ -164,7 +165,7 @@ export async function createS3Plan(
       > = {
         type: Type.Update,
         executor: updateBucket,
-        args: [nextConfig.region, name, nextConfig, state],
+        args: [nextConfig.region, name, nextConfig, state, dependsOn],
         path: key,
         state,
         config: nextConfig,

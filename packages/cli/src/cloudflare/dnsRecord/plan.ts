@@ -5,10 +5,12 @@ import { mergeProjectTags } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { Type } from "../../types/plan.ts";
+import { findConfigDependencies } from "../../dependencies.ts";
 import type { Tags } from "../../types/config.ts";
 import type { DNSConfig, DNSState, RecordConfig, RecordState, RecordType } from "./types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
 import type { CreateZoneRecord, DeleteZoneRecord, Executor, UpdateZoneRecord } from "./executor.ts";
+import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getPrevious(state: DNSState = {}) {
   const records: {
@@ -45,6 +47,7 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
       zone: string;
       type: RecordType;
       name: string;
+      dependsOn: ResourceDependency[];
     };
   } = {};
 
@@ -52,12 +55,14 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
     for (const [type, recordConfig] of Object.entries(zoneConfig)) {
       for (const [name, record] of Object.entries(recordConfig)) {
         const withTags = mergeProjectTags(record, tags);
+        const dependsOn = findConfigDependencies(record);
 
         records[dnsPath(zone, type, name)] = {
           config: omitUndefined(withTags),
           zone,
           type: type as RecordType,
           name,
+          dependsOn,
         };
       }
     }
@@ -86,17 +91,17 @@ export const createDNSPlan = (
 
   const create = Object.keys(next).filter((key) => !(key in previous));
   for (const key of create) {
-    const { config, zone, type, name } = next[key];
+    const { config, zone, type, name, dependsOn } = next[key];
 
     assertBranch(config);
 
     const createUnit: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
       type: Type.Create,
       executor: executors.createZoneRecord,
-      args: [zone, type, name, config],
+      args: [zone, type, name, config, dependsOn],
       path: key,
       config,
-      dependsOn: [],
+      dependsOn,
     };
     plan.push(createUnit);
   }
@@ -117,7 +122,7 @@ export const createDNSPlan = (
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig, zone, type, name } = next[key];
+    const { config: nextConfig, zone, type, name, dependsOn } = next[key];
     const { config: prevConfig, state } = previous[key];
 
     assertBranch(nextConfig);
@@ -130,11 +135,11 @@ export const createDNSPlan = (
       > = {
         type: Type.Update,
         executor: executors.updateZoneRecord,
-        args: [zone, type, name, state.id, nextConfig],
+        args: [zone, type, name, state.id, nextConfig, dependsOn],
         path: key,
         state,
         config: nextConfig,
-        dependsOn: [],
+        dependsOn,
       };
       plan.push(updateUnit);
     } else {
@@ -146,6 +151,7 @@ export const createDNSPlan = (
         path: key,
         config: nextConfig,
         state,
+        dependsOn: state.dependsOn,
       };
       plan.push(noopUnit);
     }

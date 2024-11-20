@@ -658,7 +658,10 @@
                           {
                             "type": "object",
                             "properties": {
-                              "zipFile": {}
+                              "zipFile": {
+                                "type": "string",
+                                "minLength": 1
+                              }
                             },
                             "required": [
                               "zipFile"

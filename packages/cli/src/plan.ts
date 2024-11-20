@@ -8,7 +8,6 @@ import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { ExecutionGroups } from "./types/plan.ts";
-import { noop } from "@es-toolkit/es-toolkit";
 
 export function sortByPath<T extends ExecutionUnit>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
