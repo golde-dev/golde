@@ -22,6 +22,10 @@ type LambdaRuntime =
   | "provided.al2023"
   | "provided.al2";
 
+export interface LoggingConfig {
+  logGroupName?: string;
+}
+
 export type ImageLambdaCode = {
   imageUri: string;
 };
@@ -45,6 +49,10 @@ export interface BaseFunctionConfig {
   region?: string;
   description?: string;
   /**
+   * ARNs of layers
+   */
+  layerArns?: string[];
+  /**
    * ARN of execution role
    */
   roleArn: string;
@@ -56,6 +64,11 @@ export interface BaseFunctionConfig {
    * Timeout in seconds
    */
   timeout?: number;
+
+  /**
+   * Logging config
+   */
+  loggingConfig?: LoggingConfig;
 }
 
 export interface ZipFunctionConfig extends BaseFunctionConfig, Resource {

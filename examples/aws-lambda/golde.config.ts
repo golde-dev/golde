@@ -36,6 +36,11 @@ const config: Config = {
         ]
       }
     },
+    cloudwatchLogGroup: {
+      "/aws/lambda/example-aws-lambda-function-log-group": {
+        retentionInDays: 30,
+      }
+    },
     lambdaFunction: {
       "example-aws-lambda-function-local-zip": {
         packageType: "Zip",
@@ -52,6 +57,25 @@ const config: Config = {
         code: {
           zipFile: "./lambda.zip"
         },
+      },
+      "example-aws-lambda-function-log-group": {
+        packageType: "Zip",
+        branch: "master",
+        description: "Example AWS Lambda Function local Zip",
+        runtime: "nodejs20.x",
+        handler: "lambda.handler",
+        memorySize: 512,
+        timeout: 30,
+        roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
+        tags: {
+          "LambdaTag": "Example tag",
+        },
+        code: {
+          zipFile: "./lambda.zip"
+        },
+        loggingConfig: {
+          logGroupName: "{{ state.aws.cloudwatchLogGroup./aws/lambda/example-aws-lambda-function-log-group.name }}",
+        }
       },
     }
   }

@@ -5,7 +5,7 @@ import { mergeProjectTags } from "../../utils/tags.ts";
 import { assertBranch } from "../../utils/resource.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { Type } from "../../types/plan.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 import type { Tags } from "../../types/config.ts";
 import type { DNSConfig, DNSState, RecordConfig, RecordState, RecordType } from "./types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
@@ -55,7 +55,7 @@ function getNext(config: DNSConfig = {}, tags: Tags = {}) {
     for (const [type, recordConfig] of Object.entries(zoneConfig)) {
       for (const [name, record] of Object.entries(recordConfig)) {
         const withTags = mergeProjectTags(record, tags);
-        const dependsOn = findConfigDependencies(record);
+        const dependsOn = findResourceDependencies(record);
 
         records[dnsPath(zone, type, name)] = {
           config: omitUndefined(withTags),

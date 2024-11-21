@@ -6,7 +6,7 @@ import { Type } from "../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../utils.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { s3BucketPath } from "./path.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 import type { Tags } from "../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../types/plan.ts";
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
@@ -51,7 +51,7 @@ function getNext(config: S3BucketConfig = {}, region: string, tags?: Tags) {
     next[s3BucketPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion),
-      dependsOn: findConfigDependencies(bucket),
+      dependsOn: findResourceDependencies(bucket),
     };
   }
   return next;

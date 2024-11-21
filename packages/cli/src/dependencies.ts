@@ -5,6 +5,7 @@ import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
 import type { Dependencies, ResourceDependency } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
+import { Type } from "./types/plan.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
@@ -40,18 +41,18 @@ export function dependenciesSearch(
   return dependencies;
 }
 
-export function findConfigDependencies(
+export function findResourceDependencies(
   value: unknown,
   dependencies: ResourceDependency[] = [],
 ): ResourceDependency[] {
   if (typeof value === "string") {
     dependenciesSearch(value, dependencies);
   } else if (value instanceof Array) {
-    value.map((val) => findConfigDependencies(val, dependencies));
+    value.map((val) => findResourceDependencies(val, dependencies));
   } else if (isPlainObject(value)) {
     Object.entries(value).forEach(([key, val]) => {
       dependenciesSearch(key, dependencies);
-      findConfigDependencies(val, dependencies);
+      findResourceDependencies(val, dependencies);
     });
   }
   return dependencies;
@@ -65,11 +66,43 @@ export function getDependencies(
   if (print) {
     logger.info("[Dependencies] Resolving dependencies");
   }
-  plan.forEach((unit) => {
-    const {
-      path,
-    } = unit;
-    logger.debug(`[Dependencies] Resolving dependencies for ${path}`);
+
+  const deps: [string, string[]][] = plan.map(({ path, ...rest }) => {
+    switch (rest.type) {
+      case Type.Delete:
+        return [path, rest.state.dependsOn.map(({ path }) => path)];
+      case Type.Update:
+      case Type.Noop:
+      case Type.Create:
+        return [path, rest.dependsOn.map(({ path }) => path)];
+      default:
+        return [path, []];
+    }
+  });
+
+  const childToParents = deps.reduce((acc, [path, children]) => {
+    if (acc[path]) {
+      acc[path].push(...children);
+    } else {
+      acc[path] = children;
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  const parentToChildren = deps.reduce((acc, [path, children]) => {
+    children.forEach((child) => {
+      if (acc[child]) {
+        acc[child].push(path);
+      } else {
+        acc[child] = [path];
+      }
+    });
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  console.log({
+    childToParents,
+    parentToChildren,
   });
 
   return Promise.resolve({});

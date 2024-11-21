@@ -4,23 +4,24 @@ import type { LogGroupConfig, LogGroupState } from "./types.ts";
 export const BASE_PATH = "aws.cloudwatchLogGroup";
 
 export function cloudwatchLogGroupPath(name: string) {
-  return prefixPath(BASE_PATH, name);
+  return prefixPath(BASE_PATH, name).trim();
 }
 export function removeLogGroupPrefix(path: string) {
-  return removePrefix(BASE_PATH, path);
+  return removePrefix(BASE_PATH, path).trim();
 }
 
 const stateAttributes = ensureAllKeys<LogGroupState>({
-  "arn": true,
-  "createdAt": true,
-  "updatedAt": true,
-  "config": true,
-  "dependsOn": true,
+  arn: true,
+  name: true,
+  createdAt: true,
+  updatedAt: true,
+  config: true,
+  dependsOn: true,
 });
 
 const configAttributes = ensureAllKeys<LogGroupConfig>({
-  "retentionInDays": true,
-  "tags": true,
+  retentionInDays: true,
+  tags: true,
 });
 
 const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
@@ -30,7 +31,7 @@ const possibleAttributes = [
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const namePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
+const namePattern = `^(?:\\['(?<name>[A-Za-z0-9._\/-]+)'\\]|(?<name>[A-Za-z0-9_\/-]+))`;
 const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
 
 const pattern = new RegExp(namePattern + attributePattern);

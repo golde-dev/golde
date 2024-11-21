@@ -16,7 +16,7 @@ import type {
   LogGroupConfig,
   LogGroupState,
 } from "./types.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 
 function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   const previous: {
@@ -56,7 +56,7 @@ function getNext(config: CloudwatchLogGroupConfig = {}, region: string, tags?: T
     next[cloudwatchLogGroupPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion),
-      dependsOn: findConfigDependencies(withTagsAndRegion),
+      dependsOn: findResourceDependencies(withTagsAndRegion),
     };
   }
   return next;

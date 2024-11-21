@@ -10,7 +10,7 @@ import { assertRegion } from "../utils.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { iamRolePath } from "./path.ts";
 import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getCurrent(roles: IAMRoleState = {}) {
@@ -50,7 +50,7 @@ function getNext(config: IAMRoleConfig = {}, tags?: Tags) {
     next[iamRolePath(name)] = {
       name,
       config: omitUndefined(withTags),
-      dependsOn: findConfigDependencies(withTags),
+      dependsOn: findResourceDependencies(withTags),
     };
   }
   return next;

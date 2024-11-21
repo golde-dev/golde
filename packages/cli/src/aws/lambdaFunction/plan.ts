@@ -16,7 +16,7 @@ import { isLambdaConfigEqual } from "./executor.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import type { CreateFunction, DeleteFunction, Executors, UpdateFunction } from "./executor.ts";
 import { lambdaFunctionPath } from "./path.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 import type { ResourceDependency } from "../../types/dependencies.ts";
 
 function getCurrent(functions: LambdaFunctionState = {}) {
@@ -57,7 +57,7 @@ function getNext(config: LambdaFunctionConfig = {}, region: string, tags?: Tags)
     next[lambdaFunctionPath(name)] = {
       name,
       config: omitUndefined(withTagsAndRegion) as FunctionConfig,
-      dependsOn: findConfigDependencies(withTagsAndRegion),
+      dependsOn: findResourceDependencies(withTagsAndRegion),
     };
   }
   return next;

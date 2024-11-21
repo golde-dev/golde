@@ -4,7 +4,7 @@ import { assertBranch } from "../../utils/resource.ts";
 import { logger } from "../../logger.ts";
 import { omitUndefined } from "../../utils/object.ts";
 import { r2BucketPath } from "./path.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 import type { CreateUnit, Plan } from "../../types/plan.ts";
 import type { ResourceDependency } from "../../types/dependencies.ts";
 import type { DeleteUnit, NoopUnit } from "../../types/plan.ts";
@@ -46,7 +46,7 @@ function getNext(config: R2BucketConfig = {}) {
     next[r2BucketPath(name)] = {
       name,
       config: omitUndefined(bucket),
-      dependsOn: findConfigDependencies(bucket),
+      dependsOn: findResourceDependencies(bucket),
     };
   }
   return next;

@@ -7,7 +7,7 @@ import { d1DatabasePath } from "./path.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan } from "../../types/plan.ts";
 import type { D1DatabaseConfig, D1DatabaseState, DatabaseConfig, DatabaseState } from "./types.ts";
 import type { CreateDatabase, DeleteDatabase, Executors } from "./executor.ts";
-import { findConfigDependencies } from "../../dependencies.ts";
+import { findResourceDependencies } from "../../dependencies.ts";
 import type { ResourceDependency } from "../../types/dependencies.ts";
 import { PlanError } from "../../error.ts";
 import { PlanErrorCode } from "../../error.ts";
@@ -47,7 +47,7 @@ function getNext(config: D1DatabaseConfig = {}) {
     next[d1DatabasePath(name)] = {
       name,
       config: omitUndefined(database),
-      dependsOn: findConfigDependencies(database),
+      dependsOn: findResourceDependencies(database),
     };
   }
   return next;

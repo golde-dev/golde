@@ -95,6 +95,8 @@ export async function createFunction(
     tags,
     region,
     roleArn,
+    loggingConfig,
+    layerArns,
   } = config;
 
   const arn = lambdaFunctionArn(this, functionName, region);
@@ -113,9 +115,13 @@ export async function createFunction(
       Tags: tags,
       PackageType: packageType,
       Role: roleArn,
+      Layers: layerArns,
       MemorySize: memorySize,
       Code: {
         ImageUri: code.imageUri,
+      },
+      LoggingConfig: {
+        LogGroup: loggingConfig?.logGroupName,
       },
     });
 
@@ -154,11 +160,15 @@ export async function createFunction(
       Runtime: runtime,
       Description: description,
       Tags: tags,
+      Layers: layerArns,
       PackageType: packageType,
       Role: roleArn,
       Handler: handler,
       MemorySize: memorySize,
       Code,
+      LoggingConfig: {
+        LogGroup: loggingConfig?.logGroupName,
+      },
     });
     const end = Date.now();
     logger.debug(`[AWS] Created function ${functionName} in ${formatDuration(end - start)}`);
@@ -223,15 +233,21 @@ export async function updateFunction(
   const {
     tags,
     code,
+    roleArn,
     region,
+    layerArns,
+    loggingConfig,
   } = config;
 
   const {
     arn,
     createdAt,
     config: {
+      roleArn: previousRoleArn,
       tags: previousTags,
       code: previousCode,
+      layerArns: previousLayerArns,
+      loggingConfig: previousLoggingConfig,
     },
   } = state;
 
@@ -284,6 +300,23 @@ export async function updateFunction(
         Publish: true,
       });
     }
+    updatedAt = nowStringDate();
+  }
+
+  if (
+    !isEqual(previousLayerArns, layerArns) ||
+    !isEqual(previousLoggingConfig, loggingConfig) ||
+    !isEqual(previousRoleArn, roleArn)
+  ) {
+    logger.debug(`[AWS] Updating lambda configuration for function ${arn}`);
+    await this.updateLambdaFunctionConfiguration(region, {
+      FunctionName: arn,
+      Layers: layerArns,
+      LoggingConfig: {
+        LogGroup: loggingConfig?.logGroupName,
+      },
+    });
+    updatedAt = nowStringDate();
   }
 
   updatedAt = nowStringDate();
@@ -329,6 +362,7 @@ export async function assertCreatePermission(this: AWSClient, name: string, regi
   const [allowed, reason] = await this.checkPermission(
     [
       "lambda:CreateFunction",
+      "lambda:GetLayerVersion",
       "lambda:TagResource",
     ],
     [arn],
@@ -366,6 +400,7 @@ export async function assertUpdatePermission(this: AWSClient, name: string, regi
     [
       "lambda:UpdateFunctionCode",
       "lambda:UpdateFunctionConfiguration",
+      "lambda:GetLayerVersion",
       "lambda:TagResource",
       "lambda:UntagResource",
     ],

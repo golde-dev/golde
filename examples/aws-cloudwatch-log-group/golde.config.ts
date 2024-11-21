@@ -1,7 +1,7 @@
 import type {Config} from '@golde/cli';
 
 const config: Config = {
-  name: "aws-cloudwatch-log-group",
+  name: "example-aws-cloudwatch-log-group",
   tags: {
     Project: "GoldeExamples",
     Stack: "example-aws-cloudwatch-log-group",

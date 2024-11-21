@@ -33,9 +33,10 @@ export interface CloudwatchLogGroupConfig {
 }
 
 export interface LogGroupState {
+  arn: string;
+  name: string;
   createdAt: string;
   updatedAt?: string;
-  arn: string;
   dependsOn: ResourceDependency[];
   config: WithRegion<WithBranch<LogGroupConfig>>;
 }

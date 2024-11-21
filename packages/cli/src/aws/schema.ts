@@ -7,10 +7,12 @@ import { iamRoleSchema } from "./iamRole/schema.ts";
 import { cloudwatchLogGroupSchema } from "./cloudwatchLogGroup/schema.ts";
 import { lambdaFunctionSchema } from "./lambdaFunction/schema.ts";
 import { iamUserSchema } from "./iamUser/schema.ts";
+import { appRunnerServiceSchema } from "./appRunnerService/schema.ts";
 import type { AWSConfig, AWSCredentials } from "./types.ts";
 
 export const awsConfigSchema = implement<AWSConfig>()
   .with({
+    appRunnerService: appRunnerServiceSchema.optional(),
     s3Bucket: s3BucketSchema.optional(),
     s3Object: s3ObjectSchema.optional(),
     route53Record: route53RecordSchema.optional(),

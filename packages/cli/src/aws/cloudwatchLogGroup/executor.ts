@@ -16,6 +16,7 @@ function logGroupArn({ accountId }: AWSClient, region: string, name: string) {
   }
   return `arn:aws:logs:${region}:${accountId}:log-group:${name}`;
 }
+
 function logGroupStreamsArn({ accountId }: AWSClient, region: string, name: string) {
   if (!accountId) {
     throw new Error("AWS client not initialized");
@@ -48,6 +49,7 @@ export async function createLogGroup(
   const createdAt = nowStringDate();
   return {
     arn,
+    name,
     createdAt,
     dependsOn,
     config,
@@ -111,6 +113,7 @@ export async function updateLogGroup(
 
   return {
     arn,
+    name,
     createdAt,
     updatedAt,
     dependsOn,

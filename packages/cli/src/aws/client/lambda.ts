@@ -10,11 +10,13 @@ import {
   TagResourceCommand,
   UntagResourceCommand,
   UpdateFunctionCodeCommand,
+  UpdateFunctionConfigurationCommand,
 } from "@aws-sdk/client-lambda";
 import type {
   CreateFunctionCommandInput,
   CreateFunctionCommandOutput,
   UpdateFunctionCodeCommandInput,
+  UpdateFunctionConfigurationCommandInput,
 } from "@aws-sdk/client-lambda";
 import type { Tags } from "../../types/config.ts";
 
@@ -149,6 +151,25 @@ export class LambdaClient extends AWSClientBase {
     } catch (e) {
       if (e instanceof Error) {
         logger.error("[AWS] Failed to update lambda function code", e);
+      }
+      throw e;
+    }
+  }
+
+  public async updateLambdaFunctionConfiguration(
+    region: string,
+    input: UpdateFunctionConfigurationCommandInput,
+  ): Promise<void> {
+    try {
+      logger.debug("[AWS] Updating lambda function layers", { region, input });
+
+      const command = new UpdateFunctionConfigurationCommand(input);
+      await this
+        .getLambdaClient(region)
+        .send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS] Failed to update lambda function configuration", e);
       }
       throw e;
     }

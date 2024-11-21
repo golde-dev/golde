@@ -6,6 +6,7 @@ import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Output } from "./output.ts";
 import type { SlackCredentials } from "../slack/types.ts";
+import { ResourceDependency } from "./dependencies.ts";
 
 export type Tags = Record<string, string>;
 
@@ -82,4 +83,5 @@ export type Resource = {
 
 export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {
   config: C;
+  dependsOn: ResourceDependency[];
 };

@@ -5,6 +5,7 @@ import type { Resource } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./iamRole/types.ts";
 import type { LambdaFunctionConfig, LambdaFunctionState } from "./lambdaFunction/types.ts";
 import type { IAMUserConfig, IAMUserState } from "./iamUser/types.ts";
+import type { AppRunnerServiceConfig, AppRunnerServiceState } from "./appRunnerService/types.ts";
 import type {
   CloudwatchLogGroupConfig,
   CloudwatchLogGroupState,
@@ -19,6 +20,11 @@ export type WithRegion<T extends AWSResource> = T & {
 };
 
 export interface AWSConfig {
+  /**
+   * App Runner Service config
+   */
+  appRunnerService?: AppRunnerServiceConfig;
+
   /**
    * S3 config
    */
@@ -56,6 +62,10 @@ export interface AWSConfig {
 }
 
 export interface AWSState {
+  /**
+   * App Runner Service state
+   */
+  appRunnerService?: AppRunnerServiceState;
   /**
    * S3 state
    */

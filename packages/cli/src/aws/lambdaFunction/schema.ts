@@ -39,18 +39,24 @@ const imageCodeSchema = z.object({
   imageUri: z.string().url(),
 });
 
+const loggingConfigSchema = z.object({
+  logGroupName: z.string().optional(),
+});
+
 export const zipFunctionSchema = implement<ZipFunctionConfig>().with({
   packageType: z.literal("Zip"),
   branch: branchSchema,
   branchPattern: branchPatternSchema,
   code: zipCodeSchema,
   runtime: runtimeSchema,
+  loggingConfig: loggingConfigSchema.optional(),
   handler: z.string(),
   roleArn: z.string(),
   timeout: z.number().optional(),
   memorySize: z.number().optional(),
   description: z.string().optional(),
   region: z.string().optional(),
+  layerArns: z.array(z.string()).optional(),
   tags: z.record(z.string()).optional(),
 })
   .strict()
@@ -61,6 +67,8 @@ export const imageFunctionSchema = implement<ImageFunctionConfig>().with({
   branch: branchSchema,
   branchPattern: branchPatternSchema,
   code: imageCodeSchema,
+  loggingConfig: loggingConfigSchema.optional(),
+  layerArns: z.array(z.string()).optional(),
   roleArn: z.string(),
   timeout: z.number().optional(),
   memorySize: z.number().optional(),

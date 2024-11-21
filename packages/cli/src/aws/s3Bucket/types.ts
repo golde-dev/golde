@@ -1,5 +1,4 @@
-import type { Resource, Tags, WithBranch } from "../../types/config.ts";
-import type { ResourceDependency } from "../../types/dependencies.ts";
+import type { Resource, ResourceState, Tags, WithBranch } from "../../types/config.ts";
 import type { WithRegion } from "../types.ts";
 
 export interface BucketConfig extends Resource {
@@ -11,11 +10,10 @@ export interface S3BucketConfig {
   [bucketName: string]: BucketConfig;
 }
 
-export interface BucketState {
+export interface BucketState extends ResourceState {
   createdAt: string;
   updatedAt?: string;
   arn: string;
-  dependsOn: ResourceDependency[];
   config: WithRegion<WithBranch<BucketConfig>>;
 }
 
