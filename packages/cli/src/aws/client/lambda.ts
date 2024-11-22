@@ -1,5 +1,4 @@
 import { logger } from "../../logger.ts";
-
 import { tagEntriesTags } from "../../utils/tags.ts";
 import { AWSClientBase } from "./base.ts";
 import {

@@ -238,8 +238,36 @@
                   },
                   "tags": {
                     "$ref": "#/definitions/golde/properties/tags"
+                  },
+                  "includes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "bucketArn": {
+                    "type": "string"
                   }
                 },
+                "required": [
+                  "bucketArn"
+                ],
                 "additionalProperties": false
               }
             },
