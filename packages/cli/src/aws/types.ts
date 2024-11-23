@@ -1,15 +1,21 @@
-import type { S3BucketConfig, S3BucketState } from "./s3Bucket/types.ts";
-import type { S3ObjectConfig, S3ObjectState } from "./s3Object/types.ts";
-import type { Route53RecordConfig, Route53RecordState } from "./route53Record/types.ts";
+import type { S3BucketConfig, S3BucketState } from "./resources/s3Bucket/types.ts";
+import type { S3ObjectConfig, S3ObjectState } from "./resources/s3Object/types.ts";
+import type { Route53RecordConfig, Route53RecordState } from "./resources/route53Record/types.ts";
 import type { Resource } from "../types/config.ts";
-import type { IAMRoleConfig, IAMRoleState } from "./iamRole/types.ts";
-import type { LambdaFunctionConfig, LambdaFunctionState } from "./lambdaFunction/types.ts";
-import type { IAMUserConfig, IAMUserState } from "./iamUser/types.ts";
-import type { AppRunnerServiceConfig, AppRunnerServiceState } from "./appRunnerService/types.ts";
+import type { IAMRoleConfig, IAMRoleState } from "./resources/iamRole/types.ts";
+import type {
+  LambdaFunctionConfig,
+  LambdaFunctionState,
+} from "./resources/lambdaFunction/types.ts";
+import type { IAMUserConfig, IAMUserState } from "./resources/iamUser/types.ts";
+import type {
+  AppRunnerServiceConfig,
+  AppRunnerServiceState,
+} from "./resources/appRunnerService/types.ts";
 import type {
   CloudwatchLogGroupConfig,
   CloudwatchLogGroupState,
-} from "./cloudwatchLogGroup/types.ts";
+} from "./resources/cloudwatchLogGroup/types.ts";
 
 export interface AWSResource extends Resource {
   region?: string;

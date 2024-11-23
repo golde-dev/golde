@@ -6,26 +6,26 @@ import {
   createRoute53DestroyPlan,
   createRoute53Executors,
   createRoute53Plan,
-} from "./route53Record/plan.ts";
-import { createS3DestroyPlan, createS3Plan } from "./s3Bucket/plan.ts";
-import { createS3Executors } from "./s3Bucket/executor.ts";
+} from "./resources/route53Record/plan.ts";
+import { createS3DestroyPlan, createS3Plan } from "./resources/s3Bucket/plan.ts";
+import { createS3Executors } from "./resources/s3Bucket/executor.ts";
 import {
   createS3ObjectDestroyPlan,
   createS3ObjectExecutors,
   createS3ObjectPlan,
-} from "./s3Object/plan.ts";
-import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./iamRole/plan.ts";
-import { createIAMRoleExecutors } from "./iamRole/executor.ts";
-import { createCloudwatchLogGroupExecutors } from "./cloudwatchLogGroup/executor.ts";
+} from "./resources/s3Object/plan.ts";
+import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iamRole/plan.ts";
+import { createIAMRoleExecutors } from "./resources/iamRole/executor.ts";
+import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatchLogGroup/executor.ts";
 import {
   createCloudwatchLogGroupDestroyPlan,
   createCloudwatchLogGroupPlan,
-} from "./cloudwatchLogGroup/plan.ts";
+} from "./resources/cloudwatchLogGroup/plan.ts";
 import {
   createLambdaFunctionDestroyPlan,
   createLambdaFunctionPlan,
-} from "./lambdaFunction/plan.ts";
-import { createLambdaFunctionExecutors } from "./lambdaFunction/executor.ts";
+} from "./resources/lambdaFunction/plan.ts";
+import { createLambdaFunctionExecutors } from "./resources/lambdaFunction/executor.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {

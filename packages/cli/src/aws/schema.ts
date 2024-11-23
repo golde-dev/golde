@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
-import { route53RecordSchema } from "./route53Record/schema.ts";
-import { s3BucketSchema } from "./s3Bucket/schema.ts";
-import { s3ObjectSchema } from "./s3Object/schema.ts";
-import { iamRoleSchema } from "./iamRole/schema.ts";
-import { cloudwatchLogGroupSchema } from "./cloudwatchLogGroup/schema.ts";
-import { lambdaFunctionSchema } from "./lambdaFunction/schema.ts";
-import { iamUserSchema } from "./iamUser/schema.ts";
-import { appRunnerServiceSchema } from "./appRunnerService/schema.ts";
+import { route53RecordSchema } from "./resources/route53Record/schema.ts";
+import { s3BucketSchema } from "./resources/s3Bucket/schema.ts";
+import { s3ObjectSchema } from "./resources/s3Object/schema.ts";
+import { iamRoleSchema } from "./resources/iamRole/schema.ts";
+import { cloudwatchLogGroupSchema } from "./resources/cloudwatchLogGroup/schema.ts";
+import { lambdaFunctionSchema } from "./resources/lambdaFunction/schema.ts";
+import { iamUserSchema } from "./resources/iamUser/schema.ts";
+import { appRunnerServiceSchema } from "./resources/appRunnerService/schema.ts";
 import type { AWSConfig, AWSCredentials } from "./types.ts";
 
 export const awsConfigSchema = implement<AWSConfig>()

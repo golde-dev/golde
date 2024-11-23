@@ -1,11 +1,11 @@
 import { PlanError, PlanErrorCode } from "../error.ts";
-import { createDNSDestroyPlan, createDNSPlan } from "./dnsRecord/plan.ts";
-import { createDNSExecutors } from "./dnsRecord/executor.ts";
-import { createR2DestroyPlan, createR2Plan } from "./r2Bucket/plan.ts";
-import { createR2Executors } from "./r2Bucket/executor.ts";
+import { createDNSDestroyPlan, createDNSPlan } from "./resources/dnsRecord/plan.ts";
+import { createDNSExecutors } from "./resources/dnsRecord/executor.ts";
+import { createR2DestroyPlan, createR2Plan } from "./resources/r2Bucket/plan.ts";
+import { createR2Executors } from "./resources/r2Bucket/executor.ts";
 import { isEmpty } from "../utils/object.ts";
-import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./d1Database/plan.ts";
-import { createD1DatabaseExecutors } from "./d1Database/executor.ts";
+import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./resources/d1Database/plan.ts";
+import { createD1DatabaseExecutors } from "./resources/d1Database/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 
