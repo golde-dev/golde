@@ -6,11 +6,15 @@ export interface Include {
   to: string;
 }
 
+export type Version = "ObjectHash" | "ObjectEtag" | "ProjectGitHash" | "ContextGitHash";
+
 export interface ObjectConfig extends Resource {
   tags?: Tags;
   includes?: Include[];
+  version?: Version;
   source?: string;
-  bucketArn: string;
+  context?: string;
+  bucketName: string;
 }
 
 export interface S3ObjectConfig {
@@ -21,6 +25,7 @@ export interface ObjectState {
   createdAt: string;
   updatedAt?: string;
   key: string;
+  version: string;
   arn: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<ObjectConfig>;

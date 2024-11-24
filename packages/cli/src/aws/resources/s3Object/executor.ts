@@ -1,0 +1,192 @@
+import { isEqual } from "@es-toolkit/es-toolkit";
+import { PlanError, PlanErrorCode } from "../../../error.ts";
+import { logger } from "../../../logger.ts";
+import type { WithBranch } from "../../../types/config.ts";
+import { formatDuration } from "../../../utils/duration.ts";
+import { assertBranch } from "../../../utils/resource.ts";
+import { toTagsList } from "../../../utils/tags.ts";
+import { nowStringDate } from "../../../utils/date.ts";
+import type { AWSClient } from "../../client/client.ts";
+import type { ObjectConfig, ObjectState } from "./types.ts";
+import type { ResourceDependency } from "../../../types/dependencies.ts";
+import { join } from "@std/path";
+
+function s3ObjectArn(bucketName: string, key: string) {
+  return `arn:aws:s3:::${join(bucketName, key)}`;
+}
+
+export async function createObject(
+  this: AWSClient,
+  key: string,
+  config: WithBranch<ObjectConfig>,
+  dependsOn: ResourceDependency[],
+): Promise<ObjectState> {
+  assertBranch(config);
+
+  const {
+    tags,
+    bucketName,
+  } = config;
+  const { body, version } = await getBody(config);
+  const start = performance.now();
+  await this.putS3Object({
+    Bucket: bucketName,
+    Key: key,
+    Body: body,
+  });
+
+  const tagList = toTagsList(tags);
+  if (tagList) {
+    await this.putS3ObjectTags(bucketName, key, tagList);
+  }
+  const end = performance.now();
+  logger.debug(`[AWS] Created s3 object ${key} in ${formatDuration(end - start)}`);
+
+  const arn = s3ObjectArn(bucketName, key);
+  const createdAt = nowStringDate();
+  return {
+    arn,
+    key,
+    version,
+    createdAt,
+    dependsOn,
+    config,
+  };
+}
+export type CreateObject = typeof createObject;
+
+export async function deleteObject(
+  this: AWSClient,
+  bucketName: string,
+  name: string,
+): Promise<void> {
+  const start = performance.now();
+  await this.deleteS3Object(bucketName, name);
+  const end = performance.now();
+  logger.debug(`[AWS] Deleted s3 object ${name} in ${formatDuration(end - start)}`);
+}
+
+export type DeleteObject = typeof deleteObject;
+
+export async function updateObject(
+  this: AWSClient,
+  key: string,
+  config: WithBranch<ObjectConfig>,
+  state: ObjectState,
+  dependsOn: ResourceDependency[],
+): Promise<ObjectState> {
+  const {
+    tags,
+    bucketName,
+  } = config;
+  const {
+    arn,
+    createdAt,
+    version: previousVersion,
+    config: {
+      tags: previousTags,
+    },
+  } = state;
+
+  const { body, version } = await getBody(config);
+
+  const start = performance.now();
+
+  if (version !== previousVersion) {
+    await this.putS3Object({
+      Bucket: bucketName,
+      Key: key,
+      Body: body,
+    });
+  }
+
+  if (!isEqual(tags, previousTags)) {
+    const tagList = toTagsList(tags) ?? [];
+    await this.putS3ObjectTags(bucketName, key, tagList);
+  }
+  const end = performance.now();
+  logger.debug(`[AWS] Updated s3 object ${name} in ${formatDuration(end - start)}`);
+
+  const updatedAt = nowStringDate();
+  return {
+    arn,
+    key,
+    createdAt,
+    updatedAt,
+    version,
+    config,
+    dependsOn,
+  };
+}
+
+export type UpdateObject = typeof updateObject;
+
+export async function assertObjectExist(this: AWSClient, bucket: string, key: string) {
+  const start = performance.now();
+  const arn = s3ObjectArn(bucket, key);
+  const exists = await this.checkS3ObjectExists(bucket, key);
+  const end = performance.now();
+  logger.debug(`[AWS] Checked S3 object ${arn} exists in ${formatDuration(end - start)}`);
+  if (!exists) {
+    throw new PlanError(`S3 object ${arn} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
+  }
+}
+
+export async function assertCreatePermission(this: AWSClient, bucket: string, key: string) {
+  const start = performance.now();
+  const arn = s3ObjectArn(bucket, key);
+  const [allowed, reason] = await this.checkPermission(
+    ["s3:CreateBucket"],
+    [arn],
+  );
+  const end = performance.now();
+  logger.debug(`[AWS] Checked permission for s3 bucket ${arn} in ${formatDuration(end - start)}`);
+  if (!allowed) {
+    logger.error(`[AWS] Create permission s3 denied for bucket ${arn}`, reason);
+    throw new PlanError(`Cannot create s3 bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
+  }
+}
+
+export async function assertDeletePermission(this: AWSClient, bucket: string, key: string) {
+  const start = performance.now();
+  const arn = s3ObjectArn(bucket, key);
+  const [allowed, reason] = await this.checkPermission(
+    ["s3:DeleteBucket"],
+    [arn],
+  );
+  const end = performance.now();
+  logger.debug(`[AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`);
+  if (!allowed) {
+    logger.error(`[AWS] Delete permission denied for bucket ${arn}`, reason);
+    throw new PlanError(`Cannot delete bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
+  }
+}
+export async function assertUpdatePermission(this: AWSClient, bucket: string, key: string) {
+  const start = performance.now();
+  const arn = s3ObjectArn(bucket, key);
+  const [allowed, reason] = await this.checkPermission(
+    ["s3:PutBucketTagging"],
+    [arn],
+  );
+  const end = performance.now();
+  logger.debug(`[AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`);
+  if (!allowed) {
+    logger.error(`[AWS] Update tags permission denied for bucket ${arn}`, reason);
+    throw new PlanError(`Cannot update bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
+  }
+}
+
+export const createS3ObjectExecutors = (aws: AWSClient) => {
+  return {
+    createObject: createObject.bind(aws),
+    deleteObject: deleteObject.bind(aws),
+    updateObject: updateObject.bind(aws),
+
+    assertCreatePermission: assertCreatePermission.bind(aws),
+    assertDeletePermission: assertDeletePermission.bind(aws),
+    assertUpdatePermission: assertUpdatePermission.bind(aws),
+    assertObjectExist: assertObjectExist.bind(aws),
+  };
+};
+
+export type Executors = ReturnType<typeof createS3ObjectExecutors>;

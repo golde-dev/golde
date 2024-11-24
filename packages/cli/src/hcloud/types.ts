@@ -1,4 +1,4 @@
-import type { ServersConfig, ServersState } from "./servers/types.ts";
+import type { ServersConfig, ServersState } from "./resources/servers/types.ts";
 
 export interface HCloudConfig {
   servers?: ServersConfig;

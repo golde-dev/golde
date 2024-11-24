@@ -4,12 +4,15 @@ import {
   BucketAlreadyExists,
   CreateBucketCommand,
   DeleteBucketCommand,
+  DeleteObjectCommand,
   HeadBucketCommand,
   NotFound,
   PutBucketCorsCommand,
   PutBucketPolicyCommand,
   PutBucketTaggingCommand,
   PutBucketVersioningCommand,
+  PutObjectCommand,
+  PutObjectTaggingCommand,
   S3Client as Client,
 } from "@aws-sdk/client-s3";
 import type {
@@ -20,6 +23,7 @@ import type {
   PutBucketPolicyCommandOutput,
   PutBucketTaggingCommandInput,
   PutBucketTaggingCommandOutput,
+  PutObjectCommandInput,
   Tag,
 } from "@aws-sdk/client-s3";
 
@@ -196,6 +200,73 @@ export class S3Client extends AWSClientBase {
     } catch (e) {
       if (e instanceof Error) {
         logger.error("[AWS] Failed to delete bucket", e);
+      }
+      throw e;
+    }
+  }
+
+  public async putS3Object(
+    input: PutObjectCommandInput,
+  ) {
+    try {
+      logger.debug("[AWS] Create s3 object", {
+        Bucket: input.Bucket,
+        Key: input.Key,
+      });
+      const command = new PutObjectCommand(input);
+      await this
+        .getS3Client()
+        .send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS] Failed to create s3 object", e);
+      }
+      throw e;
+    }
+  }
+
+  public async putS3ObjectTags(
+    bucket: string,
+    key: string,
+    tags: Tag[],
+  ) {
+    try {
+      logger.debug("[AWS] Update s3 object tags", { bucket, key, tags });
+
+      const command = new PutObjectTaggingCommand({
+        Bucket: bucket,
+        Key: key,
+        Tagging: {
+          TagSet: tags,
+        },
+      });
+      await this
+        .getS3Client()
+        .send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS] Failed to update s3 object tags", e);
+      }
+      throw e;
+    }
+  }
+
+  public async deleteS3Object(bucketName: string, key: string): Promise<void> {
+    try {
+      logger.debug("[AWS] Delete s3 object", {
+        Bucket: bucketName,
+        Key: key,
+      });
+      const command = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      });
+      await this
+        .getS3Client()
+        .send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error("[AWS] Failed to delete s3 object", e);
       }
       throw e;
     }

@@ -25,7 +25,7 @@ const config: Config = {
       }
     },
     s3Object: {
-      "include.zip": {
+      "includes.zip": {
         branch: "master",
         includes: [
           {from: "./src/nested", to: "."},

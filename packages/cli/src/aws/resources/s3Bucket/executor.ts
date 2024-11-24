@@ -15,6 +15,9 @@ function s3BucketArn(name: string) {
   return `arn:aws:s3:::${name}`;
 }
 
+export async function getBody(config: WithBranch<BucketConfig>) {
+}
+
 export async function createBucket(
   this: AWSClient,
   name: string,
@@ -28,7 +31,7 @@ export async function createBucket(
     tags,
   } = config;
 
-  const start = Date.now();
+  const start = performance.now();
   await this.createS3Bucket(region, {
     Bucket: name,
   });
@@ -37,7 +40,7 @@ export async function createBucket(
   if (tagList) {
     await this.updateS3BucketTags(region, name, tagList);
   }
-  const end = Date.now();
+  const end = performance.now();
   logger.debug(`[AWS] Created bucket ${name} in ${formatDuration(end - start)}`);
 
   const arn = s3BucketArn(name);
@@ -59,7 +62,7 @@ export async function deleteBucket(
   const start = Date.now();
   await this.deleteBucket(region, name);
   const end = Date.now();
-  logger.debug(`[AWS] Deleted bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS] Deleted S3 bucket ${name} in ${formatDuration(end - start)}`);
 }
 
 export type DeleteBucket = typeof deleteBucket;

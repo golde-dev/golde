@@ -13,14 +13,23 @@ export const includesSchema = z.array(
 
 export const sourceSchema = z.string();
 
+export const identitySchema = z.enum([
+  "ObjectHash",
+  "ObjectEtag",
+  "ProjectGitHash",
+  "ContextGitHash",
+]).default("ObjectHash");
+
 export const objectConfigSchema = implement<ObjectConfig>()
   .with({
     branch: branchSchema,
     branchPattern: branchPatternSchema,
     tags: tagsSchema,
     includes: includesSchema.optional(),
+    version: identitySchema.optional(),
     source: sourceSchema.optional(),
-    bucketArn: z.string(),
+    context: z.string().optional(),
+    bucketName: z.string(),
   })
   .strict()
   .transform(transformBranch)

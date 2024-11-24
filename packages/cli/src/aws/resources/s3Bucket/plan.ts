@@ -175,7 +175,7 @@ export async function createS3Plan(
     }
   }
 
-  return await Promise.resolve(plan);
+  return plan;
 }
 
 export async function createS3DestroyPlan(
@@ -211,5 +211,5 @@ export async function createS3DestroyPlan(
     plan.push(deleteUnit);
   }
 
-  return Promise.resolve(plan);
+  return plan;
 }
