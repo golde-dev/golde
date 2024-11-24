@@ -15,6 +15,13 @@ import type { Object, ObjectConfig, ObjectState, S3ObjectConfig, S3ObjectState }
 async function getObject(config: ObjectConfig): Promise<Object> {
 }
 
+export async function isObjectEqual(
+  previous: ObjectConfig,
+  current: ObjectConfig,
+  state: ObjectState,
+): Promise<boolean> {
+}
+
 function getCurrent(buckets: S3ObjectState = {}) {
   const previous: {
     [path: string]: {
@@ -125,8 +132,7 @@ export async function createS3ObjectPlan(
     const { config: previousConfig, state, name } = previous[key];
     const { config: { bucketName } } = state;
 
-    const object = await getObject(nextConfig);
-    if (isEqual(nextConfig, previousConfig)) {
+    if (await isObjectEqual(nextConfig, previousConfig, state)) {
       const noopUnit: NoopUnit<ObjectConfig, ObjectState> = {
         type: Type.Noop,
         path: key,
@@ -144,6 +150,7 @@ export async function createS3ObjectPlan(
       await assertObjectExist(bucketName, name);
       await assertUpdatePermission(bucketName, name);
 
+      const object = await getObject(nextConfig);
       const updateUnit: UpdateUnit<
         ObjectConfig,
         ObjectState,
