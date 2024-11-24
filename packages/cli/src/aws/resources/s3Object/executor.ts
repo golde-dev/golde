@@ -7,7 +7,7 @@ import { assertBranch } from "../../../utils/resource.ts";
 import { toTagsList } from "../../../utils/tags.ts";
 import { nowStringDate } from "../../../utils/date.ts";
 import type { AWSClient } from "../../client/client.ts";
-import type { ObjectConfig, ObjectState } from "./types.ts";
+import type { Object, ObjectConfig, ObjectState } from "./types.ts";
 import type { ResourceDependency } from "../../../types/dependencies.ts";
 import { join } from "@std/path";
 
@@ -18,6 +18,7 @@ function s3ObjectArn(bucketName: string, key: string) {
 export async function createObject(
   this: AWSClient,
   key: string,
+  object: Object,
   config: WithBranch<ObjectConfig>,
   dependsOn: ResourceDependency[],
 ): Promise<ObjectState> {
@@ -27,7 +28,12 @@ export async function createObject(
     tags,
     bucketName,
   } = config;
-  const { body, version } = await getBody(config);
+
+  const {
+    body,
+    version,
+  } = object;
+
   const start = performance.now();
   await this.putS3Object({
     Bucket: bucketName,
@@ -71,6 +77,7 @@ export type DeleteObject = typeof deleteObject;
 export async function updateObject(
   this: AWSClient,
   key: string,
+  object: Object,
   config: WithBranch<ObjectConfig>,
   state: ObjectState,
   dependsOn: ResourceDependency[],
@@ -79,6 +86,12 @@ export async function updateObject(
     tags,
     bucketName,
   } = config;
+
+  const {
+    body,
+    version,
+  } = object;
+
   const {
     arn,
     createdAt,
@@ -87,8 +100,6 @@ export async function updateObject(
       tags: previousTags,
     },
   } = state;
-
-  const { body, version } = await getBody(config);
 
   const start = performance.now();
 

@@ -1,6 +1,11 @@
 import type { Resource, Tags, WithBranch } from "../../../types/config.ts";
 import type { ResourceDependency } from "../../../types/dependencies.ts";
 
+export interface Object {
+  body: ReadableStream;
+  version: string;
+}
+
 export interface Include {
   from: string;
   to: string;

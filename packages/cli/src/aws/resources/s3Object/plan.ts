@@ -10,7 +10,10 @@ import type { Tags } from "../../../types/config.ts";
 import type { ResourceDependency } from "../../../types/dependencies.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../types/plan.ts";
 import type { CreateObject, DeleteObject, Executors, UpdateObject } from "./executor.ts";
-import type { ObjectConfig, ObjectState, S3ObjectConfig, S3ObjectState } from "./types.ts";
+import type { Object, ObjectConfig, ObjectState, S3ObjectConfig, S3ObjectState } from "./types.ts";
+
+async function getObject(config: ObjectConfig): Promise<Object> {
+}
 
 function getCurrent(buckets: S3ObjectState = {}) {
   const previous: {
@@ -71,7 +74,7 @@ export async function createS3ObjectPlan(
     assertObjectExist,
   } = executors;
 
-  logger.debug("[AWS] s3 object planning changes", { state, config });
+  logger.debug("[AWS] S3 object planning changes", { state, config });
 
   const plan: Plan = [];
 
@@ -86,10 +89,11 @@ export async function createS3ObjectPlan(
 
     await assertCreatePermission(bucketName, name);
 
+    const object = await getObject(config);
     const createUnit: CreateUnit<ObjectConfig, ObjectState, CreateObject> = {
       type: Type.Create,
       executor: createObject,
-      args: [name, config, dependsOn],
+      args: [name, object, config, dependsOn],
       path: key,
       config,
       dependsOn,
@@ -120,8 +124,9 @@ export async function createS3ObjectPlan(
     const { config: nextConfig, dependsOn } = next[key];
     const { config: previousConfig, state, name } = previous[key];
     const { config: { bucketName } } = state;
-    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
-    if (isSameBaseConfig) {
+
+    const object = await getObject(nextConfig);
+    if (isEqual(nextConfig, previousConfig)) {
       const noopUnit: NoopUnit<ObjectConfig, ObjectState> = {
         type: Type.Noop,
         path: key,
@@ -146,7 +151,7 @@ export async function createS3ObjectPlan(
       > = {
         type: Type.Update,
         executor: updateObject,
-        args: [name, nextConfig, state, dependsOn],
+        args: [name, object, nextConfig, state, dependsOn],
         path: key,
         state,
         config: nextConfig,
