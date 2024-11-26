@@ -1,22 +1,18 @@
 import { isEmpty } from "../utils/object.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
-import type { Plan } from "../types/plan.ts";
-import type { Context } from "../types/context.ts";
+import { createS3DestroyPlan, createS3Plan } from "./resources/s3Bucket/plan.ts";
+import { createS3Executors } from "./resources/s3Bucket/executor.ts";
+import { createS3ObjectDestroyPlan, createS3ObjectPlan } from "./resources/s3Object/plan.ts";
+import { createS3ObjectExecutors } from "./resources/s3Object/executor.ts";
+import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iamRole/plan.ts";
+import { createIAMRoleExecutors } from "./resources/iamRole/executor.ts";
+import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatchLogGroup/executor.ts";
+import { createLambdaFunctionExecutors } from "./resources/lambdaFunction/executor.ts";
 import {
   createRoute53DestroyPlan,
   createRoute53Executors,
   createRoute53Plan,
 } from "./resources/route53Record/plan.ts";
-import { createS3DestroyPlan, createS3Plan } from "./resources/s3Bucket/plan.ts";
-import { createS3Executors } from "./resources/s3Bucket/executor.ts";
-import {
-  createS3ObjectDestroyPlan,
-  createS3ObjectExecutors,
-  createS3ObjectPlan,
-} from "./resources/s3Object/plan.ts";
-import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iamRole/plan.ts";
-import { createIAMRoleExecutors } from "./resources/iamRole/executor.ts";
-import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatchLogGroup/executor.ts";
 import {
   createCloudwatchLogGroupDestroyPlan,
   createCloudwatchLogGroupPlan,
@@ -25,7 +21,8 @@ import {
   createLambdaFunctionDestroyPlan,
   createLambdaFunctionPlan,
 } from "./resources/lambdaFunction/plan.ts";
-import { createLambdaFunctionExecutors } from "./resources/lambdaFunction/executor.ts";
+import type { Plan } from "../types/plan.ts";
+import type { Context } from "../types/context.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -94,6 +91,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
     const executors = createS3ObjectExecutors(aws);
     plan.push(createS3ObjectPlan(
       executors,
+      tags,
       s3ObjectState,
       s3ObjectConfig,
     ));

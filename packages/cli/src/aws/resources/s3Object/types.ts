@@ -2,7 +2,7 @@ import type { Resource, Tags, WithBranch } from "../../../types/config.ts";
 import type { ResourceDependency } from "../../../types/dependencies.ts";
 
 export interface Object {
-  body: ReadableStream;
+  body: Deno.FsFile;
   version: string;
 }
 

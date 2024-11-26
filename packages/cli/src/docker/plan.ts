@@ -3,7 +3,7 @@ import {
   createImageDestroyPlan,
   createImageExecutors,
   createImagePlan,
-} from "../docker/image/plan.ts";
+} from "./resources/image/plan.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 import { isEmpty } from "../utils/object.ts";

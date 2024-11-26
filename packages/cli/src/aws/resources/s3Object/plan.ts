@@ -3,6 +3,7 @@ import { logger } from "../../../logger.ts";
 import { s3ObjectPath } from "./path.ts";
 import { assertBranch } from "../../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
+import { join } from "@std/path";
 import { omitUndefined } from "../../../utils/object.ts";
 import { mergeProjectTags } from "../../../utils/tags.ts";
 import { Type } from "../../../types/plan.ts";
@@ -11,8 +12,37 @@ import type { ResourceDependency } from "../../../types/dependencies.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../types/plan.ts";
 import type { CreateObject, DeleteObject, Executors, UpdateObject } from "./executor.ts";
 import type { Object, ObjectConfig, ObjectState, S3ObjectConfig, S3ObjectState } from "./types.ts";
+import type { Version } from "./types.ts";
+
+async function getVersion(body: Deno.FsFile, version: Version): Promise<string> {
+  if (version === "ObjectHash") {
+    return await getObjectHash(body);
+  }
+}
 
 async function getObject(config: ObjectConfig): Promise<Object> {
+  const {
+    source,
+    includes,
+    version,
+    context = ".",
+  } = config;
+
+  const src = source
+    ? await createFromSource(context, source)
+    : await createFromIncludes(context, includes);
+
+  const body = await Deno.open(src);
+
+  const newVersion = await getVersion(
+    body,
+    version,
+  );
+
+  return {
+    body,
+    version: newVersion,
+  };
 }
 
 export async function isObjectEqual(
@@ -20,6 +50,11 @@ export async function isObjectEqual(
   current: ObjectConfig,
   state: ObjectState,
 ): Promise<boolean> {
+  if (!isEqual(current, previous)) {
+    return false;
+  }
+  const object = await getObject(current);
+  return state.version === object.version;
 }
 
 function getCurrent(buckets: S3ObjectState = {}) {

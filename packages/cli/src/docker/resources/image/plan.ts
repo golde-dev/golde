@@ -1,6 +1,6 @@
-import type { DockerClient } from "../client/client.ts";
-import type { Tags } from "../../types/config.ts";
-import type { ImagesConfig, ImagesState } from "../types.ts";
+import type { DockerClient } from "../../client/client.ts";
+import type { Tags } from "../../../types/config.ts";
+import type { ImagesConfig, ImagesState } from "../../types.ts";
 
 export function createImageExecutors(_: DockerClient) {
 }
