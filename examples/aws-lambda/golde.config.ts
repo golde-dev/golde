@@ -37,7 +37,7 @@ const config: Config = {
       }
     },
     cloudwatchLogGroup: {
-      "/aws/lambda/example-aws-lambda-function-log-group": {
+      "/aws/lambda/example-aws-lambda": {
         retentionInDays: 30,
       }
     },
@@ -52,7 +52,7 @@ const config: Config = {
         timeout: 30,
         roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
         tags: {
-          "LambdaTag": "Example tag",
+          "LambdaTag": "Example lambda tag",
         },
         code: {
           zipFile: "./lambda.zip"
@@ -68,14 +68,14 @@ const config: Config = {
         timeout: 30,
         roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
         tags: {
-          "LambdaTag": "Example tag",
+          "LambdaTag": "Example lambda tag",
         },
         code: {
           zipFile: "./lambda.zip"
         },
         loggingConfig: {
-          logGroupName: "{{ state.aws.cloudwatchLogGroup./aws/lambda/example-aws-lambda-function-log-group.name }}",
-        }
+          logGroupName: "{{ state.aws.cloudwatchLogGroup./aws/lambda/example-aws-lambda.name }}",
+        },
       },
     }
   }

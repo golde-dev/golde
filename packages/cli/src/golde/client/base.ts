@@ -1,5 +1,6 @@
 import { logger } from "../../logger.ts";
 import { GOLDE_API_URL } from "../../version.ts";
+import type { GoldeClientConfig } from "../types.ts";
 
 interface GoldeErrorCause {
   url: string;
@@ -33,7 +34,7 @@ export class GoldeClientBase {
   protected readonly apiKey: string;
   protected readonly baseUrl = GOLDE_API_URL;
 
-  public constructor(apiKey: string) {
+  public constructor({apiKey}: GoldeClientConfig) {
     this.apiKey = apiKey;
   }
 

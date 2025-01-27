@@ -4,11 +4,11 @@ import { stateSchema } from "./state/schema.ts";
 import { tagsSchema } from "./utils/tags.ts";
 import { awsConfigSchema, awsCredentialsSchema } from "./aws/schema.ts";
 import { cloudflareConfigSchema, cloudflareCredentialsSchema } from "./cloudflare/schema.ts";
-import type { Config, ProvidersConfig } from "./types/config.ts";
-import type { ZodType } from "zod";
 import { goldeCredentialsSchema } from "./golde/schema.ts";
 import { dockerConfigSchema } from "./docker/schema.ts";
 import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
+import type { Config, ProvidersConfig } from "./types/config.ts";
+import type { ZodType } from "zod";
 
 export const projectNameSchema = z
   .string()

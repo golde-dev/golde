@@ -40,6 +40,7 @@ interface FetchErrorCause {
 export class CloudflareError extends Error {
   public constructor(message: string, cause?: ErrorCause[] | FetchErrorCause) {
     super(message, { cause });
+    this.cause = cause;
   }
 }
 

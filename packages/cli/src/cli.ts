@@ -12,6 +12,7 @@ import { getDependencies } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
 import type { LevelName } from "@std/log";
 import { createOutput } from "./output.ts";
+import { configure } from "./configure.ts";
 
 // TODO: handel .env.example errors
 await load({
@@ -28,6 +29,23 @@ program
   .version(VERSION);
 
 program
+  .command("configure")
+  .description("Configure Golde CLI")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-j, --json", "log output as json")
+  .action(
+    async function (
+      { logLevel, json }: { logLevel: LevelName; json: boolean },
+    ) {
+      logger.configure(logLevel, json);
+
+      await configure();
+      logger.info("Successfully configured Golde CLI")
+      Deno.exit(0)
+    },
+  );
+
+program
   .command("init")
   .description("Initialize new golde project")
   .option("-l, --logLevel <level>", "define log level", "INFO")
@@ -40,6 +58,7 @@ program
 
       await initConfig();
       logger.info("Config created");
+      Deno.exit(0)
     },
   );
 
@@ -72,6 +91,7 @@ program
       const context = await initializeContext(branchName, loadedConfig);
 
       logger.info("Config", context.config);
+      Deno.exit(0);
     },
   );
 
@@ -98,6 +118,7 @@ program
       } = await initializeContext(branchName, loadedConfig);
 
       logger.info("Current state", previousState);
+      Deno.exit(0)
     },
   );
 
@@ -127,6 +148,7 @@ program
       getFinalConfig(loadedConfig, dependencies);
 
       logger.info("Config is valid");
+      Deno.exit(0)
     },
   );
 
@@ -162,6 +184,7 @@ program
       const context = await initializeContext(branchName, loadedConfig, yes);
 
       const _destroyPlan = await createDestroyPlan(context);
+      Deno.exit(0)
     },
   );
 
@@ -189,6 +212,7 @@ program
       } = options;
       logger.configure(logLevel, json);
       logger.warn("This command is not implemented yet");
+      Deno.exit(0)
     },
   );
 
@@ -223,6 +247,7 @@ program
       const finalContext = getFinalContext(context, finalConfig);
 
       await createPlan(finalContext, true);
+      Deno.exit(0)
     },
   );
 
@@ -273,6 +298,7 @@ program
         createOutput(finalContext, state);
       }
       await releaseLocks(finalContext, locks);
+      Deno.exit(0)
     },
   );
 

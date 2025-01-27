@@ -6,7 +6,7 @@ import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
-import type { ExecutionUnit, Plan } from "./types/plan.ts";
+import type { ExecutionPlan, ExecutionUnit, Plan } from "./types/plan.ts";
 import type { ExecutionGroups } from "./types/plan.ts";
 
 export function sortByPath<T extends ExecutionUnit>(plan: T[]): T[] {
@@ -142,4 +142,8 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
     }
     return Deno.exit(1);
   }
+}
+
+export function createExecutionPlan(_plan: Plan): Promise<ExecutionPlan[]> {
+  return Promise.resolve([]);
 }

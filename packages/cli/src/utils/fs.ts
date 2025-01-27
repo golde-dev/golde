@@ -1,15 +1,15 @@
 import { isPlainObject } from "@es-toolkit/es-toolkit";
 
-export function writeJSON(path: string, data: object | unknown[]): Promise<void> {
+export function writeJSON(path: string, data: object | unknown[]): void {
   if (!isPlainObject(data) && !Array.isArray(data)) {
     throw new Error("invalid JSON data");
   }
   const string = JSON.stringify(data, null, 2);
-  return Deno.writeTextFile(path, string);
+  return Deno.writeTextFileSync(path, string);
 }
 
-export async function readJSON<T extends object | unknown[]>(path: string): Promise<T> {
-  const text = await Deno.readTextFile(path);
+export function readJSON<T extends object | unknown[]>(path: string): T {
+  const text = Deno.readTextFileSync(path);
   const parsed = JSON.parse(text);
 
   if (!isPlainObject(parsed) && !Array.isArray(parsed)) {

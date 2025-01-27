@@ -1,6 +1,6 @@
 import type { AWSConfig, AWSCredentials } from "../aws/types.ts";
 import type { CloudflareConfig, CloudflareCredentials } from "../cloudflare/types.ts";
-import type { GoldeCredentials } from "../golde/types.ts";
+import type { GoldeClientConfig } from "../golde/types.ts";
 import type { HCloudCredentials } from "../hcloud/types.ts";
 import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
@@ -14,7 +14,7 @@ export interface ProvidersConfig {
   /**
    * Golde provider config
    */
-  golde?: GoldeCredentials;
+  golde?: GoldeClientConfig;
   /**
    * AWS access credentials
    */

@@ -76,6 +76,7 @@ export type ExecutionGroups = {
 };
 
 export type Plan = ExecutionUnit[];
+export type ExecutionPlan = Plan[];
 
 export interface CreateResult<
   C extends Resource = Resource,
