@@ -68,7 +68,7 @@ type Target =
   | "aarch64-apple-darwin";
 
 async function compile(target: Target, path: string, local: boolean) {
-  logger.info(`CLI Compiling target: ${target}`);
+  logger.info(`CLI compiling target: ${target}`);
 
   const perms = [
     "--allow-read",
