@@ -9,6 +9,7 @@ import type { ResourceDependency } from "./dependencies.ts";
 import type { GithubConfig, GithubCredentials } from "../github/types.ts";
 
 export type Tags = Record<string, string>;
+export type TagList = string[];
 
 export interface ProvidersConfig {
   /**
@@ -86,6 +87,10 @@ export type WithBranch<T extends Resource> = T & {
 export type Resource = {
   branch?: string;
   branchPattern?: string;
+};
+
+export type VersionedResource = Resource & {
+  version?: string;
 };
 
 export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {

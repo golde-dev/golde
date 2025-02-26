@@ -3,7 +3,7 @@ import {
   createRegistryDockerImageDestroyPlan,
   createRegistryDockerImageExecutors,
   createRegistryDockerImagePlan,
-} from "./resources/ghcrDockerImage/plan.ts";
+} from "./resources/registryDockerImage/plan.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 import { isEmpty } from "../utils/object.ts";
@@ -52,7 +52,7 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
   return (await Promise.all(plan)).flat();
 }
 
-export async function createGhcrDestroyPlan(context: Context): Promise<Plan> {
+export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
   const {
     previousState: {
       github: githubState,

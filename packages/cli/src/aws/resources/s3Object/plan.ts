@@ -20,22 +20,28 @@ import type {
 } from "./types.ts";
 import type { Version } from "./types.ts";
 
-async function getVersion(body: Deno.FsFile, version: Version = "ObjectHash"): Promise<string> {
+async function getVersion(body: ReadableStream, version: Version = "ObjectHash"): Promise<string> {
   if (version === "ObjectHash") {
     return await getObjectHash(body);
   }
   throw new Error("Not implemented");
 }
 
-async function createFromSource(context: string, source: string): Promise<Deno.FsFile> {
+async function createFromSource(
+  context: string,
+  source: string,
+): Promise<ReadableStream> {
   return await Promise.reject(new Error("Not implemented"));
 }
 
-async function getObjectHash(body: Deno.FsFile): Promise<string> {
+async function getObjectHash(body: ReadableStream): Promise<string> {
   throw await Promise.reject(new Error("Not implemented"));
 }
 
-async function createFromIncludes(context: string, includes: Include[] = []): Promise<Deno.FsFile> {
+async function createFromIncludes(
+  context: string,
+  includes: Include[] = [],
+): Promise<ReadableStream> {
   throw await Promise.reject(new Error("Not implemented"));
 }
 

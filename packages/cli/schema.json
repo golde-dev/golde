@@ -12,7 +12,15 @@
         "tags": {
           "type": "object",
           "additionalProperties": {
-            "type": "string"
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255,
+            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+          },
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
           }
         },
         "state": {
@@ -73,7 +81,7 @@
               "additionalProperties": false
             }
           ],
-          "description": "State backend config, only required when not using oss version"
+          "description": "State backend config, only required self hosting state"
         },
         "providers": {
           "type": "object",
@@ -115,29 +123,24 @@
               "additionalProperties": false,
               "description": "AWS provider config"
             },
-            "docker": {
+            "github": {
               "type": "object",
               "properties": {
-                "registry": {
-                  "type": "string",
-                  "description": "Docker registry url"
-                },
                 "username": {
                   "type": "string",
-                  "description": "Docker registry username"
+                  "description": "Github username"
                 },
-                "password": {
+                "accessToken": {
                   "type": "string",
-                  "description": "Docker registry password"
+                  "description": "Github Personal access token"
                 }
               },
               "required": [
-                "registry",
                 "username",
-                "password"
+                "accessToken"
               ],
               "additionalProperties": false,
-              "description": "Docker provider config"
+              "description": "Github provider config"
             },
             "cloudflare": {
               "type": "object",
@@ -258,15 +261,27 @@
                       "additionalProperties": false
                     }
                   },
+                  "version": {
+                    "type": "string",
+                    "enum": [
+                      "ObjectHash",
+                      "GitHash",
+                      "ContextGitHash"
+                    ],
+                    "default": "ObjectHash"
+                  },
                   "source": {
                     "type": "string"
                   },
-                  "bucketArn": {
+                  "context": {
+                    "type": "string"
+                  },
+                  "bucketName": {
                     "type": "string"
                   }
                 },
                 "required": [
-                  "bucketArn"
+                  "bucketName"
                 ],
                 "additionalProperties": false
               }

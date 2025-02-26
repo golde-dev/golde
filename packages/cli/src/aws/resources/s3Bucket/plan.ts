@@ -165,7 +165,7 @@ export async function createS3Plan(
       > = {
         type: Type.Update,
         executor: updateBucket,
-        args: [nextConfig.region, name, nextConfig, state, dependsOn],
+        args: [region, name, nextConfig, state, dependsOn],
         path: key,
         state,
         config: nextConfig,

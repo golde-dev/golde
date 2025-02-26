@@ -2,7 +2,7 @@ import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import type { GithubCredentials } from "./types.ts";
 import type { GithubConfig } from "./types.ts";
-import { registryDockerImagesSchema } from "./resources/ghcrDockerImage/schema.ts";
+import { registryDockerImagesSchema } from "./resources/registryDockerImage/schema.ts";
 
 export const githubCredentialsSchema = implement<GithubCredentials>()
   .with({

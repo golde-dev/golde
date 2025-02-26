@@ -13,12 +13,13 @@ export const includesSchema = z.array(
 
 export const sourceSchema = z.string();
 
-export const identitySchema = z.enum([
-  "ObjectHash",
-  "ObjectEtag",
-  "ProjectGitHash",
-  "ContextGitHash",
-]).default("ObjectHash");
+export const identitySchema = z
+  .enum([
+    "ObjectHash",
+    "GitHash",
+    "ContextGitHash",
+  ])
+  .default("ObjectHash");
 
 export const objectConfigSchema = implement<ObjectConfig>()
   .with({

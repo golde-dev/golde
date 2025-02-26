@@ -1,8 +1,9 @@
 import type { Resource, Tags, WithBranch } from "../../../types/config.ts";
 import type { ResourceDependency } from "../../../types/dependencies.ts";
+import type { GitVersion, ObjectVersion } from "../../../types/version.ts";
 
 export interface Object {
-  body: Deno.FsFile;
+  body: ReadableStream;
   version: string;
 }
 
@@ -11,7 +12,7 @@ export interface Include {
   to: string;
 }
 
-export type Version = "ObjectHash" | "ObjectEtag" | "ProjectGitHash" | "ContextGitHash";
+export type Version = ObjectVersion | GitVersion;
 
 export interface ObjectConfig extends Resource {
   tags?: Tags;

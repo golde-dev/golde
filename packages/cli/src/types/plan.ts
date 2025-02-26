@@ -4,9 +4,35 @@ import type { Resource, ResourceState } from "./config.ts";
 import type { ResourceDependency } from "./dependencies.ts";
 
 export enum Type {
+  /**
+   * When resource is created
+   */
   Create = "Create",
+  /**
+   * When resource is deleted
+   */
   Delete = "Delete",
+
+  /**
+   * Deletes the resource version
+   * Used only for stateful resources
+   */
+  DeleteVersion = "DeleteVersion",
+
+  /**
+   * When resource is updated
+   */
   Update = "Update",
+
+  /**
+   * When resource exist but it is not current version
+   * Used only for stateful resources
+   */
+  UpdateVersion = "UpdateVersion",
+
+  /**
+   * When there is no change to resource
+   */
   Noop = "Noop",
 }
 

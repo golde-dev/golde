@@ -26,7 +26,7 @@ await build({
   skipNpmInstall: true,
   test: false,
   shims: {
-    deno: true,
+    deno: false,
   },
   compilerOptions: {
     target: "ES2022",

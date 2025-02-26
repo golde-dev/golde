@@ -12,9 +12,10 @@ const config: Config = {
     }
   },
   github: {
-    dockerImage: {
-      "example-docker-image-golde": {
-        tags: {"latest": ""},
+    registryDockerImage: {
+      "@golde-dev/example-docker-image-golde": {
+        context: ".",
+        tags: {"latest": true},
       }
     }
   },
