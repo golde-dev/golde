@@ -32,6 +32,7 @@
 			"Nodenv",
 			"terragrunt"
 		],
+		"biome.enabled": false,
 		"search.exclude": {
 			"**/node_modules": true,
 			"**/dist": true,

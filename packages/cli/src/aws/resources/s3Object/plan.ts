@@ -3,7 +3,6 @@ import { logger } from "../../../logger.ts";
 import { s3ObjectPath } from "./path.ts";
 import { assertBranch } from "../../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { join } from "@std/path";
 import { omitUndefined } from "../../../utils/object.ts";
 import { mergeProjectTags } from "../../../utils/tags.ts";
 import { Type } from "../../../types/plan.ts";
@@ -11,13 +10,33 @@ import type { Tags } from "../../../types/config.ts";
 import type { ResourceDependency } from "../../../types/dependencies.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../types/plan.ts";
 import type { CreateObject, DeleteObject, Executors, UpdateObject } from "./executor.ts";
-import type { Object, ObjectConfig, ObjectState, S3ObjectConfig, S3ObjectState } from "./types.ts";
+import type {
+  Include,
+  Object,
+  ObjectConfig,
+  ObjectState,
+  S3ObjectConfig,
+  S3ObjectState,
+} from "./types.ts";
 import type { Version } from "./types.ts";
 
-async function getVersion(body: Deno.FsFile, version: Version): Promise<string> {
+async function getVersion(body: Deno.FsFile, version: Version = "ObjectHash"): Promise<string> {
   if (version === "ObjectHash") {
     return await getObjectHash(body);
   }
+  throw new Error("Not implemented");
+}
+
+async function createFromSource(context: string, source: string): Promise<Deno.FsFile> {
+  return await Promise.reject(new Error("Not implemented"));
+}
+
+async function getObjectHash(body: Deno.FsFile): Promise<string> {
+  throw await Promise.reject(new Error("Not implemented"));
+}
+
+async function createFromIncludes(context: string, includes: Include[] = []): Promise<Deno.FsFile> {
+  throw await Promise.reject(new Error("Not implemented"));
 }
 
 async function getObject(config: ObjectConfig): Promise<Object> {
@@ -28,16 +47,11 @@ async function getObject(config: ObjectConfig): Promise<Object> {
     context = ".",
   } = config;
 
-  const src = source
+  const body = source
     ? await createFromSource(context, source)
     : await createFromIncludes(context, includes);
 
-  const body = await Deno.open(src);
-
-  const newVersion = await getVersion(
-    body,
-    version,
-  );
+  const newVersion = await getVersion(body, version);
 
   return {
     body,

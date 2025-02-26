@@ -1,4 +1,4 @@
-import { decode } from "../../utils/text.ts";
+import { decode } from "../utils/text.ts";
 
 export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";

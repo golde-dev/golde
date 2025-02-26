@@ -1,13 +1,13 @@
 import type { AWSState } from "../aws/types.ts";
 import type { CloudflareState } from "../cloudflare/types.ts";
-import type { DockerState } from "../docker/types.ts";
 import type { Lock } from "./lock.ts";
+import type { GithubState } from "../github/types.ts";
 import type { Change } from "./plan.ts";
 
 export interface State {
   aws?: AWSState;
+  github?: GithubState;
   cloudflare?: CloudflareState;
-  docker?: DockerState;
 }
 
 export abstract class AbstractStateClient {

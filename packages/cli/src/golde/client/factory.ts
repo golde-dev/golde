@@ -3,7 +3,7 @@ import { logger } from "../../logger.ts";
 import { GoldeClient } from "./client.ts";
 import { homedir } from "node:os";
 import { existsSync } from "@std/fs/exists";
-import { readJSON } from "../../utils/fs.ts";
+import { readJSON } from "../../utils/json.ts";
 import type { GoldeClientConfig } from "../types.ts";
 
 export const getGoldeConfig = (): GoldeClientConfig | void => {
@@ -13,7 +13,7 @@ export const getGoldeConfig = (): GoldeClientConfig | void => {
       apiKey,
     };
   }
-  const configPath = join(homedir(), ".golde/config.json")
+  const configPath = join(homedir(), ".golde/config.json");
   if (existsSync(configPath)) {
     try {
       return readJSON<GoldeClientConfig>(configPath);

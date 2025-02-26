@@ -55,6 +55,8 @@ export class S3 {
         accessKeyId,
         secretAccessKey,
       },
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
 

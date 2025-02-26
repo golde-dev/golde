@@ -2,7 +2,6 @@ import { logger } from "./logger.ts";
 import { ContextError, ContextErrorCode } from "./error.ts";
 import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
 import { createHCloudClient } from "./hcloud/client/factory.ts";
-import { createDockerClient } from "./docker/client/factory.ts";
 import { createCloudflareClient } from "./cloudflare/client/factory.ts";
 import { createStateClient } from "./state/state.ts";
 import { createAWSClient } from "./aws/client/factory.ts";
@@ -11,8 +10,8 @@ import { getGitInfo } from "./utils/git.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { createSlackClient } from "./slack/client/factory.ts";
 import type { Context } from "./types/context.ts";
-import type { DockerClient } from "./docker/client/client.ts";
 import type { Config } from "./types/config.ts";
+import { createGithubClient } from "./github/client/factory.ts";
 
 export const initializeContext = async (
   branchName: string,
@@ -28,23 +27,12 @@ export const initializeContext = async (
       aws,
       hcloud,
       cloudflare,
-      docker,
+      github,
       slack,
     } = {},
   } = config;
 
   logger.debug("[Context] Start context initialization");
-
-  const createDocker = async (): Promise<DockerClient | undefined> => {
-    if (docker) {
-      logger.debug("[Context] Using docker provider to create docker client");
-      return await createDockerClient(docker);
-    } else if (golde) {
-      logger.debug("[Context] Using golde provider to create docker client");
-      return await createDockerClient(golde);
-    }
-    logger.debug("[Context] No docker client initialized");
-  };
 
   try {
     const start = performance.now();
@@ -63,7 +51,7 @@ export const initializeContext = async (
       cloudflare ? createCloudflareClient(cloudflare) : undefined,
       aws ? createAWSClient(aws) : undefined,
       slack ? createSlackClient(slack) : undefined,
-      createDocker(),
+      github ? createGithubClient(github) : undefined,
     ]);
 
     const git = getGitInfo(branchName);

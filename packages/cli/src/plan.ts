@@ -1,7 +1,7 @@
 import { logger } from "./logger.ts";
 import { createCloudflareDestroyPlan, createCloudflarePlan } from "./cloudflare/plan.ts";
 import { createAWSDestroyPlan, createAWSPlan } from "./aws/plan.ts";
-import { createDockerDestroyPlan, createDockerPlan } from "./docker/plan.ts";
+import { createGhcrDestroyPlan, createGithubPlan } from "./github/plan.ts";
 import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
@@ -91,7 +91,7 @@ export async function createPlan(
         [
           createAWSPlan(context),
           createCloudflarePlan(context),
-          createDockerPlan(context),
+          createGithubPlan(context),
         ],
       )
     ).flat();
@@ -127,7 +127,7 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
         [
           createAWSDestroyPlan(context),
           createCloudflareDestroyPlan(context),
-          createDockerDestroyPlan(context),
+          createGhcrDestroyPlan(context),
         ],
       )
     ).flat();

@@ -41,5 +41,5 @@ export const stateSchema: ZodType<StateConfig> = z.discriminatedUnion("type", [
   s3stateSchema,
   fsStateSchema,
 ]).describe(
-  "State backend config, only required when not using oss version",
+  "State backend config, only required self hosting state",
 );

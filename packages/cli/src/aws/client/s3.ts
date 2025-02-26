@@ -41,6 +41,8 @@ export class S3Client extends AWSClientBase {
             accessKeyId: this.accessKeyId,
             secretAccessKey: this.secretAccessKey,
           },
+          requestChecksumCalculation: "WHEN_REQUIRED",
+          responseChecksumValidation: "WHEN_REQUIRED",
         }),
       );
     }

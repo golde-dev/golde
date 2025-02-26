@@ -2,11 +2,11 @@ import type { AWSConfig, AWSCredentials } from "../aws/types.ts";
 import type { CloudflareConfig, CloudflareCredentials } from "../cloudflare/types.ts";
 import type { GoldeClientConfig } from "../golde/types.ts";
 import type { HCloudCredentials } from "../hcloud/types.ts";
-import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Output } from "./output.ts";
 import type { SlackCredentials } from "../slack/types.ts";
 import type { ResourceDependency } from "./dependencies.ts";
+import type { GithubConfig, GithubCredentials } from "../github/types.ts";
 
 export type Tags = Record<string, string>;
 
@@ -32,7 +32,7 @@ export interface ProvidersConfig {
   /**
    * Docker registry credentials
    */
-  docker?: DockerCredentials;
+  github?: GithubCredentials;
 
   /**
    * Hetzner cloud provider config
@@ -62,8 +62,15 @@ export type Config = {
    * Config for AWS resources
    */
   aws?: AWSConfig;
-  docker?: DockerConfig;
+  /**
+   * Cloudflare resources
+   */
   cloudflare?: CloudflareConfig;
+
+  /**
+   * Github resources
+   */
+  github?: GithubConfig;
   output?: Output | Output[];
 };
 

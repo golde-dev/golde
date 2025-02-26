@@ -1,8 +1,8 @@
 import slugify from "@sindresorhus/slugify";
-import { ensureDir } from "@std/fs";
+import { ensureDir, existsSync } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { join } from "@std/path";
-import { readJSON, writeJSON } from "../utils/fs.ts";
+import { readJSON, writeJSON } from "../utils/json.ts";
 import { applyChangeSet } from "../utils/object.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
@@ -44,18 +44,18 @@ export class FSStateClient implements AbstractStateClient {
    */
   public async getBranchState(_: string, branch: string): Promise<State | undefined> {
     const path = this.getStatePath(branch);
-    if (!await exists(path)) {
+    if (!await existsSync(path)) {
       return;
     }
-    return await readJSON<State>(path);
+    return readJSON<State>(path);
   }
 
   /**
    * Save state to file
    */
-  private saveState(branch: string, state: State): Promise<void> {
+  private saveState(branch: string, state: State): void {
     const path = this.getStatePath(branch);
-    return writeJSON(path, state);
+    writeJSON(path, state);
   }
 
   /**
