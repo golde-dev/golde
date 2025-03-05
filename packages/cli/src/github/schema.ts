@@ -2,7 +2,7 @@ import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import type { GithubCredentials } from "./types.ts";
 import type { GithubConfig } from "./types.ts";
-import { registryDockerImagesSchema } from "./resources/registryDockerImage/schema.ts";
+import { registryDockerImagesSchema } from "./resources/registry/dockerImage/schema.ts";
 
 export const githubCredentialsSchema = implement<GithubCredentials>()
   .with({
@@ -18,7 +18,9 @@ export const githubCredentialsSchema = implement<GithubCredentials>()
 
 export const githubConfigSchema = implement<GithubConfig>()
   .with({
-    registryDockerImage: registryDockerImagesSchema.optional(),
+    registry: z.object({
+      dockerImage: registryDockerImagesSchema.optional(),
+    }).optional(),
   })
   .describe("Github resources config")
   .strict();

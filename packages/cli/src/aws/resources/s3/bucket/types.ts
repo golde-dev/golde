@@ -1,5 +1,5 @@
-import type { Resource, ResourceState, Tags, WithBranch } from "../../../types/config.ts";
-import type { WithRegion } from "../../types.ts";
+import type { Resource, ResourceState, Tags, WithBranch } from "../../../../types/config.ts";
+import type { WithRegion } from "../../../types.ts";
 
 export interface BucketConfig extends Resource {
   region?: string;

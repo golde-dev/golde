@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { implement } from "../../../utils/zod.ts";
+import { implement } from "../../../../utils/zod.ts";
 import type { ImageConfig } from "./types.ts";
-import { branchPatternSchema, transformBranch } from "../../../utils/resource.ts";
-import { branchSchema } from "../../../utils/resource.ts";
+import { branchPatternSchema, transformBranch } from "../../../../utils/resource.ts";
+import { branchSchema } from "../../../../utils/resource.ts";
 
 export const imageConfigSchema = implement<ImageConfig>()
   .with({
@@ -13,8 +13,7 @@ export const imageConfigSchema = implement<ImageConfig>()
         "ImageHash",
         "GitHash",
         "ContextGitHash",
-      ])
-      .optional(),
+      ]),
     tags: z.array(z.string()).optional(),
     labels: z.record(z.string(), z.string()).optional(),
     context: z

@@ -1,9 +1,9 @@
-import { ensureAllKeys, prefixPath, removePrefix } from "../../../utils/object.ts";
+import { ensureAllKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
 
-export const BASE_PATH = "cloudflare.r2Bucket";
+export const BASE_PATH = "aws.s3.bucket";
 
-export function r2BucketPath(name: string) {
+export function s3BucketPath(name: string) {
   return prefixPath(BASE_PATH, name);
 }
 
@@ -14,14 +14,14 @@ export function removeBucketPrefix(path: string) {
 const stateAttributes = ensureAllKeys<BucketState>({
   createdAt: true,
   updatedAt: true,
+  arn: true,
   config: true,
-  location: true,
   dependsOn: true,
 });
 
 const configAttributes = ensureAllKeys<BucketConfig>({
-  locationHint: true,
-  storageClass: true,
+  "region": true,
+  "tags": true,
 });
 const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
 const possibleAttributes = [
@@ -30,12 +30,12 @@ const possibleAttributes = [
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const bucketNamePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
+const namePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
 const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
 
-const pattern = new RegExp(bucketNamePattern + attributePattern);
+const pattern = new RegExp(namePattern + attributePattern);
 
-export function matchR2Bucket(path: string): [string, string, string | null] | undefined {
+export function matchS3Bucket(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -43,14 +43,14 @@ export function matchR2Bucket(path: string): [string, string, string | null] | u
   const match = pattern.exec(groupPath);
 
   if (!match) {
-    throw new Error(`Incorrect Cloudflare R2 Bucket path: ${path}`);
+    throw new Error(`Incorrect AWS Bucket path: ${path}`);
   }
   const {
     groups: { name, attributePath = null } = {},
   } = match;
 
   return [
-    r2BucketPath(name),
+    s3BucketPath(name),
     name,
     attributePath,
   ];

@@ -1,5 +1,5 @@
-import type { Tags } from "../../../types/config.ts";
-import type { GithubClient } from "../../client/client.ts";
+import type { Tags } from "../../../../types/config.ts";
+import type { GithubClient } from "../../../client/client.ts";
 import type { RegistryDockerImagesConfig, RegistryDockerImagesState } from "./types.ts";
 
 export function createRegistryDockerImageExecutors(_: GithubClient) {

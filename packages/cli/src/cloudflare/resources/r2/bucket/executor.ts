@@ -1,8 +1,8 @@
-import { logger } from "../../../logger.ts";
-import type { WithBranch } from "../../../types/config.ts";
-import type { ResourceDependency } from "../../../types/dependencies.ts";
-import { formatDuration } from "../../../utils/duration.ts";
-import type { CloudflareClient } from "../../client/client.ts";
+import { logger } from "../../../../logger.ts";
+import type { WithBranch } from "../../../../types/config.ts";
+import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import { formatDuration } from "../../../../utils/duration.ts";
+import type { CloudflareClient } from "../../../client/client.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
 
 export async function createBucket(

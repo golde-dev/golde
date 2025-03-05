@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { implement } from "../../../utils/zod.ts";
-import { branchPatternSchema, branchSchema, transformBranch } from "../../../utils/resource.ts";
-import { tagsSchema } from "../../../utils/tags.ts";
+import { implement } from "../../../../utils/zod.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "../../../../utils/resource.ts";
+import { tagsSchema } from "../../../../utils/tags.ts";
 import type { BucketConfig } from "./types.ts";
 
 export const bucketSchema = implement<BucketConfig>()

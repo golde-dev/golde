@@ -1,5 +1,5 @@
-import type { S3BucketConfig, S3BucketState } from "./resources/s3Bucket/types.ts";
-import type { S3ObjectConfig, S3ObjectState } from "./resources/s3Object/types.ts";
+import type { S3BucketConfig, S3BucketState } from "./resources/s3/bucket/types.ts";
+import type { S3ObjectConfig, S3ObjectState } from "./resources/s3/object/types.ts";
 import type { Route53RecordConfig, Route53RecordState } from "./resources/route53Record/types.ts";
 import type { Resource } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./resources/iamRole/types.ts";
@@ -31,15 +31,10 @@ export interface AWSConfig {
    */
   appRunnerService?: AppRunnerServiceConfig;
 
-  /**
-   * S3 config
-   */
-  s3Bucket?: S3BucketConfig;
-
-  /**
-   * S3 Object config
-   */
-  s3Object?: S3ObjectConfig;
+  s3?: {
+    bucket?: S3BucketConfig;
+    object?: S3ObjectConfig;
+  };
 
   /**
    * Route53 record config
@@ -72,15 +67,14 @@ export interface AWSState {
    * App Runner Service state
    */
   appRunnerService?: AppRunnerServiceState;
-  /**
-   * S3 state
-   */
-  s3Bucket?: S3BucketState;
 
-  /**
-   * S3 Object state
-   */
-  s3Object?: S3ObjectState;
+  s3: {
+    /**
+     * S3 state
+     */
+    bucket?: S3BucketState;
+    object?: S3ObjectState;
+  };
 
   /**
    * Route53 state

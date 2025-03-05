@@ -1,12 +1,12 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { spy } from "@std/testing/mock";
-import { Type } from "../../../../types/plan.ts";
+import { Type } from "../../../../../types/plan.ts";
 import { createR2Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "../executor.ts";
 import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "../types.ts";
-import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../../types/plan.ts";
-import { assertBranch } from "../../../../utils/resource.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../../../types/plan.ts";
+import { assertBranch } from "../../../../../utils/resource.ts";
 
 const executors = {
   createBucket: spy(),
@@ -36,7 +36,7 @@ describe("cloudflare buckets", () => {
         type: Type.Create,
         executor: executors.createBucket,
         args: ["bucket1", config.bucket1, []],
-        path: "cloudflare.r2Bucket.bucket1",
+        path: "cloudflare.r2.bucket.bucket1",
         config: config.bucket1,
         dependsOn: [],
       };
@@ -99,7 +99,7 @@ describe("cloudflare buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["bucket1"],
-        path: "cloudflare.r2Bucket.bucket1",
+        path: "cloudflare.r2.bucket.bucket1",
         state: state.bucket1,
       };
       expect(result).toEqual([execution]);
@@ -130,7 +130,7 @@ describe("cloudflare buckets", () => {
         type: Type.Create,
         executor: executors.createBucket,
         args: ["bucket2", config.bucket2, []],
-        path: "cloudflare.r2Bucket.bucket2",
+        path: "cloudflare.r2.bucket.bucket2",
         config: config.bucket2,
         dependsOn: [],
       };
@@ -139,7 +139,7 @@ describe("cloudflare buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["bucket1"],
-        path: "cloudflare.r2Bucket.bucket1",
+        path: "cloudflare.r2.bucket.bucket1",
         state: state.bucket1,
       };
 
@@ -183,7 +183,7 @@ describe("cloudflare buckets", () => {
 
       const noop: NoopUnit = {
         type: Type.Noop,
-        path: "cloudflare.r2Bucket.bucket1",
+        path: "cloudflare.r2.bucket.bucket1",
         config: config.bucket1,
         state: state.bucket1,
         dependsOn: [],

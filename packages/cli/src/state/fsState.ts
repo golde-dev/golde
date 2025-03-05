@@ -3,7 +3,7 @@ import { ensureDir, existsSync } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { join } from "@std/path";
 import { readJSON, writeJSON } from "../utils/json.ts";
-import { applyChangeSet } from "../utils/object.ts";
+import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";

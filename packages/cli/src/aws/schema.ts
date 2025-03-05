@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import { route53RecordSchema } from "./resources/route53Record/schema.ts";
-import { s3BucketSchema } from "./resources/s3Bucket/schema.ts";
-import { s3ObjectSchema } from "./resources/s3Object/schema.ts";
+import { s3BucketSchema } from "./resources/s3/bucket/schema.ts";
+import { s3ObjectSchema } from "./resources/s3/object/schema.ts";
 import { iamRoleSchema } from "./resources/iamRole/schema.ts";
 import { cloudwatchLogGroupSchema } from "./resources/cloudwatchLogGroup/schema.ts";
 import { lambdaFunctionSchema } from "./resources/lambdaFunction/schema.ts";
@@ -13,8 +13,10 @@ import type { AWSConfig, AWSCredentials } from "./types.ts";
 export const awsConfigSchema = implement<AWSConfig>()
   .with({
     appRunnerService: appRunnerServiceSchema.optional(),
-    s3Bucket: s3BucketSchema.optional(),
-    s3Object: s3ObjectSchema.optional(),
+    s3: z.object({
+      bucket: s3BucketSchema.optional(),
+      object: s3ObjectSchema.optional(),
+    }).optional(),
     route53Record: route53RecordSchema.optional(),
     iamUser: iamUserSchema.optional(),
     iamRole: iamRoleSchema.optional(),

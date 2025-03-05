@@ -5,7 +5,7 @@ import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
-import { applyChangeSet } from "../utils/object.ts";
+import { applyChangeSet } from "./utils/apply.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
   `/${projectName}/${slugify(branch)}.state.json`;

@@ -207,84 +207,90 @@
                 "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*$"
               }
             },
-            "s3Bucket": {
+            "s3": {
               "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "branch": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branch"
-                  },
-                  "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branchPattern"
-                  },
-                  "tags": {
-                    "$ref": "#/definitions/golde/properties/tags"
-                  },
-                  "region": {
-                    "type": "string"
+              "properties": {
+                "bucket": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branch"
+                      },
+                      "branchPattern": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branchPattern"
+                      },
+                      "tags": {
+                        "$ref": "#/definitions/golde/properties/tags"
+                      },
+                      "region": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
                   }
                 },
-                "additionalProperties": false
-              }
-            },
-            "s3Object": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "branch": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branch"
-                  },
-                  "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branchPattern"
-                  },
-                  "tags": {
-                    "$ref": "#/definitions/golde/properties/tags"
-                  },
-                  "includes": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "from": {
-                          "type": "string"
-                        },
-                        "to": {
-                          "type": "string"
+                "object": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branch"
+                      },
+                      "branchPattern": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branchPattern"
+                      },
+                      "tags": {
+                        "$ref": "#/definitions/golde/properties/tags"
+                      },
+                      "includes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from",
+                            "to"
+                          ],
+                          "additionalProperties": false
                         }
                       },
-                      "required": [
-                        "from",
-                        "to"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "version": {
-                    "type": "string",
-                    "enum": [
-                      "ObjectHash",
-                      "GitHash",
-                      "ContextGitHash"
+                      "version": {
+                        "type": "string",
+                        "enum": [
+                          "ObjectHash",
+                          "GitHash",
+                          "ContextGitHash"
+                        ],
+                        "default": "ObjectHash"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "context": {
+                        "type": "string"
+                      },
+                      "bucketName": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "bucketName"
                     ],
-                    "default": "ObjectHash"
-                  },
-                  "source": {
-                    "type": "string"
-                  },
-                  "context": {
-                    "type": "string"
-                  },
-                  "bucketName": {
-                    "type": "string"
+                    "additionalProperties": false
                   }
-                },
-                "required": [
-                  "bucketName"
-                ],
-                "additionalProperties": false
-              }
+                }
+              },
+              "additionalProperties": false
             },
             "route53Record": {
               "type": "object",
@@ -902,52 +908,58 @@
                 }
               }
             },
-            "r2Bucket": {
+            "r2": {
               "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "branch": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branch"
+              "properties": {
+                "bucket": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branch"
+                      },
+                      "branchPattern": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branchPattern"
+                      },
+                      "locationHint": {
+                        "type": "string",
+                        "enum": [
+                          "apac",
+                          "eeur",
+                          "enam",
+                          "weur",
+                          "wnam"
+                        ]
+                      },
+                      "storageClass": {
+                        "type": "string",
+                        "enum": [
+                          "Standard",
+                          "InfrequentAccess"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
                   },
-                  "branchPattern": {
-                    "$ref": "#/definitions/golde/properties/aws/properties/appRunnerService/additionalProperties/properties/branchPattern"
-                  },
-                  "locationHint": {
-                    "type": "string",
-                    "enum": [
-                      "apac",
-                      "eeur",
-                      "enam",
-                      "weur",
-                      "wnam"
-                    ]
-                  },
-                  "storageClass": {
-                    "type": "string",
-                    "enum": [
-                      "Standard",
-                      "InfrequentAccess"
+                  "propertyNames": {
+                    "minLength": 3,
+                    "maxLength": 63,
+                    "allOf": [
+                      {
+                        "pattern": "^[a-z0-9]"
+                      },
+                      {
+                        "pattern": "[a-z0-9]$"
+                      },
+                      {
+                        "pattern": "^[a-z0-9-]*$"
+                      }
                     ]
                   }
-                },
-                "additionalProperties": false
+                }
               },
-              "propertyNames": {
-                "minLength": 3,
-                "maxLength": 63,
-                "allOf": [
-                  {
-                    "pattern": "^[a-z0-9]"
-                  },
-                  {
-                    "pattern": "[a-z0-9]$"
-                  },
-                  {
-                    "pattern": "^[a-z0-9-]*$"
-                  }
-                ]
-              }
+              "additionalProperties": false
             },
             "d1Database": {
               "type": "object",

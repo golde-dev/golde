@@ -1,17 +1,17 @@
-import { logger } from "../../../logger.ts";
-import { mergeProjectTags } from "../../../utils/tags.ts";
-import { assertBranch } from "../../../utils/resource.ts";
+import { logger } from "../../../../logger.ts";
+import { mergeProjectTags } from "../../../../utils/tags.ts";
+import { assertBranch } from "../../../../utils/resource.ts";
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { Type } from "../../../types/plan.ts";
-import { addDefaultRegion, assertRegion } from "../../utils.ts";
-import { omitUndefined } from "../../../utils/object.ts";
+import { Type } from "../../../../types/plan.ts";
+import { addDefaultRegion, assertRegion } from "../../../utils.ts";
+import { omitUndefined } from "../../../../utils/object.ts";
 import { s3BucketPath } from "./path.ts";
-import { findResourceDependencies } from "../../../dependencies.ts";
-import type { Tags } from "../../../types/config.ts";
-import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../types/plan.ts";
+import { findResourceDependencies } from "../../../../dependencies.ts";
+import type { Tags } from "../../../../types/config.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../../types/plan.ts";
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
-import type { ResourceDependency } from "../../../types/dependencies.ts";
+import type { ResourceDependency } from "../../../../types/dependencies.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
   const previous: {

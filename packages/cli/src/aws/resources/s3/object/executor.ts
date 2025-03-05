@@ -1,14 +1,14 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { PlanError, PlanErrorCode } from "../../../error.ts";
-import { logger } from "../../../logger.ts";
-import type { WithBranch } from "../../../types/config.ts";
-import { formatDuration } from "../../../utils/duration.ts";
-import { assertBranch } from "../../../utils/resource.ts";
-import { toTagsList } from "../../../utils/tags.ts";
-import { nowStringDate } from "../../../utils/date.ts";
-import type { AWSClient } from "../../client/client.ts";
+import { PlanError, PlanErrorCode } from "../../../../error.ts";
+import { logger } from "../../../../logger.ts";
+import type { WithBranch } from "../../../../types/config.ts";
+import { formatDuration } from "../../../../utils/duration.ts";
+import { assertBranch } from "../../../../utils/resource.ts";
+import { toTagsList } from "../../../../utils/tags.ts";
+import { nowStringDate } from "../../../../utils/date.ts";
+import type { AWSClient } from "../../../client/client.ts";
 import type { Object, ObjectConfig, ObjectState } from "./types.ts";
-import type { ResourceDependency } from "../../../types/dependencies.ts";
+import type { ResourceDependency } from "../../../../types/dependencies.ts";
 import { join } from "@std/path";
 
 function s3ObjectArn(bucketName: string, key: string) {

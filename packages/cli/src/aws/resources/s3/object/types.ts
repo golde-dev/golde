@@ -1,6 +1,6 @@
-import type { Resource, Tags, WithBranch } from "../../../types/config.ts";
-import type { ResourceDependency } from "../../../types/dependencies.ts";
-import type { GitVersion, ObjectVersion } from "../../../types/version.ts";
+import type { Tags, VersionedResource, WithBranch } from "../../../../types/config.ts";
+import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import type { GitVersion, ObjectVersion } from "../../../../types/version.ts";
 
 export interface Object {
   body: ReadableStream;
@@ -14,7 +14,7 @@ export interface Include {
 
 export type Version = ObjectVersion | GitVersion;
 
-export interface ObjectConfig extends Resource {
+export interface ObjectConfig extends VersionedResource {
   tags?: Tags;
   includes?: Include[];
   version?: Version;
@@ -38,5 +38,10 @@ export interface ObjectState {
 }
 
 export interface S3ObjectState {
-  [objectName: string]: ObjectState;
+  [objectName: string]: {
+    current: string;
+    versions: {
+      [version: string]: ObjectState;
+    };
+  };
 }

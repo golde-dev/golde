@@ -1,6 +1,6 @@
-import type { TagList, VersionedResource, WithBranch } from "../../../types/config.ts";
-import type { ResourceDependency } from "../../../types/dependencies.ts";
-import type { GitVersion, ImageVersion } from "../../../types/version.ts";
+import type { TagList, VersionedResource, WithBranch } from "../../../../types/config.ts";
+import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import type { GitVersion, ImageVersion } from "../../../../types/version.ts";
 
 export interface ImageConfig extends VersionedResource {
   /**
@@ -10,7 +10,7 @@ export interface ImageConfig extends VersionedResource {
    *
    * @default ImageHash
    */
-  version?: GitVersion | ImageVersion;
+  version: GitVersion | ImageVersion;
   /**
    * An optional identifier used to specify a particular version or variant of the image. If no tag is provided, Docker defaults to latest.
    * @see https://docs.docker.com/reference/cli/docker/image/tag/

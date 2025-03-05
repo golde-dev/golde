@@ -21,7 +21,7 @@ await build({
   entryPoints: ["./src/mod.ts"],
   outDir: "./dist/npm/@golde/cli",
   testPattern: "**/*.test.{ts,tsx,js,mjs,jsx}",
-  importMap: "deno.jsonc",
+  importMap: "deno.json",
   scriptModule: false,
   skipNpmInstall: true,
   test: false,

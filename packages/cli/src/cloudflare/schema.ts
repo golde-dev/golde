@@ -1,6 +1,6 @@
 import { implement } from "../utils/zod.ts";
 import type { CloudflareConfig, CloudflareCredentials } from "./types.ts";
-import { r2Schema } from "./resources/r2Bucket/schema.ts";
+import { r2BucketsSchema } from "./resources/r2/bucket/schema.ts";
 import { dnsSchema } from "./resources/dnsRecord/schema.ts";
 import { z } from "zod";
 import { d1DatabaseSchema } from "./resources/d1Database/schema.ts";
@@ -8,7 +8,9 @@ import { d1DatabaseSchema } from "./resources/d1Database/schema.ts";
 export const cloudflareConfigSchema = implement<CloudflareConfig>()
   .with({
     dnsRecord: dnsSchema.optional(),
-    r2Bucket: r2Schema.optional(),
+    r2: z.object({
+      bucket: r2BucketsSchema.optional(),
+    }).optional(),
     d1Database: d1DatabaseSchema.optional(),
   })
   .strict();

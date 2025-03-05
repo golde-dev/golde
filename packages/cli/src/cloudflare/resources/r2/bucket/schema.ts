@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { implement } from "../../../utils/zod.ts";
-import { branchPatternSchema, branchSchema, transformBranch } from "../../../utils/resource.ts";
+import { implement } from "../../../../utils/zod.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "../../../../utils/resource.ts";
 import type { BucketConfig } from "./types.ts";
 
-export const r2BucketSchema = implement<BucketConfig>()
+export const bucketSchema = implement<BucketConfig>()
   .with({
     branch: branchSchema,
     branchPattern: branchPatternSchema,
@@ -36,4 +36,4 @@ const nameSchema = z
     message: "R2 Bucket name can only contain lowercase letters, numbers, and hyphens.",
   });
 
-export const r2Schema = z.record(nameSchema, r2BucketSchema);
+export const r2BucketsSchema = z.record(nameSchema, bucketSchema);

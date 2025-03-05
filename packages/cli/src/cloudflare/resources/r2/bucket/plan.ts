@@ -1,13 +1,13 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { Type } from "../../../types/plan.ts";
-import { assertBranch } from "../../../utils/resource.ts";
-import { logger } from "../../../logger.ts";
-import { omitUndefined } from "../../../utils/object.ts";
+import { Type } from "../../../../types/plan.ts";
+import { assertBranch } from "../../../../utils/resource.ts";
+import { logger } from "../../../../logger.ts";
+import { omitUndefined } from "../../../../utils/object.ts";
 import { r2BucketPath } from "./path.ts";
-import { findResourceDependencies } from "../../../dependencies.ts";
-import type { CreateUnit, Plan } from "../../../types/plan.ts";
-import type { ResourceDependency } from "../../../types/dependencies.ts";
-import type { DeleteUnit, NoopUnit } from "../../../types/plan.ts";
+import { findResourceDependencies } from "../../../../dependencies.ts";
+import type { CreateUnit, Plan } from "../../../../types/plan.ts";
+import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import type { DeleteUnit, NoopUnit } from "../../../../types/plan.ts";
 import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "./executor.ts";
 

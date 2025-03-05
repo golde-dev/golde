@@ -86,6 +86,7 @@ export enum PlanErrorCode {
    *  eg: when user credentials are lack required permissions to perform action
    */
   PERMISSION_DENIED = "PERMISSION_DENIED",
+
   /**
    * Resource is already exists
    * eg: create bucket when bucket already exists in s3 global namespace
@@ -103,6 +104,12 @@ export enum PlanErrorCode {
    * eg: update d1 database
    */
   UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION",
+
+  /**
+   * When during plan resolution resource cannot be resolved
+   * eg: when trying to create bucket object where source file do not exists
+   */
+  INVALID_CONFIG = "INVALID_CONFIG",
 }
 
 export class PlanError extends Error {

@@ -3,7 +3,7 @@ import {
   createRegistryDockerImageDestroyPlan,
   createRegistryDockerImageExecutors,
   createRegistryDockerImagePlan,
-} from "./resources/registryDockerImage/plan.ts";
+} from "./resources/registry/dockerImage/plan.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 import { isEmpty } from "../utils/object.ts";
@@ -34,20 +34,26 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
   }
 
   const {
-    registryDockerImage: imagesState,
+    registry: {
+      dockerImage: imagesState,
+    } = {},
   } = githubState ?? {};
 
   const {
-    registryDockerImage: imagesConfig,
+    registry: {
+      dockerImage: imagesConfig,
+    } = {},
   } = githubConfig ?? {};
 
-  const dockerExecutors = createRegistryDockerImageExecutors(github);
-  plan.push(createRegistryDockerImagePlan(
-    dockerExecutors,
-    tags,
-    imagesState,
-    imagesConfig,
-  ));
+  if (!isEmpty(imagesState) || !isEmpty(imagesConfig)) {
+    const dockerExecutors = createRegistryDockerImageExecutors(github);
+    plan.push(createRegistryDockerImagePlan(
+      dockerExecutors,
+      tags,
+      imagesState,
+      imagesConfig,
+    ));
+  }
 
   return (await Promise.all(plan)).flat();
 }
@@ -73,14 +79,18 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
     );
   }
   const {
-    registryDockerImage: imagesState,
+    registry: {
+      dockerImage: imagesState,
+    } = {},
   } = githubState ?? {};
 
-  const dockerExecutors = createRegistryDockerImageExecutors(github);
-  plan.push(createRegistryDockerImageDestroyPlan(
-    dockerExecutors,
-    imagesState,
-  ));
+  if (!isEmpty(imagesState)) {
+    const dockerExecutors = createRegistryDockerImageExecutors(github);
+    plan.push(createRegistryDockerImageDestroyPlan(
+      dockerExecutors,
+      imagesState,
+    ));
+  }
 
   return (await Promise.all(plan)).flat();
 }

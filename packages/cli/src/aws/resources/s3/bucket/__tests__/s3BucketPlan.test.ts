@@ -1,14 +1,14 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { spy } from "@std/testing/mock";
-import { Type } from "../../../../types/plan.ts";
+import { Type } from "../../../../../types/plan.ts";
 import { createS3Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "../executor.ts";
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "../types.ts";
-import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../../types/plan.ts";
-import { assertBranch } from "../../../../utils/resource.ts";
-import { mergeProjectTags, mergeTags } from "../../../../utils/tags.ts";
-import { addDefaultRegion } from "../../../utils.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit, UpdateUnit } from "../../../../../types/plan.ts";
+import { assertBranch } from "../../../../../utils/resource.ts";
+import { mergeProjectTags, mergeTags } from "../../../../../utils/tags.ts";
+import { addDefaultRegion } from "../../../../utils.ts";
 
 const executors = {
   getDefaultRegion: () => "us-east-1",
@@ -54,7 +54,7 @@ describe("aws s3 buckets", () => {
         type: Type.Create,
         executor: executors.createBucket,
         args: ["bucket1", configWithRegion, []],
-        path: "aws.s3Bucket.bucket1",
+        path: "aws.s3.bucket.bucket1",
         config: configWithRegion,
         dependsOn: [],
       };
@@ -97,7 +97,7 @@ describe("aws s3 buckets", () => {
         type: Type.Update,
         executor: executors.updateBucket,
         args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1, []],
-        path: "aws.s3Bucket.bucket1",
+        path: "aws.s3.bucket.bucket1",
         state: state.bucket1,
         config: configWithRegion,
         dependsOn: [],
@@ -173,7 +173,7 @@ describe("aws s3 buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["us-east-1", "bucket1"],
-        path: "aws.s3Bucket.bucket1",
+        path: "aws.s3.bucket.bucket1",
         state: state.bucket1,
       };
       expect(result).toEqual([execution]);
@@ -209,7 +209,7 @@ describe("aws s3 buckets", () => {
         type: Type.Create,
         executor: executors.createBucket,
         args: ["bucket2", configWithRegion, []],
-        path: "aws.s3Bucket.bucket2",
+        path: "aws.s3.bucket.bucket2",
         config: configWithRegion,
         dependsOn: [],
       };
@@ -218,7 +218,7 @@ describe("aws s3 buckets", () => {
         type: Type.Delete,
         executor: executors.deleteBucket,
         args: ["us-east-1", "bucket1"],
-        path: "aws.s3Bucket.bucket1",
+        path: "aws.s3.bucket.bucket1",
         state: state.bucket1,
       };
 
@@ -264,7 +264,7 @@ describe("aws s3 buckets", () => {
 
       const noop: NoopUnit = {
         type: Type.Noop,
-        path: "aws.s3Bucket.bucket1",
+        path: "aws.s3.bucket.bucket1",
         config: config.bucket1,
         state: state.bucket1,
         dependsOn: state.bucket1.dependsOn,
