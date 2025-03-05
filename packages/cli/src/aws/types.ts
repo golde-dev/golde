@@ -1,21 +1,21 @@
 import type { S3BucketConfig, S3BucketState } from "./resources/s3/bucket/types.ts";
 import type { S3ObjectConfig, S3ObjectState } from "./resources/s3/object/types.ts";
-import type { Route53RecordConfig, Route53RecordState } from "./resources/route53Record/types.ts";
+import type { Route53RecordConfig, Route53RecordState } from "./resources/route53/record/types.ts";
 import type { Resource } from "../types/config.ts";
-import type { IAMRoleConfig, IAMRoleState } from "./resources/iamRole/types.ts";
+import type { IAMRoleConfig, IAMRoleState } from "./resources/iam/role/types.ts";
 import type {
   LambdaFunctionConfig,
   LambdaFunctionState,
-} from "./resources/lambdaFunction/types.ts";
-import type { IAMUserConfig, IAMUserState } from "./resources/iamUser/types.ts";
+} from "./resources/lambda/function/types.ts";
+import type { IAMUserConfig, IAMUserState } from "./resources/iam/user/types.ts";
 import type {
   AppRunnerServiceConfig,
   AppRunnerServiceState,
-} from "./resources/appRunnerService/types.ts";
+} from "./resources/appRunner/service/types.ts";
 import type {
   CloudwatchLogGroupConfig,
   CloudwatchLogGroupState,
-} from "./resources/cloudwatchLogGroup/types.ts";
+} from "./resources/cloudwatch/logGroup/types.ts";
 
 export interface AWSResource extends Resource {
   region?: string;
@@ -27,47 +27,71 @@ export type WithRegion<T extends AWSResource> = T & {
 
 export interface AWSConfig {
   /**
-   * App Runner Service config
+   * App Runner
    */
-  appRunnerService?: AppRunnerServiceConfig;
+  appRunner?: {
+    service?: AppRunnerServiceConfig;
+  };
 
+  /**
+   * S3 service
+   */
   s3?: {
     bucket?: S3BucketConfig;
     object?: S3ObjectConfig;
   };
 
   /**
-   * Route53 record config
+   * Route53
    */
-  route53Record?: Route53RecordConfig;
+  route53?: {
+    /**
+     * Route53 record config
+     */
+    record?: Route53RecordConfig;
+  };
 
   /**
-   * IAM user config
+   * IAM
    */
-  iamUser?: IAMUserConfig;
+  iam?: {
+    /**
+     * IAM user config
+     */
+    user?: IAMUserConfig;
+
+    /**
+     * IAM role config
+     */
+    role?: IAMRoleConfig;
+  };
 
   /**
-   * IAM role config
+   * Cloudwatch service
    */
-  iamRole?: IAMRoleConfig;
+  cloudwatch?: {
+    logGroup?: CloudwatchLogGroupConfig;
+  };
 
   /**
-   * Cloudwatch log group config
+   * Lambda service
    */
-  cloudwatchLogGroup?: CloudwatchLogGroupConfig;
-
-  /**
-   * Lambda function config
-   */
-  lambdaFunction?: LambdaFunctionConfig;
+  lambda?: {
+    function?: LambdaFunctionConfig;
+  };
 }
 
 export interface AWSState {
   /**
-   * App Runner Service state
+   * App Runner Service
    */
-  appRunnerService?: AppRunnerServiceState;
+  appRunner?: {
+    service?: AppRunnerServiceState;
+  };
 
+  /**
+   * S3 service
+   */
   s3: {
     /**
      * S3 state
@@ -79,27 +103,31 @@ export interface AWSState {
   /**
    * Route53 state
    */
-  route53Record?: Route53RecordState;
+  route53?: {
+    record?: Route53RecordState;
+  };
 
   /**
-   * IAM user state
+   * IAM
    */
-  iamUser?: IAMUserState;
-
-  /**
-   * IAM role state
-   */
-  iamRole?: IAMRoleState;
+  iam?: {
+    user?: IAMUserState;
+    role?: IAMRoleState;
+  };
 
   /**
    * Cloudwatch log group state
    */
-  cloudwatchLogGroup?: CloudwatchLogGroupState;
+  cloudwatch: {
+    logGroup?: CloudwatchLogGroupState;
+  };
 
   /**
    * Lambda function state
    */
-  lambdaFunction?: LambdaFunctionState;
+  lambda?: {
+    function?: LambdaFunctionState;
+  };
 }
 
 export interface AWSCredentials {

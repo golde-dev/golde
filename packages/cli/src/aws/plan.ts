@@ -4,23 +4,23 @@ import { createS3DestroyPlan, createS3Plan } from "./resources/s3/bucket/plan.ts
 import { createS3Executors } from "./resources/s3/bucket/executor.ts";
 import { createS3ObjectDestroyPlan, createS3ObjectPlan } from "./resources/s3/object/plan.ts";
 import { createS3ObjectExecutors } from "./resources/s3/object/executor.ts";
-import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iamRole/plan.ts";
-import { createIAMRoleExecutors } from "./resources/iamRole/executor.ts";
-import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatchLogGroup/executor.ts";
-import { createLambdaFunctionExecutors } from "./resources/lambdaFunction/executor.ts";
+import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iam/role/plan.ts";
+import { createIAMRoleExecutors } from "./resources/iam/role/executor.ts";
+import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatch/logGroup/executor.ts";
+import { createLambdaFunctionExecutors } from "./resources/lambda/function/executor.ts";
 import {
   createRoute53DestroyPlan,
   createRoute53Executors,
   createRoute53Plan,
-} from "./resources/route53Record/plan.ts";
+} from "./resources/route53/record/plan.ts";
 import {
   createCloudwatchLogGroupDestroyPlan,
   createCloudwatchLogGroupPlan,
-} from "./resources/cloudwatchLogGroup/plan.ts";
+} from "./resources/cloudwatch/logGroup/plan.ts";
 import {
   createLambdaFunctionDestroyPlan,
   createLambdaFunctionPlan,
-} from "./resources/lambdaFunction/plan.ts";
+} from "./resources/lambda/function/plan.ts";
 import type { Plan } from "../types/plan.ts";
 import type { Context } from "../types/context.ts";
 
@@ -50,25 +50,41 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
   }
 
   const {
-    route53Record: route53RecordConfig,
+    route53: {
+      record: route53RecordConfig,
+    } = {},
     s3: {
       bucket: s3BucketConfig,
       object: s3ObjectConfig,
     } = {},
-    iamRole: iamRoleConfig,
-    cloudwatchLogGroup: cloudwatchLogGroupConfig,
-    lambdaFunction: lambdaFunctionConfig,
+    iam: {
+      role: iamRoleConfig,
+    } = {},
+    cloudwatch: {
+      logGroup: cloudwatchLogGroupConfig,
+    } = {},
+    lambda: {
+      function: lambdaFunctionConfig,
+    } = {},
   } = awsConfig ?? {};
 
   const {
-    route53Record: route53RecordState,
+    route53: {
+      record: route53RecordState,
+    } = {},
     s3: {
       bucket: s3BucketState,
       object: s3ObjectState,
     } = {},
-    iamRole: iamRoleState,
-    cloudwatchLogGroup: cloudwatchLogGroupState,
-    lambdaFunction: lambdaFunctionState,
+    iam: {
+      role: iamRoleState,
+    } = {},
+    cloudwatch: {
+      logGroup: cloudwatchLogGroupState,
+    } = {},
+    lambda: {
+      function: lambdaFunctionState,
+    } = {},
   } = awsState ?? {};
 
   if (!isEmpty(route53RecordState) || !isEmpty(route53RecordConfig)) {
@@ -155,14 +171,22 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     );
   }
   const {
-    route53Record: route53State,
+    route53: {
+      record: route53State,
+    } = {},
     s3: {
       bucket: s3BucketState,
       object: s3ObjectState,
     } = {},
-    iamRole: iamRoleState,
-    cloudwatchLogGroup: cloudwatchLogGroupState,
-    lambdaFunction: lambdaFunctionState,
+    iam: {
+      role: iamRoleState,
+    } = {},
+    cloudwatch: {
+      logGroup: cloudwatchLogGroupState,
+    } = {},
+    lambda: {
+      function: lambdaFunctionState,
+    } = {},
   } = awsState ?? {};
 
   if (!isEmpty(route53State)) {
