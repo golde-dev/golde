@@ -2,6 +2,11 @@ import type {Config} from "@golde/cli";
 
 const config: Config = {
   name: "example-cloudflare-r2-bucket",
+  tags: {
+    Project: "GoldeExamples",
+    Stack: "example-cloudflare-r2-bucket",
+    Branch: "{{ git.BRANCH_NAME }}",
+  },
   providers: {
     golde: {
       apiKey: "{{ env.GOLDE_API_KEY }}",
@@ -12,9 +17,11 @@ const config: Config = {
     },
   },
   cloudflare: {
-    r2Bucket: {
-      "example-cloudflare-r2-bucket": {
-        storageClass: "Standard"
+    r2: {
+      bucket: {
+        "example-cloudflare-r2-bucket": {
+          storageClass: "Standard"
+        }
       }
     }
   }

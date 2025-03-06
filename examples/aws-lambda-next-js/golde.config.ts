@@ -16,34 +16,34 @@ const config: Config = {
     },
   },
   aws: {
-    s3Bucket: {
-      "example-aws-lambda-next-js": {
-        branch: "master",
+    s3: {
+      bucket: {
+        "example-aws-lambda-next-js": {
+          branch: "master",
+        },
+        "example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
+          branchPattern: "feature/*",
+        }
       },
-      "example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
-        branchPattern: "feature/*",
-      }
-    },
-    s3Object: {
-      "lambda-{{ git.BRANCH_HASH }}.zip": {
-        type: "zip",
-        include: [
-          {from: ".next/standalone", to: "."},
-          {from: "bin/run.sh", to: "."},
-          {from: "public", to: "public"},
-        ],
-        branch: "master",
-        bucket: "{{ state.aws.s3.example-aws-lambda-next-js.arn }}",
-      },
-      "lambda-{{ git.BRANCH_SLUG }}-{{ git.BRANCH_HASH }}.zip": {
-        type: "zip",
-        include: [
-          {from: ".next/standalone", to: "."},
-          {from: "bin/run.sh", to: "."},
-          {from: "public", to: "public"},
-        ],
-        branchPattern: "feature/*",
-        bucket: "{{ state.aws.s3.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
+      object: {
+        "lambda-{{ git.BRANCH_SLUG }}.zip": {
+          includes: [
+            {from: ".next/standalone", to: "."},
+            {from: "bin/run.sh", to: "."},
+            {from: "public", to: "public"},
+          ],
+          branch: "master",
+          bucketName: "{{ state.aws.s3.bucket.example-aws-lambda-next-js.name }}",
+        },
+        "lambda-feature-{{ git.BRANCH_SLUG }}.zip": {
+          includes: [
+            {from: ".next/standalone", to: "."},
+            {from: "bin/run.sh", to: "."},
+            {from: "public", to: "public"},
+          ],
+          branchPattern: "feature/*",
+          bucketName: "{{ state.aws.s3.bucket.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.name }}",
+        },
       },
     },
     iamRole: {
@@ -66,49 +66,53 @@ const config: Config = {
         ]
       }
     },
-    cloudwatchLogGroup: {
-      "/aws/lambda/example-aws-lambda-next-js": {
-        branch: "master",
-        retentionInDays: 60,
-      },
-      "/aws/lambda/example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
-        branchPattern: "feature/*",
-        retentionInDays: 14,
-      },
+    cloudwatch: {
+        logGroup: {
+        "/aws/lambda/example-aws-lambda-next-js": {
+          branch: "master",
+          retentionInDays: 60,
+        },
+        "/aws/lambda/example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
+          branchPattern: "feature/*",
+          retentionInDays: 14,
+        },
+      }
     },
     lambda: {
-      "example-aws-lambda-next-js": {
-        branch: "master",
-        description: "Example AWS Lambda Next.js",
-        runtime: "nodejs22.x",
-        handler: "index.handler",
-        memorySize: 512,
-        timeout: 30,
-        role: "{{ state.aws.iamRole.example-aws-lambda-next-js.arn }}",
-        code: {
-          s3bucket: "{{ state.aws.s3.example-aws-lambda-next-js.arn }}",
-          s3Key: "{{ lambda-{{ git.BRANCH_SLUG }}-{{ git.BRANCH_HASH }}.zip }}",
+      function: {
+        "example-aws-lambda-next-js": {
+          branch: "master",
+          description: "Example AWS Lambda Next.js",
+          runtime: "nodejs22.x",
+          handler: "index.handler",
+          memorySize: 512,
+          timeout: 30,
+          role: "{{ state.aws.iamRole.example-aws-lambda-next-js.arn }}",
+          code: {
+            s3bucket: "{{ state.aws.s3.example-aws-lambda-next-js.arn }}",
+            s3Key: "{{ lambda-{{ git.BRANCH_SLUG }}-{{ git.BRANCH_HASH }}.zip }}",
+          },
+          loggingConfig: {
+            logGroup: "{{ state.aws.cloudWatchLogGroup.example-aws-lambda-next-js.arn }}",
+          }
         },
-        loggingConfig: {
-          logGroup: "{{ state.aws.cloudWatchLogGroup.example-aws-lambda-next-js.arn }}",
-        }
-      },
-      "example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
-        branchPattern: "feature/*",
-        description: "Feature branch example AWS Lambda Next.js",
-        runtime: "nodejs22.x",
-        handler: "index.handler",
-        memorySize: 256,
-        timeout: 30,
-        role: "{{ state.aws.iamRole.example-aws-lambda-next-js.arn }}",
-        cade: {
-          s3bucket: "{{ state.aws.s3.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
-          s3Key: "{{ lambda-{{ git.BRANCH_HASH }}.zip }}",
+        "example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}": {
+          branchPattern: "feature/*",
+          description: "Feature branch example AWS Lambda Next.js",
+          runtime: "nodejs22.x",
+          handler: "index.handler",
+          memorySize: 256,
+          timeout: 30,
+          role: "{{ state.aws.iamRole.example-aws-lambda-next-js.arn }}",
+          cade: {
+            s3bucket: "{{ state.aws.s3.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
+            s3Key: "{{ lambda-{{ git.BRANCH_HASH }}.zip }}",
+          },
+          loggingConfig: {
+            logGroup: "{{ state.aws.cloudWatchLogGroup.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
+          }
         },
-        loggingConfig: {
-          logGroup: "{{ state.aws.cloudWatchLogGroup.example-aws-lambda-next-js-{{ git.BRANCH_SLUG }}.arn }}",
-        }
-      },
+      }
     }
   }, 
   output: {

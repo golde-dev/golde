@@ -17,12 +17,14 @@ const config: Config = {
     },
   },
   aws: {
-    cloudwatchLogGroup: {
-      "/aws/aws-cloudwatch-log-group": {
-        retentionInDays: 30,
-        tags: {
-          "GroupTag": "Example Log tag",
-        },
+    cloudwatch: {
+      logGroup: {
+        "/aws/aws-cloudwatch-log-group": {
+          retentionInDays: 30,
+          tags: {
+            "GroupTag": "Example Log tag",
+          },
+        }
       }
     }
   }

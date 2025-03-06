@@ -21,7 +21,7 @@ const config: Config = {
       bucket: {
         "golde-example-aws-s3-object": {
           tags: {
-            "BucketTag": "Example",
+            "BucketTag": "example-aws-s3-object",
           },
         }
       },
@@ -37,12 +37,12 @@ const config: Config = {
             { from: "./src/test1.txt", to: "./moved" },
             { from: "./src/test2.txt", to: "./moved" },
           ],
-          bucketArn: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.arn }}",
+          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
         "copy.txt": {
           branch: "master",
           source: "./src/base.txt",
-          bucketArn: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.arn }}",
+          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
       }
     }

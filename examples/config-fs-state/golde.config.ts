@@ -2,6 +2,11 @@ import type {Config} from "@golde/cli";
 
 const config: Config = {
   name: "example-config-fs-state",
+  tags: {
+    Project: "GoldeExamples",
+    Stack: "example-config-fs-state",
+    Branch: "{{ git.BRANCH_NAME }}",
+  },
   state: {
     type: "fs"
   },
@@ -13,8 +18,10 @@ const config: Config = {
   },
   cloudflare: {
     r2: {
-      "example-config-fs-state": {
-        storageClass: "Standard"
+      bucket: {
+        "example-config-fs-state": {
+          storageClass: "Standard"
+        }
       }
     }
   }
