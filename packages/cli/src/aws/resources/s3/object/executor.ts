@@ -1,15 +1,15 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
-import { PlanError, PlanErrorCode } from "../../../../error.ts";
-import { logger } from "../../../../logger.ts";
-import type { WithBranch } from "../../../../types/config.ts";
-import { formatDuration } from "../../../../utils/duration.ts";
-import { assertBranch } from "../../../../utils/resource.ts";
-import { toTagsList } from "../../../../utils/tags.ts";
-import { nowStringDate } from "../../../../utils/date.ts";
-import type { AWSClient } from "../../../client/client.ts";
-import type { Object, ObjectConfig, ObjectState } from "./types.ts";
-import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import { PlanError, PlanErrorCode } from "@/error.ts";
+import { logger } from "@/logger.ts";
 import { join } from "@std/path";
+import type { WithBranch } from "@/types/config.ts";
+import { formatDuration } from "@/utils/duration.ts";
+import { assertBranch } from "@/utils/resource.ts";
+import { toTagsList } from "@/utils/tags.ts";
+import { nowStringDate } from "@/utils/date.ts";
+import type { AWSClient } from "../../../client/client.ts";
+import type { ResourceDependency } from "@/types/dependencies.ts";
+import type { Object, ObjectConfig, ObjectState } from "@/generic/resources/s3/object/types.ts";
 
 function s3ObjectArn(bucketName: string, key: string) {
   return `arn:aws:s3:::${join(bucketName, key)}`;
@@ -30,15 +30,19 @@ export async function createObject(
   } = config;
 
   const {
-    body,
+    path,
     version,
   } = object;
+
+  const {
+    readable,
+  } = Deno.openSync(path);
 
   const start = performance.now();
   await this.putS3Object({
     Bucket: bucketName,
     Key: key,
-    Body: body,
+    Body: readable,
   });
 
   const tagList = toTagsList(tags);
@@ -88,7 +92,7 @@ export async function updateObject(
   } = config;
 
   const {
-    body,
+    path,
     version,
   } = object;
 
@@ -104,10 +108,14 @@ export async function updateObject(
   const start = performance.now();
 
   if (version !== previousVersion) {
+    const {
+      readable,
+    } = Deno.openSync(path);
+
     await this.putS3Object({
       Bucket: bucketName,
       Key: key,
-      Body: body,
+      Body: readable,
     });
   }
 

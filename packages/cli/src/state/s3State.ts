@@ -1,6 +1,6 @@
 import slugify from "@sindresorhus/slugify";
-import { notFoundAsUndefined } from "../shared/s3.ts";
-import type { S3 } from "../shared/s3.ts";
+import { notFoundAsUndefined } from "../generic/client/s3.ts";
+import type { S3 } from "../generic/client/s3.ts";
 import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";

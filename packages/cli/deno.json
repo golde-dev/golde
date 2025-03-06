@@ -16,6 +16,7 @@
     "compile:local": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --local"
   },
   "imports": {
+    "@/": "./src/",
     "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
     "@es-toolkit/es-toolkit": "jsr:@es-toolkit/es-toolkit@^1.32.0",
     "@std/assert": "jsr:@std/assert@^1.0.6",

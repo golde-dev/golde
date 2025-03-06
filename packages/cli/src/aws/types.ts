@@ -1,5 +1,5 @@
 import type { S3BucketConfig, S3BucketState } from "./resources/s3/bucket/types.ts";
-import type { S3ObjectConfig, S3ObjectState } from "./resources/s3/object/types.ts";
+import type { S3ObjectConfig, S3ObjectState } from "@/generic/resources/s3/object/types.ts";
 import type { Route53RecordConfig, Route53RecordState } from "./resources/route53/record/types.ts";
 import type { Resource } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./resources/iam/role/types.ts";

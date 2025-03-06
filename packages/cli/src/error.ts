@@ -106,10 +106,10 @@ export enum PlanErrorCode {
   UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION",
 
   /**
-   * When during plan resolution resource cannot be resolved
+   * When source file does not exist
    * eg: when trying to create bucket object where source file do not exists
    */
-  INVALID_CONFIG = "INVALID_CONFIG",
+  SOURCE_NOT_FOUND = "SOURCE_NOT_FOUND",
 }
 
 export class PlanError extends Error {

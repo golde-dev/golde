@@ -3,7 +3,7 @@ import type { ResourceDependency } from "../../../../types/dependencies.ts";
 import type { GitVersion, ObjectVersion } from "../../../../types/version.ts";
 
 export interface Object {
-  body: ReadableStream;
+  path: string;
   version: string;
 }
 
