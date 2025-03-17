@@ -15,11 +15,11 @@ export const sourceSchema = z.string();
 
 export const identitySchema = z
   .enum([
-    "ObjectHash",
+    "FileHash",
     "GitHash",
     "ContextGitHash",
   ])
-  .default("ObjectHash");
+  .default("FileHash");
 
 export const objectConfigSchema = implement<ObjectConfig>()
   .with({

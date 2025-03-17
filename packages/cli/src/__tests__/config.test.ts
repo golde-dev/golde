@@ -19,9 +19,11 @@ describe("resolveConfig", () => {
         },
       },
       cloudflare: {
-        r2Bucket: {
-          [`bucket-{{ env.NAME }}`]: {
-            storageClass: "Standard",
+        r2: {
+          bucket: {
+            [`bucket-{{ env.NAME }}`]: {
+              storageClass: "Standard",
+            },
           },
         },
       },
@@ -36,10 +38,12 @@ describe("resolveConfig", () => {
         },
       },
       cloudflare: {
-        r2Bucket: {
-          "bucket-name": {
-            branch: "master",
-            storageClass: "Standard",
+        r2: {
+          bucket: {
+            "bucket-name": {
+              branch: "master",
+              storageClass: "Standard",
+            },
           },
         },
       },
@@ -62,10 +66,12 @@ describe("resolveConfig", () => {
         "BRANCH_SLUG": "{{ git.BRANCH_SLUG }}",
       },
       cloudflare: {
-        r2Bucket: {
-          [`{{ git.BRANCH_NAME }}-{{ git.BRANCH_SLUG }}`]: {
-            storageClass: "Standard",
-            branch: "master",
+        r2: {
+          bucket: {
+            [`{{ git.BRANCH_NAME }}-{{ git.BRANCH_SLUG }}`]: {
+              storageClass: "Standard",
+              branch: "master",
+            },
           },
         },
       },
@@ -78,10 +84,12 @@ describe("resolveConfig", () => {
         BRANCH_SLUG: "master",
       },
       cloudflare: {
-        r2Bucket: {
-          "master-master": {
-            storageClass: "Standard",
-            branch: "master",
+        r2: {
+          bucket: {
+            "master-master": {
+              storageClass: "Standard",
+              branch: "master",
+            },
           },
         },
       },
@@ -98,19 +106,21 @@ describe("resolveConfig", () => {
       {
         name: "test",
         cloudflare: {
-          r2Bucket: {
-            [`bucket`]: {
-              storageClass: "Standard",
-              branch: "master",
-            },
-            [`bucket-branch-{{ git.BRANCH_SLUG }}`]: {
-              storageClass: "Standard",
-              branch: "{{ git.BRANCH_NAME }}",
-            },
-            [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
-              storageClass: "Standard",
-              branchPattern: "feature/*",
-              branch: "{{ git.BRANCH_NAME }}",
+          r2: {
+            bucket: {
+              [`bucket`]: {
+                storageClass: "Standard",
+                branch: "master",
+              },
+              [`bucket-branch-{{ git.BRANCH_SLUG }}`]: {
+                storageClass: "Standard",
+                branch: "{{ git.BRANCH_NAME }}",
+              },
+              [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
+                storageClass: "Standard",
+                branchPattern: "feature/*",
+                branch: "{{ git.BRANCH_NAME }}",
+              },
             },
           },
         },
@@ -122,15 +132,17 @@ describe("resolveConfig", () => {
     expect(config).toEqual({
       name: "test",
       cloudflare: {
-        r2Bucket: {
-          "bucket-branch-feature-test": {
-            storageClass: "Standard",
-            branch: "feature/test",
-          },
-          "bucket-pattern-feature-test": {
-            storageClass: "Standard",
-            branchPattern: "feature/*",
-            branch: "feature/test",
+        r2: {
+          bucket: {
+            "bucket-branch-feature-test": {
+              storageClass: "Standard",
+              branch: "feature/test",
+            },
+            "bucket-pattern-feature-test": {
+              storageClass: "Standard",
+              branchPattern: "feature/*",
+              branch: "feature/test",
+            },
           },
         },
       },
@@ -147,11 +159,13 @@ describe("resolveConfig", () => {
       {
         name: "test",
         cloudflare: {
-          r2Bucket: {
-            [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
-              storageClass: "Standard",
-              branchPattern: "feature/*",
-              branch: "{{ git.BRANCH_NAME }}",
+          r2: {
+            bucket: {
+              [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
+                storageClass: "Standard",
+                branchPattern: "feature/*",
+                branch: "{{ git.BRANCH_NAME }}",
+              },
             },
           },
         },
@@ -174,19 +188,21 @@ describe("resolveConfig", () => {
     const config = resolveConfig({
       name: "test",
       cloudflare: {
-        r2Bucket: {
-          [`bucket`]: {
-            storageClass: "Standard",
-            branch: "master",
-          },
-          [`bucket-branch-{{ git.BRANCH_SLUG }}`]: {
-            storageClass: "Standard",
-            branch: "{{ git.BRANCH_NAME }}",
-          },
-          [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
-            storageClass: "Standard",
-            branchPattern: "feature/*",
-            branch: "{{ git.BRANCH_NAME }}",
+        r2: {
+          bucket: {
+            [`bucket`]: {
+              storageClass: "Standard",
+              branch: "master",
+            },
+            [`bucket-branch-{{ git.BRANCH_SLUG }}`]: {
+              storageClass: "Standard",
+              branch: "{{ git.BRANCH_NAME }}",
+            },
+            [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
+              storageClass: "Standard",
+              branchPattern: "feature/*",
+              branch: "{{ git.BRANCH_NAME }}",
+            },
           },
         },
       },
@@ -195,19 +211,21 @@ describe("resolveConfig", () => {
     expect(config).toEqual({
       name: "test",
       cloudflare: {
-        r2Bucket: {
+        r2: {
           bucket: {
-            storageClass: "Standard",
-            branch: "master",
-          },
-          "bucket-branch-feature-test": {
-            storageClass: "Standard",
-            branch: "feature/test",
-          },
-          "bucket-pattern-feature-test": {
-            storageClass: "Standard",
-            branchPattern: "feature/*",
-            branch: "feature/test",
+            bucket: {
+              storageClass: "Standard",
+              branch: "master",
+            },
+            "bucket-branch-feature-test": {
+              storageClass: "Standard",
+              branch: "feature/test",
+            },
+            "bucket-pattern-feature-test": {
+              storageClass: "Standard",
+              branchPattern: "feature/*",
+              branch: "feature/test",
+            },
           },
         },
       },

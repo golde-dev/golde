@@ -42,8 +42,8 @@ describe("matchDNSRecord", () => {
 
   it("should not match not dns record path", () => {
     const examples = [
-      "aws.iamUser.user",
-      "aws.iamUser.user.arn",
+      "aws.iam.user.user",
+      "aws.iam.user.user.arn",
     ];
 
     for (const path of examples) {
@@ -54,9 +54,9 @@ describe("matchDNSRecord", () => {
 
   it("should throw when path is incorrect", () => {
     const examples = [
-      `cloudflare.dnsRecord.my.invalidType`,
-      `cloudflare.dnsRecord['my.dev'].A.test.invalidAttribute`,
-      `cloudflare.dnsRecord['my.dev'].A.@-invalidName`,
+      `cloudflare.dns.record.my.invalidType`,
+      `cloudflare.dns.record['my.dev'].A.test.invalidAttribute`,
+      `cloudflare.dns.record['my.dev'].A.@-invalidName`,
     ];
 
     for (const path of examples) {

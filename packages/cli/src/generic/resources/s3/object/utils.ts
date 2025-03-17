@@ -1,16 +1,18 @@
 import { copy, ensureDir, exists } from "@std/fs";
 import { dirname, join } from "@std/path";
+import { tar, tgz, zip } from "jsr:@deno-library/compress";
 import { getRefHash } from "../../../../utils/git.ts";
 import { hashFile } from "../../../../utils/hash.ts";
 import { PlanError, PlanErrorCode } from "../../../../error.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
+import { logger } from "@/logger.ts";
 
 async function getVersion(
   path: string,
   context: string,
-  version: Version = "ObjectHash",
+  version: Version = "FileHash",
 ): Promise<string> {
-  if (version === "ObjectHash") {
+  if (version === "FileHash") {
     return await hashFile(path);
   }
   if (version === "GitHash") {
@@ -22,6 +24,28 @@ async function getVersion(
   throw new Error("Not implemented");
 }
 
+async function compress(path: string, name: string) {
+  if (name.endsWith(".zip")) {
+    const archivePath = join(path, `zip`);
+    logger.debug(`Object ${name} Compressing ${path} to ${archivePath}`);
+    await zip.compress(path, archivePath);
+    return archivePath;
+  }
+  if (name.endsWith(".tar.gz")) {
+    const archivePath = join(path, `tar.gz`);
+    logger.debug(`Object ${name} Compressing ${path} to ${archivePath}`);
+    await tgz.compress(path, archivePath);
+    return archivePath;
+  }
+  if (name.endsWith(".tar")) {
+    const archivePath = join(path, `.tar`);
+    logger.debug(`Object ${name} Compressing ${path} to ${archivePath}`);
+    await tar.compress(path, archivePath);
+    return archivePath;
+  }
+  return path;
+}
+
 async function createFromSource(
   context: string,
   name: string,
@@ -29,9 +53,17 @@ async function createFromSource(
 ): Promise<string> {
   const path = join(context, source);
   if (await exists(path)) {
-    return path;
+    const tmpDir = await Deno.makeTempDir({
+      prefix: `golde-bucket-object-${name}`,
+    });
+    logger.debug(`Object ${name} Copying ${path} to ${tmpDir}`);
+    await copy(path, tmpDir, { preserveTimestamps: true });
+    return await compress(path, name);
   }
-  throw new PlanError(`Source ${source} does not exist`, PlanErrorCode.SOURCE_NOT_FOUND);
+  throw new PlanError(
+    `Bucket object ${name}, source ${source} does not exist`,
+    PlanErrorCode.SOURCE_NOT_FOUND,
+  );
 }
 
 async function createFromIncludes(
@@ -40,7 +72,7 @@ async function createFromIncludes(
   includes: Include[] = [],
 ): Promise<string> {
   const tmpDir = await Deno.makeTempDir({
-    prefix: "golde-bucket-object-",
+    prefix: `golde-bucket-object-${name}`,
   });
 
   for (const { from, to } of includes) {
@@ -50,16 +82,17 @@ async function createFromIncludes(
     ensureDir(dirname(toPath));
 
     if (await exists(fromPath)) {
-      await copy(fromPath, toPath);
+      logger.debug(`Object ${name} Copying ${fromPath} to ${toPath}`);
+      await copy(fromPath, toPath, { preserveTimestamps: true });
     } else {
       throw new PlanError(
-        `Bucket object include ${from} does not exist`,
+        `Bucket object ${name}, include ${from} does not exist`,
         PlanErrorCode.SOURCE_NOT_FOUND,
       );
     }
   }
 
-  return tmpDir;
+  return await compress(tmpDir, name);
 }
 
 export async function getObject(name: string, config: ObjectConfig): Promise<Object> {

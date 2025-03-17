@@ -42,7 +42,7 @@ const prefixHash = (hash: string, outputLength: number) => `fh-shake128-${output
  * At minimum use 24 bytes(170bit) and add add byte 200MB of input
  * Return hash encoded in base64url
  */
-export function hashFile(path: string) {
+export function hashFile(path: string): Promise<string> {
   const { size } = statSync(path);
 
   const outputLength = getOutputLength(size);

@@ -44,6 +44,24 @@ const config: Config = {
           source: "./src/base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
+        "file-hash.copy.zip": {
+          branch: "master",
+          source: "./src/base.txt",
+          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+        },
+        "git-hash.copy.zip": {
+          branch: "master",
+          version: "GitHash",
+          source: "./src/base.txt",
+          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+        },
+        "git-hash-context.copy.zip": {
+          branch: "master",
+          version: "ContextGitHash",
+          context: "./src",
+          source: "base.txt",
+          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+        },
       }
     }
   }
