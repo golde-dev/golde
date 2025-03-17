@@ -6,40 +6,16 @@ describe("matchIamRole", () => {
   it("should match IAM Role", () => {
     const examples = [
       {
-        path: `${BASE_PATH}.myRole`,
-        resourcePath: iamRolePath("myRole"),
-        roleName: "myRole",
-        attributePath: null,
-      },
-      {
         path: `${BASE_PATH}.myRole.arn`,
         resourcePath: iamRolePath("myRole"),
         roleName: "myRole",
         attributePath: "arn",
       },
       {
-        path: `${BASE_PATH}['my.Role'].arn`,
+        path: `${BASE_PATH}.my.Role.arn`,
         resourcePath: iamRolePath("my.Role"),
         roleName: "my.Role",
         attributePath: "arn",
-      },
-      {
-        path: `${BASE_PATH}.myRole.config`,
-        resourcePath: iamRolePath("myRole"),
-        roleName: "myRole",
-        attributePath: "config",
-      },
-      {
-        path: `${BASE_PATH}.my-Role.config`,
-        resourcePath: iamRolePath("my-Role"),
-        roleName: "my-Role",
-        attributePath: "config",
-      },
-      {
-        path: `${BASE_PATH}.myRole.config.managedPoliciesArns`,
-        resourcePath: iamRolePath("myRole"),
-        roleName: "myRole",
-        attributePath: "config.managedPoliciesArns",
       },
       {
         path: `${BASE_PATH}.myRole.config.permissionsBoundaryArn`,
@@ -62,10 +38,10 @@ describe("matchIamRole", () => {
     }
   });
 
-  it("should not match non IAM rolepath", () => {
+  it("should not match non IAM role path", () => {
     const examples = [
-      "aws.iamUser.user",
-      "aws.iamUser.user.arn",
+      "aws.iam.user.user",
+      "aws.iam.user.my-user.arn",
     ];
 
     for (const path of examples) {

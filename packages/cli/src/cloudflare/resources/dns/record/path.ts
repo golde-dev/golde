@@ -1,6 +1,5 @@
-import { trimStart } from "@es-toolkit/es-toolkit";
-import { ensureAllKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
-import type { RecordConfig, RecordState } from "./types.ts";
+import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
+import type { RecordConfig, RecordState, RecordType } from "./types.ts";
 
 const BASE_PATH = "cloudflare.dns.record";
 
@@ -21,39 +20,53 @@ export function removeDNSPrefix(path: string) {
   return removePrefix(BASE_PATH, path);
 }
 
-const stateAttributes = ensureAllKeys<RecordState>({
+const recordTypes: RecordType[] = [
+  "A",
+  "AAAA",
+  "CAA",
+  "CNAME",
+  "DKIM",
+  "DMARC",
+  "DNSKEY",
+  "DS",
+  "MX",
+  "NS",
+  "PTR",
+  "SOA",
+  "SPF",
+  "SRV",
+  "SVCB",
+  "TXT",
+];
+const recordTypePattern = recordTypes.join("|");
+
+const stateAttributes = ensureAllowedKeys<RecordState>({
   id: true,
   zoneId: true,
   updatedAt: true,
   createdAt: true,
-  config: true,
-  dependsOn: true,
 });
 
-const configAttributes = ensureAllKeys<RecordConfig>({
+const configAttributes = ensureAllowedKeys<RecordConfig>({
   value: true,
   ttl: true,
   proxied: true,
   comment: true,
-  tags: true,
-});
+  branch: true,
+  branchPattern: true,
+}).map((attribute) => `config.${attribute}`);
 
-const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
+const configPaths = configAttributes;
 
 const possibleAttributes = [
   ...stateAttributes,
   ...configPaths,
 ];
-
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const zoneTypePattern = new RegExp(
-  String.raw`^\['(?<zone>[a-zA-Z0-9.-]+)'\]\.(?<type>[A-Z]+)(?<rest>.*)$`,
+const pattern = new RegExp(
+  `^(?<tld>(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})\\.(?<recordType>${recordTypePattern})\\.(?<name>.*?)\\.(?<attributePath>${possibleAttributePattern})$`,
 );
-const namePattern = String.raw`^(?:\['(?<name>[A-Za-z0-9._-]+)'\]|(?<name>[A-Za-z0-9_-]+|@))`;
-const attributePattern = String.raw`(?:\.(?<attributePath>${possibleAttributePattern}))?$`;
-
-const restPattern = new RegExp(namePattern + attributePattern);
 
 export function matchDNSRecord(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {
@@ -61,26 +74,19 @@ export function matchDNSRecord(path: string): [string, string, string | null] | 
   }
   const dns = removeDNSPrefix(path);
 
-  const matchZone = zoneTypePattern.exec(dns);
-  if (!matchZone) {
-    throw new Error(`Incorrect Cloudflare DNS record path: ${path}`);
-  }
-  const {
-    groups: { type, zone, rest } = {},
-  } = matchZone;
+  const match = pattern.exec(dns);
 
-  const matchRest = restPattern.exec(trimStart(rest, "."));
-
-  if (!matchRest) {
-    throw new Error(`Incorrect Cloudflare DNS record path: ${path}`);
+  if (!match) {
+    throw new Error(`Incorrect Cloudflare DNS Record path: ${path}`);
   }
+
   const {
-    groups: { name, attributePath = null } = {},
-  } = matchRest;
+    groups: { tld, recordType, name, attributePath = null } = {},
+  } = match;
 
   return [
-    dnsPath(zone, type, name),
-    dnsRecordPath(zone, type, name),
+    dnsPath(tld, recordType, name),
+    dnsRecordPath(tld, recordType, name),
     attributePath,
   ];
 }

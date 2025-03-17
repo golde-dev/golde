@@ -2,15 +2,9 @@ import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 import { BASE_PATH, cloudwatchLogGroupPath, matchCloudwatchLogGroup } from "../path.ts";
 
-describe("matchIamRole", () => {
+describe("matchCloudwatchLogGroup", () => {
   it("should match cloudwatch log group path", () => {
     const examples = [
-      {
-        path: `${BASE_PATH}.my-group`,
-        resourcePath: cloudwatchLogGroupPath("my-group"),
-        name: "my-group",
-        attributePath: null,
-      },
       {
         path: `${BASE_PATH}.myGroup.arn`,
         resourcePath: cloudwatchLogGroupPath("myGroup"),
@@ -18,7 +12,7 @@ describe("matchIamRole", () => {
         attributePath: "arn",
       },
       {
-        path: `${BASE_PATH}['my.Group'].arn`,
+        path: `${BASE_PATH}.my.Group.arn`,
         resourcePath: cloudwatchLogGroupPath("my.Group"),
         name: "my.Group",
         attributePath: "arn",
@@ -52,8 +46,8 @@ describe("matchIamRole", () => {
 
   it("should not match non cloudwatch log group path", () => {
     const examples = [
-      "aws.iamUser.user",
-      "aws.iamUser.user.arn",
+      "aws.iam.user.user",
+      "aws.iam.user.user.arn",
     ];
 
     for (const path of examples) {

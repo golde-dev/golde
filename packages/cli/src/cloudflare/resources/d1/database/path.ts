@@ -1,4 +1,4 @@
-import { ensureAllKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
+import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { DatabaseConfig, DatabaseState } from "./types.ts";
 
 export const BASE_PATH = "cloudflare.d1.database";
@@ -11,28 +11,25 @@ export function removeD1Prefix(path: string) {
   return removePrefix(BASE_PATH, path);
 }
 
-const stateAttributes = ensureAllKeys<DatabaseState>({
+const stateAttributes = ensureAllowedKeys<DatabaseState>({
   createdAt: true,
   updatedAt: true,
   uuid: true,
-  config: true,
-  dependsOn: true,
 });
 
-const configAttributes = ensureAllKeys<DatabaseConfig>({
+const configAttributes = ensureAllowedKeys<DatabaseConfig>({
   locationHint: true,
-});
-const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
+  branch: true,
+  branchPattern: true,
+}).map((attribute) => `config.${attribute}`);
+
 const possibleAttributes = [
   ...stateAttributes,
-  ...configPaths,
+  ...configAttributes,
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const namePattern = `^(?<name>[a-z0-9][a-z0-9-_]+)`;
-const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
-
-const pattern = new RegExp(namePattern + attributePattern);
+const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
 export function matchD1Database(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {

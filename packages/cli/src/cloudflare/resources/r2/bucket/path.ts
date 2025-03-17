@@ -1,4 +1,4 @@
-import { ensureAllKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
+import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
 
 export const BASE_PATH = "cloudflare.r2.bucket";
@@ -11,29 +11,26 @@ export function removeBucketPrefix(path: string) {
   return removePrefix(BASE_PATH, path);
 }
 
-const stateAttributes = ensureAllKeys<BucketState>({
+const stateAttributes = ensureAllowedKeys<BucketState>({
   createdAt: true,
   updatedAt: true,
-  config: true,
   location: true,
-  dependsOn: true,
 });
 
-const configAttributes = ensureAllKeys<BucketConfig>({
+const configAttributes = ensureAllowedKeys<BucketConfig>({
   locationHint: true,
   storageClass: true,
-});
-const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
+  branch: true,
+  branchPattern: true,
+}).map((attribute) => `config.${attribute}`);
+
 const possibleAttributes = [
   ...stateAttributes,
-  ...configPaths,
+  ...configAttributes,
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const bucketNamePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
-const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
-
-const pattern = new RegExp(bucketNamePattern + attributePattern);
+const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
 export function matchR2Bucket(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {

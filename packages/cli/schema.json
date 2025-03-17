@@ -273,11 +273,11 @@
                       "version": {
                         "type": "string",
                         "enum": [
-                          "ObjectHash",
+                          "FileHash",
                           "GitHash",
                           "ContextGitHash"
                         ],
-                        "default": "ObjectHash"
+                        "default": "FileHash"
                       },
                       "source": {
                         "type": "string"

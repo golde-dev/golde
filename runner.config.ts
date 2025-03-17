@@ -3,6 +3,8 @@ import {spawnTask, parallelTask, seriesTask, task} from "@chyzwar/runner";
 import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
 import {debounce} from "es-toolkit";
+import { parseArgs } from 'util';
+
 
 spawnTask("verdaccio", 
   "yarn", ["dlx", "verdaccio@6.0.0-rc.1"],
@@ -88,18 +90,43 @@ parallelTask("dist:quick", [
   "dist:cli:quick",
 ]);
 
+const {positionals: [pattern]} = parseArgs({
+  args: process.argv.slice(3),
+  strict: false,
+  options: {
+    filer: {
+      type: "string",
+    }
+  }
+})
+
 spawnTask("test:agent", 
-  "deno", [
+  "deno", pattern ? [
     "test", 
     "--allow-env", 
-    "--allow-read"
+    "--allow-read", 
+    "--allow-run",
+    "--filter",
+    pattern
+  ] :[
+    "test", 
+    "--allow-env", 
+    "--allow-read", 
+    "--allow-run"
   ], 
   {
     cwd: "./packages/agent",
   }
 );
 spawnTask("test:cli", 
-  "deno", [
+  "deno", pattern ? [
+    "test", 
+    "--allow-env", 
+    "--allow-read", 
+    "--allow-run",
+    "--filter",
+    pattern
+  ] :[
     "test", 
     "--allow-env", 
     "--allow-read", 

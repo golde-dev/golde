@@ -70,26 +70,31 @@ export function omitUndefined<T extends object>(object: T): T {
 }
 
 /**
- * Construct array with all properties based on interface
+ * Utility type to filter keys by allowed types (string | number | boolean)
  */
-export function ensureAllKeys<T>(obj: { [K in keyof T]: true }): (keyof T)[] {
-  return Object.keys(obj) as (keyof T)[];
+type AllowedKeyOf<T> = {
+  [K in keyof T]: T[K] extends string | number | undefined | boolean ? K : never;
+}[keyof T];
+
+/**
+ * Construct array with only keys that have string | number | boolean values
+ */
+export function ensureAllowedKeys<T>(obj: { [K in AllowedKeyOf<T>]: true }): AllowedKeyOf<T>[] {
+  return Object.keys(obj) as AllowedKeyOf<T>[];
 }
 
 /**
  * Add prefix to path, if path contain . wrap it in ['path']
  */
 export function prefixPath(prefix: string, path: string): string {
-  return path.includes(".") ? `${prefix}['${path}']` : `${prefix}.${path}`;
+  return `${prefix}.${path}`;
 }
 
 /**
  * Remove prefix from path, handle ['path'] case
  */
 export function removePrefix(prefix: string, path: string): string {
-  return path.startsWith(`${prefix}.`)
-    ? path.replace(`${prefix}.`, "")
-    : path.replace(`${prefix}`, "");
+  return path.replace(`${prefix}.`, "");
 }
 
 /**

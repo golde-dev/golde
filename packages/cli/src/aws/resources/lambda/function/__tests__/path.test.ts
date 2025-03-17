@@ -6,28 +6,22 @@ describe("matchLambdaFunction", () => {
   it("should match function name and attribute path", () => {
     const examples = [
       {
-        path: `${BASE_PATH}.myFunction`,
-        resourcePath: lambdaFunctionPath("myFunction"),
-        functionName: "myFunction",
-        attributePath: null,
-      },
-      {
         path: `${BASE_PATH}.myFunction.arn`,
         resourcePath: lambdaFunctionPath("myFunction"),
         functionName: "myFunction",
         attributePath: "arn",
       },
       {
-        path: `${BASE_PATH}.myFunction.config`,
-        resourcePath: lambdaFunctionPath("myFunction"),
-        functionName: "myFunction",
-        attributePath: "config",
-      },
-      {
-        path: `${BASE_PATH}.my-Function.config`,
+        path: `${BASE_PATH}.my-Function.arn`,
         resourcePath: lambdaFunctionPath("my-Function"),
         functionName: "my-Function",
-        attributePath: "config",
+        attributePath: "arn",
+      },
+      {
+        path: `${BASE_PATH}.my.Function.arn`,
+        resourcePath: lambdaFunctionPath("my.Function"),
+        functionName: "my.Function",
+        attributePath: "arn",
       },
       {
         path: `${BASE_PATH}.myFunction.config.description`,
@@ -58,8 +52,8 @@ describe("matchLambdaFunction", () => {
 
   it("should not match non-lambda function path", () => {
     const examples = [
-      "aws.iamUser.user",
-      "aws.iamUser.user.arn",
+      "aws.iam.user.user",
+      "aws.iam.user.user.arn",
     ];
 
     for (const path of examples) {

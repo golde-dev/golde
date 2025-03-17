@@ -68,6 +68,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          name: "bucket1",
           dependsOn: [],
           config: {
             tags: { Type: "Old" },
@@ -118,6 +119,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          name: "bucket1",
           dependsOn: [],
           config: {
             region: "us-east-1",
@@ -151,6 +153,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          name: "bucket1",
           dependsOn: [],
           config: {
             tags: { Type: "Old" },
@@ -184,6 +187,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          name: "bucket1",
           dependsOn: [],
           config: {
             region: "us-east-1",
@@ -239,6 +243,7 @@ describe("aws s3 buckets", () => {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
+          name: "bucket1",
           dependsOn: [],
           config: {
             region: "us-east-1",

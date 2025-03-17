@@ -1,4 +1,4 @@
-import { ensureAllKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
+import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
 
 export const BASE_PATH = "aws.s3.bucket";
@@ -11,29 +11,26 @@ export function removeBucketPrefix(path: string) {
   return removePrefix(BASE_PATH, path);
 }
 
-const stateAttributes = ensureAllKeys<BucketState>({
+const stateAttributes = ensureAllowedKeys<BucketState>({
   createdAt: true,
   updatedAt: true,
   arn: true,
-  config: true,
-  dependsOn: true,
+  name: true,
 });
 
-const configAttributes = ensureAllKeys<BucketConfig>({
-  "region": true,
-  "tags": true,
-});
-const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
+const configAttributes = ensureAllowedKeys<BucketConfig>({
+  region: true,
+  branch: true,
+  branchPattern: true,
+}).map((attribute) => `config.${attribute}`);
+
 const possibleAttributes = [
   ...stateAttributes,
-  ...configPaths,
+  ...configAttributes,
 ];
+
 const possibleAttributePattern = possibleAttributes.join("|");
-
-const namePattern = `^(?:\\['(?<name>[A-Za-z0-9._-]+)'\\]|(?<name>[A-Za-z0-9_-]+))`;
-const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
-
-const pattern = new RegExp(namePattern + attributePattern);
+const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
 export function matchS3Bucket(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {

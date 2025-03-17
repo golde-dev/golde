@@ -15,9 +15,6 @@ function s3BucketArn(name: string) {
   return `arn:aws:s3:::${name}`;
 }
 
-export async function getBody(config: WithBranch<BucketConfig>) {
-}
-
 export async function createBucket(
   this: AWSClient,
   name: string,
@@ -47,6 +44,7 @@ export async function createBucket(
   const createdAt = nowStringDate();
   return {
     arn,
+    name,
     createdAt,
     dependsOn,
     config,
@@ -92,6 +90,7 @@ export async function updateBucket(
     const updatedAt = new Date().toISOString();
     return {
       arn,
+      name,
       createdAt,
       updatedAt,
       config,

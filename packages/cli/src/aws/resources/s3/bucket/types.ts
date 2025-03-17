@@ -14,6 +14,7 @@ export interface BucketState extends ResourceState {
   createdAt: string;
   updatedAt?: string;
   arn: string;
+  name: string;
   config: WithRegion<WithBranch<BucketConfig>>;
 }
 

@@ -7,22 +7,22 @@ describe("matchDNSRecord", () => {
   it("should match dns path and attribute path", () => {
     const examples = [
       {
-        path: dnsPath("acme.dev", "A", "@"),
-        resourcePath: dnsPath("acme.dev", "A", "@"),
-        recordPath: dnsRecordPath("acme.dev", "A", "@"),
-        attributePath: null,
-      },
-      {
         path: `${dnsPath("acme.dev", "A", "@")}.id`,
         resourcePath: dnsPath("acme.dev", "A", "@"),
         recordPath: dnsRecordPath("acme.dev", "A", "@"),
         attributePath: "id",
       },
       {
-        path: `${dnsPath("acme.dev", "A", "sub.sub")}.config`,
+        path: `${dnsPath("acme.dev", "A", "sub")}.id`,
+        resourcePath: dnsPath("acme.dev", "A", "sub"),
+        recordPath: dnsRecordPath("acme.dev", "A", "sub"),
+        attributePath: "id",
+      },
+      {
+        path: `${dnsPath("acme.dev", "A", "sub.sub")}.zoneId`,
         resourcePath: dnsPath("acme.dev", "A", "sub.sub"),
         recordPath: dnsRecordPath("acme.dev", "A", "sub.sub"),
-        attributePath: "config",
+        attributePath: "zoneId",
       },
     ];
 
@@ -54,14 +54,14 @@ describe("matchDNSRecord", () => {
 
   it("should throw when path is incorrect", () => {
     const examples = [
-      `cloudflare.dns.record.my.invalidType`,
-      `cloudflare.dns.record['my.dev'].A.test.invalidAttribute`,
-      `cloudflare.dns.record['my.dev'].A.@-invalidName`,
+      `cloudflare.dns.record.my.dev.invalidType`,
+      `cloudflare.dns.record.my.dev.A.test.invalid.invalid`,
+      `cloudflare.dns.record.my.dev.A.@.invalidAttribute`,
     ];
 
     for (const path of examples) {
       expect(() => matchDNSRecord(path)).toThrow(
-        `Incorrect Cloudflare DNS record path: ${path}`,
+        `Incorrect Cloudflare DNS Record path: ${path}`,
       );
     }
   });

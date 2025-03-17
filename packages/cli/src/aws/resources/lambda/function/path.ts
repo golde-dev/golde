@@ -1,4 +1,4 @@
-import { ensureAllKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
+import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { FunctionState, ZipLambdaCode } from "./types.ts";
 import type { ZipFunctionConfig } from "./types.ts";
 import type { ImageFunctionConfig } from "./types.ts";
@@ -13,15 +13,13 @@ export function removeFunctionPrefix(path: string) {
   return removePrefix(BASE_PATH, path);
 }
 
-const stateAttributes = ensureAllKeys<FunctionState>({
+const stateAttributes = ensureAllowedKeys<FunctionState>({
   arn: true,
   createdAt: true,
   updatedAt: true,
-  config: true,
-  dependsOn: true,
 });
 
-const configAttributes = ensureAllKeys<ImageFunctionConfig | ZipFunctionConfig>({
+const configAttributes = ensureAllowedKeys<ZipFunctionConfig>({
   description: true,
   packageType: true,
   handler: true,
@@ -29,32 +27,27 @@ const configAttributes = ensureAllKeys<ImageFunctionConfig | ZipFunctionConfig>(
   timeout: true,
   roleArn: true,
   region: true,
-  tags: true,
   memorySize: true,
-  code: true,
-});
-const configPaths = configAttributes.map((attribute) => `config.${attribute}`);
+  branch: true,
+  branchPattern: true,
+}).map((attribute) => `config.${attribute}`);
 
-const codeAttributes = ensureAllKeys<ZipLambdaCode | ImageLambdaCode>({
+const codeAttributes = ensureAllowedKeys<ZipLambdaCode | ImageLambdaCode>({
   imageUri: true,
   zipFile: true,
   s3Bucket: true,
   s3Key: true,
   s3ObjectVersion: true,
-});
-const codePaths = codeAttributes.map((attribute) => `config.code.${attribute}`);
+}).map((attribute) => `config.code.${attribute}`);
 
-export const possibleAttributes = [
+const possibleAttributes = [
   ...stateAttributes,
-  ...configPaths,
-  ...codePaths,
+  ...configAttributes,
+  ...codeAttributes,
 ];
 const possibleAttributePattern = possibleAttributes.join("|");
 
-const namePattern = `^(?<name>[A-Za-z0-9_-]+)`;
-const attributePattern = `(?:\\.(?<attributePath>${possibleAttributePattern}))?$`;
-
-const pattern = new RegExp(namePattern + attributePattern);
+const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
 export function matchLambdaFunction(path: string): [string, string, string | null] | undefined {
   if (!path.startsWith(BASE_PATH)) {

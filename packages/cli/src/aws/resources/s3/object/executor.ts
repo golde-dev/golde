@@ -52,10 +52,8 @@ export async function createObject(
   const end = performance.now();
   logger.debug(`[AWS] Created s3 object ${key} in ${formatDuration(end - start)}`);
 
-  const arn = s3ObjectArn(bucketName, key);
   const createdAt = nowStringDate();
   return {
-    arn,
     key,
     version,
     createdAt,
@@ -97,7 +95,6 @@ export async function updateObject(
   } = object;
 
   const {
-    arn,
     createdAt,
     version: previousVersion,
     config: {
@@ -128,7 +125,6 @@ export async function updateObject(
 
   const updatedAt = nowStringDate();
   return {
-    arn,
     key,
     createdAt,
     updatedAt,
