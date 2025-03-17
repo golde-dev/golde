@@ -46,6 +46,13 @@ const config: Config = {
         },
         "file-hash.copy.zip": {
           branch: "master",
+          version: "FileHash",
+          source: "./src/base.txt",
+          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+        },
+        "file-last-updated.copy.zip": {
+          branch: "master",
+          version: "LastUpdated",
           source: "./src/base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },

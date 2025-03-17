@@ -2,7 +2,7 @@ import { isEmpty } from "../utils/object.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import { createS3DestroyPlan, createS3Plan } from "./resources/s3/bucket/plan.ts";
 import { createS3Executors } from "./resources/s3/bucket/executor.ts";
-import { createS3ObjectDestroyPlan, createS3ObjectPlan } from "./resources/s3/object/plan.ts";
+import { createObjectDestroyPlan, createObjectPlan } from "./resources/s3/object/plan.ts";
 import { createS3ObjectExecutors } from "./resources/s3/object/executor.ts";
 import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iam/role/plan.ts";
 import { createIAMRoleExecutors } from "./resources/iam/role/executor.ts";
@@ -109,7 +109,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
 
   if (!isEmpty(s3ObjectState) || !isEmpty(s3ObjectConfig)) {
     const executors = createS3ObjectExecutors(aws);
-    plan.push(createS3ObjectPlan(
+    plan.push(createObjectPlan(
       executors,
       tags,
       s3ObjectState,
@@ -207,7 +207,7 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
 
   if (!isEmpty(s3ObjectState)) {
     const executors = createS3ObjectExecutors(aws);
-    plan.push(createS3ObjectDestroyPlan(
+    plan.push(createObjectDestroyPlan(
       executors,
       s3ObjectState,
     ));

@@ -1,13 +1,14 @@
 import type { S3BucketConfig, S3BucketState } from "./resources/s3/bucket/types.ts";
-import type { S3ObjectConfig, S3ObjectState } from "@/generic/resources/s3/object/types.ts";
+import type { ObjectsConfig, ObjectsState } from "@/generic/resources/s3/object/types.ts";
 import type { Route53RecordConfig, Route53RecordState } from "./resources/route53/record/types.ts";
 import type { Resource } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./resources/iam/role/types.ts";
+import type { IAMUserConfig, IAMUserState } from "./resources/iam/user/types.ts";
 import type {
   LambdaFunctionConfig,
   LambdaFunctionState,
 } from "./resources/lambda/function/types.ts";
-import type { IAMUserConfig, IAMUserState } from "./resources/iam/user/types.ts";
+
 import type {
   AppRunnerServiceConfig,
   AppRunnerServiceState,
@@ -38,7 +39,7 @@ export interface AWSConfig {
    */
   s3?: {
     bucket?: S3BucketConfig;
-    object?: S3ObjectConfig;
+    object?: ObjectsConfig;
   };
 
   /**
@@ -97,7 +98,7 @@ export interface AWSState {
      * S3 state
      */
     bucket?: S3BucketState;
-    object?: S3ObjectState;
+    object?: ObjectsState;
   };
 
   /**

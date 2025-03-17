@@ -5,7 +5,7 @@ import { Type } from "@/types/plan.ts";
 import { omitUndefined } from "@/utils/object.ts";
 import { assertBranch } from "@/utils/resource.ts";
 import { mergeProjectTags } from "@/utils/tags.ts";
-import type { Object, ObjectConfig, ObjectState, S3ObjectConfig, S3ObjectState } from "./types.ts";
+import type { Object, ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "./types.ts";
 import type { ResourceDependency } from "@/types/dependencies.ts";
 import type { Tags, WithBranch } from "@/types/config.ts";
 import type { CreateVersionUnit, DeleteUnit, DeleteVersionUnit, Plan } from "@/types/plan.ts";
@@ -25,8 +25,8 @@ export interface GenericExecutors {
     dependsOn: ResourceDependency[],
   ) => Promise<ObjectState>;
   deleteObject: (bucketName: string, name: string) => Promise<void>;
-  assertCreatePermission: (bucketName: string, name: string) => Promise<void>;
-  assertDeletePermission: (bucketName: string, name: string) => Promise<void>;
+  assertCreatePermission?: (bucketName: string, name: string) => Promise<void>;
+  assertDeletePermission?: (bucketName: string, name: string) => Promise<void>;
   assertObjectExist: (bucketName: string, name: string) => Promise<void>;
 }
 
@@ -36,7 +36,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
   providerName = "AWS",
   serviceName = "S3",
 ) {
-  function getCurrent(buckets: S3ObjectState = {}) {
+  function getCurrent(buckets: ObjectsState = {}) {
     const previous: {
       [path: string]: {
         name: string;
@@ -61,7 +61,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     return previous;
   }
 
-  async function getNext(config: S3ObjectConfig = {}, tags?: Tags) {
+  async function getNext(config: ObjectsConfig = {}, tags?: Tags) {
     const next: {
       [path: string]: {
         name: string;
@@ -88,11 +88,11 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     return next;
   }
 
-  async function createS3ObjectPlan(
+  async function createObjectPlan(
     executors: E,
     tags?: Tags,
-    state?: S3ObjectState,
-    config?: S3ObjectConfig,
+    state?: ObjectsState,
+    config?: ObjectsConfig,
   ): Promise<Plan> {
     const {
       createObject,
@@ -115,7 +115,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const { bucketName } = config;
       assertBranch(config);
 
-      await assertCreatePermission(bucketName, name);
+      await assertCreatePermission?.(bucketName, name);
 
       const object = {
         path,
@@ -139,7 +139,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const { config: { bucketName } } = state;
 
       await assertObjectExist(bucketName, name);
-      await assertDeletePermission(bucketName, name);
+      await assertDeletePermission?.(bucketName, name);
 
       const deleteVersionUnit: DeleteVersionUnit<ObjectState, typeof deleteObject> = {
         type: Type.DeleteVersion,
@@ -160,9 +160,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     return await Promise.resolve(plan);
   }
 
-  async function createS3ObjectDestroyPlan(
+  async function createObjectDestroyPlan(
     executors: GenericExecutors,
-    state?: S3ObjectState,
+    state?: ObjectsState,
   ): Promise<Plan> {
     logger.debug(`[${providerName}] ${serviceName} object planning destroying changes`, { state });
     const {
@@ -182,7 +182,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const { config: { bucketName } } = state;
 
       await assertObjectExist(bucketName, name);
-      await assertDeletePermission(bucketName, name);
+      await assertDeletePermission?.(bucketName, name);
 
       const deleteUnit: DeleteUnit<ObjectState, typeof deleteObject> = {
         type: Type.Delete,
@@ -197,7 +197,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
   }
 
   return {
-    createS3ObjectPlan,
-    createS3ObjectDestroyPlan,
+    createObjectPlan,
+    createObjectDestroyPlan,
   };
 }

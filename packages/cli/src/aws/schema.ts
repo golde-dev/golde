@@ -2,7 +2,7 @@ import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import { route53RecordSchema } from "./resources/route53/record/schema.ts";
 import { s3BucketSchema } from "./resources/s3/bucket/schema.ts";
-import { s3ObjectSchema } from "./resources/s3/object/schema.ts";
+import { s3ObjectSchema } from "../generic/resources/s3/object/schema.ts";
 import { iamRoleSchema } from "./resources/iam/role/schema.ts";
 import { cloudwatchLogGroupSchema } from "./resources/cloudwatch/logGroup/schema.ts";
 import { lambdaFunctionSchema } from "./resources/lambda/function/schema.ts";

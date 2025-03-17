@@ -3,11 +3,11 @@ import { s3ObjectPath, s3VersionObjectPath } from "./path.ts";
 import type { Executors } from "./executor.ts";
 
 const {
-  createS3ObjectPlan,
-  createS3ObjectDestroyPlan,
+  createObjectPlan,
+  createObjectDestroyPlan,
 } = createS3PlanFactory<Executors>(
   s3ObjectPath,
   s3VersionObjectPath,
 );
 
-export { createS3ObjectDestroyPlan, createS3ObjectPlan };
+export { createObjectDestroyPlan, createObjectPlan };

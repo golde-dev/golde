@@ -993,6 +993,9 @@
                       }
                     ]
                   }
+                },
+                "object": {
+                  "$ref": "#/definitions/golde/properties/aws/properties/s3/properties/object"
                 }
               },
               "additionalProperties": false

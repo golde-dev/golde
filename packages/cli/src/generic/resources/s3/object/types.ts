@@ -23,7 +23,7 @@ export interface ObjectConfig extends VersionedResource {
   bucketName: string;
 }
 
-export interface S3ObjectConfig {
+export interface ObjectsConfig {
   [objectName: string]: ObjectConfig;
 }
 
@@ -36,7 +36,7 @@ export interface ObjectState {
   config: WithBranch<ObjectConfig>;
 }
 
-export interface S3ObjectState {
+export interface ObjectsState {
   [objectName: string]: {
     current: string;
     versions: {

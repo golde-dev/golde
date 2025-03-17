@@ -1,11 +1,19 @@
 import { copy, ensureDir, exists } from "@std/fs";
 import { dirname, join } from "@std/path";
 import { tar, tgz, zip } from "jsr:@deno-library/compress";
-import { getRefHash } from "../../../../utils/git.ts";
-import { hashFile } from "../../../../utils/hash.ts";
-import { PlanError, PlanErrorCode } from "../../../../error.ts";
+import { getRefHash } from "@/utils/git.ts";
+import { hashFile } from "@/utils/hash.ts";
+import { PlanError, PlanErrorCode } from "@/error.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 import { logger } from "@/logger.ts";
+
+async function getLastUpdated(path: string) {
+  const { mtime } = await Deno.lstat(path);
+  if (!mtime) {
+    throw new Error(`Failed to get last updated for ${path}`);
+  }
+  return mtime.toString();
+}
 
 async function getVersion(
   path: string,
@@ -15,13 +23,16 @@ async function getVersion(
   if (version === "FileHash") {
     return await hashFile(path);
   }
+  if (version === "LastUpdated") {
+    return await getLastUpdated(path);
+  }
   if (version === "GitHash") {
     return await getRefHash();
   }
   if (version === "ContextGitHash") {
     return await getRefHash(context);
   }
-  throw new Error("Not implemented");
+  throw new Error(`Not implemented: ${version}`);
 }
 
 async function compress(path: string, name: string) {
