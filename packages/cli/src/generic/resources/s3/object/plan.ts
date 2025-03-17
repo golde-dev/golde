@@ -75,7 +75,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     for (const [name, object] of Object.entries(config)) {
       const withTags = mergeProjectTags(object, tags);
 
-      const { version, path } = await getObject(object);
+      const { version, path } = await getObject(name, object);
 
       next[s3VersionObjectPath(version, name)] = {
         name,

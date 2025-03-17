@@ -1,5 +1,5 @@
-import { exists } from "@std/fs";
-import { join } from "@std/path";
+import { copy, ensureDir, exists } from "@std/fs";
+import { dirname, join } from "@std/path";
 import { getRefHash } from "../../../../utils/git.ts";
 import { hashFile } from "../../../../utils/hash.ts";
 import { PlanError, PlanErrorCode } from "../../../../error.ts";
@@ -24,6 +24,7 @@ async function getVersion(
 
 async function createFromSource(
   context: string,
+  name: string,
   source: string,
 ): Promise<string> {
   const path = join(context, source);
@@ -35,12 +36,33 @@ async function createFromSource(
 
 async function createFromIncludes(
   context: string,
+  name: string,
   includes: Include[] = [],
 ): Promise<string> {
-  throw await Promise.reject(new Error("Not implemented"));
+  const tmpDir = await Deno.makeTempDir({
+    prefix: "golde-bucket-object-",
+  });
+
+  for (const { from, to } of includes) {
+    const fromPath = join(context, from);
+    const toPath = join(tmpDir, to);
+
+    ensureDir(dirname(toPath));
+
+    if (await exists(fromPath)) {
+      await copy(fromPath, toPath);
+    } else {
+      throw new PlanError(
+        `Bucket object include ${from} does not exist`,
+        PlanErrorCode.SOURCE_NOT_FOUND,
+      );
+    }
+  }
+
+  return tmpDir;
 }
 
-export async function getObject(config: ObjectConfig): Promise<Object> {
+export async function getObject(name: string, config: ObjectConfig): Promise<Object> {
   const {
     source,
     includes,
@@ -49,8 +71,8 @@ export async function getObject(config: ObjectConfig): Promise<Object> {
   } = config;
 
   const path = source
-    ? await createFromSource(context, source)
-    : await createFromIncludes(context, includes);
+    ? await createFromSource(context, name, source)
+    : await createFromIncludes(context, name, includes);
 
   const newVersion = await getVersion(path, context, version);
 

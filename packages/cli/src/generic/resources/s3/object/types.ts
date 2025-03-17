@@ -32,7 +32,6 @@ export interface ObjectState {
   updatedAt?: string;
   key: string;
   version: string;
-  arn: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<ObjectConfig>;
 }
