@@ -73,8 +73,8 @@ spawnTask("dist:cli:local",
   }
 );
 
-spawnTask("dist:cli:quick", 
-  "deno", ["task", "dist:quick"], 
+spawnTask("dist:cli:dev", 
+  "deno", ["task", "dist:dev"], 
   {
     cwd: "./packages/cli",
   }
@@ -86,8 +86,8 @@ parallelTask("dist:local", [
   "dist:cli:local",
 ]);
 
-parallelTask("dist:quick", [
-  "dist:cli:quick",
+parallelTask("dist:dev", [
+  "dist:cli:dev",
 ]);
 
 const {positionals: [pattern]} = parseArgs({
@@ -197,8 +197,8 @@ spawnTask("publish:cli:local",
     cwd: "./packages/cli",
   }
 );
-spawnTask("publish:cli:quick",
-  "deno", ["task", "publish:quick"],
+spawnTask("publish:cli:dev",
+  "deno", ["task", "publish:dev"],
   {
     cwd: "./packages/cli",
   }
@@ -228,8 +228,8 @@ parallelTask("publish:local", [
   "publish:agent:local",
 ]);
 
-parallelTask("publish:quick", [
-  "publish:cli:quick",
+parallelTask("publish:dev", [
+  "publish:cli:dev",
 ]);
 
 seriesTask("local", [
@@ -239,10 +239,10 @@ seriesTask("local", [
   "version:clean"
 ]);
 
-seriesTask("quick", [
+seriesTask("dev", [
   "version:local",
-  "dist:quick",
-  "publish:quick",
+  "dist:dev",
+  "publish:dev",
   "version:clean"
 ]);
 
@@ -255,17 +255,17 @@ seriesTask("local:cli", [
 ]);
 
 
-task("quick:watch", () => {
+task("dev:watch", () => {
   return new Promise(() => {
-    let quickProcess;
-    const quick = debounce(() => {
-      if (quickProcess) {
-        quickProcess.kill();
+    let devProcess;
+    const dev = debounce(() => {
+      if (devProcess) {
+        devProcess.kill();
       }
-      quickProcess = spawn('yarn', ['quick'])
-      quickProcess.stdout.on('data', (data) => {
+      devProcess = spawn('yarn', ['dev'])
+      devProcess.stdout.on('data', (data) => {
         if(data.toString().trim()) {
-          console.log(`[quick:watch] ${data}`);
+          console.log(`[dev:watch] ${data}`);
         }
       });
     }, 2000);
@@ -273,8 +273,8 @@ task("quick:watch", () => {
     chokidar
       .watch('./packages/cli/src', {ignoreInitial: true})
       .on('all', (event, path) => {
-        console.log(`[quick:watch] ${event} ${path}`);
-        quick();
+        console.log(`[dev:watch] ${event} ${path}`);
+        dev();
     });
   });
 });

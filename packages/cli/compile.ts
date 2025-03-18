@@ -3,12 +3,12 @@ import { ensureDir } from "@std/fs/ensure-dir";
 import { decode } from "./src/utils/text.ts";
 import { logger } from "./src/logger.ts";
 
-const { local, quick } = parseArgs(Deno.args, {
-  boolean: ["local", "quick"],
+const { local, dev } = parseArgs(Deno.args, {
+  boolean: ["local", "dev"],
 });
 
-if (quick) {
-  compileQuick();
+if (dev) {
+  compileDev();
 } else if (local) {
   compileLocal();
 } else {
@@ -29,7 +29,7 @@ async function compileLocal() {
 /**
  * Detect and only compile for current arch
  */
-async function compileQuick() {
+async function compileDev() {
   await ensureDir("./dist/bin");
   if (Deno.build.os === "linux") {
     await Promise.all([

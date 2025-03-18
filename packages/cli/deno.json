@@ -7,12 +7,12 @@
     "package": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net package.ts",
     "publish": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts",
     "publish:local": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --local",
-    "publish:quick": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --quick",
+    "publish:dev": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --dev",
     "dist": "deno check src && deno task schema &&  deno task compile && deno task package",
     "dist:local": "deno check src && deno task schema && deno task compile:local && deno task package --local",
-    "dist:quick": "deno check src && deno task schema && deno task compile:quick && deno task package --local",
+    "dist:dev": "deno check src && deno task schema && deno task compile:dev && deno task package --local",
     "compile": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts",
-    "compile:quick": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --quick",
+    "compile:dev": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --dev",
     "compile:local": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --local"
   },
   "imports": {
