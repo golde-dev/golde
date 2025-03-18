@@ -32,7 +32,7 @@ const possibleAttributePattern = possibleAttributes.join("|");
 
 const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
-export function matchCloudwatchLogGroup(path: string): [string, string, string | null] | undefined {
+export function matchCloudwatchLogGroup(path: string): [string, string, string] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -43,7 +43,7 @@ export function matchCloudwatchLogGroup(path: string): [string, string, string |
     throw new Error(`Incorrect AWS Cloudwatch Log Group path: ${path}`);
   }
   const {
-    groups: { name, attributePath = null } = {},
+    groups: { name, attributePath } = {},
   } = match;
 
   return [

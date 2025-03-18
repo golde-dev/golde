@@ -6,10 +6,11 @@ import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
-import type { ExecutionPlan, ExecutionUnit, Plan } from "./types/plan.ts";
-import type { ExecutionGroups } from "./types/plan.ts";
+import type { ExecutionPlan, ExecutionUnit, Plan, Unit } from "./types/plan.ts";
+import type { UnitGroups } from "./types/plan.ts";
+import { resolveNoopDependencies } from "@/dependencies.ts";
 
-export function sortByPath<T extends ExecutionUnit>(plan: T[]): T[] {
+export function sortByPath<T extends Unit>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
 }
 
@@ -18,11 +19,11 @@ export function hasChanges(plan: Plan): boolean {
 }
 
 export function printPlan(flatPlan: Plan) {
-  const plan = Object.groupBy(flatPlan, ({ type }) => type) as ExecutionGroups;
+  const plan = Object.groupBy(flatPlan, ({ type }) => type) as UnitGroups;
 
   logger.info("[Plan] Execution plan");
 
-  if (plan[Type.Noop]) {
+  if (plan[Type.Noop]?.length) {
     logger.info(`[Plan] ${plan[Type.Noop].length} resources that are already up to date`);
     sortByPath(plan[Type.Noop]).forEach((noop) => {
       if (logger.level === "DEBUG") {
@@ -36,13 +37,13 @@ export function printPlan(flatPlan: Plan) {
     });
   }
 
-  if (plan[Type.Create]) {
+  if (plan[Type.Create]?.length) {
     logger.info(`[Plan] ${plan[Type.Create].length} resources to create`);
     sortByPath(plan[Type.Create]).forEach((create) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${create.path}`, {
           config: create.config,
-          dependsOn: create.dependsOn,
+          dependsOn: create.dependsOn.map(({ resourcePath }) => resourcePath),
         });
       } else {
         logger.info(`   ${create.path}`);
@@ -50,7 +51,21 @@ export function printPlan(flatPlan: Plan) {
     });
   }
 
-  if (plan[Type.Delete]) {
+  if (plan[Type.CreateVersion].length) {
+    logger.info(`[Plan] ${plan[Type.CreateVersion].length} resources versions to create`);
+    sortByPath(plan[Type.CreateVersion]).forEach((create) => {
+      if (logger.level === "DEBUG") {
+        logger.debug(`    ${create.path}`, {
+          config: create.config,
+          dependsOn: create.dependsOn.map(({ resourcePath }) => resourcePath),
+        });
+      } else {
+        logger.info(`   ${create.path} version: ${create.version}`);
+      }
+    });
+  }
+
+  if (plan[Type.Delete]?.length) {
     logger.info(`[Plan] ${plan[Type.Delete].length} resources to delete`);
     sortByPath(plan[Type.Delete]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
@@ -63,30 +78,62 @@ export function printPlan(flatPlan: Plan) {
     });
   }
 
-  if (plan[Type.Update]) {
+  if (plan[Type.DeleteVersion]?.length) {
+    logger.info(`[Plan] ${plan[Type.DeleteVersion].length} resources versions to delete`);
+    sortByPath(plan[Type.DeleteVersion]).forEach((deleted) => {
+      if (logger.level === "DEBUG") {
+        logger.debug(`    ${deleted.path}`, {
+          state: deleted.state,
+        });
+      } else {
+        logger.info(`   ${deleted.path} version ${deleted.version}`);
+      }
+    });
+  }
+
+  if (plan[Type.Update]?.length) {
     logger.info(`[Plan] ${plan[Type.Update].length} Resources to update`);
     sortByPath(plan[Type.Update]).forEach((update) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${update.path}`, {
           config: update.config,
           state: update.state,
-          dependsOn: update.dependsOn,
+          dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
         });
       } else {
         logger.info(`   ${update.path}`);
       }
     });
   }
+
+  if (plan[Type.ChangeVersion]?.length) {
+    logger.info(`[Plan] ${plan[Type.ChangeVersion].length} resources versions to change`);
+    sortByPath(plan[Type.ChangeVersion]).forEach((update) => {
+      if (logger.level === "DEBUG") {
+        logger.debug(`    ${update.path}`, {
+          config: update.config,
+          state: update.state,
+          dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
+        });
+      } else {
+        logger.info(`   ${update.path} from: ${update.state.version} to: ${update.version}`);
+      }
+    });
+  }
+}
+
+export function filterExecutionUnits(plan: Plan): ExecutionUnit[] {
+  return plan.filter((unit) => unit.type !== Type.Noop);
 }
 
 export async function createPlan(
   context: Context,
   print = false,
-): Promise<Plan> {
+): Promise<ExecutionPlan> {
   try {
     logger.debug("[Plan] Creating plan");
     const start = performance.now();
-    const plan: Plan = (
+    const initialPlan: Plan = (
       await Promise.all(
         [
           createAWSPlan(context),
@@ -95,20 +142,26 @@ export async function createPlan(
         ],
       )
     ).flat();
+
+    const partiallyResolved = resolveNoopDependencies(initialPlan);
+    const executionUnits = filterExecutionUnits(partiallyResolved);
+    const sortedUnits = sortByPath(executionUnits);
+
     const end = performance.now();
 
-    if (!hasChanges(plan)) {
+    if (!hasChanges(initialPlan)) {
       logger.info(`[Plan] No changes detected in ${formatDuration(end - start)}`);
       Deno.exit(0);
     }
 
     if (print) {
       logger.info(`[Plan] Created plan in ${formatDuration(end - start)}`);
-      printPlan(plan);
+      printPlan(initialPlan);
     } else {
       logger.debug(`[Plan] Created plan in ${formatDuration(end - start)}`);
     }
-    return sortByPath(plan);
+
+    return sortedUnits;
   } catch (error) {
     if (error instanceof PlanError) {
       logger.error(`[Plan] Failed to plan changes: ${error.message}`);

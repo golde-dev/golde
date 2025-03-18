@@ -40,8 +40,8 @@ program
       logger.configure(logLevel, json);
 
       await configure();
-      logger.info("Successfully configured Golde CLI")
-      Deno.exit(0)
+      logger.info("Successfully configured Golde CLI");
+      Deno.exit(0);
     },
   );
 
@@ -58,7 +58,7 @@ program
 
       await initConfig();
       logger.info("Config created");
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 
@@ -118,7 +118,7 @@ program
       } = await initializeContext(branchName, loadedConfig);
 
       logger.info("Current state", previousState);
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 
@@ -148,7 +148,7 @@ program
       getFinalConfig(loadedConfig, dependencies);
 
       logger.info("Config is valid");
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 
@@ -184,7 +184,7 @@ program
       const context = await initializeContext(branchName, loadedConfig, yes);
 
       const _destroyPlan = await createDestroyPlan(context);
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 
@@ -212,7 +212,7 @@ program
       } = options;
       logger.configure(logLevel, json);
       logger.warn("This command is not implemented yet");
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 
@@ -247,7 +247,7 @@ program
       const finalContext = getFinalContext(context, finalConfig);
 
       await createPlan(finalContext, true);
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 
@@ -298,7 +298,7 @@ program
         createOutput(finalContext, state);
       }
       await releaseLocks(finalContext, locks);
-      Deno.exit(0)
+      Deno.exit(0);
     },
   );
 

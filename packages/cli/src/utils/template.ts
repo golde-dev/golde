@@ -3,7 +3,10 @@ import type { GitInfo } from "./git.ts";
 import type { Dependencies } from "../types/dependencies.ts";
 import { existsSync } from "@std/fs/exists";
 import type { ManagedConfig } from "../config.ts";
-import type { State } from "../types/state.ts";
+import type { Unit } from "@/types/plan.ts";
+import { get } from "@es-toolkit/es-toolkit/compat";
+import type { State } from "@/types/state.ts";
+import type { ResourceState } from "@/types/config.ts";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
@@ -110,21 +113,21 @@ const envRe = new RegExp(/(?<=env.)(.*)/);
 
 export function envTemplate(value: string): string {
   const match = envRe.exec(value);
-  if (match) {
-    const [variableName] = match;
-
-    const env = Deno.env.get(variableName);
-    if (env) {
-      return env;
-    } else {
-      throw new ConfigError(
-        "Env variable is missing",
-        ConfigErrorCode.ENV_MISSING,
-        variableName,
-      );
-    }
+  if (!match) {
+    return originalTemplateString(value);
   }
-  return originalTemplateString(value);
+  const [variableName] = match;
+
+  const env = Deno.env.get(variableName);
+  if (env) {
+    return env;
+  } else {
+    throw new ConfigError(
+      "Env variable is missing",
+      ConfigErrorCode.ENV_MISSING,
+      variableName,
+    );
+  }
 }
 
 const gitRe = new RegExp(/(?<=git.)(.*)/);
@@ -132,22 +135,22 @@ const gitRe = new RegExp(/(?<=git.)(.*)/);
 export function gitTemplate(gitInfo: GitInfo) {
   return (value: string): string => {
     const match = gitRe.exec(value);
-    if (match) {
-      const [variableName] = match;
-
-      if (variableName === "BRANCH_SLUG") {
-        return gitInfo.branchSlug;
-      } else if (variableName === "BRANCH_NAME") {
-        return gitInfo.branchName;
-      } else {
-        throw new ConfigError(
-          "git variable is missing",
-          ConfigErrorCode.GIT_MISSING,
-          variableName,
-        );
-      }
+    if (!match) {
+      return originalTemplateString(value);
     }
-    return originalTemplateString(value);
+    const [variableName] = match;
+
+    if (variableName === "BRANCH_SLUG") {
+      return gitInfo.branchSlug;
+    } else if (variableName === "BRANCH_NAME") {
+      return gitInfo.branchName;
+    } else {
+      throw new ConfigError(
+        "git variable is missing",
+        ConfigErrorCode.GIT_MISSING,
+        variableName,
+      );
+    }
   };
 }
 
@@ -156,42 +159,42 @@ const configRe = new RegExp(/(?<=config.)(.*)/);
 export const configTemplate =
   (config: ManagedConfig) => (value: string): string | number | boolean => {
     const match = configRe.exec(value);
-    if (match) {
-      const [variableName] = match;
-      if (variableName in config) {
-        return config[variableName];
-      } else {
-        throw new ConfigError(
-          "Managed config value is missing",
-          ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND,
-          variableName,
-        );
-      }
+    if (!match) {
+      return originalTemplateString(value);
     }
-    return originalTemplateString(value);
+    const [variableName] = match;
+    if (variableName in config) {
+      return config[variableName];
+    } else {
+      throw new ConfigError(
+        "Managed config value is missing",
+        ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND,
+        variableName,
+      );
+    }
   };
 
 const fileRe = new RegExp(/(?<=file\()(.*)(?=\))/);
 
 export const fileTemplate = (value: string): string => {
   const match = fileRe.exec(value);
-  if (match) {
-    const [fileName] = match;
-
-    if (existsSync(fileName)) {
-      return Deno.readTextFileSync(fileName);
-    } else {
-      throw new ConfigError(
-        "Template file is missing",
-        ConfigErrorCode.FILE_MISSING,
-        fileName,
-      );
-    }
+  if (!match) {
+    return originalTemplateString(value);
   }
-  return originalTemplateString(value);
+  const [fileName] = match;
+
+  if (existsSync(fileName)) {
+    return Deno.readTextFileSync(fileName);
+  } else {
+    throw new ConfigError(
+      "Template file is missing",
+      ConfigErrorCode.FILE_MISSING,
+      fileName,
+    );
+  }
 };
 
-const _stateRe = new RegExp(/(?<=state.)(.*)/);
+const stateRe = new RegExp(/(?<=state.)(.*)/);
 
 export const dependenciesTemplate = (_dependencies: Dependencies) => (value: string): string => {
   return originalTemplateString(value);
@@ -199,4 +202,70 @@ export const dependenciesTemplate = (_dependencies: Dependencies) => (value: str
 
 export const stateTemplate = (_state: State) => (value: string): string => {
   return originalTemplateString(value);
+};
+
+export const unitStateTemplate =
+  (unit: Unit, resources: { path: string; state: ResourceState }[]) => (value: string): string => {
+    const match = stateRe.exec(value);
+    if (!match) {
+      return originalTemplateString(value);
+    }
+    const [stateMatch] = match;
+    if ("dependsOn" in unit) {
+      const dependsOn = unit.dependsOn.find(({ statePath }) => statePath === stateMatch);
+      if (dependsOn) {
+        const {
+          resourcePath,
+          resourceAttribute,
+        } = dependsOn;
+
+        const stateUnit = resources.find((d) => d.path === resourcePath);
+        if (stateUnit) {
+          const value = get(stateUnit.state, resourceAttribute);
+          if (typeof value === "string") {
+            return value;
+          }
+          throw new ConfigError(
+            `Failed to resolve unit ${unit.path} dependency on ${stateUnit.path}, attribute ${resourceAttribute} is missing`,
+            ConfigErrorCode.STATE_MISSING,
+          );
+        }
+      }
+    }
+    return originalTemplateString(value);
+  };
+
+/**
+ * Resolve unit dependencies
+ * Only resolve args and config
+ */
+export const resolveUnitDeps = (
+  unit: Unit,
+  resources: { path: string; state: ResourceState }[],
+): Unit => {
+  const resolved = {
+    ...unit,
+  };
+  const onTemplate = unitStateTemplate(unit, resources);
+
+  if ("args" in resolved) {
+    resolved.args = resolveTemplate(resolved.args, onTemplate) as typeof resolved.args;
+  }
+  if ("config" in resolved) {
+    resolved.config = resolveTemplate(resolved.config, onTemplate) as typeof resolved.config;
+  }
+
+  if ("dependsOn" in resolved) {
+    resolved.dependsOn = resolved.dependsOn.map((dependOn) => {
+      if (resources.find((resource) => resource.path === dependOn.resourcePath)) {
+        return {
+          ...dependOn,
+          resolved: true,
+        };
+      }
+      return dependOn;
+    });
+  }
+
+  return resolved;
 };

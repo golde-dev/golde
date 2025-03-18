@@ -1,7 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
 
-import type { Resource, ResourceState } from "./config.ts";
 import type { ResourceDependency } from "./dependencies.ts";
+import type {
+  Resource,
+  ResourceState,
+  VersionedResource,
+  VersionedResourceState,
+} from "./config.ts";
 
 export enum Type {
   /**
@@ -57,7 +62,7 @@ export interface CreateUnit<
 }
 
 export interface CreateVersionUnit<
-  C extends Resource = Resource,
+  C extends VersionedResource = VersionedResource,
   S extends ResourceState = ResourceState,
   T extends (...args: any[]) => Promise<S> = (...args: any) => Promise<S>,
 > {
@@ -125,8 +130,8 @@ export interface NoopUnit<
  * Used when there is no need to update resource
  */
 export interface ChangeVersionUnit<
-  C extends Resource = Resource,
-  S extends ResourceState = ResourceState,
+  C extends VersionedResource = VersionedResource,
+  S extends VersionedResourceState = VersionedResourceState,
 > {
   type: Type.ChangeVersion;
   path: string;
@@ -136,7 +141,7 @@ export interface ChangeVersionUnit<
   dependsOn: ResourceDependency[];
 }
 
-export type ExecutionUnit =
+export type Unit =
   | CreateUnit
   | CreateVersionUnit
   | UpdateUnit
@@ -145,7 +150,15 @@ export type ExecutionUnit =
   | NoopUnit
   | ChangeVersionUnit;
 
-export type ExecutionGroups = {
+export type ExecutionUnit =
+  | CreateUnit
+  | CreateVersionUnit
+  | UpdateUnit
+  | DeleteUnit
+  | DeleteVersionUnit
+  | ChangeVersionUnit;
+
+export type UnitGroups = {
   [Type.Noop]?: NoopUnit[];
   [Type.Create]?: CreateUnit[];
   [Type.CreateVersion]: CreateVersionUnit[];
@@ -155,8 +168,8 @@ export type ExecutionGroups = {
   [Type.ChangeVersion]?: ChangeVersionUnit[];
 };
 
-export type Plan = ExecutionUnit[];
-export type ExecutionPlan = Plan[];
+export type Plan = Unit[];
+export type ExecutionPlan = ExecutionUnit[];
 
 export interface CreateResult<
   C extends Resource = Resource,

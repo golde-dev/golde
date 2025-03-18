@@ -68,7 +68,7 @@ const pattern = new RegExp(
   `^(?<tld>(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,})\\.(?<recordType>${recordTypePattern})\\.(?<name>.*?)\\.(?<attributePath>${possibleAttributePattern})$`,
 );
 
-export function matchDNSRecord(path: string): [string, string, string | null] | undefined {
+export function matchDNSRecord(path: string): [string, string, string] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -81,7 +81,7 @@ export function matchDNSRecord(path: string): [string, string, string | null] | 
   }
 
   const {
-    groups: { tld, recordType, name, attributePath = null } = {},
+    groups: { tld, recordType, name, attributePath } = {},
   } = match;
 
   return [

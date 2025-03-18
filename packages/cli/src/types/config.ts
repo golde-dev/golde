@@ -89,11 +89,24 @@ export type Resource = {
   branchPattern?: string;
 };
 
-export type VersionedResource = Resource & {
+export type Versioned = {
   version?: string;
 };
 
-export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {
+export type VersionedResource = Resource & Versioned;
+
+export type ResourceState<
+  S extends object = object,
+  C extends Resource = Resource,
+> = S & {
+  config: C;
+  dependsOn: ResourceDependency[];
+};
+
+export type VersionedResourceState<
+  S extends Versioned = Versioned,
+  C extends VersionedResource = VersionedResource,
+> = S & {
   config: C;
   dependsOn: ResourceDependency[];
 };

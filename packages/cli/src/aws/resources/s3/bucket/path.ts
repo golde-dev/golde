@@ -32,7 +32,7 @@ const possibleAttributes = [
 const possibleAttributePattern = possibleAttributes.join("|");
 const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
-export function matchS3Bucket(path: string): [string, string, string | null] | undefined {
+export function matchS3Bucket(path: string): [string, string, string] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -43,7 +43,7 @@ export function matchS3Bucket(path: string): [string, string, string | null] | u
     throw new Error(`Incorrect AWS Bucket path: ${path}`);
   }
   const {
-    groups: { name, attributePath = null } = {},
+    groups: { name, attributePath } = {},
   } = match;
 
   return [

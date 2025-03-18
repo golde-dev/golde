@@ -1,9 +1,11 @@
 import type { Resource } from "./config.ts";
 
 export interface ResourceDependency {
-  path: string;
-  name: string;
-  attribute: string | null;
+  statePath: string;
+  resolved?: boolean;
+  resourcePath: string;
+  resourceName: string;
+  resourceAttribute: string;
 }
 
 export interface External {

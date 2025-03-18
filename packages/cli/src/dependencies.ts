@@ -4,8 +4,9 @@ import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
 import type { Dependencies, ResourceDependency } from "./types/dependencies.ts";
-import type { Plan } from "./types/plan.ts";
+import type { NoopUnit, Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
+import { resolveUnitDeps } from "@/utils/template.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
@@ -25,11 +26,12 @@ export function dependenciesSearch(
         const [statePath] = match;
         const depsMatch = matchAWSPath(statePath) ?? matchCloudflarePath(statePath);
         if (depsMatch) {
-          const [path, name, attribute] = depsMatch;
+          const [resourcePath, resourceName, resourceAttribute] = depsMatch;
           dependencies.push({
-            path,
-            name,
-            attribute,
+            statePath,
+            resourcePath,
+            resourceName,
+            resourceAttribute,
           });
           return dependencies;
         }
@@ -70,17 +72,18 @@ export function getDependencies(
   const deps: [string, string[]][] = plan.map(({ path, ...rest }) => {
     switch (rest.type) {
       case Type.Delete:
-        return [path, rest.state.dependsOn.map(({ path }) => path)];
+        return [path, rest.state.dependsOn.map(({ resourcePath }) => resourcePath)];
+      case Type.CreateVersion:
       case Type.Update:
       case Type.Noop:
       case Type.Create:
-        return [path, rest.dependsOn.map(({ path }) => path)];
+        return [path, rest.dependsOn.map(({ resourcePath }) => resourcePath)];
       default:
         return [path, []];
     }
   });
 
-  const childToParents = deps.reduce((acc, [path, children]) => {
+  const _childToParents = deps.reduce((acc, [path, children]) => {
     if (acc[path]) {
       acc[path].push(...children);
     } else {
@@ -89,7 +92,7 @@ export function getDependencies(
     return acc;
   }, {} as Record<string, string[]>);
 
-  const parentToChildren = deps.reduce((acc, [path, children]) => {
+  const _parentToChildren = deps.reduce((acc, [path, children]) => {
     children.forEach((child) => {
       if (acc[child]) {
         acc[child].push(path);
@@ -100,10 +103,36 @@ export function getDependencies(
     return acc;
   }, {} as Record<string, string[]>);
 
-  console.log({
-    childToParents,
-    parentToChildren,
-  });
-
   return Promise.resolve({});
+}
+
+/**
+ * Any resources dependencies that are marked as noop will be resolved in planning
+ * @example if s3.object dependsOn s3.bucket,
+ *  and  s3.bucket is noop
+ *  then resolve s3.object execution config
+ */
+export function resolveNoopDependencies(plan: Plan): Plan {
+  const noopUnits = plan.filter((unit) => unit.type === Type.Noop);
+
+  return plan
+    .map((unit) => {
+      if ("dependsOn" in unit) {
+        const { dependsOn } = unit;
+        if (dependsOn.length) {
+          const noopUnitDeps: NoopUnit[] = [];
+          for (const dep of dependsOn) {
+            const noopUnit = noopUnits.find((noop) => noop.path === dep.resourcePath);
+            if (noopUnit) {
+              noopUnitDeps.push(noopUnit);
+            }
+          }
+
+          if (noopUnitDeps.length) {
+            return resolveUnitDeps(unit, noopUnitDeps);
+          }
+        }
+      }
+      return unit;
+    });
 }

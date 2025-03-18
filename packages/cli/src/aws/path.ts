@@ -3,7 +3,7 @@ import { matchIAMRole } from "./resources/iam/role/path.ts";
 import { matchLambdaFunction } from "./resources/lambda/function/path.ts";
 import { matchS3Bucket } from "./resources/s3/bucket/path.ts";
 
-export function matchAWSPath(path: string): [string, string, string | null] | undefined {
+export function matchAWSPath(path: string): [string, string, string] | undefined {
   if (!path.startsWith("aws.")) {
     return;
   }

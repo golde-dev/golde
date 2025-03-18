@@ -1,8 +1,12 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { configTemplate, gitTemplate, resolveTemplate } from "../template.ts";
+import { configTemplate, gitTemplate, resolveTemplate, resolveUnitDeps } from "../template.ts";
 import { ConfigError } from "../../error.ts";
 import type { GitInfo } from "../git.ts";
 import { describe, it } from "@std/testing/bdd";
+import { expect } from "@std/expect/expect";
+import { Type } from "@/types/plan.ts";
+import type { CreateUnit } from "@/types/plan.ts";
+import type { Resource, ResourceState } from "@/types/config.ts";
 
 describe("resolveTemplate", () => {
   it(
@@ -159,5 +163,117 @@ describe("resolveTemplate", () => {
       "boolean": true,
     };
     assertEquals(resolveTemplate(input, configTemplate(managedConfig)), expected);
+  });
+});
+
+describe("resolveUnitDeps", () => {
+  it("should resolve dependencies for a single unit", () => {
+    const dependOn = {
+      statePath: "aws.s3.bucket.my-bucket.name",
+      resourcePath: "aws.s3.bucket.my-bucket",
+      resourceName: "my-bucket",
+      resourceAttribute: "name",
+    };
+    const unit: CreateUnit<
+      { bucketName: string } & Resource,
+      { bucketName: string } & ResourceState
+    > = {
+      type: Type.Create,
+      path: "aws.s3.object.my-object",
+      args: [`{{ state.aws.s3.bucket.my-bucket.name }}`],
+      executor: (bucketName: string) =>
+        Promise.resolve({
+          bucketName,
+          config: {
+            bucketName,
+            branch: "master",
+          },
+          dependsOn: [],
+        }),
+      config: {
+        bucketName: `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        branch: "master",
+      },
+      dependsOn: [dependOn],
+    };
+
+    const deps = {
+      path: "aws.s3.bucket.my-bucket",
+      type: Type.Noop,
+      state: {
+        name: "my-bucket",
+        createdAt: "2022-01-01T00:00:00.000Z",
+        config: {},
+        branch: "master",
+        dependsOn: [],
+      },
+    };
+
+    const expected = {
+      type: Type.Create,
+      path: "aws.s3.object.my-object",
+      args: [`my-bucket`],
+      executor: unit.executor,
+      config: {
+        bucketName: `my-bucket`,
+        branch: "master",
+      },
+      dependsOn: [
+        {
+          ...dependOn,
+          resolved: true,
+        },
+      ],
+    };
+
+    expect(resolveUnitDeps(unit, [deps])).toEqual(expected);
+  });
+
+  it("should throw if state path reference is invalid", () => {
+    const unit: CreateUnit<
+      { bucketName: string } & Resource,
+      { bucketName: string } & ResourceState
+    > = {
+      type: Type.Create,
+      path: "aws.s3.object.my-object",
+      args: [`{{ state.aws.s3.bucket.my-bucket.name }}`],
+      executor: (bucketName: string) =>
+        Promise.resolve({
+          bucketName,
+          config: {
+            bucketName,
+            branch: "master",
+          },
+          dependsOn: [],
+        }),
+      config: {
+        bucketName: `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        branch: "master",
+      },
+      dependsOn: [
+        {
+          statePath: "aws.s3.bucket.my-bucket.name",
+          resourcePath: "state.aws.s3.bucket.my-bucket",
+          resourceName: "my-bucket",
+          resourceAttribute: "name",
+        },
+      ],
+    };
+
+    const deps = {
+      path: "state.aws.s3.bucket.my-bucket",
+      type: Type.Noop,
+      state: {
+        differentName: "my-bucket",
+        createdAt: "2022-01-01T00:00:00.000Z",
+        branch: "master",
+        dependsOn: [],
+        config: {},
+      },
+    };
+
+    expect(() => resolveUnitDeps(unit, [deps])).toThrow(
+      "Failed to resolve unit aws.s3.object.my-object dependency on state.aws.s3.bucket.my-bucket, attribute name is missing",
+    );
   });
 });

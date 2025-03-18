@@ -31,7 +31,7 @@ const possibleAttributePattern = possibleAttributes.join("|");
 
 const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
-export function matchD1Database(path: string): [string, string, string | null] | undefined {
+export function matchD1Database(path: string): [string, string, string] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -42,7 +42,7 @@ export function matchD1Database(path: string): [string, string, string | null] |
     throw new Error(`Incorrect D1 Database path: ${path}`);
   }
   const {
-    groups: { name, attributePath = null } = {},
+    groups: { name, attributePath } = {},
   } = match;
 
   return [

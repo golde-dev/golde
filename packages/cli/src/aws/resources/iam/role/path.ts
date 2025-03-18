@@ -33,7 +33,7 @@ const possibleAttributePattern = possibleAttributes.join("|");
 
 const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
-export function matchIAMRole(path: string): [string, string, string | null] | undefined {
+export function matchIAMRole(path: string): [string, string, string] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -44,7 +44,7 @@ export function matchIAMRole(path: string): [string, string, string | null] | un
     throw new Error(`Incorrect AWS IAM role path: ${path}`);
   }
   const {
-    groups: { name, attributePath = null } = {},
+    groups: { name, attributePath } = {},
   } = match;
 
   return [

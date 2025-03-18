@@ -1,7 +1,6 @@
 import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { FunctionState, ZipLambdaCode } from "./types.ts";
 import type { ZipFunctionConfig } from "./types.ts";
-import type { ImageFunctionConfig } from "./types.ts";
 import type { ImageLambdaCode } from "./types.ts";
 
 export const BASE_PATH = "aws.lambda.function";
@@ -49,7 +48,7 @@ const possibleAttributePattern = possibleAttributes.join("|");
 
 const pattern = new RegExp(`^(?<name>.+)\\.(?<attributePath>${possibleAttributePattern})$`);
 
-export function matchLambdaFunction(path: string): [string, string, string | null] | undefined {
+export function matchLambdaFunction(path: string): [string, string, string] | undefined {
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
@@ -60,7 +59,7 @@ export function matchLambdaFunction(path: string): [string, string, string | nul
     throw new Error(`Incorrect AWS lambda function path: ${path}`);
   }
   const {
-    groups: { name, attributePath = null } = {},
+    groups: { name, attributePath } = {},
   } = match;
 
   return [
