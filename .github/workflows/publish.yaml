@@ -16,7 +16,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - master
+      - never
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
