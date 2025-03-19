@@ -1,10 +1,10 @@
+import { logger } from "../../logger.ts";
 import { GoldeClientBase, GoldeError } from "./base.ts";
 import type { StateConfig } from "../../state/types.ts";
 import type { Lock } from "../../types/lock.ts";
 import type { Change } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
-import { logger } from "../../logger.ts";
 import type { Dependency } from "../../types/dependencies.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {

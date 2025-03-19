@@ -179,7 +179,7 @@ task("version:local", () => {
     JSON.stringify(
       {
         version: new Date().toISOString().replaceAll(":", "-"),
-        goldeURL: "https://golde.localhost/api/v1",
+        goldeURL: "https://api.golde.localhost/v1",
       },
     ),
   )
