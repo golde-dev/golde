@@ -1,11 +1,11 @@
 import { PlanError, PlanErrorCode } from "../error.ts";
-import { createDNSDestroyPlan, createDNSPlan } from "./resources/dnsRecord/plan.ts";
-import { createDNSExecutors } from "./resources/dnsRecord/executor.ts";
-import { createR2DestroyPlan, createR2Plan } from "./resources/r2Bucket/plan.ts";
-import { createR2Executors } from "./resources/r2Bucket/executor.ts";
+import { createDNSDestroyPlan, createDNSPlan } from "./resources/dns/record/plan.ts";
+import { createDNSExecutors } from "./resources/dns/record/executor.ts";
+import { createR2DestroyPlan, createR2Plan } from "./resources/r2/bucket/plan.ts";
+import { createR2Executors } from "./resources/r2/bucket/executor.ts";
 import { isEmpty } from "../utils/object.ts";
-import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./resources/d1Database/plan.ts";
-import { createD1DatabaseExecutors } from "./resources/d1Database/executor.ts";
+import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./resources/d1/database/plan.ts";
+import { createD1DatabaseExecutors } from "./resources/d1/database/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 
@@ -35,15 +35,27 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
   }
 
   const {
-    dnsRecord: dnsRecordConfig,
-    r2Bucket: r2BucketConfig,
-    d1Database: d1DatabaseConfig,
+    dns: {
+      record: dnsRecordConfig,
+    } = {},
+    r2: {
+      bucket: r2BucketConfig,
+    } = {},
+    d1: {
+      database: d1DatabaseConfig,
+    } = {},
   } = cloudflareConfig ?? {};
 
   const {
-    dnsRecord: dnsRecordState,
-    r2Bucket: r2BucketState,
-    d1Database: d1DatabaseState,
+    dns: {
+      record: dnsRecordState,
+    } = {},
+    r2: {
+      bucket: r2BucketState,
+    } = {},
+    d1: {
+      database: d1DatabaseState,
+    } = {},
   } = cloudflareState ?? {};
 
   if (!isEmpty(dnsRecordState) || !isEmpty(dnsRecordConfig)) {
@@ -98,9 +110,15 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
     );
   }
   const {
-    dnsRecord: dnsRecordState,
-    r2Bucket: r2BucketState,
-    d1Database: d1DatabaseState,
+    dns: {
+      record: dnsRecordState,
+    } = {},
+    r2: {
+      bucket: r2BucketState,
+    } = {},
+    d1: {
+      database: d1DatabaseState,
+    } = {},
   } = cloudflareState ?? {};
 
   if (!isEmpty(dnsRecordState)) {

@@ -9,8 +9,8 @@ import { basename, join, resolve } from "@std/path";
 import { copy } from "@std/fs/copy";
 import { homedir } from "node:os";
 
-const { local, quick } = parseArgs(Deno.args, {
-  boolean: ["local", "quick"],
+const { local, dev } = parseArgs(Deno.args, {
+  boolean: ["local", "dev"],
 });
 
 const localRegistry = "http://localhost:4873/";
@@ -97,7 +97,7 @@ async function publishNPMPackages(
   }
 }
 
-function quickUpdateExamples(examples: string[]) {
+function devUpdateExamples(examples: string[]) {
   const exampleBaseDir = resolve("../../examples/");
 
   return Promise.all(
@@ -232,7 +232,7 @@ function updateLocalCLI(): Promise<void> {
   });
 }
 
-async function quickLocalCLI(): Promise<void> {
+async function devLocalCLI(): Promise<void> {
   logger.info("Updating local CLI");
 
   const home = homedir();
@@ -280,14 +280,14 @@ async function publishLocal() {
   }
 }
 
-async function publishLocalQuick() {
+async function publishLocalDev() {
   logger.info("Publishing to local registry");
-  await quickUpdateExamples(examples);
-  await quickLocalCLI();
+  await devUpdateExamples(examples);
+  await devLocalCLI();
 }
 
-if (quick) {
-  publishLocalQuick();
+if (dev) {
+  publishLocalDev();
 } else if (local) {
   publishLocal();
 } else {

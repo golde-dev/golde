@@ -1,8 +1,8 @@
-import { matchD1Database } from "./resources/d1Database/path.ts";
-import { matchDNSRecord } from "./resources/dnsRecord/path.ts";
-import { matchR2Bucket } from "./resources/r2Bucket/path.ts";
+import { matchD1Database } from "./resources/d1/database/path.ts";
+import { matchDNSRecord } from "./resources/dns/record/path.ts";
+import { matchR2Bucket } from "./resources/r2/bucket/path.ts";
 
-export function matchCloudflarePath(path: string): [string, string, string | null] | undefined {
+export function matchCloudflarePath(path: string): [string, string, string] | undefined {
   if (!path.startsWith("cloudflare.")) {
     return;
   }

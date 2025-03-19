@@ -6,6 +6,7 @@ import {
   DeleteBucketCommand,
   DeleteObjectCommand,
   HeadBucketCommand,
+  HeadObjectCommand,
   NotFound,
   PutBucketCorsCommand,
   PutBucketPolicyCommand,
@@ -40,6 +41,8 @@ export class S3Client extends AWSClientBase {
             accessKeyId: this.accessKeyId,
             secretAccessKey: this.secretAccessKey,
           },
+          requestChecksumCalculation: "WHEN_REQUIRED",
+          responseChecksumValidation: "WHEN_REQUIRED",
         }),
       );
     }
@@ -247,6 +250,28 @@ export class S3Client extends AWSClientBase {
       if (e instanceof Error) {
         logger.error("[AWS] Failed to update s3 object tags", e);
       }
+      throw e;
+    }
+  }
+
+  public async checkS3ObjectExists(bucketName: string, key: string): Promise<boolean> {
+    try {
+      logger.debug("[AWS] Check s3 object exists", {
+        Bucket: bucketName,
+        Key: key,
+      });
+      const command = new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      });
+      await this.getS3Client()
+        .send(command);
+      return true;
+    } catch (e) {
+      if (e instanceof NotFound) {
+        return false;
+      }
+      logger.error("[AWS] Failed to check s3 object exists", e);
       throw e;
     }
   }

@@ -1,20 +1,21 @@
 import type { AWSConfig, AWSCredentials } from "../aws/types.ts";
 import type { CloudflareConfig, CloudflareCredentials } from "../cloudflare/types.ts";
-import type { GoldeCredentials } from "../golde/types.ts";
+import type { GoldeClientConfig } from "../golde/types.ts";
 import type { HCloudCredentials } from "../hcloud/types.ts";
-import type { DockerConfig, DockerCredentials } from "../docker/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Output } from "./output.ts";
 import type { SlackCredentials } from "../slack/types.ts";
-import { ResourceDependency } from "./dependencies.ts";
+import type { ResourceDependency } from "./dependencies.ts";
+import type { GithubConfig, GithubCredentials } from "../github/types.ts";
 
 export type Tags = Record<string, string>;
+export type TagList = string[];
 
 export interface ProvidersConfig {
   /**
    * Golde provider config
    */
-  golde?: GoldeCredentials;
+  golde?: GoldeClientConfig;
   /**
    * AWS access credentials
    */
@@ -32,7 +33,7 @@ export interface ProvidersConfig {
   /**
    * Docker registry credentials
    */
-  docker?: DockerCredentials;
+  github?: GithubCredentials;
 
   /**
    * Hetzner cloud provider config
@@ -62,8 +63,15 @@ export type Config = {
    * Config for AWS resources
    */
   aws?: AWSConfig;
-  docker?: DockerConfig;
+  /**
+   * Cloudflare resources
+   */
   cloudflare?: CloudflareConfig;
+
+  /**
+   * Github resources
+   */
+  github?: GithubConfig;
   output?: Output | Output[];
 };
 
@@ -81,7 +89,24 @@ export type Resource = {
   branchPattern?: string;
 };
 
-export type ResourceState<S extends object = object, C extends Resource = Resource> = S & {
+export type Versioned = {
+  version?: string;
+};
+
+export type VersionedResource = Resource & Versioned;
+
+export type ResourceState<
+  S extends object = object,
+  C extends Resource = Resource,
+> = S & {
+  config: C;
+  dependsOn: ResourceDependency[];
+};
+
+export type VersionedResourceState<
+  S extends Versioned = Versioned,
+  C extends VersionedResource = VersionedResource,
+> = S & {
   config: C;
   dependsOn: ResourceDependency[];
 };

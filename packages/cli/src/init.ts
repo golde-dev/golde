@@ -122,7 +122,7 @@ export async function createProjectIfWanted(
 ) {
   const projectExists = await golde.hasProject(name);
   if (projectExists) {
-    logger.debug(`Project ${name} already exists`);
+    logger.debug(`[Init] Project ${name} already exists`);
     return;
   }
   const shouldCreate = await confirmCreateProject(name);

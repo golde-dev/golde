@@ -1,4 +1,4 @@
-export interface GoldeCredentials {
+export interface GoldeClientConfig {
   /**
    * Golde API token
    */

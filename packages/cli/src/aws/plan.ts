@@ -1,31 +1,28 @@
 import { isEmpty } from "../utils/object.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
-import type { Plan } from "../types/plan.ts";
-import type { Context } from "../types/context.ts";
+import { createS3DestroyPlan, createS3Plan } from "./resources/s3/bucket/plan.ts";
+import { createS3Executors } from "./resources/s3/bucket/executor.ts";
+import { createObjectDestroyPlan, createObjectPlan } from "./resources/s3/object/plan.ts";
+import { createS3ObjectExecutors } from "./resources/s3/object/executor.ts";
+import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iam/role/plan.ts";
+import { createIAMRoleExecutors } from "./resources/iam/role/executor.ts";
+import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatch/logGroup/executor.ts";
+import { createLambdaFunctionExecutors } from "./resources/lambda/function/executor.ts";
 import {
   createRoute53DestroyPlan,
   createRoute53Executors,
   createRoute53Plan,
-} from "./resources/route53Record/plan.ts";
-import { createS3DestroyPlan, createS3Plan } from "./resources/s3Bucket/plan.ts";
-import { createS3Executors } from "./resources/s3Bucket/executor.ts";
-import {
-  createS3ObjectDestroyPlan,
-  createS3ObjectExecutors,
-  createS3ObjectPlan,
-} from "./resources/s3Object/plan.ts";
-import { createIAMRoleDestroyPlan, createIAMRolePlan } from "./resources/iamRole/plan.ts";
-import { createIAMRoleExecutors } from "./resources/iamRole/executor.ts";
-import { createCloudwatchLogGroupExecutors } from "./resources/cloudwatchLogGroup/executor.ts";
+} from "./resources/route53/record/plan.ts";
 import {
   createCloudwatchLogGroupDestroyPlan,
   createCloudwatchLogGroupPlan,
-} from "./resources/cloudwatchLogGroup/plan.ts";
+} from "./resources/cloudwatch/logGroup/plan.ts";
 import {
   createLambdaFunctionDestroyPlan,
   createLambdaFunctionPlan,
-} from "./resources/lambdaFunction/plan.ts";
-import { createLambdaFunctionExecutors } from "./resources/lambdaFunction/executor.ts";
+} from "./resources/lambda/function/plan.ts";
+import type { Plan } from "../types/plan.ts";
+import type { Context } from "../types/context.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   const {
@@ -53,21 +50,41 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
   }
 
   const {
-    route53Record: route53RecordConfig,
-    s3Bucket: s3BucketConfig,
-    s3Object: s3ObjectConfig,
-    iamRole: iamRoleConfig,
-    cloudwatchLogGroup: cloudwatchLogGroupConfig,
-    lambdaFunction: lambdaFunctionConfig,
+    route53: {
+      record: route53RecordConfig,
+    } = {},
+    s3: {
+      bucket: s3BucketConfig,
+      object: s3ObjectConfig,
+    } = {},
+    iam: {
+      role: iamRoleConfig,
+    } = {},
+    cloudwatch: {
+      logGroup: cloudwatchLogGroupConfig,
+    } = {},
+    lambda: {
+      function: lambdaFunctionConfig,
+    } = {},
   } = awsConfig ?? {};
 
   const {
-    route53Record: route53RecordState,
-    s3Bucket: s3BucketState,
-    s3Object: s3ObjectState,
-    iamRole: iamRoleState,
-    cloudwatchLogGroup: cloudwatchLogGroupState,
-    lambdaFunction: lambdaFunctionState,
+    route53: {
+      record: route53RecordState,
+    } = {},
+    s3: {
+      bucket: s3BucketState,
+      object: s3ObjectState,
+    } = {},
+    iam: {
+      role: iamRoleState,
+    } = {},
+    cloudwatch: {
+      logGroup: cloudwatchLogGroupState,
+    } = {},
+    lambda: {
+      function: lambdaFunctionState,
+    } = {},
   } = awsState ?? {};
 
   if (!isEmpty(route53RecordState) || !isEmpty(route53RecordConfig)) {
@@ -92,8 +109,9 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
 
   if (!isEmpty(s3ObjectState) || !isEmpty(s3ObjectConfig)) {
     const executors = createS3ObjectExecutors(aws);
-    plan.push(createS3ObjectPlan(
+    plan.push(createObjectPlan(
       executors,
+      tags,
       s3ObjectState,
       s3ObjectConfig,
     ));
@@ -153,12 +171,22 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
     );
   }
   const {
-    route53Record: route53State,
-    s3Bucket: s3BucketState,
-    s3Object: s3ObjectState,
-    iamRole: iamRoleState,
-    cloudwatchLogGroup: cloudwatchLogGroupState,
-    lambdaFunction: lambdaFunctionState,
+    route53: {
+      record: route53State,
+    } = {},
+    s3: {
+      bucket: s3BucketState,
+      object: s3ObjectState,
+    } = {},
+    iam: {
+      role: iamRoleState,
+    } = {},
+    cloudwatch: {
+      logGroup: cloudwatchLogGroupState,
+    } = {},
+    lambda: {
+      function: lambdaFunctionState,
+    } = {},
   } = awsState ?? {};
 
   if (!isEmpty(route53State)) {
@@ -179,7 +207,7 @@ export async function createAWSDestroyPlan(context: Context): Promise<Plan> {
 
   if (!isEmpty(s3ObjectState)) {
     const executors = createS3ObjectExecutors(aws);
-    plan.push(createS3ObjectDestroyPlan(
+    plan.push(createObjectDestroyPlan(
       executors,
       s3ObjectState,
     ));

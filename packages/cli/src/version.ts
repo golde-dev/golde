@@ -5,7 +5,7 @@ interface WithVersion {
   };
 }
 
-let goldeURL = "https://golde.dev/api/v1";
+let goldeURL = "https://api.golde.dev/v1";
 
 let {
   default: {

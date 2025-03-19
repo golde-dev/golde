@@ -1,12 +1,13 @@
 import slugify from "@sindresorhus/slugify";
-import { ensureDir } from "@std/fs";
+import { ensureDir, existsSync } from "@std/fs";
 import { exists } from "@std/fs/exists";
 import { join } from "@std/path";
-import { readJSON, writeJSON } from "../utils/fs.ts";
-import { applyChangeSet } from "../utils/object.ts";
+import { readJSON, writeJSON } from "../utils/json.ts";
+import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
+import type { Dependency } from "@/types/dependencies.ts";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -31,6 +32,10 @@ export class FSStateClient implements AbstractStateClient {
     throw new Error("Method not implemented.");
   }
 
+  public getResources(_: string, _resources: string[]): Promise<Dependency[]> {
+    throw new Error("Method not implemented.");
+  }
+
   /**
    * Get state path for a branch
    */
@@ -44,18 +49,18 @@ export class FSStateClient implements AbstractStateClient {
    */
   public async getBranchState(_: string, branch: string): Promise<State | undefined> {
     const path = this.getStatePath(branch);
-    if (!await exists(path)) {
+    if (!await existsSync(path)) {
       return;
     }
-    return await readJSON<State>(path);
+    return readJSON<State>(path);
   }
 
   /**
    * Save state to file
    */
-  private saveState(branch: string, state: State): Promise<void> {
+  private saveState(branch: string, state: State): void {
     const path = this.getStatePath(branch);
-    return writeJSON(path, state);
+    writeJSON(path, state);
   }
 
   /**
@@ -76,13 +81,21 @@ export class FSStateClient implements AbstractStateClient {
     return join(this.path, `${slugify(branch)}.lock.json`);
   }
 
+  public createLock(
+    _project: string,
+    _branch: string,
+    _resources: string[],
+  ): Promise<Lock | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
   /**
    * Get locks for a branch
    */
-  public async getStateLock(_: string, branch: string): Promise<Lock[] | undefined> {
+  public async getLocks(_: string, branch: string): Promise<Lock[]> {
     const path = this.getStateLockPath(branch);
     if (!await exists(path)) {
-      return;
+      return [];
     }
     return await readJSON<Lock[]>(path);
   }

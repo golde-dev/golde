@@ -14,13 +14,12 @@ import { basename, extname } from "@std/path";
 import { decode } from "./utils/text.ts";
 import {
   configTemplate,
-  dependenciesTemplate,
   envTemplate,
   fileTemplate,
   gitTemplate,
   resolveTemplate,
 } from "./utils/template.ts";
-import type { Dependencies } from "./types/dependencies.ts";
+
 import type { Config } from "./types/config.ts";
 
 const loadConfig = async (
@@ -247,29 +246,4 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
   const end = performance.now();
   logger.info(`[Config] Initialized config in ${formatDuration(end - start)}`);
   return resolvedManaged;
-}
-
-export function getFinalConfig(config: Config, dependencies: Dependencies): Config {
-  try {
-    const configWithDeps = resolveTemplate(config, dependenciesTemplate(dependencies));
-    logger.debug("[Config] Resolved state dependencies in config", { config: configWithDeps });
-    const validatedConfig = validateConfig(configWithDeps);
-    return validatedConfig;
-  } catch (error) {
-    if (error instanceof ConfigError) {
-      switch (error.code) {
-        case ConfigErrorCode.STATE_MISSING:
-          logger.error(`[Config] State variable is missing: ${error.cause as string}`);
-          break;
-        case ConfigErrorCode.INVALID_CONFIG:
-          logger.error("[Config] Config failed validation", error.cause);
-          break;
-        default:
-          logger.error(`[Config] Configuration error: ${error.message}`);
-      }
-    } else if (error instanceof Error) {
-      logger.error(`[Config] Unknown error: ${error.message}`, error);
-    }
-    return Deno.exit(1);
-  }
 }

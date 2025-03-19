@@ -17,35 +17,37 @@ const config: Config = {
     },
   },
   aws: {
-    iamRole: {
-      "example-aws-aim-role": {
-        assumeRolePolicy: {
-          Version: "2012-10-17",
-          Statement: [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
+    iam: {
+      role: {
+        "example-aws-aim-role": {
+          assumeRolePolicy: {
+            Version: "2012-10-17",
+            Statement: [
+              {
+                "Action": "sts:AssumeRole",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Effect": "Allow",
               },
-              "Effect": "Allow",
-            },
+            ]
+          }, 
+          inlinePolicy: {
+            Version: "2012-10-17",
+            Statement: [
+              {
+                "Action": [
+                  "logs:PutLogEvents",
+                ],
+                "Resource": "arn:aws:logs:*:*:*",
+                "Effect": "Allow"
+              }
+            ],
+          },
+          managedPoliciesArns: [
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
           ]
-        }, 
-        inlinePolicy: {
-          Version: "2012-10-17",
-          Statement: [
-            {
-              "Action": [
-                "logs:PutLogEvents",
-              ],
-              "Resource": "arn:aws:logs:*:*:*",
-              "Effect": "Allow"
-            }
-          ],
-        },
-        managedPoliciesArns: [
-          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        ]
+        }
       }
     },
   }

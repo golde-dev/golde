@@ -1,9 +1,9 @@
-import { matchCloudwatchLogGroup } from "./resources/cloudwatchLogGroup/path.ts";
-import { matchIAMRole } from "./resources/iamRole/path.ts";
-import { matchLambdaFunction } from "./resources/lambdaFunction/path.ts";
-import { matchS3Bucket } from "./resources/s3Bucket/path.ts";
+import { matchCloudwatchLogGroup } from "./resources/cloudwatch/logGroup/path.ts";
+import { matchIAMRole } from "./resources/iam/role/path.ts";
+import { matchLambdaFunction } from "./resources/lambda/function/path.ts";
+import { matchS3Bucket } from "./resources/s3/bucket/path.ts";
 
-export function matchAWSPath(path: string): [string, string, string | null] | undefined {
+export function matchAWSPath(path: string): [string, string, string] | undefined {
   if (!path.startsWith("aws.")) {
     return;
   }

@@ -1,5 +1,5 @@
 import { logger } from "../logger.ts";
-import { S3 } from "../clients/s3.ts";
+import { S3 } from "../generic/client/s3.ts";
 import { S3StateClient } from "./s3State.ts";
 import { FSStateClient } from "./fsState.ts";
 import type { AbstractStateClient } from "../types/state.ts";

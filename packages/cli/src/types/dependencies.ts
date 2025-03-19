@@ -1,31 +1,11 @@
-import type { Resource } from "./config.ts";
+import type { ResourceState } from "./config.ts";
 
 export interface ResourceDependency {
-  path: string;
-  name: string;
-  attribute: string | null;
+  statePath: string;
+  resolved?: boolean;
+  resourcePath: string;
+  resourceName: string;
+  resourceAttribute: string;
 }
 
-export interface External {
-  type: "external";
-  value: Resource;
-}
-
-export interface Internal {
-  type: "internal";
-  value: Resource;
-}
-
-export interface Execution {
-  type: "execution";
-  value: Resource;
-}
-
-export type Dependency =
-  | External
-  | Internal
-  | Execution;
-
-export interface Dependencies {
-  [resource: string]: Dependency;
-}
+export type Dependency = { path: string; state: ResourceState };

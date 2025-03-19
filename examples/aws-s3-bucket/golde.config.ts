@@ -17,11 +17,13 @@ const config: Config = {
     },
   },
   aws: {
-    s3Bucket: {
-      "golde-example-aws-s3-bucket": {
-        tags: {
-          "BucketTag": "Example",
-        },
+    s3: {
+      bucket: {
+        "golde-example-aws-s3-bucket": {
+          tags: {
+            "BucketTag": "Example",
+          },
+        }
       }
     }
   }

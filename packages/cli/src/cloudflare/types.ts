@@ -1,18 +1,33 @@
-import type { D1DatabaseConfig, D1DatabaseState } from "./resources/d1Database/types.ts";
-import type { DNSConfig } from "./resources/dnsRecord/types.ts";
-import type { DNSState } from "./resources/dnsRecord/types.ts";
-import type { R2BucketConfig, R2BucketState } from "./resources/r2Bucket/types.ts";
+import type { ObjectsConfig, ObjectsState } from "@/generic/resources/s3/object/types.ts";
+import type { D1DatabaseConfig, D1DatabaseState } from "./resources/d1/database/types.ts";
+import type { DNSConfig } from "./resources/dns/record/types.ts";
+import type { DNSState } from "./resources/dns/record/types.ts";
+import type { R2BucketConfig, R2BucketState } from "./resources/r2/bucket/types.ts";
 
 export interface CloudflareConfig {
-  dnsRecord?: DNSConfig;
-  r2Bucket?: R2BucketConfig;
-  d1Database?: D1DatabaseConfig;
+  dns?: {
+    record?: DNSConfig;
+  };
+  r2?: {
+    bucket?: R2BucketConfig;
+    object?: ObjectsConfig;
+  };
+  d1?: {
+    database?: D1DatabaseConfig;
+  };
 }
 
 export interface CloudflareState {
-  dnsRecord?: DNSState;
-  r2Bucket?: R2BucketState;
-  d1Database?: D1DatabaseState;
+  dns?: {
+    record?: DNSState;
+  };
+  r2?: {
+    bucket?: R2BucketState;
+    object?: ObjectsState;
+  };
+  d1?: {
+    database?: D1DatabaseState;
+  };
 }
 
 export interface CloudflareCredentials {

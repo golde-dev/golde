@@ -1,13 +1,21 @@
 import { Queue } from "moderndash";
 import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
+import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
-import type { Change, Plan } from "./types/plan.ts";
-import type { CreateResult, DeleteResult, UpdateResult } from "./types/plan.ts";
+import type { Change, ExecutionPlan, Plan } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Lock } from "./types/lock.ts";
-import { formatDuration } from "./utils/duration.ts";
+import { resolveStateDependencies } from "./utils/template.ts";
+import type {
+  ChangeVersionResult,
+  CreateResult,
+  CreateVersionResult,
+  DeleteResult,
+  DeleteVersionResult,
+  UpdateResult,
+} from "./types/plan.ts";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -20,15 +28,55 @@ export async function confirmExecutePlan(): Promise<boolean> {
   }
 }
 
-export async function executePlan(plan: Plan): Promise<Change[]> {
-  logger.info("[Execute] Start plan execution");
+interface Execution {
+  remainingPlan: ExecutionPlan;
+  executionPlan: ExecutionPlan;
+}
+export function createExecutionPlan(
+  plan: Plan,
+  changes: Change[],
+): Execution {
+  const eligibleUnits = plan.filter((unit) => unit.type !== Type.Noop);
+
+  let executionPlan: ExecutionPlan = eligibleUnits;
+  if (changes.length) {
+    executionPlan = eligibleUnits.map((unit) => resolveStateDependencies(unit, changes));
+  }
+  executionPlan = executionPlan.filter((unit) => {
+    if (unit.type === Type.Delete || unit.type === Type.DeleteVersion) {
+      return true;
+    }
+    return unit.dependsOn.every((dependOn) => dependOn.resolved);
+  });
+
+  const remainingPlan = eligibleUnits.filter((unit) =>
+    executionPlan.find((planUnit) => planUnit.path === unit.path)
+  );
+
+  return {
+    executionPlan,
+    remainingPlan,
+  };
+}
+
+export async function executePlan(
+  plan: Plan,
+  changes: Change[] = [],
+): Promise<Change[]> {
+  if (changes.length === 0) {
+    logger.info("[Execute] Start plan execution");
+  }
+
+  const { executionPlan, remainingPlan } = createExecutionPlan(plan, changes);
+  if (executionPlan.length === 0) {
+    return changes;
+  }
 
   try {
     const queue = new Queue(20);
     const start = performance.now();
     const changes: Change[] = await queue.add(
-      plan
-        .filter((unit) => unit.type !== Type.Noop)
+      executionPlan
         .map((unit) => async (): Promise<Change> => {
           if (unit.type === Type.Create) {
             const start = performance.now();
@@ -39,6 +87,21 @@ export async function executePlan(plan: Plan): Promise<Change[]> {
             const create: CreateResult = {
               type: Type.Create,
               path: unit.path,
+              state: state,
+              config: unit.config,
+              executionTime: createTime,
+            };
+            return create;
+          } else if (unit.type === Type.CreateVersion) {
+            const start = performance.now();
+            const state = await unit.executor(...unit.args);
+            const end = performance.now();
+            const createTime = end - start;
+
+            const create: CreateVersionResult = {
+              type: Type.CreateVersion,
+              path: unit.path,
+              version: unit.version,
               state: state,
               config: unit.config,
               executionTime: createTime,
@@ -59,7 +122,7 @@ export async function executePlan(plan: Plan): Promise<Change[]> {
               executionTime: updateTime,
             };
             return update;
-          } else {
+          } else if (unit.type === Type.Delete) {
             const start = performance.now();
             await unit.executor(...unit.args);
             const end = performance.now();
@@ -72,12 +135,38 @@ export async function executePlan(plan: Plan): Promise<Change[]> {
               executionTime: deleteTime,
             };
             return deletes;
+          } else if (unit.type === Type.DeleteVersion) {
+            const start = performance.now();
+            await unit.executor(...unit.args);
+            const end = performance.now();
+            const deleteTime = end - start;
+
+            const deletesVersion: DeleteVersionResult = {
+              type: Type.DeleteVersion,
+              path: unit.path,
+              version: unit.version,
+              state: unit.state,
+              executionTime: deleteTime,
+            };
+            return deletesVersion;
+          } else if (unit.type === Type.ChangeVersion) {
+            const changeVersionUnit: ChangeVersionResult = {
+              type: Type.ChangeVersion,
+              path: unit.path,
+              version: unit.version,
+              state: unit.state,
+              executionTime: 0,
+            };
+            return changeVersionUnit;
+          } else {
+            throw new Error("Unknown type");
           }
         }),
     );
     const end = performance.now();
     logger.info(`[Execute] Successfully executed plan in ${formatDuration(end - start)}`);
-    return changes;
+
+    return executePlan(remainingPlan, changes);
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);
@@ -108,7 +197,7 @@ export async function updateState(
 
     if (logger.level === "DEBUG") {
       logger.debug(`[Apply] Updated state in ${formatDuration(end - start)}`, {
-        state: updateState,
+        state: updatedState,
       });
     } else {
       logger.info(`[Apply] Updated state in ${formatDuration(end - start)}`);
@@ -137,10 +226,24 @@ export function printChanges(changes: Change[]): void {
       case Type.Create:
         logger.info(`[Execute] Created ${path} in ${executionTime}ms`);
         break;
+      case Type.CreateVersion: {
+        const { version } = change;
+        logger.info(`[Execute] Created version ${version} for ${path} in ${executionTime}ms`);
+        break;
+      }
       case Type.Delete:
         logger.info(`[Execute] Deleted ${path} in ${executionTime}ms`);
         break;
-
+      case Type.DeleteVersion: {
+        const { version } = change;
+        logger.info(`[Execute] Deleted version ${version} for ${path} in ${executionTime}ms`);
+        break;
+      }
+      case Type.ChangeVersion: {
+        const { version } = change;
+        logger.info(`[Execute] Changed version ${version} for ${path}`);
+        break;
+      }
       default:
         throw new Error("Unknown type");
     }

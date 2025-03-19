@@ -4,7 +4,27 @@ import type { Tags } from "../types/config.ts";
 import { isUndefined } from "@es-toolkit/es-toolkit";
 import { isEmpty } from "./object.ts";
 
-export const tagsSchema = z.record(z.string()).optional();
+/**
+ * Use AWS tag rules https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+ * I make assumption that other providers might have similar rules
+ */
+export const tagKeySchema = z.string()
+  .min(1)
+  .max(128)
+  .regex(/^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$/u, {
+    message:
+      "Invalid tag key, must be unicode letters, digits, whitespace, and the special characters _, ., /, :, =, +, -, and @",
+  });
+
+export const tagValueSchema = z.string()
+  .min(0)
+  .max(255)
+  .regex(/^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$/u, {
+    message:
+      "Invalid tag value, must be unicode letters, digits, whitespace, and the special characters _, ., /, :, =, +, -, and @",
+  });
+
+export const tagsSchema = z.record(tagKeySchema, tagValueSchema).optional();
 
 export function mergeTags(tags?: Tags, other?: Tags): Tags | undefined {
   if (isEmpty(tags) && isEmpty(other)) {

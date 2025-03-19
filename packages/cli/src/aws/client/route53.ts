@@ -1,3 +1,4 @@
+import { logger } from "../../logger.ts";
 import { memoize } from "@es-toolkit/es-toolkit";
 import { AWSClientBase } from "./base.ts";
 import {
@@ -10,7 +11,6 @@ import type {
   ListHostedZonesCommandOutput,
   ResourceRecordSet,
 } from "@aws-sdk/client-route-53";
-import { logger } from "../../logger.ts";
 
 const clients = new Map<string, Client>();
 

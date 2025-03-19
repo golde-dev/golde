@@ -1,17 +1,18 @@
 import { load } from "@std/dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
-import { getConfig, getFinalConfig } from "./config.ts";
-import { createDestroyPlan, createPlan } from "./plan.ts";
-import { getFinalContext, initializeContext } from "./context.ts";
+import { getConfig } from "./config.ts";
+import { createDestroyPlan, createPlan, validatePlan } from "./plan.ts";
+import { initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
 import { confirmExecutePlan, executePlan, printChanges, updateState } from "./apply.ts";
 import { getBranchName, verifyInstalled } from "./utils/git.ts";
-import { getDependencies } from "./dependencies.ts";
+import { getDependencies, resolveExternal } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
 import type { LevelName } from "@std/log";
 import { createOutput } from "./output.ts";
+import { configure } from "./configure.ts";
 
 // TODO: handel .env.example errors
 await load({
@@ -28,6 +29,23 @@ program
   .version(VERSION);
 
 program
+  .command("configure")
+  .description("Configure Golde CLI")
+  .option("-l, --logLevel <level>", "define log level", "INFO")
+  .option("-j, --json", "log output as json")
+  .action(
+    async function (
+      { logLevel, json }: { logLevel: LevelName; json: boolean },
+    ) {
+      logger.configure(logLevel, json);
+
+      await configure();
+      logger.info("Successfully configured Golde CLI");
+      Deno.exit(0);
+    },
+  );
+
+program
   .command("init")
   .description("Initialize new golde project")
   .option("-l, --logLevel <level>", "define log level", "INFO")
@@ -40,6 +58,7 @@ program
 
       await initConfig();
       logger.info("Config created");
+      Deno.exit(0);
     },
   );
 
@@ -72,6 +91,7 @@ program
       const context = await initializeContext(branchName, loadedConfig);
 
       logger.info("Config", context.config);
+      Deno.exit(0);
     },
   );
 
@@ -98,6 +118,7 @@ program
       } = await initializeContext(branchName, loadedConfig);
 
       logger.info("Current state", previousState);
+      Deno.exit(0);
     },
   );
 
@@ -121,12 +142,12 @@ program
       const loadedConfig = await getConfig(branchName, config);
       const context = await initializeContext(branchName, loadedConfig);
 
-      const initialPlan = await createPlan(context);
-      const dependencies = await getDependencies(context, initialPlan);
+      const plan = await createPlan(context);
 
-      getFinalConfig(loadedConfig, dependencies);
+      await getDependencies(context, plan);
 
       logger.info("Config is valid");
+      Deno.exit(0);
     },
   );
 
@@ -162,6 +183,7 @@ program
       const context = await initializeContext(branchName, loadedConfig, yes);
 
       const _destroyPlan = await createDestroyPlan(context);
+      Deno.exit(0);
     },
   );
 
@@ -189,6 +211,7 @@ program
       } = options;
       logger.configure(logLevel, json);
       logger.warn("This command is not implemented yet");
+      Deno.exit(0);
     },
   );
 
@@ -215,14 +238,13 @@ program
       const branchName = getBranchName();
       const loadedConfig = await getConfig(branchName, config);
       const context = await initializeContext(branchName, loadedConfig);
+      const initialPlan = await createPlan(context);
+      const external = await getDependencies(context, initialPlan);
 
-      const initialPlan = await createPlan(context, false);
-      const dependencies = await getDependencies(context, initialPlan);
+      const planWithExternal = resolveExternal(initialPlan, external);
+      const _validPlan = validatePlan(planWithExternal);
 
-      const finalConfig = getFinalConfig(loadedConfig, dependencies);
-      const finalContext = getFinalContext(context, finalConfig);
-
-      await createPlan(finalContext, true);
+      Deno.exit(0);
     },
   );
 
@@ -245,34 +267,33 @@ program
       const {
         logLevel,
         json,
-        config,
-        yes,
+        config: configPath,
+        yes = false,
       } = options;
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
 
-      const initialConfig = await getConfig(branchName, config);
-      const initialContext = await initializeContext(branchName, initialConfig, yes);
-      const initialPlan = await createPlan(initialContext, false);
-      const initialDependencies = await getDependencies(initialContext, initialPlan, false);
+      const config = await getConfig(branchName, configPath);
+      const context = await initializeContext(branchName, config, yes);
 
-      const locks = await lockDependencies(initialContext, initialDependencies);
-      const finalDependencies = await getDependencies(initialContext, initialPlan, true);
-      const finalConfig = getFinalConfig(initialConfig, finalDependencies);
-      const finalContext = getFinalContext(initialContext, finalConfig);
-      const finalPlan = await createPlan(finalContext, true);
+      const initialPlan = await createPlan(context);
+      const external = await getDependencies(context, initialPlan);
+      const planWithExternal = resolveExternal(initialPlan, external);
+      const validPlan = validatePlan(planWithExternal);
+      const locks = await lockDependencies(context, validPlan, external);
 
       const shouldExecute = yes || await confirmExecutePlan();
 
       if (shouldExecute) {
-        const changes = await executePlan(finalPlan);
+        const changes = await executePlan(validPlan);
         printChanges(changes);
 
-        const state = await updateState(finalContext, changes, locks);
-        createOutput(finalContext, state);
+        const state = await updateState(context, changes, locks);
+        createOutput(context, state);
       }
-      await releaseLocks(finalContext, locks);
+      await releaseLocks(context, locks);
+      Deno.exit(0);
     },
   );
 

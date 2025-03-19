@@ -12,10 +12,12 @@ const config: Config = {
     },
   },
   cloudflare: {
-    d1Database: {
-      "example-cloudflare-d1-database": {
-        branch: "master",
-        locationHint: "apac",
+    d1: {
+      database: {
+        "example-cloudflare-d1-database": {
+          branch: "master",
+          locationHint: "apac",
+        }
       }
     }
   }

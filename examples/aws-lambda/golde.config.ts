@@ -17,66 +17,72 @@ const config: Config = {
     },
   },
   aws: {
-    iamRole: {
-      "example-aws-lambda-execution-role": {
-        assumeRolePolicy: {
-          Version: "2012-10-17",
-          Statement: [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
+    iam: {
+      role: {
+        "example-aws-lambda-execution-role": {
+          assumeRolePolicy: {
+            Version: "2012-10-17",
+            Statement: [
+              {
+                "Action": "sts:AssumeRole",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Effect": "Allow",
               },
-              "Effect": "Allow",
-            },
+            ]
+          }, 
+          managedPoliciesArns: [
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
           ]
-        }, 
-        managedPoliciesArns: [
-          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        ]
-      }
-    },
-    cloudwatchLogGroup: {
-      "/aws/lambda/example-aws-lambda-function-log-group": {
-        retentionInDays: 30,
-      }
-    },
-    lambdaFunction: {
-      "example-aws-lambda-function-local-zip": {
-        packageType: "Zip",
-        branch: "master",
-        description: "Example AWS Lambda Function local Zip",
-        runtime: "nodejs20.x",
-        handler: "lambda.handler",
-        memorySize: 512,
-        timeout: 30,
-        roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
-        tags: {
-          "LambdaTag": "Example tag",
-        },
-        code: {
-          zipFile: "./lambda.zip"
-        },
-      },
-      "example-aws-lambda-function-log-group": {
-        packageType: "Zip",
-        branch: "master",
-        description: "Example AWS Lambda Function local Zip",
-        runtime: "nodejs20.x",
-        handler: "lambda.handler",
-        memorySize: 512,
-        timeout: 30,
-        roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
-        tags: {
-          "LambdaTag": "Example tag",
-        },
-        code: {
-          zipFile: "./lambda.zip"
-        },
-        loggingConfig: {
-          logGroupName: "{{ state.aws.cloudwatchLogGroup./aws/lambda/example-aws-lambda-function-log-group.name }}",
         }
       },
+    },
+    cloudwatch: {
+      logGroup: {
+        "/aws/lambda/example-aws-lambda": {
+          retentionInDays: 30,
+        }
+      },
+    },
+    lambda: {
+      function: {
+        "example-aws-lambda-function-local-zip": {
+          packageType: "Zip",
+          branch: "master",
+          description: "Example AWS Lambda Function local Zip",
+          runtime: "nodejs20.x",
+          handler: "lambda.handler",
+          memorySize: 512,
+          timeout: 30,
+          roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
+          tags: {
+            "LambdaTag": "Example lambda tag",
+          },
+          code: {
+            zipFile: "./lambda.zip"
+          },
+        },
+        "example-aws-lambda-function-log-group": {
+          packageType: "Zip",
+          branch: "master",
+          description: "Example AWS Lambda Function local Zip",
+          runtime: "nodejs20.x",
+          handler: "lambda.handler",
+          memorySize: 512,
+          timeout: 30,
+          roleArn: "{{ state.aws.iamRole.example-aws-lambda-execution-role.arn }}",
+          tags: {
+            "LambdaTag": "Example lambda tag",
+          },
+          code: {
+            zipFile: "./lambda.zip"
+          },
+          loggingConfig: {
+            logGroupName: "{{ state.aws.cloudwatchLogGroup./aws/lambda/example-aws-lambda.name }}",
+          },
+        },
+      }
     }
   }
 };
