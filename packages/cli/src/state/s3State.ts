@@ -6,6 +6,8 @@ import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
 import { applyChangeSet } from "./utils/apply.ts";
+import type { Dependency } from "@/types/dependencies.ts";
+import type { StateConfig } from "@/state/types.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
   `/${projectName}/${slugify(branch)}.state.json`;
@@ -20,9 +22,33 @@ export class S3StateClient implements AbstractStateClient {
     this.s3 = s3;
   }
 
+  public createLock(
+    _project: string,
+    _branch: string,
+    _resources: string[],
+  ): Promise<Lock | undefined> {
+    return Promise.resolve(undefined);
+  }
+
+  public getStateConfig(
+    _project: string,
+    _branch?: string,
+  ): Promise<StateConfig | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
+  public getLocks(_project: string, _branch?: string): Promise<Lock[]> {
+    return Promise.resolve([]);
+  }
+
   public getState(_project: string): Promise<State | undefined> {
     throw new Error("Method not implemented.");
   }
+
+  public getResources(_project: string, _resources: string[]): Promise<Dependency[]> {
+    throw new Error("Method not implemented.");
+  }
+
   /**
    * Get state for a branch and project
    */

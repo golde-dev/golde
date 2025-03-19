@@ -7,6 +7,7 @@ import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
+import type { Dependency } from "@/types/dependencies.ts";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -28,6 +29,10 @@ export class FSStateClient implements AbstractStateClient {
    * Get state for all branches
    */
   public getState(_: string): Promise<State | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
+  public getResources(_: string, _resources: string[]): Promise<Dependency[]> {
     throw new Error("Method not implemented.");
   }
 
@@ -76,13 +81,21 @@ export class FSStateClient implements AbstractStateClient {
     return join(this.path, `${slugify(branch)}.lock.json`);
   }
 
+  public createLock(
+    _project: string,
+    _branch: string,
+    _resources: string[],
+  ): Promise<Lock | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
   /**
    * Get locks for a branch
    */
-  public async getStateLock(_: string, branch: string): Promise<Lock[] | undefined> {
+  public async getLocks(_: string, branch: string): Promise<Lock[]> {
     const path = this.getStateLockPath(branch);
     if (!await exists(path)) {
-      return;
+      return [];
     }
     return await readJSON<Lock[]>(path);
   }

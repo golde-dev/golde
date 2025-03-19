@@ -1,12 +1,12 @@
 import { ConfigError, ConfigErrorCode } from "../error.ts";
 import type { GitInfo } from "./git.ts";
-import type { Dependencies } from "../types/dependencies.ts";
 import { existsSync } from "@std/fs/exists";
 import type { ManagedConfig } from "../config.ts";
 import type { Unit } from "@/types/plan.ts";
 import { get } from "@es-toolkit/es-toolkit/compat";
-import type { State } from "@/types/state.ts";
 import type { ResourceState } from "@/types/config.ts";
+import type { Dependency } from "@/types/dependencies.ts";
+import type { State } from "@/mod.ts";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
@@ -196,10 +196,6 @@ export const fileTemplate = (value: string): string => {
 
 const stateRe = new RegExp(/(?<=state.)(.*)/);
 
-export const dependenciesTemplate = (_dependencies: Dependencies) => (value: string): string => {
-  return originalTemplateString(value);
-};
-
 export const stateTemplate = (_state: State) => (value: string): string => {
   return originalTemplateString(value);
 };
@@ -221,9 +217,23 @@ export const unitStateTemplate =
 
         const stateUnit = resources.find((d) => d.path === resourcePath);
         if (stateUnit) {
-          const value = get(stateUnit.state, resourceAttribute);
-          if (typeof value === "string") {
-            return value;
+          const { state } = stateUnit;
+
+          if (
+            ("current" in state && typeof state.current === "string") &&
+            ("versions" in state && typeof state.versions === "object")
+          ) {
+            const currentVersion = get(state.versions, state.current);
+            const value = get(currentVersion, resourceAttribute);
+
+            if (typeof value === "string") {
+              return value;
+            }
+          } else {
+            const value = get(state, resourceAttribute);
+            if (typeof value === "string") {
+              return value;
+            }
           }
           throw new ConfigError(
             `Failed to resolve unit ${unit.path} dependency on ${stateUnit.path}, attribute ${resourceAttribute} is missing`,
@@ -239,10 +249,10 @@ export const unitStateTemplate =
  * Resolve unit dependencies
  * Only resolve args and config
  */
-export const resolveUnitDeps = (
-  unit: Unit,
-  resources: { path: string; state: ResourceState }[],
-): Unit => {
+export const resolveStateDependencies = <T extends Unit>(
+  unit: T,
+  resources: Dependency[],
+): T => {
   const resolved = {
     ...unit,
   };

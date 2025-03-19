@@ -1,12 +1,12 @@
-import { isPlainObject } from "@es-toolkit/es-toolkit";
+import { groupBy, isPlainObject, uniq } from "@es-toolkit/es-toolkit";
 import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
-import type { Dependencies, ResourceDependency } from "./types/dependencies.ts";
-import type { NoopUnit, Plan } from "./types/plan.ts";
+import type { Dependency, ResourceDependency } from "./types/dependencies.ts";
+import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
-import { resolveUnitDeps } from "@/utils/template.ts";
+import { resolveStateDependencies } from "@/utils/template.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
@@ -60,79 +60,80 @@ export function findResourceDependencies(
   return dependencies;
 }
 
-export function getDependencies(
-  _context: Context,
-  plan: Plan,
-  print = false,
-): Promise<Dependencies> {
-  if (print) {
-    logger.info("[Dependencies] Resolving dependencies");
+export function validateDependencies(dependencies: Dependency[]) {
+  const grouped = groupBy(dependencies, (d) => d.path);
+  for (const [key, value] of Object.entries(grouped)) {
+    if (value.length > 1) {
+      throw new Error(`Multiple dependencies found for same path: ${key}`);
+    }
   }
-
-  const deps: [string, string[]][] = plan.map(({ path, ...rest }) => {
-    switch (rest.type) {
-      case Type.Delete:
-        return [path, rest.state.dependsOn.map(({ resourcePath }) => resourcePath)];
-      case Type.CreateVersion:
-      case Type.Update:
-      case Type.Noop:
-      case Type.Create:
-        return [path, rest.dependsOn.map(({ resourcePath }) => resourcePath)];
-      default:
-        return [path, []];
-    }
-  });
-
-  const _childToParents = deps.reduce((acc, [path, children]) => {
-    if (acc[path]) {
-      acc[path].push(...children);
-    } else {
-      acc[path] = children;
-    }
-    return acc;
-  }, {} as Record<string, string[]>);
-
-  const _parentToChildren = deps.reduce((acc, [path, children]) => {
-    children.forEach((child) => {
-      if (acc[child]) {
-        acc[child].push(path);
-      } else {
-        acc[child] = [path];
-      }
-    });
-    return acc;
-  }, {} as Record<string, string[]>);
-
-  return Promise.resolve({});
 }
 
 /**
- * Any resources dependencies that are marked as noop will be resolved in planning
+ * Find and fetch external dependencies
+ * Assume that dependencies that do not exist in plan are external
+ */
+export async function getDependencies(
+  context: Context,
+  plan: Plan,
+): Promise<Dependency[]> {
+  logger.info("[Dependencies] Resolving dependencies");
+
+  const {
+    config: {
+      name,
+    },
+    state,
+  } = context;
+
+  const external: string[] = [];
+  const plannedUnits: Record<string, Type> = {};
+  for (const unit of plan) {
+    plannedUnits[unit.path] = unit.type;
+  }
+
+  for (const unit of plan) {
+    if (unit.type === Type.Delete || unit.type === Type.DeleteVersion) {
+      for (const { resourcePath } of unit.state.dependsOn) {
+        if (!plannedUnits[resourcePath]) {
+          external.push(resourcePath);
+        }
+      }
+    } else {
+      for (const { resourcePath } of unit.dependsOn) {
+        if (!plannedUnits[resourcePath]) {
+          external.push(resourcePath);
+        }
+      }
+    }
+  }
+  const uniqueExternal = uniq(external);
+  if (!uniqueExternal.length) {
+    return [];
+  }
+
+  const dependencies = await state.getResources(name, uniqueExternal);
+  validateDependencies(dependencies);
+  return dependencies;
+}
+
+/**
+ * Any resources dependencies that are noop these can resolved before execution
  * @example if s3.object dependsOn s3.bucket,
  *  and  s3.bucket is noop
  *  then resolve s3.object execution config
  */
 export function resolveNoopDependencies(plan: Plan): Plan {
-  const noopUnits = plan.filter((unit) => unit.type === Type.Noop);
+  const units = plan.filter((unit) => unit.type === Type.Noop);
+  return plan.map((unit) => resolveStateDependencies(unit, units));
+}
 
-  return plan
-    .map((unit) => {
-      if ("dependsOn" in unit) {
-        const { dependsOn } = unit;
-        if (dependsOn.length) {
-          const noopUnitDeps: NoopUnit[] = [];
-          for (const dep of dependsOn) {
-            const noopUnit = noopUnits.find((noop) => noop.path === dep.resourcePath);
-            if (noopUnit) {
-              noopUnitDeps.push(noopUnit);
-            }
-          }
-
-          if (noopUnitDeps.length) {
-            return resolveUnitDeps(unit, noopUnitDeps);
-          }
-        }
-      }
-      return unit;
-    });
+/**
+ * Resolve external cross branch dependencies
+ * @example if s3.object dependsOn s3.bucket,
+ *  and  s3.bucket is in another branch
+ *  then resolve s3.object execution config with s3.bucket state
+ */
+export function resolveExternal(plan: Plan, deps: Dependency[]): Plan {
+  return plan.map((unit) => resolveStateDependencies(unit, deps));
 }

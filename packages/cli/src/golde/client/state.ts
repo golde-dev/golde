@@ -5,8 +5,26 @@ import type { Change } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
 import { logger } from "../../logger.ts";
+import type { Dependency } from "../../types/dependencies.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
+  public async getResources(project: string, resources: string[]): Promise<Dependency[]> {
+    logger.debug("[Golde] fetching resources", { project, resources });
+    try {
+      const result = await this.makeRequest<Dependency[]>(
+        `/projects/${project}/resources`,
+        "POST",
+        { resources },
+      );
+      return result;
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error("[Golde] Failed to fetch resources", error.message);
+      }
+      throw error;
+    }
+  }
+
   public async getState(project: string): Promise<State | undefined> {
     logger.debug("[Golde] fetching project state", { project });
     try {
@@ -68,14 +86,35 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     }
   }
 
-  public async getStateLock(project: string, branch: string): Promise<Lock[] | undefined> {
+  public async createLock(
+    project: string,
+    branch: string,
+    resources: string[] = [],
+  ): Promise<Lock> {
+    logger.debug("[Golde] creating branch lock", { project, branch });
+    try {
+      const result = await this.makeRequest<Lock>(
+        `/projects/${project}/lock`,
+        "POST",
+        { branch, resources },
+      );
+      return result;
+    } catch (e) {
+      if (e instanceof GoldeError) {
+        logger.error("Golde failed to create branch lock", e.cause);
+      }
+      throw e;
+    }
+  }
+
+  public async getLocks(project: string, branch: string): Promise<Lock[]> {
     const query = new URLSearchParams({ branch }).toString();
+
     logger.debug("[Golde] fetching state lock", { project, branch });
     try {
       const result = await this.makeRequest<Lock[]>(
         `/projects/${project}/lock?${query}`,
         "GET",
-        { branch },
       );
       return result;
     } catch (e) {

@@ -6,7 +6,7 @@ import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
-import type { ExecutionPlan, ExecutionUnit, Plan, Unit } from "./types/plan.ts";
+import type { ExecutionUnit, Plan, Unit } from "./types/plan.ts";
 import type { UnitGroups } from "./types/plan.ts";
 import { resolveNoopDependencies } from "@/dependencies.ts";
 
@@ -128,8 +128,7 @@ export function filterExecutionUnits(plan: Plan): ExecutionUnit[] {
 
 export async function createPlan(
   context: Context,
-  print = false,
-): Promise<ExecutionPlan> {
+): Promise<Plan> {
   try {
     logger.debug("[Plan] Creating plan");
     const start = performance.now();
@@ -144,8 +143,7 @@ export async function createPlan(
     ).flat();
 
     const partiallyResolved = resolveNoopDependencies(initialPlan);
-    const executionUnits = filterExecutionUnits(partiallyResolved);
-    const sortedUnits = sortByPath(executionUnits);
+    const sortedUnits = sortByPath(partiallyResolved);
 
     const end = performance.now();
 
@@ -154,12 +152,8 @@ export async function createPlan(
       Deno.exit(0);
     }
 
-    if (print) {
-      logger.info(`[Plan] Created plan in ${formatDuration(end - start)}`);
-      printPlan(initialPlan);
-    } else {
-      logger.debug(`[Plan] Created plan in ${formatDuration(end - start)}`);
-    }
+    logger.debug(`[Plan] Created initial plan in ${formatDuration(end - start)}`);
+    printPlan(initialPlan);
 
     return sortedUnits;
   } catch (error) {
@@ -197,6 +191,8 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
   }
 }
 
-export function createExecutionPlan(_plan: Plan): Promise<ExecutionPlan[]> {
-  return Promise.resolve([]);
+export function validatePlan(
+  plan: Plan,
+): Plan {
+  return plan;
 }

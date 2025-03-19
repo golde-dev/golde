@@ -89,12 +89,12 @@ export async function createS3Plan(
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
-    const { config, name, dependsOn } = next[key];
+    const { config: nextConfig, name, dependsOn } = next[key];
 
-    assertRegion(config);
-    assertBranch(config);
+    assertRegion(nextConfig);
+    assertBranch(nextConfig);
 
-    const { region } = config;
+    const { region } = nextConfig;
 
     await assertBucketNameAvailable(name, region);
     await assertCreatePermission(name, region);
@@ -102,9 +102,9 @@ export async function createS3Plan(
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
       type: Type.Create,
       executor: createBucket,
-      args: [name, config, dependsOn],
+      args: [name, nextConfig, dependsOn],
       path: key,
-      config,
+      config: nextConfig,
       dependsOn,
     };
     plan.push(createUnit);

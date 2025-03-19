@@ -1,5 +1,10 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { configTemplate, gitTemplate, resolveTemplate, resolveUnitDeps } from "../template.ts";
+import {
+  configTemplate,
+  gitTemplate,
+  resolveStateDependencies,
+  resolveTemplate,
+} from "../template.ts";
 import { ConfigError } from "../../error.ts";
 import type { GitInfo } from "../git.ts";
 import { describe, it } from "@std/testing/bdd";
@@ -166,7 +171,7 @@ describe("resolveTemplate", () => {
   });
 });
 
-describe("resolveUnitDeps", () => {
+describe("resolveStateDependencies", () => {
   it("should resolve dependencies for a single unit", () => {
     const dependOn = {
       statePath: "aws.s3.bucket.my-bucket.name",
@@ -226,7 +231,7 @@ describe("resolveUnitDeps", () => {
       ],
     };
 
-    expect(resolveUnitDeps(unit, [deps])).toEqual(expected);
+    expect(resolveStateDependencies(unit, [deps])).toEqual(expected);
   });
 
   it("should throw if state path reference is invalid", () => {
@@ -272,7 +277,7 @@ describe("resolveUnitDeps", () => {
       },
     };
 
-    expect(() => resolveUnitDeps(unit, [deps])).toThrow(
+    expect(() => resolveStateDependencies(unit, [deps])).toThrow(
       "Failed to resolve unit aws.s3.object.my-object dependency on state.aws.s3.bucket.my-bucket, attribute name is missing",
     );
   });
