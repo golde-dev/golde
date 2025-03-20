@@ -275,7 +275,8 @@
                         "enum": [
                           "FileHash",
                           "GitHash",
-                          "ContextGitHash"
+                          "ContextGitHash",
+                          "LastUpdated"
                         ],
                         "default": "FileHash"
                       },

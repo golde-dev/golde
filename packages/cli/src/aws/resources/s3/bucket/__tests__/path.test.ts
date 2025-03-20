@@ -12,6 +12,12 @@ describe("matchS3Bucket", () => {
         attributePath: "arn",
       },
       {
+        path: `${BASE_PATH}.my-bucket.name`,
+        resourcePath: s3BucketPath("my-bucket"),
+        bucketName: "my-bucket",
+        attributePath: "name",
+      },
+      {
         path: `${BASE_PATH}.my.my-bucket.arn`,
         resourcePath: s3BucketPath("my.my-bucket"),
         bucketName: "my.my-bucket",

@@ -1,7 +1,6 @@
 import { logger } from "../../../../logger.ts";
 import { mergeProjectTags } from "../../../../utils/tags.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
-import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../../../utils.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
@@ -12,23 +11,25 @@ import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../.
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import { isConfigEqual } from "@/utils/config.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
   const previous: {
     [path: string]: {
       name: string;
-      config: BucketConfig;
+      rawConfig: BucketConfig;
       state: BucketState;
     };
   } = {};
 
-  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
+  for (const [name, { config, rawConfig, ...rest }] of Object.entries(buckets)) {
     previous[s3BucketPath(name)] = {
       name,
-      config,
+      rawConfig,
       state: {
         ...rest,
         config,
+        rawConfig,
       },
     };
   }
@@ -102,7 +103,7 @@ export async function createS3Plan(
     const createUnit: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
       type: Type.Create,
       executor: createBucket,
-      args: [name, nextConfig, dependsOn],
+      args: [name, nextConfig],
       path: key,
       config: nextConfig,
       dependsOn,
@@ -130,30 +131,30 @@ export async function createS3Plan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig, dependsOn } = next[key];
-    const { config: previousConfig, state, name } = previous[key];
+    const { config: nextRawConfig, dependsOn } = next[key];
+    const { rawConfig: previousRawConfig, state, name } = previous[key];
 
-    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
+    const isSameBaseConfig = isConfigEqual(nextRawConfig, previousRawConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<BucketConfig, BucketState> = {
         type: Type.Noop,
         path: key,
-        config: previousConfig,
+        config: previousRawConfig,
         state,
         dependsOn,
       };
       plan.push(noopUnit);
     } else {
-      if (nextConfig.region !== previousConfig.region) {
+      if (nextRawConfig.region !== previousRawConfig.region) {
         throw new Error(
           "It is not possible to update s3 bucket region, create new and migrate data",
         );
       }
 
-      assertBranch(nextConfig);
-      assertRegion(nextConfig);
+      assertBranch(nextRawConfig);
+      assertRegion(nextRawConfig);
 
-      const { region } = nextConfig;
+      const { region } = nextRawConfig;
 
       await assertBucketExist(name, region);
       await assertUpdatePermission(name, region);
@@ -165,10 +166,10 @@ export async function createS3Plan(
       > = {
         type: Type.Update,
         executor: updateBucket,
-        args: [region, name, nextConfig, state, dependsOn],
+        args: [region, name, nextRawConfig, state],
         path: key,
         state,
-        config: nextConfig,
+        config: nextRawConfig,
         dependsOn,
       };
       plan.push(updateUnit);

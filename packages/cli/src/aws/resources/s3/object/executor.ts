@@ -2,13 +2,12 @@ import { isEqual } from "@es-toolkit/es-toolkit";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { logger } from "@/logger.ts";
 import { join } from "@std/path";
-import type { WithBranch } from "@/types/config.ts";
+import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import { formatDuration } from "@/utils/duration.ts";
 import { assertBranch } from "@/utils/resource.ts";
 import { toTagsList } from "@/utils/tags.ts";
 import { nowStringDate } from "@/utils/date.ts";
 import type { AWSClient } from "../../../client/client.ts";
-import type { ResourceDependency } from "@/types/dependencies.ts";
 import type { Object, ObjectConfig, ObjectState } from "@/generic/resources/s3/object/types.ts";
 
 function s3ObjectArn(bucketName: string, key: string) {
@@ -20,8 +19,7 @@ export async function createObject(
   key: string,
   object: Object,
   config: WithBranch<ObjectConfig>,
-  dependsOn: ResourceDependency[],
-): Promise<ObjectState> {
+): Promise<OmitExecutionContext<ObjectState>> {
   assertBranch(config);
 
   const {
@@ -57,7 +55,6 @@ export async function createObject(
     key,
     version,
     createdAt,
-    dependsOn,
     config,
   };
 }
@@ -79,42 +76,23 @@ export type DeleteObject = typeof deleteObject;
 export async function updateObject(
   this: AWSClient,
   key: string,
-  object: Object,
   config: WithBranch<ObjectConfig>,
   state: ObjectState,
-  dependsOn: ResourceDependency[],
-): Promise<ObjectState> {
+): Promise<OmitExecutionContext<ObjectState>> {
   const {
     tags,
     bucketName,
   } = config;
 
   const {
-    path,
-    version,
-  } = object;
-
-  const {
     createdAt,
-    version: previousVersion,
+    version,
     config: {
       tags: previousTags,
     },
   } = state;
 
   const start = performance.now();
-
-  if (version !== previousVersion) {
-    const {
-      readable,
-    } = Deno.openSync(path);
-
-    await this.putS3Object({
-      Bucket: bucketName,
-      Key: key,
-      Body: readable,
-    });
-  }
 
   if (!isEqual(tags, previousTags)) {
     const tagList = toTagsList(tags) ?? [];
@@ -130,7 +108,6 @@ export async function updateObject(
     updatedAt,
     version,
     config,
-    dependsOn,
   };
 }
 

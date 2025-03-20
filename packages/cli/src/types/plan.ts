@@ -2,6 +2,7 @@
 
 import type { ResourceDependency } from "./dependencies.ts";
 import type {
+  OmitExecutionContext,
   Resource,
   ResourceState,
   VersionedResource,
@@ -37,6 +38,12 @@ export enum Type {
   Update = "Update",
 
   /**
+   * When resource version is updated
+   * @example s3 object tags changed
+   */
+  UpdateVersion = "UpdateVersion",
+
+  /**
    * When resource version is changed
    * Versioned resources only
    */
@@ -51,7 +58,9 @@ export enum Type {
 export interface CreateUnit<
   C extends Resource = Resource,
   S extends ResourceState = ResourceState,
-  T extends (...args: any[]) => Promise<S> = (...args: any) => Promise<S>,
+  T extends (...args: any[]) => Promise<OmitExecutionContext<S>> = (
+    ...args: any
+  ) => Promise<OmitExecutionContext<S>>,
 > {
   type: Type.Create;
   executor: T;
@@ -64,7 +73,9 @@ export interface CreateUnit<
 export interface CreateVersionUnit<
   C extends VersionedResource = VersionedResource,
   S extends ResourceState = ResourceState,
-  T extends (...args: any[]) => Promise<S> = (...args: any) => Promise<S>,
+  T extends (...args: any[]) => Promise<OmitExecutionContext<S>> = (
+    ...args: any
+  ) => Promise<OmitExecutionContext<S>>,
 > {
   type: Type.CreateVersion;
   executor: T;
@@ -101,10 +112,25 @@ export interface DeleteVersionUnit<
 export interface UpdateUnit<
   C extends Resource = Resource,
   S extends ResourceState = ResourceState,
-  T extends (...args: any[]) => any = (...args: any) => Promise<S>,
+  T extends (...args: any[]) => any = (...args: any) => Promise<OmitExecutionContext<S>>,
 > {
   type: Type.Update;
   executor: T;
+  args: Parameters<T>;
+  state: S;
+  config: C;
+  path: string;
+  dependsOn: ResourceDependency[];
+}
+
+export interface UpdateVersionUnit<
+  C extends Resource = Resource,
+  S extends ResourceState = ResourceState,
+  T extends (...args: any[]) => any = (...args: any) => Promise<OmitExecutionContext<S>>,
+> {
+  type: Type.UpdateVersion;
+  executor: T;
+  version: string;
   args: Parameters<T>;
   state: S;
   config: C;
@@ -145,6 +171,7 @@ export type Unit =
   | CreateUnit
   | CreateVersionUnit
   | UpdateUnit
+  | UpdateVersionUnit
   | DeleteUnit
   | DeleteVersionUnit
   | NoopUnit
@@ -154,6 +181,7 @@ export type ExecutionUnit =
   | CreateUnit
   | CreateVersionUnit
   | UpdateUnit
+  | UpdateVersionUnit
   | DeleteUnit
   | DeleteVersionUnit
   | ChangeVersionUnit;
@@ -166,6 +194,7 @@ export type UnitGroups = {
   [Type.DeleteVersion]?: DeleteVersionUnit[];
   [Type.Update]?: UpdateUnit[];
   [Type.ChangeVersion]?: ChangeVersionUnit[];
+  [Type.UpdateVersion]?: UpdateVersionUnit[];
 };
 
 export type Plan = Unit[];
@@ -206,6 +235,19 @@ export interface UpdateResult<
   executionTime: number;
 }
 
+export interface UpdateVersionResult<
+  C extends Resource = Resource,
+  S extends ResourceState = ResourceState,
+> {
+  type: Type.UpdateVersion;
+  path: string;
+  version: string;
+  prevState: S;
+  state: S;
+  config: C;
+  executionTime: number;
+}
+
 export interface DeleteResult<
   S extends ResourceState = ResourceState,
 > {
@@ -239,6 +281,7 @@ export type Change =
   | CreateResult
   | CreateVersionResult
   | UpdateResult
+  | UpdateVersionResult
   | DeleteResult
   | DeleteVersionResult
   | ChangeVersionResult;

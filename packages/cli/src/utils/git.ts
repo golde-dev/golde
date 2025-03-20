@@ -2,6 +2,7 @@ import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
 import { memoize } from "@es-toolkit/es-toolkit";
 import { decode } from "./text.ts";
+import { relative, resolve } from "@std/path";
 
 export interface GitInfo {
   defaultBranch: string;
@@ -37,11 +38,30 @@ export const getBranchName = memoize((revision: string = "HEAD") =>
     .trim()
 );
 
-export const getRefHash = memoize((revision: string = "HEAD") =>
-  execSync(`git rev-parse ${revision}`)
+export const getRefHash = memoize((revision: string = "HEAD") => {
+  return execSync(`git rev-parse ${revision}`)
     .toString()
-    .trim()
-);
+    .trim();
+});
+
+const getGitTopLevel = memoize(() => {
+  return execSync(`git rev-parse --show-toplevel`)
+    .toString()
+    .trim();
+});
+
+export const getContextRefHash = memoize((context: string, revision: string = "HEAD") => {
+  const path = resolve(context);
+  const topLevel = getGitTopLevel();
+
+  const relativePath = relative(topLevel, path);
+
+  console.log({ relativePath });
+
+  return execSync(`git rev-parse ${revision}:${relativePath}`)
+    .toString()
+    .trim();
+});
 
 export const getBranchSlug = memoize((revision: string = "HEAD") =>
   slugify(getBranchName(revision))

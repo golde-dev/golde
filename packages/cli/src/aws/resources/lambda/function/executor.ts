@@ -7,8 +7,7 @@ import { nowStringDate } from "../../../../utils/date.ts";
 import { hashByteArray } from "../../../../utils/hash.ts";
 import type { AWSClient } from "../../../client/client.ts";
 import type { WithRegion } from "../../../types.ts";
-import type { WithBranch } from "../../../../types/config.ts";
-import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import type { OmitExecutionContext, WithBranch } from "../../../../types/config.ts";
 import type {
   FunctionConfig,
   FunctionConfigState,
@@ -85,8 +84,7 @@ export async function createFunction(
   this: AWSClient,
   functionName: string,
   config: WithBranch<WithRegion<FunctionConfig>>,
-  dependsOn: ResourceDependency[],
-): Promise<FunctionState> {
+): Promise<OmitExecutionContext<FunctionState>> {
   assertBranch(config);
 
   const start = Date.now();
@@ -132,7 +130,6 @@ export async function createFunction(
     return {
       arn,
       createdAt,
-      dependsOn,
       config,
     };
   } else {
@@ -185,7 +182,6 @@ export async function createFunction(
       return {
         arn,
         createdAt,
-        dependsOn,
         config: {
           ...config,
           code: zipCode,
@@ -199,7 +195,6 @@ export async function createFunction(
       return {
         arn,
         createdAt,
-        dependsOn,
         config: {
           ...config,
           code: s3Code,
@@ -228,8 +223,7 @@ export async function updateFunction(
   this: AWSClient,
   config: WithBranch<WithRegion<FunctionConfig>>,
   state: FunctionState,
-  dependsOn: ResourceDependency[],
-): Promise<FunctionState> {
+): Promise<OmitExecutionContext<FunctionState>> {
   const {
     tags,
     code,
@@ -327,7 +321,6 @@ export async function updateFunction(
     arn,
     createdAt,
     updatedAt,
-    dependsOn,
     config: configState,
   };
 }

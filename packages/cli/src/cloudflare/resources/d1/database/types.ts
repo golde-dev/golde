@@ -16,6 +16,7 @@ export interface DatabaseState {
   updatedAt?: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<DatabaseConfig>;
+  rawConfig: WithBranch<DatabaseConfig>;
 }
 
 export interface D1DatabaseState {

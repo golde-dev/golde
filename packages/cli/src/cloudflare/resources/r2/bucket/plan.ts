@@ -11,22 +11,25 @@ import type { DeleteUnit, NoopUnit } from "../../../../types/plan.ts";
 import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "./executor.ts";
 
-function getCurrent(buckets: R2BucketState = {}) {
+function getPrevious(buckets: R2BucketState = {}) {
   const previous: {
     [path: string]: {
       name: string;
       config: BucketConfig;
+      rawConfig: BucketConfig;
       state: BucketState;
     };
   } = {};
 
-  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
+  for (const [name, { config, rawConfig, ...rest }] of Object.entries(buckets)) {
     previous[r2BucketPath(name)] = {
       name,
       config,
+      rawConfig,
       state: {
         ...rest,
         config,
+        rawConfig,
       },
     };
   }
@@ -64,7 +67,7 @@ export async function createR2Plan(
 
   const plan: Plan = [];
 
-  const previous = getCurrent(state);
+  const previous = getPrevious(state);
   const next = getNext(config);
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
@@ -98,15 +101,15 @@ export async function createR2Plan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig } = next[key];
-    const { config: previousConfig, state } = previous[key];
+    const { config: nextRawConfig } = next[key];
+    const { rawConfig: previousRawConfig, state } = previous[key];
 
-    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
+    const isSameBaseConfig = isEqual(nextRawConfig, previousRawConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<BucketConfig, BucketState> = {
         type: Type.Noop,
         path: key,
-        config: previousConfig,
+        config: previousRawConfig,
         state,
         dependsOn: state.dependsOn,
       };
@@ -128,7 +131,7 @@ export function createR2DestroyPlan(
     state,
   });
 
-  const previous = getCurrent(state);
+  const previous = getPrevious(state);
   for (const key of Object.keys(previous)) {
     const { state, name } = previous[key];
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {

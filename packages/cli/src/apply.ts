@@ -4,7 +4,7 @@ import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
-import type { Change, ExecutionPlan, Plan } from "./types/plan.ts";
+import type { Change, ExecutionPlan, Plan, UpdateVersionResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Lock } from "./types/lock.ts";
 import { resolveStateDependencies } from "./utils/template.ts";
@@ -87,7 +87,11 @@ export async function executePlan(
             const create: CreateResult = {
               type: Type.Create,
               path: unit.path,
-              state: state,
+              state: {
+                ...state,
+                rawConfig: unit.config,
+                dependsOn: unit.dependsOn,
+              },
               config: unit.config,
               executionTime: createTime,
             };
@@ -102,7 +106,11 @@ export async function executePlan(
               type: Type.CreateVersion,
               path: unit.path,
               version: unit.version,
-              state: state,
+              state: {
+                ...state,
+                rawConfig: unit.config,
+                dependsOn: unit.dependsOn,
+              },
               config: unit.config,
               executionTime: createTime,
             };
@@ -117,7 +125,31 @@ export async function executePlan(
               type: Type.Update,
               path: unit.path,
               prevState: unit.state,
-              state: state,
+              state: {
+                ...state,
+                rawConfig: unit.config,
+                dependsOn: unit.dependsOn,
+              },
+              config: unit.config,
+              executionTime: updateTime,
+            };
+            return update;
+          } else if (unit.type === Type.UpdateVersion) {
+            const start = performance.now();
+            const state = await unit.executor(...unit.args);
+            const end = performance.now();
+
+            const updateTime = end - start;
+            const update: UpdateVersionResult = {
+              type: Type.UpdateVersion,
+              path: unit.path,
+              version: unit.version,
+              prevState: unit.state,
+              state: {
+                ...state,
+                rawConfig: unit.config,
+                dependsOn: unit.dependsOn,
+              },
               config: unit.config,
               executionTime: updateTime,
             };
@@ -223,6 +255,11 @@ export function printChanges(changes: Change[]): void {
       case Type.Update:
         logger.info(`[Execute] Updated ${path} in ${executionTime}ms`);
         break;
+      case Type.UpdateVersion: {
+        const { version } = change;
+        logger.info(`[Execute] Updated version ${version} for ${path} in ${executionTime}ms`);
+        break;
+      }
       case Type.Create:
         logger.info(`[Execute] Created ${path} in ${executionTime}ms`);
         break;

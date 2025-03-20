@@ -1,5 +1,5 @@
 import { expect } from "@std/expect/expect";
-import { getOutputLength } from "../hash.ts";
+import { getOutputLength } from "../version.ts";
 import { describe, it } from "@std/testing/bdd";
 
 describe("getOutputLength", () => {

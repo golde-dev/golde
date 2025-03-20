@@ -16,7 +16,7 @@ function getCurrent(buckets: D1DatabaseState = {}) {
   const previous: {
     [path: string]: {
       name: string;
-      config: DatabaseConfig;
+      rawConfig: DatabaseConfig;
       state: DatabaseState;
     };
   } = {};
@@ -24,7 +24,7 @@ function getCurrent(buckets: D1DatabaseState = {}) {
   for (const [name, { config, ...rest }] of Object.entries(buckets)) {
     previous[d1DatabasePath(name)] = {
       name,
-      config,
+      rawConfig: config,
       state: {
         ...rest,
         config,
@@ -38,7 +38,7 @@ function getNext(config: D1DatabaseConfig = {}) {
   const next: {
     [path: string]: {
       name: string;
-      config: DatabaseConfig;
+      rawConfig: DatabaseConfig;
       dependsOn: ResourceDependency[];
     };
   } = {};
@@ -46,7 +46,7 @@ function getNext(config: D1DatabaseConfig = {}) {
   for (const [name, database] of Object.entries(config)) {
     next[d1DatabasePath(name)] = {
       name,
-      config: omitUndefined(database),
+      rawConfig: omitUndefined(database),
       dependsOn: findResourceDependencies(database),
     };
   }
@@ -78,17 +78,17 @@ export async function createD1DatabasePlan(
 
   const creating = Object.keys(next).filter((key) => !(key in previous));
   for (const key of creating) {
-    const { config, name, dependsOn } = next[key];
+    const { rawConfig, name, dependsOn } = next[key];
 
-    assertBranch(config);
+    assertBranch(rawConfig);
     await assertDatabaseNotExist(name);
 
     const createUnit: CreateUnit<DatabaseConfig, DatabaseState, CreateDatabase> = {
       type: Type.Create,
       executor: createDatabase,
-      args: [name, config, dependsOn],
+      args: [name, rawConfig],
       path: key,
-      config,
+      config: rawConfig,
       dependsOn,
     };
     plan.push(createUnit);
@@ -112,15 +112,15 @@ export async function createD1DatabasePlan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextConfig } = next[key];
-    const { config: previousConfig, state } = previous[key];
+    const { rawConfig: nextConfig } = next[key];
+    const { rawConfig: previousRawConfig, state } = previous[key];
 
-    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
+    const isSameBaseConfig = isEqual(nextConfig, previousRawConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<DatabaseConfig, DatabaseState> = {
         type: Type.Noop,
         path: key,
-        config: previousConfig,
+        config: previousRawConfig,
         state,
         dependsOn: state.dependsOn,
       };

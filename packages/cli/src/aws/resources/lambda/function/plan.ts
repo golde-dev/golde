@@ -108,7 +108,7 @@ export async function createLambdaFunctionPlan(
     const createUnit: CreateUnit<FunctionConfig, FunctionState, CreateFunction> = {
       type: Type.Create,
       executor: createFunction,
-      args: [name, config, dependsOn],
+      args: [name, config],
       path: key,
       config,
       dependsOn,
@@ -171,7 +171,7 @@ export async function createLambdaFunctionPlan(
       > = {
         type: Type.Update,
         executor: updateFunction,
-        args: [nextConfig, state, dependsOn],
+        args: [nextConfig, state],
         path: key,
         state,
         config: nextConfig,

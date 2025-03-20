@@ -107,7 +107,7 @@ export async function createCloudwatchLogGroupPlan(
     const createUnit: CreateUnit<LogGroupConfig, LogGroupState, CreateLogGroup> = {
       type: Type.Create,
       executor: createLogGroup,
-      args: [name, config, dependsOn],
+      args: [name, config],
       path: key,
       config,
       dependsOn,
@@ -170,7 +170,7 @@ export async function createCloudwatchLogGroupPlan(
       > = {
         type: Type.Update,
         executor: updateLogGroup,
-        args: [nextConfig.region, name, nextConfig, state, dependsOn],
+        args: [nextConfig.region, name, nextConfig, state],
         path: key,
         state,
         config: nextConfig,

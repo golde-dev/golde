@@ -1,19 +1,15 @@
-import { copy, ensureDir, exists } from "@std/fs";
-import { dirname, join } from "@std/path";
-import { tar, tgz, zip } from "jsr:@deno-library/compress";
-import { getRefHash } from "@/utils/git.ts";
-import { hashFile } from "@/utils/hash.ts";
-import { PlanError, PlanErrorCode } from "@/error.ts";
-import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 import { logger } from "@/logger.ts";
-
-async function getLastUpdated(path: string) {
-  const { mtime } = await Deno.lstat(path);
-  if (!mtime) {
-    throw new Error(`Failed to get last updated for ${path}`);
-  }
-  return mtime.toString();
-}
+import { copy, exists } from "@std/fs";
+import { basename, join, resolve } from "@std/path";
+import { tar, tgz, zip } from "@deno-library/compress";
+import { PlanError, PlanErrorCode } from "@/error.ts";
+import {
+  getFileHashVersion,
+  getGitContextVersion,
+  getGitVersion,
+  getLastUpdatedVersion,
+} from "@/utils/version.ts";
+import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 
 async function getVersion(
   path: string,
@@ -21,36 +17,37 @@ async function getVersion(
   version: Version = "FileHash",
 ): Promise<string> {
   if (version === "FileHash") {
-    return await hashFile(path);
+    return await getFileHashVersion(path);
   }
   if (version === "LastUpdated") {
-    return await getLastUpdated(path);
+    return await getLastUpdatedVersion(path);
   }
   if (version === "GitHash") {
-    return await getRefHash();
+    return await getGitVersion();
   }
   if (version === "ContextGitHash") {
-    return await getRefHash(context);
+    return await getGitContextVersion(context);
   }
   throw new Error(`Not implemented: ${version}`);
 }
 
 async function compress(path: string, name: string) {
+  // TODO: zip is not working issue with workers
   if (name.endsWith(".zip")) {
-    const archivePath = join(path, `zip`);
-    logger.debug(`Object ${name} Compressing ${path} to ${archivePath}`);
+    const archivePath = `${path}.zip`;
+    logger.debug(`[Plan] Object ${name} compressing ${path} to ${archivePath}`);
     await zip.compress(path, archivePath);
     return archivePath;
   }
   if (name.endsWith(".tar.gz")) {
-    const archivePath = join(path, `tar.gz`);
-    logger.debug(`Object ${name} Compressing ${path} to ${archivePath}`);
+    const archivePath = `${path}.tar.gz`;
+    logger.debug(`[Plan] Object ${name} compressing ${path} to ${archivePath}`);
     await tgz.compress(path, archivePath);
     return archivePath;
   }
   if (name.endsWith(".tar")) {
-    const archivePath = join(path, `.tar`);
-    logger.debug(`Object ${name} Compressing ${path} to ${archivePath}`);
+    const archivePath = `${path}.tar`;
+    logger.debug(`[Plan] Object ${name} compressing ${path} to ${archivePath}`);
     await tar.compress(path, archivePath);
     return archivePath;
   }
@@ -62,19 +59,35 @@ async function createFromSource(
   name: string,
   source: string,
 ): Promise<string> {
-  const path = join(context, source);
-  if (await exists(path)) {
+  const contextBase = resolve(context);
+  const fromPath = join(contextBase, source);
+
+  if (!await exists(fromPath)) {
+    throw new PlanError(
+      `Bucket object ${name}, source ${source} does not exist`,
+      PlanErrorCode.SOURCE_NOT_FOUND,
+    );
+  }
+
+  try {
     const tmpDir = await Deno.makeTempDir({
       prefix: `golde-bucket-object-${name}`,
     });
-    logger.debug(`Object ${name} Copying ${path} to ${tmpDir}`);
-    await copy(path, tmpDir, { preserveTimestamps: true });
-    return await compress(path, name);
+    const toPath = join(tmpDir, basename(fromPath));
+    logger.debug(`Object ${name} Copying ${fromPath} to ${tmpDir}`);
+
+    await copy(fromPath, toPath, {
+      preserveTimestamps: true,
+      overwrite: true,
+    });
+    return await compress(toPath, name);
+  } catch (error) {
+    throw new PlanError(
+      `Bucket object ${name}, source ${source} failed`,
+      PlanErrorCode.SOURCE_ERROR,
+      error,
+    );
   }
-  throw new PlanError(
-    `Bucket object ${name}, source ${source} does not exist`,
-    PlanErrorCode.SOURCE_NOT_FOUND,
-  );
 }
 
 async function createFromIncludes(
@@ -85,25 +98,61 @@ async function createFromIncludes(
   const tmpDir = await Deno.makeTempDir({
     prefix: `golde-bucket-object-${name}`,
   });
+  const contextBase = resolve(context);
 
-  for (const { from, to } of includes) {
-    const fromPath = join(context, from);
-    const toPath = join(tmpDir, to);
+  try {
+    for (const { from, to } of includes) {
+      const fromPath = join(contextBase, from);
+      const toPath = join(tmpDir, to);
 
-    ensureDir(dirname(toPath));
+      logger.debug(`[Plan] Object ${name} Copying ${fromPath} to ${toPath}`);
 
-    if (await exists(fromPath)) {
-      logger.debug(`Object ${name} Copying ${fromPath} to ${toPath}`);
-      await copy(fromPath, toPath, { preserveTimestamps: true });
-    } else {
-      throw new PlanError(
-        `Bucket object ${name}, include ${from} does not exist`,
-        PlanErrorCode.SOURCE_NOT_FOUND,
-      );
+      if (!await exists(fromPath)) {
+        throw new PlanError(
+          `[Plan] Bucket object ${name}, include ${from} does not exist`,
+          PlanErrorCode.SOURCE_NOT_FOUND,
+        );
+      }
+
+      if (toPath !== tmpDir) {
+        await copy(fromPath, toPath, { preserveTimestamps: true });
+        continue;
+      }
+
+      const fromStat = Deno.lstatSync(fromPath);
+
+      if (fromStat.isFile) {
+        const fileToPath = join(tmpDir, basename(fromPath));
+        await copy(fromPath, fileToPath, {
+          preserveTimestamps: true,
+          overwrite: false,
+        });
+        continue;
+      }
+
+      if (fromStat.isDirectory) {
+        for (const entry of Deno.readDirSync(fromPath)) {
+          const entryFromPath = join(fromPath, entry.name);
+          const entryToPath = join(tmpDir, entry.name);
+
+          await copy(entryFromPath, entryToPath, {
+            preserveTimestamps: true,
+            overwrite: false,
+          });
+        }
+        continue;
+      }
+
+      throw new Error(`Object ${name}, include ${from} is not a file or directory`);
     }
+    return await compress(tmpDir, name);
+  } catch (error) {
+    throw new PlanError(
+      `Bucket object ${name}, include failed`,
+      PlanErrorCode.SOURCE_ERROR,
+      error,
+    );
   }
-
-  return await compress(tmpDir, name);
 }
 
 export async function getObject(name: string, config: ObjectConfig): Promise<Object> {

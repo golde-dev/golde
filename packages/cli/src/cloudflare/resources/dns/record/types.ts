@@ -49,6 +49,7 @@ export interface RecordState {
   createdAt: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<RecordConfig>;
+  rawConfig: WithBranch<RecordConfig>;
 }
 
 export type ZoneRecordsState = Partial<

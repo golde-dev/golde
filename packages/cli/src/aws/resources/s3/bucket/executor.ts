@@ -1,7 +1,7 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
 import { PlanError, PlanErrorCode } from "../../../../error.ts";
 import { logger } from "../../../../logger.ts";
-import type { WithBranch } from "../../../../types/config.ts";
+import type { OmitExecutionContext, WithBranch } from "../../../../types/config.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
 import { toTagsList } from "../../../../utils/tags.ts";
@@ -9,7 +9,6 @@ import { nowStringDate } from "../../../../utils/date.ts";
 import type { AWSClient } from "../../../client/client.ts";
 import type { WithRegion } from "../../../types.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
-import type { ResourceDependency } from "../../../../types/dependencies.ts";
 
 function s3BucketArn(name: string) {
   return `arn:aws:s3:::${name}`;
@@ -19,8 +18,7 @@ export async function createBucket(
   this: AWSClient,
   name: string,
   config: WithBranch<WithRegion<BucketConfig>>,
-  dependsOn: ResourceDependency[],
-): Promise<BucketState> {
+): Promise<OmitExecutionContext<BucketState>> {
   assertBranch(config);
 
   const {
@@ -46,7 +44,6 @@ export async function createBucket(
     arn,
     name,
     createdAt,
-    dependsOn,
     config,
   };
 }
@@ -71,8 +68,7 @@ export async function updateBucket(
   name: string,
   config: WithBranch<WithRegion<BucketConfig>>,
   state: BucketState,
-  dependsOn: ResourceDependency[],
-): Promise<BucketState> {
+): Promise<OmitExecutionContext<BucketState>> {
   const {
     tags,
   } = config;
@@ -94,7 +90,6 @@ export async function updateBucket(
       createdAt,
       updatedAt,
       config,
-      dependsOn,
     };
   }
   return state;

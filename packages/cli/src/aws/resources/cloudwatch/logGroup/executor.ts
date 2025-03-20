@@ -8,7 +8,7 @@ import type { AWSClient } from "../../../client/client.ts";
 import type { WithRegion } from "../../../types.ts";
 import type { LogGroupConfig, LogGroupState } from "./types.ts";
 import { nowStringDate } from "../../../../utils/date.ts";
-import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import type { OmitExecutionContext } from "@/types/config.ts";
 
 function logGroupArn({ accountId }: AWSClient, region: string, name: string) {
   if (!accountId) {
@@ -28,8 +28,7 @@ export async function createLogGroup(
   this: AWSClient,
   name: string,
   config: WithBranch<WithRegion<LogGroupConfig>>,
-  dependsOn: ResourceDependency[],
-): Promise<LogGroupState> {
+): Promise<OmitExecutionContext<LogGroupState>> {
   assertBranch(config);
 
   const {
@@ -51,7 +50,6 @@ export async function createLogGroup(
     arn,
     name,
     createdAt,
-    dependsOn,
     config,
   };
 }
@@ -79,8 +77,7 @@ export async function updateLogGroup(
   name: string,
   config: WithBranch<WithRegion<LogGroupConfig>>,
   state: LogGroupState,
-  dependsOn: ResourceDependency[],
-): Promise<LogGroupState> {
+): Promise<OmitExecutionContext<LogGroupState>> {
   const {
     tags,
     retentionInDays,
@@ -116,7 +113,6 @@ export async function updateLogGroup(
     name,
     createdAt,
     updatedAt,
-    dependsOn,
     config,
   };
 }

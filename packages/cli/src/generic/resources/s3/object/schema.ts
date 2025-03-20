@@ -18,6 +18,7 @@ export const identitySchema = z
     "FileHash",
     "GitHash",
     "ContextGitHash",
+    "LastUpdated",
   ])
   .default("FileHash");
 

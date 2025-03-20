@@ -1,7 +1,6 @@
 import { PlanError, PlanErrorCode } from "../../../../error.ts";
 import { logger } from "../../../../logger.ts";
-import type { WithBranch } from "../../../../types/config.ts";
-import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import type { OmitExecutionContext, WithBranch } from "../../../../types/config.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
 import type { CloudflareClient } from "../../../client/client.ts";
 import type { DatabaseConfig, DatabaseState } from "./types.ts";
@@ -10,8 +9,7 @@ export async function createDatabase(
   this: CloudflareClient,
   name: string,
   config: WithBranch<DatabaseConfig>,
-  dependsOn: ResourceDependency[],
-): Promise<DatabaseState> {
+): Promise<OmitExecutionContext<DatabaseState>> {
   const {
     locationHint,
   } = config;
@@ -28,7 +26,6 @@ export async function createDatabase(
   return {
     uuid,
     createdAt,
-    dependsOn,
     config,
   };
 }

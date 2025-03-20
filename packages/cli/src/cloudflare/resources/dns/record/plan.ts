@@ -98,7 +98,7 @@ export const createDNSPlan = (
     const createUnit: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
       type: Type.Create,
       executor: executors.createZoneRecord,
-      args: [zone, type, name, config, dependsOn],
+      args: [zone, type, name, config],
       path: key,
       config,
       dependsOn,
@@ -135,7 +135,7 @@ export const createDNSPlan = (
       > = {
         type: Type.Update,
         executor: executors.updateZoneRecord,
-        args: [zone, type, name, state.id, nextConfig, dependsOn],
+        args: [zone, type, name, state.id, nextConfig],
         path: key,
         state,
         config: nextConfig,

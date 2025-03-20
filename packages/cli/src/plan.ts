@@ -51,7 +51,7 @@ export function printPlan(flatPlan: Plan) {
     });
   }
 
-  if (plan[Type.CreateVersion].length) {
+  if (plan[Type.CreateVersion]?.length) {
     logger.info(`[Plan] ${plan[Type.CreateVersion].length} resources versions to create`);
     sortByPath(plan[Type.CreateVersion]).forEach((create) => {
       if (logger.level === "DEBUG") {
@@ -94,6 +94,21 @@ export function printPlan(flatPlan: Plan) {
   if (plan[Type.Update]?.length) {
     logger.info(`[Plan] ${plan[Type.Update].length} Resources to update`);
     sortByPath(plan[Type.Update]).forEach((update) => {
+      if (logger.level === "DEBUG") {
+        logger.debug(`    ${update.path}`, {
+          config: update.config,
+          state: update.state,
+          dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
+        });
+      } else {
+        logger.info(`   ${update.path}`);
+      }
+    });
+  }
+
+  if (plan[Type.UpdateVersion]?.length) {
+    logger.info(`[Plan] ${plan[Type.UpdateVersion].length} Resources version to update`);
+    sortByPath(plan[Type.UpdateVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
         logger.debug(`    ${update.path}`, {
           config: update.config,

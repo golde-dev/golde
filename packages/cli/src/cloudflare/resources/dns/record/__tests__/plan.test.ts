@@ -43,7 +43,7 @@ describe.skip("cloudflare dsn", () => {
       const create: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
         type: Type.Create,
         executor: executors.createZoneRecord,
-        args: ["golde.dev", "A", "dns-cloudflare", recordConfig, []],
+        args: ["golde.dev", "A", "dns-cloudflare", recordConfig],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         dependsOn: [],
         config: recordConfig,
@@ -94,7 +94,7 @@ describe.skip("cloudflare dsn", () => {
       const create: CreateUnit<RecordConfig, RecordState, CreateZoneRecord> = {
         type: Type.Create,
         executor: executors.createZoneRecord,
-        args: ["golde.dev", "A", "dns-cloudflare", recordConfigWithTags, []],
+        args: ["golde.dev", "A", "dns-cloudflare", recordConfigWithTags],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         dependsOn: [],
         config: recordConfigWithTags,
@@ -132,6 +132,7 @@ describe.skip("cloudflare dsn", () => {
         createdAt: "2022-01-01T00:00:00.000Z",
         dependsOn: [],
         config: prevRecordConfig,
+        rawConfig: prevRecordConfig,
       };
 
       const state: DNSState = {
@@ -152,7 +153,7 @@ describe.skip("cloudflare dsn", () => {
       const update: UpdateUnit<RecordConfig, RecordState, UpdateZoneRecord> = {
         type: Type.Update,
         executor: executors.updateZoneRecord,
-        args: ["golde.dev", "A", "dns-cloudflare", "1234", updatedRecordConfig, []],
+        args: ["golde.dev", "A", "dns-cloudflare", "1234", updatedRecordConfig],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         dependsOn: [],
         state: recordState,
@@ -184,6 +185,7 @@ describe.skip("cloudflare dsn", () => {
         value: "20.10.10.1",
         dependsOn: [],
         config: recordConfig,
+        rawConfig: recordConfig,
       };
 
       const state: DNSState = {
@@ -235,6 +237,7 @@ describe.skip("cloudflare dsn", () => {
         createdAt: "2022-01-01T00:00:00.000Z",
         dependsOn: [],
         config: prevRecordConfig,
+        rawConfig: prevRecordConfig,
       };
       const state: DNSState = {
         "golde.dev": {

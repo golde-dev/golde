@@ -39,6 +39,7 @@ export interface LogGroupState {
   updatedAt?: string;
   dependsOn: ResourceDependency[];
   config: WithRegion<WithBranch<LogGroupConfig>>;
+  rawConfig: WithRegion<WithBranch<LogGroupConfig>>;
 }
 
 export interface CloudwatchLogGroupState {

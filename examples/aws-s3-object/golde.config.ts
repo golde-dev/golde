@@ -26,16 +26,17 @@ const config: Config = {
         }
       },
       object: {
-        "includes.zip": {
+        "includes.tar": {
           branch: "master",
           includes: [
             { from: "./src/nested", to: "." },
+            { from: "./src/base.txt", to: "." },
             { from: "./src/nested", to: "./moved/nested" },
 
             { from: "./src/base.txt", to: "./renamed.txt" },
 
-            { from: "./src/test1.txt", to: "./moved" },
-            { from: "./src/test2.txt", to: "./moved" },
+            // { from: "./src/test1.txt", to: "./moved" },
+            // { from: "./src/test2.txt", to: "./moved" },
           ],
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
@@ -44,25 +45,25 @@ const config: Config = {
           source: "./src/base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
-        "file-hash.copy.zip": {
+        "file-hash.copy.tar": {
           branch: "master",
           version: "FileHash",
           source: "./src/base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
-        "file-last-updated.copy.zip": {
+        "file-last-updated.copy.tar": {
           branch: "master",
           version: "LastUpdated",
           source: "./src/base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
-        "git-hash.copy.zip": {
+        "git-hash.copy.tar": {
           branch: "master",
           version: "GitHash",
           source: "./src/base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },
-        "git-hash-context.copy.zip": {
+        "git-hash-context.copy.tar": {
           branch: "master",
           version: "ContextGitHash",
           context: "./src",

@@ -24,7 +24,9 @@ export function dependenciesSearch(
       const match = stateRe.exec(key);
       if (match) {
         const [statePath] = match;
-        const depsMatch = matchAWSPath(statePath) ?? matchCloudflarePath(statePath);
+        const statePathTrimmed = statePath.trim();
+
+        const depsMatch = matchAWSPath(statePathTrimmed) ?? matchCloudflarePath(statePathTrimmed);
         if (depsMatch) {
           const [resourcePath, resourceName, resourceAttribute] = depsMatch;
           dependencies.push({

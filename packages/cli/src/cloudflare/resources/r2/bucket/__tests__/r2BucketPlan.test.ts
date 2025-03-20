@@ -46,16 +46,18 @@ describe("cloudflare buckets", () => {
 
   describe("update bucket", () => {
     it("should throw when trying to update a bucket", async () => {
+      const bucket1Config = {
+        storageClass: "Standard",
+        locationHint: "apac",
+        branch: "master",
+      } as const;
       const state: R2BucketState = {
         "bucket1": {
           location: "eeur",
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
-          config: {
-            storageClass: "Standard",
-            locationHint: "apac",
-            branch: "master",
-          },
+          config: bucket1Config,
+          rawConfig: bucket1Config,
         },
       };
 
@@ -82,6 +84,9 @@ describe("cloudflare buckets", () => {
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
           config: {
+            branch: "master",
+          },
+          rawConfig: {
             branch: "master",
           },
         },
@@ -112,6 +117,9 @@ describe("cloudflare buckets", () => {
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
           config: {
+            branch: "master",
+          },
+          rawConfig: {
             branch: "master",
           },
         },
@@ -155,16 +163,18 @@ describe("cloudflare buckets", () => {
 
   describe("noop changes on bucket", () => {
     it("when state and config are the same", async () => {
+      const bucket1Config = {
+        storageClass: "Standard",
+        locationHint: "apac",
+        branch: "master",
+      } as const;
       const state: R2BucketState = {
         "bucket1": {
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
-          config: {
-            storageClass: "Standard",
-            locationHint: "apac",
-            branch: "master",
-          },
+          config: bucket1Config,
+          rawConfig: bucket1Config,
         },
       };
 

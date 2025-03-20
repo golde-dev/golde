@@ -209,6 +209,7 @@ describe("resolveStateDependencies", () => {
         name: "my-bucket",
         createdAt: "2022-01-01T00:00:00.000Z",
         config: {},
+        rawConfig: {},
         branch: "master",
         dependsOn: [],
       },
@@ -274,6 +275,7 @@ describe("resolveStateDependencies", () => {
         branch: "master",
         dependsOn: [],
         config: {},
+        rawConfig: {},
       },
     };
 

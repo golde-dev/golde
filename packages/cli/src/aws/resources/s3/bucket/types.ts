@@ -16,6 +16,7 @@ export interface BucketState extends ResourceState {
   arn: string;
   name: string;
   config: WithRegion<WithBranch<BucketConfig>>;
+  rawConfig: WithRegion<WithBranch<BucketConfig>>;
 }
 
 export interface S3BucketState {

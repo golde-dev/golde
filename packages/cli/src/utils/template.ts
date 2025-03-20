@@ -261,9 +261,6 @@ export const resolveStateDependencies = <T extends Unit>(
   if ("args" in resolved) {
     resolved.args = resolveTemplate(resolved.args, onTemplate) as typeof resolved.args;
   }
-  if ("config" in resolved) {
-    resolved.config = resolveTemplate(resolved.config, onTemplate) as typeof resolved.config;
-  }
 
   if ("dependsOn" in resolved) {
     resolved.dependsOn = resolved.dependsOn.map((dependOn) => {
@@ -278,4 +275,8 @@ export const resolveStateDependencies = <T extends Unit>(
   }
 
   return resolved;
+};
+
+export const isTemplate = (string: string) => {
+  return string.includes("{{") && string.includes("}}");
 };

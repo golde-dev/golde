@@ -1,5 +1,6 @@
 import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
+import { PlanError, PlanErrorCode } from "@/error.ts";
 
 export const BASE_PATH = "aws.s3.bucket";
 
@@ -36,11 +37,11 @@ export function matchS3Bucket(path: string): [string, string, string] | undefine
   if (!path.startsWith(BASE_PATH)) {
     return;
   }
-  const groupPath = removeBucketPrefix(path);
-  const match = pattern.exec(groupPath);
+  const bucketPath = removeBucketPrefix(path);
+  const match = pattern.exec(bucketPath);
 
   if (!match) {
-    throw new Error(`Incorrect AWS Bucket path: ${path}`);
+    throw new PlanError(`Incorrect AWS Bucket path: ${path}`, PlanErrorCode.INCORRECT_PATH);
   }
   const {
     groups: { name, attributePath } = {},

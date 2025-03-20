@@ -106,10 +106,20 @@ export enum PlanErrorCode {
   UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION",
 
   /**
+   * When state reference is incorrect
+   */
+  INCORRECT_PATH = "INCORRECT_PATH",
+
+  /**
    * When source file does not exist
    * eg: when trying to create bucket object where source file do not exists
    */
   SOURCE_NOT_FOUND = "SOURCE_NOT_FOUND",
+
+  /**
+   * When source file error
+   */
+  SOURCE_ERROR = "SOURCE_ERROR",
 }
 
 export class PlanError extends Error {

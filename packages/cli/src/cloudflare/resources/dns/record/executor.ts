@@ -1,10 +1,9 @@
 import { logger } from "../../../../logger.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
 import { toTagsArray } from "../../../../utils/tags.ts";
-import type { WithBranch } from "../../../../types/config.ts";
+import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import type { CloudflareClient } from "../../../client/client.ts";
 import type { RecordConfig, RecordState, RecordType } from "./types.ts";
-import type { ResourceDependency } from "../../../../types/dependencies.ts";
 
 async function createZoneRecord(
   this: CloudflareClient,
@@ -12,8 +11,7 @@ async function createZoneRecord(
   type: RecordType,
   name: string,
   config: WithBranch<RecordConfig>,
-  dependsOn: ResourceDependency[],
-): Promise<RecordState> {
+): Promise<OmitExecutionContext<RecordState>> {
   const start = performance.now();
   const {
     id,
@@ -38,7 +36,6 @@ async function createZoneRecord(
     updatedAt,
     createdAt,
     config,
-    dependsOn,
   };
 }
 export type CreateZoneRecord = typeof createZoneRecord;
@@ -50,8 +47,7 @@ async function updateZoneRecord(
   name: string,
   recordId: string,
   config: WithBranch<RecordConfig>,
-  dependsOn: ResourceDependency[],
-): Promise<RecordState> {
+): Promise<OmitExecutionContext<RecordState>> {
   const start = performance.now();
   const {
     id,
@@ -75,7 +71,6 @@ async function updateZoneRecord(
     updatedAt,
     createdAt,
     config,
-    dependsOn,
   };
 }
 

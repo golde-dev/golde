@@ -53,7 +53,7 @@ describe("aws s3 buckets", () => {
       const execution: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
-        args: ["bucket1", configWithRegion, []],
+        args: ["bucket1", configWithRegion],
         path: "aws.s3.bucket.bucket1",
         config: configWithRegion,
         dependsOn: [],
@@ -64,17 +64,19 @@ describe("aws s3 buckets", () => {
 
   describe("update bucket", () => {
     it("should allow to update tags", async () => {
+      const bucket1Config = {
+        region: "us-east-1",
+        tags: { Type: "Old" },
+        branch: "master",
+      };
       const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
           name: "bucket1",
           dependsOn: [],
-          config: {
-            tags: { Type: "Old" },
-            branch: "master",
-            region: "us-east-1",
-          },
+          config: bucket1Config,
+          rawConfig: bucket1Config,
         },
       };
 
@@ -97,7 +99,7 @@ describe("aws s3 buckets", () => {
       > = {
         type: Type.Update,
         executor: executors.updateBucket,
-        args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1, []],
+        args: [configWithRegion.region, "bucket1", configWithRegion, state.bucket1],
         path: "aws.s3.bucket.bucket1",
         state: state.bucket1,
         config: configWithRegion,
@@ -115,17 +117,19 @@ describe("aws s3 buckets", () => {
     });
 
     it("should throw when trying to update a bucket with different region", async () => {
+      const bucket1Config = {
+        region: "us-east-1",
+        tags: { Type: "Old" },
+        branch: "master",
+      };
       const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
           name: "bucket1",
           dependsOn: [],
-          config: {
-            region: "us-east-1",
-            tags: { Type: "Old" },
-            branch: "master",
-          },
+          config: bucket1Config,
+          rawConfig: bucket1Config,
         },
       };
 
@@ -149,17 +153,19 @@ describe("aws s3 buckets", () => {
 
   describe("delete bucket", () => {
     it("should delete previously created bucket", async () => {
+      const bucket1Config = {
+        region: "us-east-1",
+        tags: { Type: "Old" },
+        branch: "master",
+      };
       const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
           name: "bucket1",
           dependsOn: [],
-          config: {
-            tags: { Type: "Old" },
-            region: "us-east-1",
-            branch: "master",
-          },
+          config: bucket1Config,
+          rawConfig: bucket1Config,
         },
       };
 
@@ -183,17 +189,19 @@ describe("aws s3 buckets", () => {
     });
 
     it("should delete and create bucket when bucket is renamed", async () => {
+      const bucket1Config = {
+        region: "us-east-1",
+        tags: { Type: "Old" },
+        branch: "master",
+      };
       const state: S3BucketState = {
         "bucket1": {
           createdAt: "2022-01-01T00:00:00.000Z",
           arn: "arn:aws:s3:::bucket1",
           name: "bucket1",
           dependsOn: [],
-          config: {
-            region: "us-east-1",
-            tags: { Type: "Old" },
-            branch: "master",
-          },
+          config: bucket1Config,
+          rawConfig: bucket1Config,
         },
       };
 
@@ -212,7 +220,7 @@ describe("aws s3 buckets", () => {
       const created: CreateUnit<BucketConfig, BucketState, CreateBucket> = {
         type: Type.Create,
         executor: executors.createBucket,
-        args: ["bucket2", configWithRegion, []],
+        args: ["bucket2", configWithRegion],
         path: "aws.s3.bucket.bucket2",
         config: configWithRegion,
         dependsOn: [],
@@ -246,6 +254,11 @@ describe("aws s3 buckets", () => {
           name: "bucket1",
           dependsOn: [],
           config: {
+            region: "us-east-1",
+            tags: mergeTags(projectTags, { Type: "Old" }),
+            branch: "master",
+          },
+          rawConfig: {
             region: "us-east-1",
             tags: mergeTags(projectTags, { Type: "Old" }),
             branch: "master",

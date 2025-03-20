@@ -39,6 +39,7 @@ export interface RoleState {
   arn: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<RoleConfig>;
+  rawConfig: WithBranch<RoleConfig>;
 }
 
 export interface IAMRoleState {

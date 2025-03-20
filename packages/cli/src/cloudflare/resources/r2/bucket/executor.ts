@@ -10,7 +10,7 @@ export async function createBucket(
   name: string,
   config: WithBranch<BucketConfig>,
   dependsOn: ResourceDependency[] = [],
-): Promise<BucketState> {
+): Promise<Omit<BucketState, "rawConfig">> {
   const start = Date.now();
   const bucket = await this.createBucket({
     name,

@@ -146,27 +146,14 @@ export async function getManagedConfig(_config: Config): Promise<ManagedConfig> 
 }
 
 export const resolveManagedConfig = (config: Config, managedConfig: ManagedConfig): Config => {
-  try {
-    const configWithConfig = resolveTemplate(config, configTemplate(managedConfig));
-    logger.debug("[Config] Resolved managed config templates in config", {
-      config: configWithConfig,
-    });
-    const validatedConfig = validateConfig(configWithConfig);
-    logger.debug("[Config] Validated config with schema", { config: validatedConfig });
+  const configWithConfig = resolveTemplate(config, configTemplate(managedConfig));
+  logger.debug("[Config] Resolved managed config templates in config", {
+    config: configWithConfig,
+  });
+  const validatedConfig = validateConfig(configWithConfig);
+  logger.debug("[Config] Validated config with schema", { config: validatedConfig });
 
-    return validatedConfig;
-  } catch (error) {
-    if (error instanceof ConfigError) {
-      switch (error.code) {
-        case ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND:
-          logger.warn("[Config] No managed config value found", { error });
-          return config;
-      }
-    } else if (error instanceof Error) {
-      logger.error(`[Config] Unknown error: ${error.message}`, error);
-    }
-    return Deno.exit(1);
-  }
+  return validatedConfig;
 };
 
 export const resolveConfig = (
@@ -174,25 +161,42 @@ export const resolveConfig = (
   gitInfo: GitInfo,
   branch?: string,
 ): Config => {
+  logger.debug("[Config] Resolving config");
+
+  const configWithEnv = resolveTemplate(config, envTemplate);
+  logger.debug("[Config] Resolved env vars templates in config", { config: configWithEnv });
+
+  const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
+  logger.debug("[Config] Resolved file templates in config", { config: configWithFiles });
+
+  const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
+  logger.debug("[Config] Resolved git templates in config", { config: configWithGit });
+
+  const validatedConfig = validateConfig(configWithGit);
+  logger.debug("[Config] Validated config with schema", { config: validatedConfig });
+
+  if (!branch) {
+    return validatedConfig;
+  }
+  return filterToBranch(validatedConfig, branch) as Config;
+};
+
+export async function getConfig(branch: string, configPath?: string): Promise<Config> {
+  logger.debug("[Config] Start config initialization");
+  const start = performance.now();
+
   try {
-    logger.debug("[Config] Resolving config");
+    const branchName = getBranchName(branch);
+    const rawConfig = await getConfigRaw(configPath);
+    const gitInfo = getGitInfo(branch);
 
-    const configWithEnv = resolveTemplate(config, envTemplate);
-    logger.debug("[Config] Resolved env vars templates in config", { config: configWithEnv });
+    const resolvedBase = resolveConfig(rawConfig, gitInfo, branchName);
+    const managedConfig = await getManagedConfig(resolvedBase);
+    const resolvedManaged = resolveManagedConfig(resolvedBase, managedConfig);
 
-    const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
-    logger.debug("[Config] Resolved file templates in config", { config: configWithFiles });
-
-    const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
-    logger.debug("[Config] Resolved git templates in config", { config: configWithGit });
-
-    const validatedConfig = validateConfig(configWithGit);
-    logger.debug("[Config] Validated config with schema", { config: validatedConfig });
-
-    if (!branch) {
-      return validatedConfig;
-    }
-    return filterToBranch(validatedConfig, branch) as Config;
+    const end = performance.now();
+    logger.info(`[Config] Initialized config in ${formatDuration(end - start)}`);
+    return resolvedManaged;
   } catch (error) {
     if (error instanceof ConfigError) {
       switch (error.code) {
@@ -221,6 +225,9 @@ export const resolveConfig = (
         case ConfigErrorCode.INVALID_CONFIG:
           logger.error("[Config] Config failed validation", error.cause);
           break;
+        case ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND:
+          logger.warn("[Config] No managed config value found", { error });
+          break;
         default:
           logger.error(`[Config] Configuration error: ${error.message}`);
       }
@@ -229,21 +236,4 @@ export const resolveConfig = (
     }
     return Deno.exit(1);
   }
-};
-
-export async function getConfig(branch: string, configPath?: string): Promise<Config> {
-  logger.debug("[Config] Start config initialization");
-  const start = performance.now();
-
-  const branchName = getBranchName(branch);
-  const rawConfig = await getConfigRaw(configPath);
-  const gitInfo = getGitInfo(branch);
-
-  const resolvedBase = resolveConfig(rawConfig, gitInfo, branchName);
-  const managedConfig = await getManagedConfig(resolvedBase);
-  const resolvedManaged = resolveManagedConfig(resolvedBase, managedConfig);
-
-  const end = performance.now();
-  logger.info(`[Config] Initialized config in ${formatDuration(end - start)}`);
-  return resolvedManaged;
 }

@@ -5,56 +5,65 @@ import { Type } from "@/types/plan.ts";
 import { omitUndefined } from "@/utils/object.ts";
 import { assertBranch } from "@/utils/resource.ts";
 import { mergeProjectTags } from "@/utils/tags.ts";
-import type { Object, ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "./types.ts";
+import type { ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "./types.ts";
 import type { ResourceDependency } from "@/types/dependencies.ts";
-import type { Tags, WithBranch } from "@/types/config.ts";
-import type { CreateVersionUnit, DeleteUnit, DeleteVersionUnit, Plan } from "@/types/plan.ts";
+import type { OmitExecutionContext, Tags, WithBranch } from "@/types/config.ts";
+import type {
+  ChangeVersionUnit,
+  CreateVersionUnit,
+  DeleteUnit,
+  DeleteVersionUnit,
+  NoopUnit,
+  Plan,
+  UpdateVersionUnit,
+} from "@/types/plan.ts";
+import { isTemplate } from "@/utils/template.ts";
+import { isConfigEqual } from "@/utils/config.ts";
 
 export interface GenericExecutors {
   createObject: (
     name: string,
     object: { path: string; version: string },
     config: WithBranch<ObjectConfig>,
-    dependsOn: ResourceDependency[],
-  ) => Promise<ObjectState>;
+  ) => Promise<OmitExecutionContext<ObjectState>>;
   updateObject: (
     key: string,
-    object: Object,
     config: WithBranch<ObjectConfig>,
     state: ObjectState,
-    dependsOn: ResourceDependency[],
-  ) => Promise<ObjectState>;
+  ) => Promise<OmitExecutionContext<ObjectState>>;
   deleteObject: (bucketName: string, name: string) => Promise<void>;
   assertCreatePermission?: (bucketName: string, name: string) => Promise<void>;
   assertDeletePermission?: (bucketName: string, name: string) => Promise<void>;
+  assertUpdatePermission?: (bucketName: string, name: string) => Promise<void>;
   assertObjectExist: (bucketName: string, name: string) => Promise<void>;
 }
 
 export function createS3PlanFactory<E extends GenericExecutors>(
   s3ObjectPath: (name: string) => string,
-  s3VersionObjectPath: (version: string, name: string) => string,
   providerName = "AWS",
   serviceName = "S3",
 ) {
-  function getCurrent(buckets: ObjectsState = {}) {
+  function getCurrent(objects: ObjectsState = {}) {
     const previous: {
-      [path: string]: {
-        name: string;
-        config: ObjectConfig;
-        state: ObjectState;
+      [name: string]: {
+        [version: string]: {
+          name: string;
+          isCurrent: boolean;
+          rawConfig: ObjectConfig;
+          state: ObjectState;
+        };
       };
     } = {};
 
-    for (const [name, { versions }] of Object.entries(buckets)) {
+    for (const [name, { versions, current }] of Object.entries(objects)) {
       for (const [version, state] of Object.entries(versions)) {
-        const { config, ...rest } = state;
-        previous[s3VersionObjectPath(version, name)] = {
+        if (!previous[name]) previous[name] = {};
+
+        previous[name][version] = {
           name,
-          config,
-          state: {
-            ...rest,
-            config,
-          },
+          rawConfig: state.rawConfig,
+          isCurrent: version === current,
+          state,
         };
       }
     }
@@ -63,7 +72,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
   async function getNext(config: ObjectsConfig = {}, tags?: Tags) {
     const next: {
-      [path: string]: {
+      [name: string]: {
         name: string;
         path: string;
         version: string;
@@ -74,10 +83,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
     for (const [name, object] of Object.entries(config)) {
       const withTags = mergeProjectTags(object, tags);
-
       const { version, path } = await getObject(name, object);
 
-      next[s3VersionObjectPath(version, name)] = {
+      next[name] = {
         name,
         path,
         version,
@@ -97,8 +105,10 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     const {
       createObject,
       deleteObject,
+      updateObject,
       assertCreatePermission,
       assertDeletePermission,
+      assertUpdatePermission,
       assertObjectExist,
     } = executors;
 
@@ -113,18 +123,22 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     for (const key of creating) {
       const { config, name, path, version, dependsOn } = next[key];
       const { bucketName } = config;
-      assertBranch(config);
 
-      await assertCreatePermission?.(bucketName, name);
-
+      const objectKey = `${version}.${name}`;
       const object = {
         path,
         version,
       };
+      assertBranch(config);
+
+      if (!isTemplate(bucketName)) {
+        await assertCreatePermission?.(bucketName, objectKey);
+      }
+
       const createVersionUnit: CreateVersionUnit<ObjectConfig, ObjectState, typeof createObject> = {
         type: Type.CreateVersion,
         executor: createObject,
-        args: [name, object, config, dependsOn],
+        args: [objectKey, object, config],
         version,
         path: s3ObjectPath(name),
         config,
@@ -135,27 +149,114 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
     const deleting = Object.keys(previous).filter((key) => !(key in next));
     for (const key of deleting) {
-      const { state, name } = previous[key];
-      const { config: { bucketName } } = state;
+      const deletedValues = Object.values(previous[key]);
 
-      await assertObjectExist(bucketName, name);
-      await assertDeletePermission?.(bucketName, name);
+      for (const { name, state } of deletedValues) {
+        const { config: { bucketName, version } } = state;
 
-      const deleteVersionUnit: DeleteVersionUnit<ObjectState, typeof deleteObject> = {
-        type: Type.DeleteVersion,
-        executor: deleteObject,
-        version: state.version,
-        args: [bucketName, key],
-        path: s3ObjectPath(name),
-        state,
-      };
-      plan.push(deleteVersionUnit);
+        const objectKey = `${version}.${name}`;
+
+        await assertObjectExist(bucketName, objectKey);
+        await assertDeletePermission?.(bucketName, objectKey);
+
+        const deleteVersionUnit: DeleteVersionUnit<ObjectState, typeof deleteObject> = {
+          type: Type.DeleteVersion,
+          executor: deleteObject,
+          version: state.version,
+          args: [bucketName, objectKey],
+          path: s3ObjectPath(name),
+          state,
+        };
+        plan.push(deleteVersionUnit);
+      }
     }
 
-    // Add noop action if version already exist
-    // Add change version if we change to existing version
-    // Add delete if whole object is deleted
-    // Add update object of for example tags changed
+    const updating = Object.keys(previous).filter((key) => key in next);
+    for (const key of updating) {
+      const { version, path, config: nextRawConfig, dependsOn } = next[key];
+      const previousObjectVersion = previous[key][version];
+
+      assertBranch(nextRawConfig);
+      const objectKey = `${version}.${name}`;
+
+      if (previousObjectVersion) {
+        const { rawConfig: previousRawConfig, isCurrent, state: prevState } = previousObjectVersion;
+
+        /**
+         * If object version existed, was current and config has no changed
+         */
+        if (isCurrent && isConfigEqual(nextRawConfig, previousRawConfig)) {
+          const noopUnit: NoopUnit<ObjectConfig, ObjectState> = {
+            type: Type.Noop,
+            path: s3ObjectPath(name),
+            config: previousRawConfig,
+            state: prevState,
+            dependsOn: dependsOn,
+          };
+          plan.push(noopUnit);
+          continue;
+        }
+        /**
+         * If object version existed but was not the current version and config is the same
+         */
+        if (!isCurrent && isConfigEqual(nextRawConfig, previousRawConfig)) {
+          const changeVersionUnit: ChangeVersionUnit<ObjectConfig, ObjectState> = {
+            type: Type.ChangeVersion,
+            path: s3ObjectPath(name),
+            config: nextRawConfig,
+            version,
+            state: {
+              ...prevState,
+              dependsOn: dependsOn,
+            },
+            dependsOn: dependsOn,
+          };
+          plan.push(changeVersionUnit);
+          continue;
+        }
+
+        if (!isConfigEqual(nextRawConfig, previousRawConfig)) {
+          if (!isTemplate(nextRawConfig.bucketName)) {
+            assertUpdatePermission?.(nextRawConfig.bucketName, objectKey);
+          }
+
+          const updateVersionUnit: UpdateVersionUnit<
+            ObjectConfig,
+            ObjectState,
+            typeof updateObject
+          > = {
+            type: Type.UpdateVersion,
+            executor: updateObject,
+            args: [objectKey, nextRawConfig, prevState],
+            version,
+            state: prevState,
+            path: s3ObjectPath(name),
+            config: nextRawConfig,
+            dependsOn,
+          };
+          plan.push(updateVersionUnit);
+          continue;
+        }
+      }
+
+      const object = {
+        path,
+        version,
+      };
+      if (!isTemplate(nextRawConfig.bucketName)) {
+        await assertCreatePermission?.(nextRawConfig.bucketName, objectKey);
+      }
+      const createVersionUnit: CreateVersionUnit<ObjectConfig, ObjectState, typeof createObject> = {
+        type: Type.CreateVersion,
+        executor: createObject,
+        args: [objectKey, object, nextRawConfig],
+        version,
+        path: s3ObjectPath(name),
+        config: nextRawConfig,
+        dependsOn,
+      };
+      plan.push(createVersionUnit);
+    }
 
     return await Promise.resolve(plan);
   }
@@ -178,20 +279,25 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
     const previous = getCurrent(state);
     for (const key of Object.keys(previous)) {
-      const { state, name } = previous[key];
-      const { config: { bucketName } } = state;
+      const entriesToDelete = Object.values(previous[key]);
 
-      await assertObjectExist(bucketName, name);
-      await assertDeletePermission?.(bucketName, name);
+      for (const { name, state } of entriesToDelete) {
+        const { version, config: { bucketName } } = state;
 
-      const deleteUnit: DeleteUnit<ObjectState, typeof deleteObject> = {
-        type: Type.Delete,
-        executor: deleteObject,
-        args: [bucketName, name],
-        path: key,
-        state: state,
-      };
-      plan.push(deleteUnit);
+        const objectKey = `${version}.${name}`;
+
+        await assertObjectExist(bucketName, objectKey);
+        await assertDeletePermission?.(bucketName, objectKey);
+
+        const deleteUnit: DeleteUnit<ObjectState, typeof deleteObject> = {
+          type: Type.Delete,
+          executor: deleteObject,
+          args: [bucketName, objectKey],
+          path: key,
+          state: state,
+        };
+        plan.push(deleteUnit);
+      }
     }
     return plan;
   }

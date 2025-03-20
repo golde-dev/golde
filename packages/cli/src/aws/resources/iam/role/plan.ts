@@ -95,7 +95,7 @@ export async function createIAMRolePlan(
     const createUnit: CreateUnit<RoleConfig, RoleState, CreateRole> = {
       type: Type.Create,
       executor: createRole,
-      args: [name, config, dependsOn],
+      args: [name, config],
       path: key,
       config,
       dependsOn,
@@ -155,7 +155,7 @@ export async function createIAMRolePlan(
       > = {
         type: Type.Update,
         executor: updateRole,
-        args: [name, nextConfig, state, dependsOn],
+        args: [name, nextConfig, state],
         path: key,
         state,
         config: nextConfig,
