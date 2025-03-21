@@ -92,6 +92,7 @@ export async function createR2Plan(
       args: [name],
       path: key,
       state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }
@@ -137,6 +138,7 @@ export function createR2DestroyPlan(
       args: [name],
       path: key,
       state: state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }

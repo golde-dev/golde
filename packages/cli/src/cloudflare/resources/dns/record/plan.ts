@@ -116,6 +116,7 @@ export const createDNSPlan = (
       args: [zone, name],
       path: key,
       state: state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }
@@ -181,6 +182,7 @@ export function createDNSDestroyPlan(
       args: [zone, name],
       path: key,
       state: state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }

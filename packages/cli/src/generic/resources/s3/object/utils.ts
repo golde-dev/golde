@@ -68,7 +68,8 @@ async function createFromSource(
   context: string,
   name: string,
   source: string,
-): Promise<string> {
+  version?: Version,
+): Promise<[string, string]> {
   const contextBase = resolve(context);
   const fromPath = join(contextBase, source);
 
@@ -93,7 +94,9 @@ async function createFromSource(
       preserveTimestamps: true,
       overwrite: true,
     });
-    return await compress(toPath, name);
+    const archivePath = await compress(toPath, name);
+    const newVersion = await getVersion(toPath, context, version);
+    return [archivePath, newVersion];
   } catch (error) {
     throw new PlanError(
       `Bucket object ${name}, source ${source} failed`,
@@ -107,7 +110,8 @@ async function createFromIncludes(
   context: string,
   name: string,
   includes: Include[] = [],
-): Promise<string> {
+  version?: Version,
+): Promise<[string, string]> {
   const tmpDir = await Deno.makeTempDir({
     prefix: `golde-bucket-object-${name}`,
   });
@@ -169,7 +173,10 @@ async function createFromIncludes(
 
       throw new Error(`Object ${name}, include ${from} is not a file or directory`);
     }
-    return await compress(tmpDir, name);
+    const archivePath = await compress(tmpDir, name);
+    const newVersion = await getVersion(archivePath, context, version);
+
+    return [archivePath, newVersion];
   } catch (error) {
     throw new PlanError(
       `Bucket object ${name}, include failed`,
@@ -187,11 +194,9 @@ export async function getObject(name: string, config: ObjectConfig): Promise<Obj
     context = ".",
   } = config;
 
-  const path = source
-    ? await createFromSource(context, name, source)
-    : await createFromIncludes(context, name, includes);
-
-  const newVersion = await getVersion(path, context, version);
+  const [path, newVersion] = source
+    ? await createFromSource(context, name, source, version)
+    : await createFromIncludes(context, name, includes, version);
 
   return {
     path,

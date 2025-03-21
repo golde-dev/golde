@@ -95,6 +95,7 @@ export interface DeleteUnit<
   args: Parameters<T>;
   state: S;
   path: string;
+  dependsOn: ResourceDependency[];
 }
 
 export interface DeleteVersionUnit<
@@ -107,6 +108,7 @@ export interface DeleteVersionUnit<
   args: Parameters<T>;
   state: S;
   path: string;
+  dependsOn: ResourceDependency[];
 }
 
 export interface UpdateUnit<

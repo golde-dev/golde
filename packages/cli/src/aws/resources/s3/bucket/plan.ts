@@ -124,6 +124,7 @@ export async function createS3Plan(
       args: [region, name],
       path: key,
       state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }
@@ -207,6 +208,7 @@ export async function createS3DestroyPlan(
       args: [region, name],
       path: key,
       state: state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }

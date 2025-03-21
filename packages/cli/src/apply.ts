@@ -17,7 +17,7 @@ import type {
   UpdateResult,
 } from "./types/plan.ts";
 import { get } from "@es-toolkit/es-toolkit/compat";
-import { ResourceDependency } from "@/types/dependencies.ts";
+import type { ResourceDependency } from "@/types/dependencies.ts";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -42,10 +42,7 @@ export function createExecutionPlan(
   const remainingPlan: ExecutionPlan = [];
 
   for (const unit of initialPlan) {
-    if (
-      unit.type === Type.Delete || unit.type === Type.DeleteVersion ||
-      unit.type === Type.ChangeVersion
-    ) {
+    if (unit.type === Type.ChangeVersion) {
       executionPlan.push(unit);
       continue;
     }

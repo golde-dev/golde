@@ -6,27 +6,17 @@ export function createRegistryDockerImageExecutors(_: GithubClient) {
 }
 
 export async function createRegistryDockerImagePlan(
-  executors: ReturnType<typeof createRegistryDockerImageExecutors>,
-  tags?: Tags,
-  state?: RegistryDockerImagesState,
-  config?: RegistryDockerImagesConfig,
+  _executors: ReturnType<typeof createRegistryDockerImageExecutors>,
+  _tags?: Tags,
+  _state?: RegistryDockerImagesState,
+  _config?: RegistryDockerImagesConfig,
 ) {
-  console.log({
-    executors,
-    tags,
-    state,
-    config,
-  });
   return await Promise.resolve([]);
 }
 
 export async function createRegistryDockerImageDestroyPlan(
-  executors: ReturnType<typeof createRegistryDockerImageExecutors>,
-  state?: RegistryDockerImagesState,
+  _executors: ReturnType<typeof createRegistryDockerImageExecutors>,
+  _state?: RegistryDockerImagesState,
 ) {
-  console.log({
-    executors,
-    state,
-  });
   return await Promise.resolve([]);
 }

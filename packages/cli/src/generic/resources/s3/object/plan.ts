@@ -59,8 +59,6 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       for (const [version, state] of Object.entries(versions)) {
         if (!previous[name]) previous[name] = {};
 
-        console.log(name, version, current);
-
         previous[name][version] = {
           name,
           config: state.config,
@@ -172,6 +170,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
           args: [bucketName, objectKey],
           path: s3ObjectPath(name),
           state,
+          dependsOn: state.dependsOn,
         };
         plan.push(deleteVersionUnit);
       }
@@ -303,6 +302,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
           args: [bucketName, objectKey],
           path: key,
           state: state,
+          dependsOn: state.dependsOn,
         };
         plan.push(deleteUnit);
       }

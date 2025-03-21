@@ -207,6 +207,7 @@ describe.skip("cloudflare dsn", () => {
         args: ["golde.dev", "1234"],
         path: "dns.cloudflare.golde.dev.A.dns-cloudflare",
         state: recordState,
+        dependsOn: [],
       };
 
       expect(result).toEqual([deleteUnit]);

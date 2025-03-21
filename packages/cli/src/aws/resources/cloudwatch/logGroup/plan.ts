@@ -129,6 +129,7 @@ export async function createCloudwatchLogGroupPlan(
       args: [region, name],
       path: key,
       state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }
@@ -212,6 +213,7 @@ export async function createCloudwatchLogGroupDestroyPlan(
       args: [region, name],
       path: key,
       state: state,
+      dependsOn: state.dependsOn,
     };
     plan.push(deleteUnit);
   }

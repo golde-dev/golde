@@ -102,6 +102,7 @@ describe("cloudflare buckets", () => {
         args: ["bucket1"],
         path: "cloudflare.r2.bucket.bucket1",
         state: state.bucket1,
+        dependsOn: [],
       };
       expect(result).toEqual([execution]);
     });
@@ -142,6 +143,7 @@ describe("cloudflare buckets", () => {
         args: ["bucket1"],
         path: "cloudflare.r2.bucket.bucket1",
         state: state.bucket1,
+        dependsOn: [],
       };
 
       const result = await createR2Plan(

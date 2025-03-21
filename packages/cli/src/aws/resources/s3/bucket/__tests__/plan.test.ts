@@ -181,6 +181,7 @@ describe("aws s3 buckets", () => {
         args: ["us-east-1", "bucket1"],
         path: "aws.s3.bucket.bucket1",
         state: state.bucket1,
+        dependsOn: [],
       };
       expect(result).toEqual([execution]);
     });
@@ -228,6 +229,7 @@ describe("aws s3 buckets", () => {
         args: ["us-east-1", "bucket1"],
         path: "aws.s3.bucket.bucket1",
         state: state.bucket1,
+        dependsOn: [],
       };
 
       const result = await createS3Plan(

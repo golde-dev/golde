@@ -1,17 +1,18 @@
-import { groupBy, isPlainObject, uniq } from "@es-toolkit/es-toolkit";
+import { groupBy, isPlainObject, memoize, uniq } from "@es-toolkit/es-toolkit";
 import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
-import type { Resource, ResourceDependency, SavedResource } from "./types/dependencies.ts";
+import type { ResourceDependency, SavedResource } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
-import { resolveUnitState } from "@/utils/template.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
 
-export const matchStatePath = (path: string) => matchAWSPath(path) ?? matchCloudflarePath(path);
+export const matchStatePath = memoize((path: string) =>
+  matchAWSPath(path) ?? matchCloudflarePath(path)
+);
 
 export function dependenciesSearch(
   string: string,

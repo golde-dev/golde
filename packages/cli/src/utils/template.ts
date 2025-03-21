@@ -228,8 +228,6 @@ export const resourcesTemplate = (resources: SavedResource[]) => (value: string)
   if (deps) {
     const [resourcePath, _, resourceAttribute] = deps;
     const selectedResources = resources.filter(({ path }) => path === resourcePath);
-    console.log(selectedResources);
-
     if (selectedResources.length === 0) {
       return originalTemplateString(value);
     }
