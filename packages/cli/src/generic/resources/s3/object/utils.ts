@@ -4,6 +4,7 @@ import { basename, join, resolve } from "@std/path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import {
+  getDirHashVersion,
   getFileHashVersion,
   getGitContextVersion,
   getGitVersion,
@@ -17,9 +18,6 @@ async function getVersion(
   context: string,
   version: Version = "FileHash",
 ): Promise<string> {
-  if (version === "FileHash") {
-    return await getFileHashVersion(path);
-  }
   if (version === "LastUpdated") {
     return await getLastUpdatedVersion(path);
   }
@@ -28,6 +26,16 @@ async function getVersion(
   }
   if (version === "ContextGitHash") {
     return await getGitContextVersion(context);
+  }
+  if (version === "FileHash") {
+    const stat = await Deno.lstat(path);
+    if (stat.isFile) {
+      return await getFileHashVersion(path);
+    }
+    if (stat.isDirectory) {
+      return await getDirHashVersion(path);
+    }
+    throw new Error(`Not implemented for this type of file: ${version}`);
   }
   throw new Error(`Not implemented: ${version}`);
 }
@@ -174,7 +182,7 @@ async function createFromIncludes(
       throw new Error(`Object ${name}, include ${from} is not a file or directory`);
     }
     const archivePath = await compress(tmpDir, name);
-    const newVersion = await getVersion(archivePath, context, version);
+    const newVersion = await getVersion(tmpDir, context, version);
 
     return [archivePath, newVersion];
   } catch (error) {

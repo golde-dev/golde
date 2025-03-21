@@ -1,15 +1,19 @@
 import { expect } from "@std/expect/expect";
-import { getOutputLength } from "../version.ts";
+import { getDirHashVersion, getFileHashVersion } from "../version.ts";
 import { describe, it } from "@std/testing/bdd";
+import { resolve } from "@std/path/resolve";
 
-describe("getOutputLength", () => {
-  it("should calculate minimum output length based on input length", () => {
-    const inputLength = 1024 * 1024;
-    const outputLength = getOutputLength(inputLength);
-    expect(outputLength).toEqual(24);
+describe("getFileHashVersion", () => {
+  it("should calculate file hash version", () => {
+    const hash = getFileHashVersion(resolve(__dirname, "./__fixtures__/file.txt"));
 
-    const inputLength2 = 10_000 * 1024 * 1024;
-    const outputLength2 = getOutputLength(inputLength2);
-    expect(outputLength2).toEqual(50);
+    expect(hash).toBe("fh-sha384-8f0a6c6f121313213121");
+  });
+});
+
+describe("getDirHashVersion", () => {
+  it("should calculate dir hash version", () => {
+    const hash = getDirHashVersion(resolve(__dirname, "./__fixtures__/dir"));
+    expect(hash).toBe("dh-sha384-8f0a6c6f12131321312112xzscdqw121");
   });
 });
