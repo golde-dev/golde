@@ -164,6 +164,7 @@ export interface ChangeVersionUnit<
   type: Type.ChangeVersion;
   path: string;
   version: string;
+  prevVersion: string;
   config: C;
   state: S;
   dependsOn: ResourceDependency[];
@@ -276,6 +277,7 @@ export interface ChangeVersionResult<
 > {
   type: Type.ChangeVersion;
   version: string;
+  prevVersion: string;
   isCurrent: true;
   path: string;
   state: S;
@@ -290,3 +292,13 @@ export type Change =
   | DeleteResult
   | DeleteVersionResult
   | ChangeVersionResult;
+
+export type ExecutionGroup = {
+  [Type.Create]?: CreateResult[];
+  [Type.CreateVersion]: CreateVersionResult[];
+  [Type.Delete]?: DeleteResult[];
+  [Type.DeleteVersion]?: DeleteVersionResult[];
+  [Type.Update]?: UpdateResult[];
+  [Type.ChangeVersion]?: ChangeVersionResult[];
+  [Type.UpdateVersion]?: UpdateVersionResult[];
+};

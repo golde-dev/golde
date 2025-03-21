@@ -34,9 +34,6 @@ const config: Config = {
             { from: "./src/nested", to: "./moved/nested" },
 
             { from: "./src/base.txt", to: "./renamed.txt" },
-
-            // { from: "./src/test1.txt", to: "./moved" },
-            // { from: "./src/test2.txt", to: "./moved" },
           ],
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
         },

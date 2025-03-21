@@ -43,7 +43,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
   providerName = "AWS",
   serviceName = "S3",
 ) {
-  function getCurrent(objects: ObjectsState = {}) {
+  function getPrevious(objects: ObjectsState = {}) {
     const previous: {
       [name: string]: {
         [version: string]: {
@@ -119,7 +119,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
     const plan: Plan = [];
 
-    const previous = getCurrent(state);
+    const previous = getPrevious(state);
     const next = await getNext(config, tags);
 
     const creating = Object.keys(next).filter((key) => !(key in previous));
@@ -180,6 +180,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     for (const key of updating) {
       const { version, path, config: nextConfig, dependsOn, name } = next[key];
       const previousObjectVersion = previous[key][version];
+      const previousCurrent = Object.values(previous[key]).find(({ isCurrent }) => isCurrent);
 
       assertBranch(nextConfig);
       const objectKey = createObjectKey(nextConfig.branch, version, name);
@@ -210,6 +211,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
             path: s3ObjectPath(name),
             config: nextConfig,
             version,
+            prevVersion: previousCurrent?.state.version ?? "",
             state: {
               ...prevState,
               dependsOn: dependsOn,
@@ -284,7 +286,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       state,
     });
 
-    const previous = getCurrent(state);
+    const previous = getPrevious(state);
     for (const key of Object.keys(previous)) {
       const entriesToDelete = Object.values(previous[key]);
 

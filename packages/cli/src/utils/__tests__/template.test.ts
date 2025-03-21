@@ -220,15 +220,10 @@ describe("resolveStateDependencies", () => {
       args: [`my-bucket`, { bucketName: "my-bucket" }],
       executor: unit.executor,
       config: {
-        bucketName: `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        bucketName: "my-bucket",
         branch: "master",
       },
-      dependsOn: [
-        {
-          ...dependOn,
-          resolved: true,
-        },
-      ],
+      dependsOn: [dependOn],
     };
 
     expect(resolveUnitState(unit, [deps])).toEqual(expected);
@@ -241,7 +236,7 @@ describe("resolveStateDependencies", () => {
     > = {
       type: Type.Create,
       path: "aws.s3.object.my-object",
-      args: [`{{ state.aws.s3.bucket.my-bucket.name }}`],
+      args: [`{{ state.aws.s3.bucket.my-bucket.invalid }}`],
       executor: (bucketName: string) =>
         Promise.resolve({
           bucketName,
@@ -252,7 +247,7 @@ describe("resolveStateDependencies", () => {
           dependsOn: [],
         }),
       config: {
-        bucketName: `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        bucketName: `{{ state.aws.s3.bucket.my-bucket.invalid }}`,
         branch: "master",
       },
       dependsOn: [
@@ -278,7 +273,7 @@ describe("resolveStateDependencies", () => {
     };
 
     expect(() => resolveUnitState(unit, [deps])).toThrow(
-      "Failed to resolve unit aws.s3.object.my-object dependency on state.aws.s3.bucket.my-bucket, attribute name is missing",
+      "Failed to resolve unit aws.s3.object.my-object dependency on state.aws.s3.bucket.my-bucket, attribute invalid is missing",
     );
   });
 });

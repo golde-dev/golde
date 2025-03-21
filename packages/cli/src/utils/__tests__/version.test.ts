@@ -1,19 +1,23 @@
 import { expect } from "@std/expect/expect";
 import { getDirHashVersion, getFileHashVersion } from "../version.ts";
 import { describe, it } from "@std/testing/bdd";
-import { resolve } from "@std/path/resolve";
+import { join } from "@std/path";
 
 describe("getFileHashVersion", () => {
-  it("should calculate file hash version", () => {
-    const hash = getFileHashVersion(resolve(__dirname, "./__fixtures__/file.txt"));
+  it("should calculate file hash version", async () => {
+    const hash = await getFileHashVersion(
+      join(import.meta.dirname ?? "", "./__fixtures__/file.txt"),
+    );
 
-    expect(hash).toBe("fh-sha384-8f0a6c6f121313213121");
+    expect(hash).toBe("fh-sha384-OLBgp1GsljhM2TJ-sbHjaiH9txEUvgdDTAzHv2P24donTt6_529l-9Ua0vFImLlb");
   });
 });
 
 describe("getDirHashVersion", () => {
-  it("should calculate dir hash version", () => {
-    const hash = getDirHashVersion(resolve(__dirname, "./__fixtures__/dir"));
-    expect(hash).toBe("dh-sha384-8f0a6c6f12131321312112xzscdqw121");
+  it("should calculate dir hash version", async () => {
+    const hash = await getDirHashVersion(
+      join(import.meta.dirname ?? "", "./__fixtures__/dir"),
+    );
+    expect(hash).toBe("dh-sha384-q7JvGn4Ojgon-YQIyxCA4srr9mlmgHG3ZHnqb4nXvN3hBkxBLhxsp3nt7nNkXToH");
   });
 });

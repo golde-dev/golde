@@ -9,7 +9,7 @@ import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan, Unit } from "./types/plan.ts";
 import type { UnitGroups } from "./types/plan.ts";
 
-export function sortByPath<T extends Unit>(plan: T[]): T[] {
+export function sortByPath<T extends { path: string }>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
 }
 
@@ -54,12 +54,12 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.CreateVersion].length} resources versions to create`);
     sortByPath(plan[Type.CreateVersion]).forEach((create) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${create.path}:${create.version}`, {
+        logger.debug(`${create.path}::${create.version}`, {
           config: create.config,
           dependsOn: create.dependsOn.map(({ resourcePath }) => resourcePath),
         });
       } else {
-        logger.info(`   ${create.path} version: ${create.version}`);
+        logger.info(`   ${create.path}::${create.version}`);
       }
     });
   }
@@ -81,11 +81,11 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.DeleteVersion].length} resources versions to delete`);
     sortByPath(plan[Type.DeleteVersion]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${deleted.path}:${deleted.version}`, {
+        logger.debug(`${deleted.path}::${deleted.version}`, {
           state: deleted.state,
         });
       } else {
-        logger.info(`   ${deleted.path} version ${deleted.version}`);
+        logger.info(`   ${deleted.path}::${deleted.version}`);
       }
     });
   }
@@ -109,7 +109,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.UpdateVersion].length} Resources version to update`);
     sortByPath(plan[Type.UpdateVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${update.path}:${update.version}`, {
+        logger.debug(`${update.path}::${update.version}`, {
           config: update.config,
           state: update.state,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
@@ -124,13 +124,14 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.ChangeVersion].length} resources versions to change`);
     sortByPath(plan[Type.ChangeVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${update.path}:${update.state.version}::${update.version}`, {
+        logger.debug(`${update.path}::${update.version}`, {
           config: update.config,
-          state: update.state,
+          previousVersion: update.prevVersion,
+          newVersion: update.version,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
         });
       } else {
-        logger.info(`   ${update.path} from: ${update.state.version} to: ${update.version}`);
+        logger.info(`   ${update.path}::${update.version}`);
       }
     });
   }
