@@ -1,7 +1,7 @@
 import type { S3BucketConfig, S3BucketState } from "./resources/s3/bucket/types.ts";
 import type { ObjectsConfig, ObjectsState } from "@/generic/resources/s3/object/types.ts";
 import type { Route53RecordConfig, Route53RecordState } from "./resources/route53/record/types.ts";
-import type { Resource } from "../types/config.ts";
+import type { ResourceConfig } from "../types/config.ts";
 import type { IAMRoleConfig, IAMRoleState } from "./resources/iam/role/types.ts";
 import type { IAMUserConfig, IAMUserState } from "./resources/iam/user/types.ts";
 import type {
@@ -18,7 +18,7 @@ import type {
   CloudwatchLogGroupState,
 } from "./resources/cloudwatch/logGroup/types.ts";
 
-export interface AWSResource extends Resource {
+export interface AWSResource extends ResourceConfig {
   region?: string;
 }
 

@@ -11,7 +11,7 @@ import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 import { Type } from "@/types/plan.ts";
 import type { CreateUnit } from "@/types/plan.ts";
-import type { Resource, ResourceState } from "@/types/config.ts";
+import type { ResourceConfig, ResourceState } from "@/types/config.ts";
 
 describe("resolveTemplate", () => {
   it(
@@ -180,12 +180,17 @@ describe("resolveStateDependencies", () => {
       resourceAttribute: "name",
     };
     const unit: CreateUnit<
-      { bucketName: string } & Resource,
+      { bucketName: string } & ResourceConfig,
       { bucketName: string } & ResourceState
     > = {
       type: Type.Create,
       path: "aws.s3.object.my-object",
-      args: [`{{ state.aws.s3.bucket.my-bucket.name }}`],
+      args: [
+        `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        {
+          bucketName: "{{ state.aws.s3.bucket.my-bucket.name }}",
+        },
+      ],
       executor: (bucketName: string) =>
         Promise.resolve({
           bucketName,
@@ -218,10 +223,10 @@ describe("resolveStateDependencies", () => {
     const expected = {
       type: Type.Create,
       path: "aws.s3.object.my-object",
-      args: [`my-bucket`],
+      args: [`my-bucket`, { bucketName: "my-bucket" }],
       executor: unit.executor,
       config: {
-        bucketName: `my-bucket`,
+        bucketName: `{{ state.aws.s3.bucket.my-bucket.name }}`,
         branch: "master",
       },
       dependsOn: [
@@ -237,7 +242,7 @@ describe("resolveStateDependencies", () => {
 
   it("should throw if state path reference is invalid", () => {
     const unit: CreateUnit<
-      { bucketName: string } & Resource,
+      { bucketName: string } & ResourceConfig,
       { bucketName: string } & ResourceState
     > = {
       type: Type.Create,

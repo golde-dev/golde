@@ -10,6 +10,7 @@ import {
   getLastUpdatedVersion,
 } from "@/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
+import slugify from "@sindresorhus/slugify";
 
 async function getVersion(
   path: string,
@@ -35,19 +36,28 @@ async function compress(path: string, name: string) {
   // TODO: zip is not working issue with workers
   if (name.endsWith(".zip")) {
     const archivePath = `${path}.zip`;
-    logger.debug(`[Plan] Object ${name} compressing ${path} to ${archivePath}`);
+    logger.debug(`[Plan] Object ${name} compressing`, {
+      from: path,
+      to: archivePath,
+    });
     await zip.compress(path, archivePath);
     return archivePath;
   }
   if (name.endsWith(".tar.gz")) {
     const archivePath = `${path}.tar.gz`;
-    logger.debug(`[Plan] Object ${name} compressing ${path} to ${archivePath}`);
+    logger.debug(`[Plan] Object ${name} compressing `, {
+      from: path,
+      to: archivePath,
+    });
     await tgz.compress(path, archivePath);
     return archivePath;
   }
   if (name.endsWith(".tar")) {
     const archivePath = `${path}.tar`;
-    logger.debug(`[Plan] Object ${name} compressing ${path} to ${archivePath}`);
+    logger.debug(`[Plan] Object ${name} compressing`, {
+      from: path,
+      to: archivePath,
+    });
     await tar.compress(path, archivePath);
     return archivePath;
   }
@@ -74,7 +84,10 @@ async function createFromSource(
       prefix: `golde-bucket-object-${name}`,
     });
     const toPath = join(tmpDir, basename(fromPath));
-    logger.debug(`Object ${name} Copying ${fromPath} to ${tmpDir}`);
+    logger.debug(`[Plan] Object ${name} copying`, {
+      from: fromPath,
+      to: toPath,
+    });
 
     await copy(fromPath, toPath, {
       preserveTimestamps: true,
@@ -105,8 +118,6 @@ async function createFromIncludes(
       const fromPath = join(contextBase, from);
       const toPath = join(tmpDir, to);
 
-      logger.debug(`[Plan] Object ${name} Copying ${fromPath} to ${toPath}`);
-
       if (!await exists(fromPath)) {
         throw new PlanError(
           `[Plan] Bucket object ${name}, include ${from} does not exist`,
@@ -115,6 +126,10 @@ async function createFromIncludes(
       }
 
       if (toPath !== tmpDir) {
+        logger.debug(`Object ${name} copying`, {
+          from: fromPath,
+          to: toPath,
+        });
         await copy(fromPath, toPath, { preserveTimestamps: true });
         continue;
       }
@@ -123,6 +138,10 @@ async function createFromIncludes(
 
       if (fromStat.isFile) {
         const fileToPath = join(tmpDir, basename(fromPath));
+        logger.debug(`Object ${name} copying`, {
+          from: fromPath,
+          to: fileToPath,
+        });
         await copy(fromPath, fileToPath, {
           preserveTimestamps: true,
           overwrite: false,
@@ -134,6 +153,11 @@ async function createFromIncludes(
         for (const entry of Deno.readDirSync(fromPath)) {
           const entryFromPath = join(fromPath, entry.name);
           const entryToPath = join(tmpDir, entry.name);
+
+          logger.debug(`Object ${name} copying`, {
+            from: entryFromPath,
+            to: entryToPath,
+          });
 
           await copy(entryFromPath, entryToPath, {
             preserveTimestamps: true,
@@ -173,4 +197,12 @@ export async function getObject(name: string, config: ObjectConfig): Promise<Obj
     path,
     version: newVersion,
   };
+}
+
+export function createObjectKey(branch: string, version: string, name: string) {
+  const key = `${slugify(branch)}.${version}.${slugify(name)}`;
+  if (key.length > 1024) {
+    throw new Error(`Object key is too long for s3 object: ${key}`);
+  }
+  return key;
 }

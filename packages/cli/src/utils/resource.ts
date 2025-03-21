@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Resource, WithBranch } from "../types/config.ts";
+import type { ResourceConfig, WithBranch } from "../types/config.ts";
 import { getBranchName, getDefaultBranch } from "./git.ts";
 
 export const branchSchema = z
@@ -10,7 +10,7 @@ export const branchPatternSchema = z
   .string()
   .optional();
 
-export function transformBranch<T extends Resource>(data: T): T {
+export function transformBranch<T extends ResourceConfig>(data: T): T {
   if (!data.branch && !data.branchPattern) {
     return {
       ...data,
@@ -25,7 +25,7 @@ export function transformBranch<T extends Resource>(data: T): T {
   return data;
 }
 
-export function assertBranch<T extends Resource = Resource>(
+export function assertBranch<T extends ResourceConfig = ResourceConfig>(
   config: T,
 ): asserts config is WithBranch<T> {
   if (!config.branch) {

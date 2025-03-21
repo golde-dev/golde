@@ -1,4 +1,4 @@
-import type { Resource, Tags, WithBranch } from "../../../../types/config.ts";
+import type { ResourceConfig, Tags, WithBranch } from "../../../../types/config.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
 
 export interface PolicyDocument {
@@ -19,7 +19,7 @@ export interface Statement {
   Resource?: string[] | string;
 }
 
-export interface RoleConfig extends Resource {
+export interface RoleConfig extends ResourceConfig {
   tags?: Tags;
   path?: string;
   description?: string;

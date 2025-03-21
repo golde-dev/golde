@@ -1,4 +1,4 @@
-import type { ResourceState } from "./config.ts";
+import type { ResourceState, VersionedResourceState } from "./config.ts";
 
 export interface ResourceDependency {
   statePath: string;
@@ -8,4 +8,4 @@ export interface ResourceDependency {
   resourceAttribute: string;
 }
 
-export type Dependency = { path: string; state: ResourceState };
+export type Resource = { path: string; state: ResourceState | VersionedResourceState };

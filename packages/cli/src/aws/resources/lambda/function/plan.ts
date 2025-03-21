@@ -81,7 +81,7 @@ export async function createLambdaFunctionPlan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[AWS] Planning for lambda function changes",
+    "[Plan][AWS] Planning for lambda function changes",
     {
       state,
       config,
@@ -195,7 +195,7 @@ export async function createLambdaFunctionDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[AWS] Creating destroy lambda functions plan", {
+  logger.debug("[Plan][AWS] Creating destroy lambda functions plan", {
     state,
   });
 

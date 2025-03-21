@@ -56,8 +56,6 @@ export const getContextRefHash = memoize((context: string, revision: string = "H
 
   const relativePath = relative(topLevel, path);
 
-  console.log({ relativePath });
-
   return execSync(`git rev-parse ${revision}:${relativePath}`)
     .toString()
     .trim();

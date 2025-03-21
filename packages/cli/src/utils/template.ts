@@ -5,8 +5,9 @@ import type { ManagedConfig } from "../config.ts";
 import type { Unit } from "@/types/plan.ts";
 import { get } from "@es-toolkit/es-toolkit/compat";
 import type { ResourceState } from "@/types/config.ts";
-import type { Dependency } from "@/types/dependencies.ts";
+import type { Resource } from "@/types/dependencies.ts";
 import type { State } from "@/mod.ts";
+import { logger } from "@/logger.ts";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
@@ -134,7 +135,7 @@ const gitRe = new RegExp(/(?<=git.)(.*)/);
 
 export function gitTemplate(gitInfo: GitInfo) {
   return (value: string): string => {
-    const match = gitRe.exec(value);
+    const match = gitRe.exec(value.trim());
     if (!match) {
       return originalTemplateString(value);
     }
@@ -202,12 +203,16 @@ export const stateTemplate = (_state: State) => (value: string): string => {
 
 export const unitStateTemplate =
   (unit: Unit, resources: { path: string; state: ResourceState }[]) => (value: string): string => {
-    const match = stateRe.exec(value);
+    const match = stateRe.exec(value.trim());
     if (!match) {
       return originalTemplateString(value);
     }
     const [stateMatch] = match;
     if ("dependsOn" in unit) {
+      logger.debug(`[Template] Resolving args for ${unit.path}`, {
+        stateMatch,
+      });
+
       const dependsOn = unit.dependsOn.find(({ statePath }) => statePath === stateMatch);
       if (dependsOn) {
         const {
@@ -251,8 +256,11 @@ export const unitStateTemplate =
  */
 export const resolveStateDependencies = <T extends Unit>(
   unit: T,
-  resources: Dependency[],
+  resources: Resource[],
 ): T => {
+  if (!resources.length) {
+    return unit;
+  }
   const resolved = {
     ...unit,
   };

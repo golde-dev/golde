@@ -1,8 +1,8 @@
-import type { Resource, WithBranch } from "../../../../types/config.ts";
+import type { ResourceConfig, WithBranch } from "../../../../types/config.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
 import type { Region } from "../../../client/types.ts";
 
-export interface DatabaseConfig extends Resource {
+export interface DatabaseConfig extends ResourceConfig {
   locationHint?: Region;
 }
 

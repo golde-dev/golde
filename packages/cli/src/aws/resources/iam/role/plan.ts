@@ -4,7 +4,6 @@ import type { Tags } from "../../../../types/config.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../../types/plan.ts";
 import type { IAMRoleConfig, IAMRoleState, RoleConfig, RoleState } from "./types.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
-import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../../../types/plan.ts";
 import { assertRegion } from "../../../utils.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
@@ -12,6 +11,7 @@ import { iamRolePath } from "./path.ts";
 import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
 import { findResourceDependencies } from "../../../../dependencies.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
+import { isConfigEqual } from "@/utils/config.ts";
 
 function getCurrent(roles: IAMRoleState = {}) {
   const previous: {
@@ -73,7 +73,7 @@ export async function createIAMRolePlan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[AWS] Planning for IAM roles changes",
+    "[Plan][AWS] Planning for IAM roles changes",
     {
       state,
       config,
@@ -125,7 +125,7 @@ export async function createIAMRolePlan(
     const { config: nextConfig, dependsOn } = next[key];
     const { config: previousConfig, state, name } = previous[key];
 
-    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
+    const isSameBaseConfig = isConfigEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<RoleConfig, RoleState> = {
         type: Type.Noop,
@@ -179,7 +179,7 @@ export async function createIAMRoleDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[AWS] Creating destroy buckets plan", {
+  logger.debug("[Plan][AWS] Creating destroy buckets plan", {
     state,
   });
 

@@ -1,6 +1,6 @@
 import { findResourceDependencies } from "@/dependencies.ts";
 import { logger } from "@/logger.ts";
-import { getObject } from "./utils.ts";
+import { createObjectKey, getObject } from "./utils.ts";
 import { Type } from "@/types/plan.ts";
 import { omitUndefined } from "@/utils/object.ts";
 import { assertBranch } from "@/utils/resource.ts";
@@ -112,7 +112,10 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       assertObjectExist,
     } = executors;
 
-    logger.debug(`[${providerName}] ${serviceName} object planning changes`, { state, config });
+    logger.debug(`[Plan][${providerName}] ${serviceName} object planning changes`, {
+      state,
+      config,
+    });
 
     const plan: Plan = [];
 
@@ -122,14 +125,15 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     const creating = Object.keys(next).filter((key) => !(key in previous));
     for (const key of creating) {
       const { config, name, path, version, dependsOn } = next[key];
-      const { bucketName } = config;
 
-      const objectKey = `${version}.${name}`;
+      assertBranch(config);
+
+      const { bucketName, branch } = config;
+      const objectKey = createObjectKey(branch, version, name);
       const object = {
         path,
         version,
       };
-      assertBranch(config);
 
       if (!isTemplate(bucketName)) {
         await assertCreatePermission?.(bucketName, objectKey);
@@ -152,9 +156,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const deletedValues = Object.values(previous[key]);
 
       for (const { name, state } of deletedValues) {
-        const { config: { bucketName, version } } = state;
+        const { version, config: { bucketName, branch } } = state;
 
-        const objectKey = `${version}.${name}`;
+        const objectKey = createObjectKey(branch, version, name);
 
         await assertObjectExist(bucketName, objectKey);
         await assertDeletePermission?.(bucketName, objectKey);
@@ -177,7 +181,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const previousObjectVersion = previous[key][version];
 
       assertBranch(nextRawConfig);
-      const objectKey = `${version}.${name}`;
+      const objectKey = createObjectKey(nextRawConfig.branch, version, name);
 
       if (previousObjectVersion) {
         const { rawConfig: previousRawConfig, isCurrent, state: prevState } = previousObjectVersion;
@@ -265,7 +269,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     executors: GenericExecutors,
     state?: ObjectsState,
   ): Promise<Plan> {
-    logger.debug(`[${providerName}] ${serviceName} object planning destroying changes`, { state });
+    logger.debug(`[Plan][${providerName}] ${serviceName} object planning destroying changes`, {
+      state,
+    });
     const {
       deleteObject,
       assertObjectExist,
@@ -273,7 +279,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     } = executors;
 
     const plan: Plan = [];
-    logger.debug(`[${providerName}] ${serviceName} creating destroy objects plan`, {
+    logger.debug(`[Plan][${providerName}] ${serviceName} creating destroy objects plan`, {
       state,
     });
 
@@ -282,9 +288,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const entriesToDelete = Object.values(previous[key]);
 
       for (const { name, state } of entriesToDelete) {
-        const { version, config: { bucketName } } = state;
+        const { version, config: { bucketName, branch } } = state;
 
-        const objectKey = `${version}.${name}`;
+        const objectKey = createObjectKey(branch, version, name);
 
         await assertObjectExist(bucketName, objectKey);
         await assertDeletePermission?.(bucketName, objectKey);

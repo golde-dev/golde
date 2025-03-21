@@ -2,7 +2,7 @@ import { load } from "@std/dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig } from "./config.ts";
-import { createDestroyPlan, createPlan, validatePlan } from "./plan.ts";
+import { createDestroyPlan, createPlan, filterExecutionUnits, validatePlan } from "./plan.ts";
 import { initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
@@ -90,7 +90,7 @@ program
       const loadedConfig = await getConfig(branchName, config);
       const context = await initializeContext(branchName, loadedConfig);
 
-      logger.info("Config", context.config);
+      logger.info(`[Config] current config for ${branchName}`, context.config);
       Deno.exit(0);
     },
   );
@@ -117,7 +117,7 @@ program
         previousState,
       } = await initializeContext(branchName, loadedConfig);
 
-      logger.info("Current state", previousState);
+      logger.info(`[State] Current state for ${branchName}`, previousState);
       Deno.exit(0);
     },
   );
@@ -282,11 +282,12 @@ program
       const planWithExternal = resolveExternal(initialPlan, external);
       const validPlan = validatePlan(planWithExternal);
       const locks = await lockDependencies(context, validPlan, external);
+      const executionUnits = filterExecutionUnits(validPlan);
 
       const shouldExecute = yes || await confirmExecutePlan();
 
       if (shouldExecute) {
-        const changes = await executePlan(validPlan);
+        const changes = await executePlan(executionUnits);
         printChanges(changes);
 
         const state = await updateState(context, changes, locks);

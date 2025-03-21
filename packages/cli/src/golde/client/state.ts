@@ -5,13 +5,14 @@ import type { Lock } from "../../types/lock.ts";
 import type { Change } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
-import type { Dependency } from "../../types/dependencies.ts";
+import type { Resource } from "../../types/dependencies.ts";
+import { resourcesToState, SavedResource } from "@/utils/state.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
-  public async getResources(project: string, resources: string[]): Promise<Dependency[]> {
+  public async getResources(project: string, resources: string[]): Promise<Resource[]> {
     logger.debug("[Golde] fetching resources", { project, resources });
     try {
-      const result = await this.makeRequest<Dependency[]>(
+      const result = await this.makeRequest<Resource[]>(
         `/projects/${project}/resources`,
         "POST",
         { resources },
@@ -28,11 +29,11 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   public async getState(project: string): Promise<State | undefined> {
     logger.debug("[Golde] fetching project state", { project });
     try {
-      const result = await this.makeRequest<State>(
-        `/projects/${project}/state`,
+      const resources = await this.makeRequest<(Resource & SavedResource)[]>(
+        `/projects/${project}/resources`,
         "GET",
       );
-      return result;
+      return resourcesToState(resources);
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("Golde failed to get project state", e.cause);
@@ -45,11 +46,11 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     const query = new URLSearchParams({ branch }).toString();
     logger.debug("[Golde] fetching golde state", { project, branch });
     try {
-      const result = await this.makeRequest<State>(
-        `/projects/${project}/state?${query}`,
+      const resources = await this.makeRequest<(Resource & SavedResource)[]>(
+        `/projects/${project}/resources?${query}`,
         "GET",
       );
-      return result;
+      return resourcesToState(resources);
     } catch (e) {
       if (e instanceof GoldeError) {
         logger.error("Golde failed to get branch state", e.cause);

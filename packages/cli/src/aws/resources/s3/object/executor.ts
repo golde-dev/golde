@@ -32,15 +32,13 @@ export async function createObject(
     version,
   } = object;
 
-  const {
-    readable,
-  } = Deno.openSync(path);
+  const body = await Deno.readFile(path);
 
   const start = performance.now();
   await this.putS3Object({
     Bucket: bucketName,
     Key: key,
-    Body: readable,
+    Body: body,
   });
 
   const tagList = toTagsList(tags);
@@ -48,7 +46,7 @@ export async function createObject(
     await this.putS3ObjectTags(bucketName, key, tagList);
   }
   const end = performance.now();
-  logger.debug(`[AWS] Created s3 object ${key} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Created s3 object ${key} in ${formatDuration(end - start)}`);
 
   const createdAt = nowStringDate();
   return {
@@ -68,7 +66,7 @@ export async function deleteObject(
   const start = performance.now();
   await this.deleteS3Object(bucketName, name);
   const end = performance.now();
-  logger.debug(`[AWS] Deleted s3 object ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Deleted s3 object ${name} in ${formatDuration(end - start)}`);
 }
 
 export type DeleteObject = typeof deleteObject;
@@ -99,7 +97,7 @@ export async function updateObject(
     await this.putS3ObjectTags(bucketName, key, tagList);
   }
   const end = performance.now();
-  logger.debug(`[AWS] Updated s3 object ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Updated s3 object ${name} in ${formatDuration(end - start)}`);
 
   const updatedAt = nowStringDate();
   return {
@@ -118,7 +116,7 @@ export async function assertObjectExist(this: AWSClient, bucket: string, key: st
   const arn = s3ObjectArn(bucket, key);
   const exists = await this.checkS3ObjectExists(bucket, key);
   const end = performance.now();
-  logger.debug(`[AWS] Checked S3 object ${arn} exists in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Checked S3 object ${arn} exists in ${formatDuration(end - start)}`);
   if (!exists) {
     throw new PlanError(`S3 object ${arn} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
   }
@@ -132,9 +130,11 @@ export async function assertCreatePermission(this: AWSClient, bucket: string, ke
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for s3 bucket ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Plan][AWS] Checked permission for s3 bucket ${arn} in ${formatDuration(end - start)}`,
+  );
   if (!allowed) {
-    logger.error(`[AWS] Create permission s3 denied for bucket ${arn}`, reason);
+    logger.error(`[Execute][AWS] Create permission s3 denied for bucket ${arn}`, reason);
     throw new PlanError(`Cannot create s3 bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -147,9 +147,11 @@ export async function assertDeletePermission(this: AWSClient, bucket: string, ke
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Plan][AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`,
+  );
   if (!allowed) {
-    logger.error(`[AWS] Delete permission denied for bucket ${arn}`, reason);
+    logger.error(`[Plan][AWS] Delete permission denied for bucket ${arn}`, reason);
     throw new PlanError(`Cannot delete bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -161,9 +163,11 @@ export async function assertUpdatePermission(this: AWSClient, bucket: string, ke
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Plan][AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`,
+  );
   if (!allowed) {
-    logger.error(`[AWS] Update tags permission denied for bucket ${arn}`, reason);
+    logger.error(`[Plan][AWS] Update tags permission denied for bucket ${arn}`, reason);
     throw new PlanError(`Cannot update bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

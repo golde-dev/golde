@@ -80,11 +80,11 @@ export interface ConfigLock {
   createdAt: string;
 }
 
-export type WithBranch<T extends Resource> = T & {
+export type WithBranch<T extends ResourceConfig> = T & {
   branch: string;
 };
 
-export type Resource = {
+export type ResourceConfig = {
   branch?: string;
   branchPattern?: string;
 };
@@ -93,11 +93,11 @@ export type Versioned = {
   version?: string;
 };
 
-export type VersionedResource = Resource & Versioned;
+export type VersionedResource = ResourceConfig & Versioned;
 
 export type ResourceState<
   S extends object = object,
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
 > = S & {
   config: C;
   rawConfig: C;

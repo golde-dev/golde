@@ -1,4 +1,4 @@
-import type { Resource, Tags, WithBranch } from "../../../../types/config.ts";
+import type { ResourceConfig, Tags, WithBranch } from "../../../../types/config.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
 import type { WithRegion } from "../../../types.ts";
 
@@ -71,7 +71,7 @@ export interface BaseFunctionConfig {
   loggingConfig?: LoggingConfig;
 }
 
-export interface ZipFunctionConfig extends BaseFunctionConfig, Resource {
+export interface ZipFunctionConfig extends BaseFunctionConfig, ResourceConfig {
   packageType: "Zip";
   region?: string;
   handler: string;
@@ -79,7 +79,7 @@ export interface ZipFunctionConfig extends BaseFunctionConfig, Resource {
   code: ZipLambdaCode;
 }
 
-export interface ImageFunctionConfig extends BaseFunctionConfig, Resource {
+export interface ImageFunctionConfig extends BaseFunctionConfig, ResourceConfig {
   packageType: "Image";
   region?: string;
   tags?: Tags;

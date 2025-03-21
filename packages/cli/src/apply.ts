@@ -4,7 +4,7 @@ import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
 import type { Context } from "./types/context.ts";
-import type { Change, ExecutionPlan, Plan, UpdateVersionResult } from "./types/plan.ts";
+import type { Change, ExecutionPlan, UpdateVersionResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Lock } from "./types/lock.ts";
 import { resolveStateDependencies } from "./utils/template.ts";
@@ -33,25 +33,29 @@ interface Execution {
   executionPlan: ExecutionPlan;
 }
 export function createExecutionPlan(
-  plan: Plan,
+  initialPlan: ExecutionPlan,
   changes: Change[],
 ): Execution {
-  const eligibleUnits = plan.filter((unit) => unit.type !== Type.Noop);
+  const executionPlan: ExecutionPlan = [];
+  const remainingPlan: ExecutionPlan = [];
 
-  let executionPlan: ExecutionPlan = eligibleUnits;
-  if (changes.length) {
-    executionPlan = eligibleUnits.map((unit) => resolveStateDependencies(unit, changes));
-  }
-  executionPlan = executionPlan.filter((unit) => {
+  for (const unit of initialPlan) {
     if (unit.type === Type.Delete || unit.type === Type.DeleteVersion) {
-      return true;
+      executionPlan.push(unit);
+      continue;
     }
-    return unit.dependsOn.every((dependOn) => dependOn.resolved);
-  });
 
-  const remainingPlan = eligibleUnits.filter((unit) =>
-    executionPlan.find((planUnit) => planUnit.path === unit.path)
-  );
+    const resolvedUnit = resolveStateDependencies(unit, changes);
+    const allDepsResolved = resolvedUnit
+      .dependsOn
+      .every(({ resolved }) => resolved);
+
+    if (allDepsResolved) {
+      executionPlan.push(resolvedUnit);
+    } else {
+      remainingPlan.push(resolvedUnit);
+    }
+  }
 
   return {
     executionPlan,
@@ -60,22 +64,30 @@ export function createExecutionPlan(
 }
 
 export async function executePlan(
-  plan: Plan,
+  plan: ExecutionPlan,
   changes: Change[] = [],
 ): Promise<Change[]> {
   if (changes.length === 0) {
-    logger.info("[Execute] Start plan execution");
+    logger.info(`[Execute] Executing for ${plan.length} units started`);
   }
 
   const { executionPlan, remainingPlan } = createExecutionPlan(plan, changes);
   if (executionPlan.length === 0) {
+    logger.info(`[Execute] Executing plan finished`);
     return changes;
   }
+
+  logger.info(
+    `[Execute] Executing plan ${executionPlan.length} units`,
+    executionPlan.map((unit) =>
+      "version" in unit ? `${unit.path} version ${unit.version}` : `${unit.path}`
+    ),
+  );
 
   try {
     const queue = new Queue(20);
     const start = performance.now();
-    const changes: Change[] = await queue.add(
+    const newChanges: Change[] = await queue.add(
       executionPlan
         .map((unit) => async (): Promise<Change> => {
           if (unit.type === Type.Create) {
@@ -186,7 +198,11 @@ export async function executePlan(
               type: Type.ChangeVersion,
               path: unit.path,
               version: unit.version,
-              state: unit.state,
+              state: {
+                ...unit.state,
+                rawConfig: unit.config,
+                dependsOn: unit.dependsOn,
+              },
               executionTime: 0,
             };
             return changeVersionUnit;
@@ -198,7 +214,7 @@ export async function executePlan(
     const end = performance.now();
     logger.info(`[Execute] Successfully executed plan in ${formatDuration(end - start)}`);
 
-    return executePlan(remainingPlan, changes);
+    return executePlan(remainingPlan, changes.concat(...newChanges));
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);

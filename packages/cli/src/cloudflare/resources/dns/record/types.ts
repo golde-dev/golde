@@ -1,5 +1,5 @@
 import type { Tags } from "../../../../types/config.ts";
-import type { Resource, WithBranch } from "../../../../types/config.ts";
+import type { ResourceConfig, WithBranch } from "../../../../types/config.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
 
 export type RecordType =
@@ -20,7 +20,7 @@ export type RecordType =
   | "SVCB"
   | "TXT";
 
-export interface RecordConfig extends Resource {
+export interface RecordConfig extends ResourceConfig {
   /**
    * Time to live in seconds
    */

@@ -23,8 +23,10 @@ import {
 } from "./resources/lambda/function/plan.ts";
 import type { Plan } from "../types/plan.ts";
 import type { Context } from "../types/context.ts";
+import { logger } from "@/logger.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
+  logger.debug("[Plan][AWS] Creating plan");
   const {
     previousState: {
       aws: awsState,
@@ -146,7 +148,7 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
       lambdaFunctionConfig,
     ));
   }
-
+  logger.debug(`[AWS] Created plan, items: ${plan.length}`);
   return (await Promise.all(plan)).flat();
 }
 

@@ -1,7 +1,6 @@
 import { logger } from "../../../../logger.ts";
 import { mergeProjectTags } from "../../../../utils/tags.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
-import { isEqual } from "@es-toolkit/es-toolkit";
 import { Type } from "../../../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../../../utils.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
@@ -17,6 +16,7 @@ import type {
   LogGroupState,
 } from "./types.ts";
 import { findResourceDependencies } from "../../../../dependencies.ts";
+import { isConfigEqual } from "@/utils/config.ts";
 
 function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   const previous: {
@@ -80,7 +80,7 @@ export async function createCloudwatchLogGroupPlan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[AWS] Planning for cloudwatch log group changes",
+    "[Plan][AWS] Planning for cloudwatch log group changes",
     {
       state,
       config,
@@ -138,7 +138,7 @@ export async function createCloudwatchLogGroupPlan(
     const { config: nextConfig, dependsOn } = next[key];
     const { config: previousConfig, state, name } = previous[key];
 
-    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
+    const isSameBaseConfig = isConfigEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<LogGroupConfig, LogGroupState> = {
         type: Type.Noop,
@@ -194,7 +194,7 @@ export async function createCloudwatchLogGroupDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[AWS] Creating destroy cloudwatch log group plan", {
+  logger.debug("[Plan][AWS] Creating destroy cloudwatch log group plan", {
     state,
   });
 

@@ -3,7 +3,7 @@
 import type { ResourceDependency } from "./dependencies.ts";
 import type {
   OmitExecutionContext,
-  Resource,
+  ResourceConfig,
   ResourceState,
   VersionedResource,
   VersionedResourceState,
@@ -56,7 +56,7 @@ export enum Type {
 }
 
 export interface CreateUnit<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
   T extends (...args: any[]) => Promise<OmitExecutionContext<S>> = (
     ...args: any
@@ -110,7 +110,7 @@ export interface DeleteVersionUnit<
 }
 
 export interface UpdateUnit<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
   T extends (...args: any[]) => any = (...args: any) => Promise<OmitExecutionContext<S>>,
 > {
@@ -124,7 +124,7 @@ export interface UpdateUnit<
 }
 
 export interface UpdateVersionUnit<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
   T extends (...args: any[]) => any = (...args: any) => Promise<OmitExecutionContext<S>>,
 > {
@@ -142,7 +142,7 @@ export interface UpdateVersionUnit<
  * Used when there is no need to update resource
  */
 export interface NoopUnit<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
 > {
   type: Type.Noop;
@@ -201,7 +201,7 @@ export type Plan = Unit[];
 export type ExecutionPlan = ExecutionUnit[];
 
 export interface CreateResult<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
 > {
   type: Type.Create;
@@ -212,7 +212,7 @@ export interface CreateResult<
 }
 
 export interface CreateVersionResult<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
 > {
   type: Type.CreateVersion;
@@ -224,7 +224,7 @@ export interface CreateVersionResult<
 }
 
 export interface UpdateResult<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
 > {
   type: Type.Update;
@@ -236,7 +236,7 @@ export interface UpdateResult<
 }
 
 export interface UpdateVersionResult<
-  C extends Resource = Resource,
+  C extends ResourceConfig = ResourceConfig,
   S extends ResourceState = ResourceState,
 > {
   type: Type.UpdateVersion;

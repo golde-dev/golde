@@ -3,7 +3,7 @@ import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
-import type { Dependency, ResourceDependency } from "./types/dependencies.ts";
+import type { Resource, ResourceDependency } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
 import { resolveStateDependencies } from "@/utils/template.ts";
@@ -21,12 +21,11 @@ export function dependenciesSearch(
   if (match) {
     const [placeholder, key] = match;
     if (placeholder === trimmed) {
-      const match = stateRe.exec(key);
+      const match = stateRe.exec(key.trim());
       if (match) {
         const [statePath] = match;
-        const statePathTrimmed = statePath.trim();
 
-        const depsMatch = matchAWSPath(statePathTrimmed) ?? matchCloudflarePath(statePathTrimmed);
+        const depsMatch = matchAWSPath(statePath) ?? matchCloudflarePath(statePath);
         if (depsMatch) {
           const [resourcePath, resourceName, resourceAttribute] = depsMatch;
           dependencies.push({
@@ -62,7 +61,7 @@ export function findResourceDependencies(
   return dependencies;
 }
 
-export function validateDependencies(dependencies: Dependency[]) {
+export function validateDependencies(dependencies: Resource[]) {
   const grouped = groupBy(dependencies, (d) => d.path);
   for (const [key, value] of Object.entries(grouped)) {
     if (value.length > 1) {
@@ -78,7 +77,7 @@ export function validateDependencies(dependencies: Dependency[]) {
 export async function getDependencies(
   context: Context,
   plan: Plan,
-): Promise<Dependency[]> {
+): Promise<Resource[]> {
   logger.info("[Dependencies] Resolving dependencies");
 
   const {
@@ -136,6 +135,6 @@ export function resolveNoopDependencies(plan: Plan): Plan {
  *  and  s3.bucket is in another branch
  *  then resolve s3.object execution config with s3.bucket state
  */
-export function resolveExternal(plan: Plan, deps: Dependency[]): Plan {
+export function resolveExternal(plan: Plan, deps: Resource[]): Plan {
   return plan.map((unit) => resolveStateDependencies(unit, deps));
 }

@@ -55,7 +55,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.CreateVersion].length} resources versions to create`);
     sortByPath(plan[Type.CreateVersion]).forEach((create) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${create.path}`, {
+        logger.debug(`${create.path}:${create.version}`, {
           config: create.config,
           dependsOn: create.dependsOn.map(({ resourcePath }) => resourcePath),
         });
@@ -69,7 +69,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.Delete].length} resources to delete`);
     sortByPath(plan[Type.Delete]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${deleted.path}`, {
+        logger.debug(`${deleted.path}`, {
           state: deleted.state,
         });
       } else {
@@ -82,7 +82,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.DeleteVersion].length} resources versions to delete`);
     sortByPath(plan[Type.DeleteVersion]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${deleted.path}`, {
+        logger.debug(`${deleted.path}:${deleted.version}`, {
           state: deleted.state,
         });
       } else {
@@ -110,7 +110,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.UpdateVersion].length} Resources version to update`);
     sortByPath(plan[Type.UpdateVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${update.path}`, {
+        logger.debug(`${update.path}:${update.version}`, {
           config: update.config,
           state: update.state,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
@@ -125,7 +125,7 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.ChangeVersion].length} resources versions to change`);
     sortByPath(plan[Type.ChangeVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${update.path}`, {
+        logger.debug(`${update.path}:${update.state.version}::${update.version}`, {
           config: update.config,
           state: update.state,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
@@ -156,7 +156,7 @@ export async function createPlan(
         ],
       )
     ).flat();
-
+    console.log("initialPlan", initialPlan);
     const partiallyResolved = resolveNoopDependencies(initialPlan);
     const sortedUnits = sortByPath(partiallyResolved);
 

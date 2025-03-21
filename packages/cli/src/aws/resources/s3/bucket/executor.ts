@@ -110,10 +110,11 @@ export async function assertBucketExist(this: AWSClient, name: string, region?: 
 export async function assertBucketNameAvailable(this: AWSClient, name: string, region?: string) {
   const start = performance.now();
   const available = await this.checkS3BucketNameAvailable(name, region);
+  console.log({ available });
   const end = performance.now();
   logger.debug(`[AWS] Checked bucket ${name} exists in ${formatDuration(end - start)}`);
   if (!available) {
-    throw new PlanError(`Cannot use bucket name ${name}`, PlanErrorCode.RESOURCE_CONFLICT);
+    throw new PlanError(`Bucket name ${name} already exists`, PlanErrorCode.RESOURCE_CONFLICT);
   }
 }
 
