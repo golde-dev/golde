@@ -34,7 +34,6 @@ export interface ObjectState {
   version: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<ObjectConfig>;
-  rawConfig: WithBranch<ObjectConfig>;
 }
 
 export interface ObjectsState {

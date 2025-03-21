@@ -1,9 +1,11 @@
 import { logger } from "./logger.ts";
 import type { Context } from "./types/context.ts";
 import type { State } from "./types/state.ts";
-import { resolveTemplate, stateTemplate } from "./utils/template.ts";
+import { resolveTemplate } from "./utils/template.ts";
 import type { Output } from "./types/output.ts";
 import { formatDuration } from "./utils/duration.ts";
+
+const stateTemplate = (state: State) => (value: string) => `{{ state.${value} }}`;
 
 function resolveOutput(output: Output, state: State): object {
   const {

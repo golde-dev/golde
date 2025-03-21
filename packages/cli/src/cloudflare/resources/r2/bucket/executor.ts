@@ -1,5 +1,5 @@
 import { logger } from "../../../../logger.ts";
-import type { WithBranch } from "../../../../types/config.ts";
+import type { OmitExecutionContext, WithBranch } from "../../../../types/config.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
 import type { CloudflareClient } from "../../../client/client.ts";
@@ -10,7 +10,7 @@ export async function createBucket(
   name: string,
   config: WithBranch<BucketConfig>,
   dependsOn: ResourceDependency[] = [],
-): Promise<Omit<BucketState, "rawConfig">> {
+): Promise<OmitExecutionContext<BucketState>> {
   const start = Date.now();
   const bucket = await this.createBucket({
     name,

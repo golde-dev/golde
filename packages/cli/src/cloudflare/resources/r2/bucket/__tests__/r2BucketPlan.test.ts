@@ -57,7 +57,6 @@ describe("cloudflare buckets", () => {
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
           config: bucket1Config,
-          rawConfig: bucket1Config,
         },
       };
 
@@ -84,9 +83,6 @@ describe("cloudflare buckets", () => {
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
           config: {
-            branch: "master",
-          },
-          rawConfig: {
             branch: "master",
           },
         },
@@ -117,9 +113,6 @@ describe("cloudflare buckets", () => {
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
           config: {
-            branch: "master",
-          },
-          rawConfig: {
             branch: "master",
           },
         },
@@ -174,7 +167,6 @@ describe("cloudflare buckets", () => {
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
           config: bucket1Config,
-          rawConfig: bucket1Config,
         },
       };
 

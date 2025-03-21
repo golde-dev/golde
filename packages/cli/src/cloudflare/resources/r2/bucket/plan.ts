@@ -16,20 +16,17 @@ function getPrevious(buckets: R2BucketState = {}) {
     [path: string]: {
       name: string;
       config: BucketConfig;
-      rawConfig: BucketConfig;
       state: BucketState;
     };
   } = {};
 
-  for (const [name, { config, rawConfig, ...rest }] of Object.entries(buckets)) {
+  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
     previous[r2BucketPath(name)] = {
       name,
       config,
-      rawConfig,
       state: {
         ...rest,
         config,
-        rawConfig,
       },
     };
   }
@@ -101,15 +98,15 @@ export async function createR2Plan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextRawConfig } = next[key];
-    const { rawConfig: previousRawConfig, state } = previous[key];
+    const { config: nextConfig } = next[key];
+    const { config: previousConfig, state } = previous[key];
 
-    const isSameBaseConfig = isEqual(nextRawConfig, previousRawConfig);
+    const isSameBaseConfig = isEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<BucketConfig, BucketState> = {
         type: Type.Noop,
         path: key,
-        config: previousRawConfig,
+        config: previousConfig,
         state,
         dependsOn: state.dependsOn,
       };

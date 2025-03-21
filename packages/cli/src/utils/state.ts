@@ -1,4 +1,4 @@
-import type { Resource } from "@/types/dependencies.ts";
+import type { Resource, SavedResource } from "@/types/dependencies.ts";
 import type { State } from "@/types/state.ts";
 import { get, set } from "@es-toolkit/es-toolkit/compat";
 import { removePrefix } from "@/utils/object.ts";
@@ -34,11 +34,6 @@ const VERSIONED = [
   ...AWS_VERSIONED_RESOURCES,
 ];
 
-export type SavedResource = {
-  isCurrent: boolean;
-  version?: string;
-};
-
 type SimpleResource = Record<string, object>;
 type VersionedResource = {
   current: string | null;
@@ -46,7 +41,7 @@ type VersionedResource = {
 };
 
 export function resourcesToState(
-  resources: (Resource & SavedResource)[],
+  resources: SavedResource[],
 ) {
   const resultedState: State = {};
 

@@ -3,7 +3,7 @@ import type { CloudflareState } from "../cloudflare/types.ts";
 import type { Lock } from "./lock.ts";
 import type { GithubState } from "../github/types.ts";
 import type { Change } from "./plan.ts";
-import type { Resource } from "@/types/dependencies.ts";
+import type { SavedResource } from "@/types/dependencies.ts";
 
 export interface State {
   aws?: AWSState;
@@ -16,7 +16,9 @@ export abstract class AbstractStateClient {
 
   public abstract getState(project: string): Promise<State | undefined>;
 
-  public abstract getResources(project: string, resources: string[]): Promise<Resource[]>;
+  public abstract getResources(project: string, resources: string[]): Promise<SavedResource[]>;
+
+  public abstract getBranchResources(project: string, branch: string): Promise<SavedResource[]>;
 
   public abstract getLocks(project: string, branch?: string): Promise<Lock[]>;
 

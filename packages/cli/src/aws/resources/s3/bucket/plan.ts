@@ -17,19 +17,18 @@ function getCurrent(buckets: S3BucketState = {}) {
   const previous: {
     [path: string]: {
       name: string;
-      rawConfig: BucketConfig;
+      config: BucketConfig;
       state: BucketState;
     };
   } = {};
 
-  for (const [name, { config, rawConfig, ...rest }] of Object.entries(buckets)) {
+  for (const [name, { config, ...rest }] of Object.entries(buckets)) {
     previous[s3BucketPath(name)] = {
       name,
-      rawConfig,
+      config,
       state: {
         ...rest,
         config,
-        rawConfig,
       },
     };
   }
@@ -131,30 +130,30 @@ export async function createS3Plan(
 
   const updating = Object.keys(next).filter((key) => key in previous);
   for (const key of updating) {
-    const { config: nextRawConfig, dependsOn } = next[key];
-    const { rawConfig: previousRawConfig, state, name } = previous[key];
+    const { config: nextConfig, dependsOn } = next[key];
+    const { config: previousConfig, state, name } = previous[key];
 
-    const isSameBaseConfig = isConfigEqual(nextRawConfig, previousRawConfig);
+    const isSameBaseConfig = isConfigEqual(nextConfig, previousConfig);
     if (isSameBaseConfig) {
       const noopUnit: NoopUnit<BucketConfig, BucketState> = {
         type: Type.Noop,
         path: key,
-        config: previousRawConfig,
+        config: previousConfig,
         state,
         dependsOn,
       };
       plan.push(noopUnit);
     } else {
-      if (nextRawConfig.region !== previousRawConfig.region) {
+      if (nextConfig.region !== previousConfig.region) {
         throw new Error(
           "It is not possible to update s3 bucket region, create new and migrate data",
         );
       }
 
-      assertBranch(nextRawConfig);
-      assertRegion(nextRawConfig);
+      assertBranch(nextConfig);
+      assertRegion(nextConfig);
 
-      const { region } = nextRawConfig;
+      const { region } = nextConfig;
 
       await assertBucketExist(name, region);
       await assertUpdatePermission(name, region);
@@ -166,10 +165,10 @@ export async function createS3Plan(
       > = {
         type: Type.Update,
         executor: updateBucket,
-        args: [region, name, nextRawConfig, state],
+        args: [region, name, nextConfig, state],
         path: key,
         state,
-        config: nextRawConfig,
+        config: nextConfig,
         dependsOn,
       };
       plan.push(updateUnit);

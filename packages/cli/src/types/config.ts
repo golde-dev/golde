@@ -100,7 +100,6 @@ export type ResourceState<
   C extends ResourceConfig = ResourceConfig,
 > = S & {
   config: C;
-  rawConfig: C;
   dependsOn: ResourceDependency[];
 };
 
@@ -109,8 +108,7 @@ export type VersionedResourceState<
   C extends VersionedResource = VersionedResource,
 > = S & {
   config: C;
-  rawConfig: C;
   dependsOn: ResourceDependency[];
 };
 
-export type OmitExecutionContext<T extends ResourceState> = Omit<T, "rawConfig" | "dependsOn">;
+export type OmitExecutionContext<T extends ResourceState> = Omit<T, "dependsOn">;

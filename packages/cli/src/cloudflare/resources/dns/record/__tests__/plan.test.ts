@@ -132,7 +132,6 @@ describe.skip("cloudflare dsn", () => {
         createdAt: "2022-01-01T00:00:00.000Z",
         dependsOn: [],
         config: prevRecordConfig,
-        rawConfig: prevRecordConfig,
       };
 
       const state: DNSState = {
@@ -185,7 +184,6 @@ describe.skip("cloudflare dsn", () => {
         value: "20.10.10.1",
         dependsOn: [],
         config: recordConfig,
-        rawConfig: recordConfig,
       };
 
       const state: DNSState = {
@@ -237,7 +235,6 @@ describe.skip("cloudflare dsn", () => {
         createdAt: "2022-01-01T00:00:00.000Z",
         dependsOn: [],
         config: prevRecordConfig,
-        rawConfig: prevRecordConfig,
       };
       const state: DNSState = {
         "golde.dev": {

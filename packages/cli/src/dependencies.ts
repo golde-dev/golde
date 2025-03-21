@@ -3,13 +3,15 @@ import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
 import type { Context } from "./types/context.ts";
-import type { Resource, ResourceDependency } from "./types/dependencies.ts";
+import type { Resource, ResourceDependency, SavedResource } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
-import { resolveStateDependencies } from "@/utils/template.ts";
+import { resolveUnitState } from "@/utils/template.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
+
+export const matchStatePath = (path: string) => matchAWSPath(path) ?? matchCloudflarePath(path);
 
 export function dependenciesSearch(
   string: string,
@@ -25,7 +27,7 @@ export function dependenciesSearch(
       if (match) {
         const [statePath] = match;
 
-        const depsMatch = matchAWSPath(statePath) ?? matchCloudflarePath(statePath);
+        const depsMatch = matchStatePath(statePath);
         if (depsMatch) {
           const [resourcePath, resourceName, resourceAttribute] = depsMatch;
           dependencies.push({
@@ -61,7 +63,7 @@ export function findResourceDependencies(
   return dependencies;
 }
 
-export function validateDependencies(dependencies: Resource[]) {
+export function validateDependencies(dependencies: SavedResource[]) {
   const grouped = groupBy(dependencies, (d) => d.path);
   for (const [key, value] of Object.entries(grouped)) {
     if (value.length > 1) {
@@ -74,10 +76,10 @@ export function validateDependencies(dependencies: Resource[]) {
  * Find and fetch external dependencies
  * Assume that dependencies that do not exist in plan are external
  */
-export async function getDependencies(
+export async function getExternalResources(
   context: Context,
   plan: Plan,
-): Promise<Resource[]> {
+): Promise<SavedResource[]> {
   logger.info("[Dependencies] Resolving dependencies");
 
   const {
@@ -116,25 +118,4 @@ export async function getDependencies(
   const dependencies = await state.getResources(name, uniqueExternal);
   validateDependencies(dependencies);
   return dependencies;
-}
-
-/**
- * Any resources dependencies that are noop these can resolved before execution
- * @example if s3.object dependsOn s3.bucket,
- *  and  s3.bucket is noop
- *  then resolve s3.object execution config
- */
-export function resolveNoopDependencies(plan: Plan): Plan {
-  const units = plan.filter((unit) => unit.type === Type.Noop);
-  return plan.map((unit) => resolveStateDependencies(unit, units));
-}
-
-/**
- * Resolve external cross branch dependencies
- * @example if s3.object dependsOn s3.bucket,
- *  and  s3.bucket is in another branch
- *  then resolve s3.object execution config with s3.bucket state
- */
-export function resolveExternal(plan: Plan, deps: Resource[]): Plan {
-  return plan.map((unit) => resolveStateDependencies(unit, deps));
 }

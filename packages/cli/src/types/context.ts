@@ -7,9 +7,11 @@ import type { Config, Tags } from "./config.ts";
 import type { AbstractStateClient, State } from "./state.ts";
 import type { SlackClient } from "../slack/client/client.ts";
 import type { GithubClient } from "../github/client/client.ts";
+import type { SavedResource } from "./dependencies.ts";
 
 export interface Context {
   previousState?: State;
+  previousResources?: SavedResource[];
   config: Config;
   git: GitInfo;
   tags?: Tags;

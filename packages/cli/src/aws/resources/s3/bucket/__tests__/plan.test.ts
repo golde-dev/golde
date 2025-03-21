@@ -76,7 +76,6 @@ describe("aws s3 buckets", () => {
           name: "bucket1",
           dependsOn: [],
           config: bucket1Config,
-          rawConfig: bucket1Config,
         },
       };
 
@@ -129,7 +128,6 @@ describe("aws s3 buckets", () => {
           name: "bucket1",
           dependsOn: [],
           config: bucket1Config,
-          rawConfig: bucket1Config,
         },
       };
 
@@ -165,7 +163,6 @@ describe("aws s3 buckets", () => {
           name: "bucket1",
           dependsOn: [],
           config: bucket1Config,
-          rawConfig: bucket1Config,
         },
       };
 
@@ -201,7 +198,6 @@ describe("aws s3 buckets", () => {
           name: "bucket1",
           dependsOn: [],
           config: bucket1Config,
-          rawConfig: bucket1Config,
         },
       };
 
@@ -254,11 +250,6 @@ describe("aws s3 buckets", () => {
           name: "bucket1",
           dependsOn: [],
           config: {
-            region: "us-east-1",
-            tags: mergeTags(projectTags, { Type: "Old" }),
-            branch: "master",
-          },
-          rawConfig: {
             region: "us-east-1",
             tags: mergeTags(projectTags, { Type: "Old" }),
             branch: "master",

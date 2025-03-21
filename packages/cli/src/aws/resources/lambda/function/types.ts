@@ -100,7 +100,6 @@ export interface FunctionState {
   arn: string;
   dependsOn: ResourceDependency[];
   config: WithRegion<WithBranch<FunctionConfigState>>;
-  rawConfig: WithRegion<WithBranch<FunctionConfigState>>;
 }
 
 export interface LambdaFunctionState {

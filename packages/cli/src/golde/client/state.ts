@@ -5,14 +5,32 @@ import type { Lock } from "../../types/lock.ts";
 import type { Change } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
-import type { Resource } from "../../types/dependencies.ts";
-import { resourcesToState, SavedResource } from "@/utils/state.ts";
+import type { SavedResource } from "../../types/dependencies.ts";
+import { resourcesToState } from "@/utils/state.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
-  public async getResources(project: string, resources: string[]): Promise<Resource[]> {
+  public async getBranchResources(project: string, branch: string): Promise<SavedResource[]> {
+    logger.debug("[Golde] fetching branch resources", { project, branch });
+
+    try {
+      const query = new URLSearchParams({ branch }).toString();
+      const resources = await this.makeRequest<SavedResource[]>(
+        `/projects/${project}/resources?${query}`,
+        "GET",
+      );
+      return resources;
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error("[Golde] Failed to fetch resources", error.message);
+      }
+      throw error;
+    }
+  }
+
+  public async getResources(project: string, resources: string[]): Promise<SavedResource[]> {
     logger.debug("[Golde] fetching resources", { project, resources });
     try {
-      const result = await this.makeRequest<Resource[]>(
+      const result = await this.makeRequest<SavedResource[]>(
         `/projects/${project}/resources`,
         "POST",
         { resources },
@@ -29,7 +47,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   public async getState(project: string): Promise<State | undefined> {
     logger.debug("[Golde] fetching project state", { project });
     try {
-      const resources = await this.makeRequest<(Resource & SavedResource)[]>(
+      const resources = await this.makeRequest<SavedResource[]>(
         `/projects/${project}/resources`,
         "GET",
       );
@@ -46,7 +64,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     const query = new URLSearchParams({ branch }).toString();
     logger.debug("[Golde] fetching golde state", { project, branch });
     try {
-      const resources = await this.makeRequest<(Resource & SavedResource)[]>(
+      const resources = await this.makeRequest<SavedResource[]>(
         `/projects/${project}/resources?${query}`,
         "GET",
       );

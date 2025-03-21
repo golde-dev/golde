@@ -17,7 +17,6 @@ export interface BucketState {
   createdAt: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<BucketConfig>;
-  rawConfig: WithBranch<BucketConfig>;
 }
 
 export interface R2BucketState {

@@ -1,5 +1,5 @@
 import { logger } from "./logger.ts";
-import { ContextError, ContextErrorCode } from "./error.ts";
+import { ConfigErrorCode, ContextError, ContextErrorCode } from "./error.ts";
 import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
 import { createHCloudClient } from "./hcloud/client/factory.ts";
 import { createCloudflareClient } from "./cloudflare/client/factory.ts";
@@ -12,6 +12,10 @@ import { createSlackClient } from "./slack/client/factory.ts";
 import type { Context } from "./types/context.ts";
 import type { Config } from "./types/config.ts";
 import { createGithubClient } from "./github/client/factory.ts";
+import type { SavedResource } from "@/types/dependencies.ts";
+import { resolveConfigState } from "@/utils/template.ts";
+import { ConfigError } from "@/error.ts";
+import { resourcesToState } from "@/utils/state.ts";
 
 export const initializeContext = async (
   branchName: string,
@@ -82,25 +86,27 @@ export const initializeContext = async (
     }
 
     if (stateClient && state) {
-      const previousState = await stateClient.getBranchState(name, branchName);
+      const previousResources = await stateClient.getBranchResources(name, branchName);
 
       const end = performance.now();
       logger.info(`[Context] Initialized in ${formatDuration(end - start)}`);
 
       return {
         ...contextBase,
-        previousState,
+        previousResources: previousResources,
+        previousState: resourcesToState(previousResources),
         state: stateClient,
       };
     } else if (goldeClient) {
-      const previousState = await goldeClient.getBranchState(name, branchName);
+      const previousResources = await goldeClient.getBranchResources(name, branchName);
 
       const end = performance.now();
       logger.info(`[Context] Initialized in ${formatDuration(end - start)}`);
 
       return {
         ...contextBase,
-        previousState,
+        previousResources: previousResources,
+        previousState: resourcesToState(previousResources),
         state: goldeClient,
       };
     } else {
@@ -117,9 +123,32 @@ export const initializeContext = async (
   }
 };
 
-export function getFinalContext(context: Context, config: Config): Context {
-  return {
-    ...context,
+export function getFinalContext(context: Context, external: SavedResource[]): Context {
+  const {
     config,
-  };
+    previousResources,
+  } = context;
+
+  try {
+    const configWithExternal = resolveConfigState(config, external);
+    const configWithState = resolveConfigState(configWithExternal, previousResources);
+
+    return {
+      ...context,
+      config: configWithState,
+    };
+  } catch (error) {
+    if (error instanceof ConfigError) {
+      switch (error.code) {
+        case ConfigErrorCode.INVALID_CONFIG:
+          logger.error("[Context] Config failed validation", error.cause);
+          break;
+        default:
+          logger.error(`[Context] Configuration error: ${error.message}`);
+      }
+    } else if (error instanceof Error) {
+      logger.error(`[Context] Unknown error: ${error.message}`, error);
+    }
+    return Deno.exit(1);
+  }
 }

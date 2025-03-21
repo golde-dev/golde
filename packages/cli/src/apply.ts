@@ -3,11 +3,11 @@ import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
+import { hasResolved, resolveUnitState } from "./utils/template.ts";
 import type { Context } from "./types/context.ts";
-import type { Change, ExecutionPlan, UpdateVersionResult } from "./types/plan.ts";
+import type { Change, ExecutionPlan, Plan, UpdateVersionResult } from "./types/plan.ts";
 import type { State } from "./types/state.ts";
 import type { Lock } from "./types/lock.ts";
-import { resolveStateDependencies } from "./utils/template.ts";
 import type {
   ChangeVersionResult,
   CreateResult,
@@ -16,6 +16,8 @@ import type {
   DeleteVersionResult,
   UpdateResult,
 } from "./types/plan.ts";
+import { get } from "@es-toolkit/es-toolkit/compat";
+import { ResourceDependency } from "@/types/dependencies.ts";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -40,15 +42,18 @@ export function createExecutionPlan(
   const remainingPlan: ExecutionPlan = [];
 
   for (const unit of initialPlan) {
-    if (unit.type === Type.Delete || unit.type === Type.DeleteVersion) {
+    if (
+      unit.type === Type.Delete || unit.type === Type.DeleteVersion ||
+      unit.type === Type.ChangeVersion
+    ) {
       executionPlan.push(unit);
       continue;
     }
 
-    const resolvedUnit = resolveStateDependencies(unit, changes);
+    const resolvedUnit = resolveUnitState(unit, changes);
     const allDepsResolved = resolvedUnit
-      .dependsOn
-      .every(({ resolved }) => resolved);
+      .args
+      .every((arg: unknown) => hasResolved(arg));
 
     if (allDepsResolved) {
       executionPlan.push(resolvedUnit);
@@ -63,7 +68,20 @@ export function createExecutionPlan(
   };
 }
 
+export function getInitialDependsOn(
+  initialPlan: Plan,
+  path: string,
+  version?: string,
+): ResourceDependency[] {
+  const unit = version
+    ? initialPlan.find((unit) => get(unit, "path") === path && get(unit, "version") === version)
+    : initialPlan.find((unit) => get(unit, "path") === path);
+
+  return get(unit, "dependsOn", []);
+}
+
 export async function executePlan(
+  initialPlan: Plan,
   plan: ExecutionPlan,
   changes: Change[] = [],
 ): Promise<Change[]> {
@@ -101,8 +119,7 @@ export async function executePlan(
               path: unit.path,
               state: {
                 ...state,
-                rawConfig: unit.config,
-                dependsOn: unit.dependsOn,
+                dependsOn: getInitialDependsOn(initialPlan, unit.path),
               },
               config: unit.config,
               executionTime: createTime,
@@ -118,10 +135,10 @@ export async function executePlan(
               type: Type.CreateVersion,
               path: unit.path,
               version: unit.version,
+              isCurrent: true,
               state: {
                 ...state,
-                rawConfig: unit.config,
-                dependsOn: unit.dependsOn,
+                dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
               },
               config: unit.config,
               executionTime: createTime,
@@ -139,8 +156,7 @@ export async function executePlan(
               prevState: unit.state,
               state: {
                 ...state,
-                rawConfig: unit.config,
-                dependsOn: unit.dependsOn,
+                dependsOn: getInitialDependsOn(initialPlan, unit.path),
               },
               config: unit.config,
               executionTime: updateTime,
@@ -156,11 +172,11 @@ export async function executePlan(
               type: Type.UpdateVersion,
               path: unit.path,
               version: unit.version,
+              isCurrent: true,
               prevState: unit.state,
               state: {
                 ...state,
-                rawConfig: unit.config,
-                dependsOn: unit.dependsOn,
+                dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
               },
               config: unit.config,
               executionTime: updateTime,
@@ -198,10 +214,10 @@ export async function executePlan(
               type: Type.ChangeVersion,
               path: unit.path,
               version: unit.version,
+              isCurrent: true,
               state: {
                 ...unit.state,
-                rawConfig: unit.config,
-                dependsOn: unit.dependsOn,
+                dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
               },
               executionTime: 0,
             };
@@ -214,7 +230,7 @@ export async function executePlan(
     const end = performance.now();
     logger.info(`[Execute] Successfully executed plan in ${formatDuration(end - start)}`);
 
-    return executePlan(remainingPlan, changes.concat(...newChanges));
+    return executePlan(initialPlan, remainingPlan, changes.concat(...newChanges));
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);

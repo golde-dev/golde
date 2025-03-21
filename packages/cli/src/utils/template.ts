@@ -3,15 +3,34 @@ import type { GitInfo } from "./git.ts";
 import { existsSync } from "@std/fs/exists";
 import type { ManagedConfig } from "../config.ts";
 import type { Unit } from "@/types/plan.ts";
-import { get } from "@es-toolkit/es-toolkit/compat";
-import type { ResourceState } from "@/types/config.ts";
-import type { Resource } from "@/types/dependencies.ts";
-import type { State } from "@/mod.ts";
-import { logger } from "@/logger.ts";
+import { get, isArray, isPlainObject, isString } from "@es-toolkit/es-toolkit/compat";
+import type { Config } from "@/types/config.ts";
+import type { Resource, SavedResource } from "@/types/dependencies.ts";
+import { matchStatePath } from "@/dependencies.ts";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
 }
+
+export const isTemplate = (string: string) => {
+  return string.includes("{{") && string.includes("}}");
+};
+
+export const hasResolved = (value: unknown): boolean => {
+  if (isString(value)) {
+    return !isTemplate(value);
+  }
+  if (isArray(value)) {
+    return value.every(hasResolved);
+  }
+  if (isPlainObject(value)) {
+    return Object
+      .entries(value as object)
+      .every(([key, value]) => hasResolved(key) && hasResolved(value));
+  }
+
+  return true;
+};
 
 export function resolveNestedTemplateString(
   string: string,
@@ -197,64 +216,52 @@ export const fileTemplate = (value: string): string => {
 
 const stateRe = new RegExp(/(?<=state.)(.*)/);
 
-export const stateTemplate = (_state: State) => (value: string): string => {
-  return originalTemplateString(value);
-};
+export const resourcesTemplate = (resources: SavedResource[]) => (value: string): string => {
+  const match = stateRe.exec(value.trim());
+  if (!match) {
+    return originalTemplateString(value);
+  }
+  const [stateMatch] = match;
 
-export const unitStateTemplate =
-  (unit: Unit, resources: { path: string; state: ResourceState }[]) => (value: string): string => {
-    const match = stateRe.exec(value.trim());
-    if (!match) {
+  const deps = matchStatePath(stateMatch);
+
+  if (deps) {
+    const [resourcePath, _, resourceAttribute] = deps;
+    const selectedResources = resources.filter(({ path }) => path === resourcePath);
+    console.log(selectedResources);
+
+    if (selectedResources.length === 0) {
       return originalTemplateString(value);
     }
-    const [stateMatch] = match;
-    if ("dependsOn" in unit) {
-      logger.debug(`[Template] Resolving args for ${unit.path}`, {
-        stateMatch,
-      });
 
-      const dependsOn = unit.dependsOn.find(({ statePath }) => statePath === stateMatch);
-      if (dependsOn) {
-        const {
-          resourcePath,
-          resourceAttribute,
-        } = dependsOn;
-
-        const stateUnit = resources.find((d) => d.path === resourcePath);
-        if (stateUnit) {
-          const { state } = stateUnit;
-
-          if (
-            ("current" in state && typeof state.current === "string") &&
-            ("versions" in state && typeof state.versions === "object")
-          ) {
-            const currentVersion = get(state.versions, state.current);
-            const value = get(currentVersion, resourceAttribute);
-
-            if (typeof value === "string") {
-              return value;
-            }
-          } else {
-            const value = get(state, resourceAttribute);
-            if (typeof value === "string") {
-              return value;
-            }
-          }
-          throw new ConfigError(
-            `Failed to resolve unit ${unit.path} dependency on ${stateUnit.path}, attribute ${resourceAttribute} is missing`,
-            ConfigErrorCode.STATE_MISSING,
-          );
-        }
+    const [firstResource] = selectedResources;
+    if (selectedResources.length === 1 && firstResource) {
+      const [firstResource] = selectedResources;
+      const value = get(firstResource.state, resourceAttribute);
+      if (typeof value === "string") {
+        return value;
       }
     }
-    return originalTemplateString(value);
-  };
+    const currentResource = selectedResources.find(({ isCurrent }) => isCurrent);
+    if (selectedResources.length > 0 && currentResource) {
+      const value = get(currentResource.state, resourceAttribute);
+      if (typeof value === "string") {
+        return value;
+      }
+    }
 
+    throw new ConfigError(
+      `Failed to resolve state dependency on ${stateMatch}`,
+      ConfigErrorCode.INVALID_CONFIG,
+    );
+  }
+  return originalTemplateString(value);
+};
 /**
  * Resolve unit dependencies
  * Only resolve args and config
  */
-export const resolveStateDependencies = <T extends Unit>(
+export const resolveUnitState = <T extends Unit>(
   unit: T,
   resources: Resource[],
 ): T => {
@@ -264,27 +271,25 @@ export const resolveStateDependencies = <T extends Unit>(
   const resolved = {
     ...unit,
   };
-  const onTemplate = unitStateTemplate(unit, resources);
+  const onTemplate = resourcesTemplate(resources);
 
   if ("args" in resolved) {
     resolved.args = resolveTemplate(resolved.args, onTemplate) as typeof resolved.args;
   }
-
-  if ("dependsOn" in resolved) {
-    resolved.dependsOn = resolved.dependsOn.map((dependOn) => {
-      if (resources.find((resource) => resource.path === dependOn.resourcePath)) {
-        return {
-          ...dependOn,
-          resolved: true,
-        };
-      }
-      return dependOn;
-    });
+  if ("config" in resolved) {
+    resolved.config = resolveTemplate(resolved.config, onTemplate) as typeof resolved.config;
   }
 
   return resolved;
 };
 
-export const isTemplate = (string: string) => {
-  return string.includes("{{") && string.includes("}}");
+export const resolveConfigState = (
+  config: Config,
+  resources: SavedResource[] = [],
+): Config => {
+  if (!resources.length) {
+    return config;
+  }
+  const onTemplate = resourcesTemplate(resources);
+  return resolveTemplate(config, onTemplate) as Config;
 };

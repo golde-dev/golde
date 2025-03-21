@@ -49,7 +49,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
         [version: string]: {
           name: string;
           isCurrent: boolean;
-          rawConfig: ObjectConfig;
+          config: ObjectConfig;
           state: ObjectState;
         };
       };
@@ -59,9 +59,11 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       for (const [version, state] of Object.entries(versions)) {
         if (!previous[name]) previous[name] = {};
 
+        console.log(name, version, current);
+
         previous[name][version] = {
           name,
-          rawConfig: state.rawConfig,
+          config: state.config,
           isCurrent: version === current,
           state,
         };
@@ -177,23 +179,23 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
     const updating = Object.keys(previous).filter((key) => key in next);
     for (const key of updating) {
-      const { version, path, config: nextRawConfig, dependsOn } = next[key];
+      const { version, path, config: nextConfig, dependsOn, name } = next[key];
       const previousObjectVersion = previous[key][version];
 
-      assertBranch(nextRawConfig);
-      const objectKey = createObjectKey(nextRawConfig.branch, version, name);
+      assertBranch(nextConfig);
+      const objectKey = createObjectKey(nextConfig.branch, version, name);
 
       if (previousObjectVersion) {
-        const { rawConfig: previousRawConfig, isCurrent, state: prevState } = previousObjectVersion;
+        const { config: previousConfig, isCurrent, state: prevState } = previousObjectVersion;
 
         /**
          * If object version existed, was current and config has no changed
          */
-        if (isCurrent && isConfigEqual(nextRawConfig, previousRawConfig)) {
+        if (isCurrent && isConfigEqual(nextConfig, previousConfig)) {
           const noopUnit: NoopUnit<ObjectConfig, ObjectState> = {
             type: Type.Noop,
             path: s3ObjectPath(name),
-            config: previousRawConfig,
+            config: previousConfig,
             state: prevState,
             dependsOn: dependsOn,
           };
@@ -203,11 +205,11 @@ export function createS3PlanFactory<E extends GenericExecutors>(
         /**
          * If object version existed but was not the current version and config is the same
          */
-        if (!isCurrent && isConfigEqual(nextRawConfig, previousRawConfig)) {
+        if (!isCurrent && isConfigEqual(nextConfig, previousConfig)) {
           const changeVersionUnit: ChangeVersionUnit<ObjectConfig, ObjectState> = {
             type: Type.ChangeVersion,
             path: s3ObjectPath(name),
-            config: nextRawConfig,
+            config: nextConfig,
             version,
             state: {
               ...prevState,
@@ -219,9 +221,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
           continue;
         }
 
-        if (!isConfigEqual(nextRawConfig, previousRawConfig)) {
-          if (!isTemplate(nextRawConfig.bucketName)) {
-            assertUpdatePermission?.(nextRawConfig.bucketName, objectKey);
+        if (!isConfigEqual(nextConfig, previousConfig)) {
+          if (!isTemplate(nextConfig.bucketName)) {
+            assertUpdatePermission?.(nextConfig.bucketName, objectKey);
           }
 
           const updateVersionUnit: UpdateVersionUnit<
@@ -231,11 +233,11 @@ export function createS3PlanFactory<E extends GenericExecutors>(
           > = {
             type: Type.UpdateVersion,
             executor: updateObject,
-            args: [objectKey, nextRawConfig, prevState],
+            args: [objectKey, nextConfig, prevState],
             version,
             state: prevState,
             path: s3ObjectPath(name),
-            config: nextRawConfig,
+            config: nextConfig,
             dependsOn,
           };
           plan.push(updateVersionUnit);
@@ -247,16 +249,16 @@ export function createS3PlanFactory<E extends GenericExecutors>(
         path,
         version,
       };
-      if (!isTemplate(nextRawConfig.bucketName)) {
-        await assertCreatePermission?.(nextRawConfig.bucketName, objectKey);
+      if (!isTemplate(nextConfig.bucketName)) {
+        await assertCreatePermission?.(nextConfig.bucketName, objectKey);
       }
       const createVersionUnit: CreateVersionUnit<ObjectConfig, ObjectState, typeof createObject> = {
         type: Type.CreateVersion,
         executor: createObject,
-        args: [objectKey, object, nextRawConfig],
+        args: [objectKey, object, nextConfig],
         version,
         path: s3ObjectPath(name),
-        config: nextRawConfig,
+        config: nextConfig,
         dependsOn,
       };
       plan.push(createVersionUnit);

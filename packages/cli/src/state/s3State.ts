@@ -6,7 +6,7 @@ import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
 import { applyChangeSet } from "./utils/apply.ts";
-import type { Resource } from "@/types/dependencies.ts";
+import type { SavedResource } from "@/types/dependencies.ts";
 import type { StateConfig } from "@/state/types.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
@@ -45,7 +45,11 @@ export class S3StateClient implements AbstractStateClient {
     throw new Error("Method not implemented.");
   }
 
-  public getResources(_project: string, _resources: string[]): Promise<Resource[]> {
+  public getResources(_project: string, _resources: string[]): Promise<SavedResource[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  public getBranchResources(_project: string, _branch: string): Promise<SavedResource[]> {
     throw new Error("Method not implemented.");
   }
 

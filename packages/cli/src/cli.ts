@@ -2,13 +2,19 @@ import { load } from "@std/dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig } from "./config.ts";
-import { createDestroyPlan, createPlan, filterExecutionUnits, validatePlan } from "./plan.ts";
-import { initializeContext } from "./context.ts";
+import {
+  createDestroyPlan,
+  createPlan,
+  filterExecutionUnits,
+  printPlan,
+  validatePlan,
+} from "./plan.ts";
+import { getFinalContext, initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
 import { confirmExecutePlan, executePlan, printChanges, updateState } from "./apply.ts";
 import { getBranchName, verifyInstalled } from "./utils/git.ts";
-import { getDependencies, resolveExternal } from "./dependencies.ts";
+import { getExternalResources } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
 import type { LevelName } from "@std/log";
 import { createOutput } from "./output.ts";
@@ -144,7 +150,7 @@ program
 
       const plan = await createPlan(context);
 
-      await getDependencies(context, plan);
+      await getExternalResources(context, plan);
 
       logger.info("Config is valid");
       Deno.exit(0);
@@ -239,10 +245,12 @@ program
       const loadedConfig = await getConfig(branchName, config);
       const context = await initializeContext(branchName, loadedConfig);
       const initialPlan = await createPlan(context);
-      const external = await getDependencies(context, initialPlan);
+      const external = await getExternalResources(context, initialPlan);
+      const finalContext = await getFinalContext(context, external);
+      const finalPlan = await createPlan(finalContext);
 
-      const planWithExternal = resolveExternal(initialPlan, external);
-      const _validPlan = validatePlan(planWithExternal);
+      validatePlan(finalPlan);
+      printPlan(finalPlan);
 
       Deno.exit(0);
     },
@@ -278,16 +286,21 @@ program
       const context = await initializeContext(branchName, config, yes);
 
       const initialPlan = await createPlan(context);
-      const external = await getDependencies(context, initialPlan);
-      const planWithExternal = resolveExternal(initialPlan, external);
-      const validPlan = validatePlan(planWithExternal);
-      const locks = await lockDependencies(context, validPlan, external);
-      const executionUnits = filterExecutionUnits(validPlan);
+      const external = await getExternalResources(context, initialPlan);
+
+      const finalContext = await getFinalContext(context, external);
+      const finalPlan = await createPlan(finalContext);
+
+      validatePlan(finalPlan);
+      printPlan(finalPlan);
+
+      const locks = await lockDependencies(context, finalPlan, external);
+      const executionUnits = filterExecutionUnits(finalPlan);
 
       const shouldExecute = yes || await confirmExecutePlan();
 
       if (shouldExecute) {
-        const changes = await executePlan(executionUnits);
+        const changes = await executePlan(initialPlan, executionUnits);
         printChanges(changes);
 
         const state = await updateState(context, changes, locks);

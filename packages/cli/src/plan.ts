@@ -8,7 +8,6 @@ import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan, Unit } from "./types/plan.ts";
 import type { UnitGroups } from "./types/plan.ts";
-import { resolveNoopDependencies } from "@/dependencies.ts";
 
 export function sortByPath<T extends Unit>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
@@ -156,10 +155,7 @@ export async function createPlan(
         ],
       )
     ).flat();
-    console.log("initialPlan", initialPlan);
-    const partiallyResolved = resolveNoopDependencies(initialPlan);
-    const sortedUnits = sortByPath(partiallyResolved);
-
+    const sortedUnits = sortByPath(initialPlan);
     const end = performance.now();
 
     if (!hasChanges(initialPlan)) {
@@ -167,8 +163,7 @@ export async function createPlan(
       Deno.exit(0);
     }
 
-    logger.debug(`[Plan] Created initial plan in ${formatDuration(end - start)}`);
-    printPlan(initialPlan);
+    logger.debug(`[Plan] Created plan in ${formatDuration(end - start)}`);
 
     return sortedUnits;
   } catch (error) {

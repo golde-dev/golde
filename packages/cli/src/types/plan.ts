@@ -217,6 +217,7 @@ export interface CreateVersionResult<
 > {
   type: Type.CreateVersion;
   version: string;
+  isCurrent: true;
   path: string;
   state: S;
   config: C;
@@ -242,6 +243,7 @@ export interface UpdateVersionResult<
   type: Type.UpdateVersion;
   path: string;
   version: string;
+  isCurrent: true;
   prevState: S;
   state: S;
   config: C;
@@ -272,6 +274,7 @@ export interface ChangeVersionResult<
 > {
   type: Type.ChangeVersion;
   version: string;
+  isCurrent: true;
   path: string;
   state: S;
   executionTime: number;
