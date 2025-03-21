@@ -75,11 +75,11 @@ export class S3Client extends AWSClientBase {
       return false;
     } catch (e) {
       if (e instanceof NotFound) {
-        logger.debug(`[AWS] Bucket name ${name} can be used`);
+        logger.debug(`[AWS] Bucket name ${bucket} can be used`);
         return true;
       }
       if (e instanceof BucketAlreadyExists) {
-        logger.error(`[AWS] Bucket ${name} is not unique globally in s3`);
+        logger.error(`[AWS] Bucket ${bucket} is not unique globally in s3`);
         return false;
       }
       throw e;
