@@ -1,7 +1,4 @@
-import type {
-  RegistryDockerImagesConfig,
-  RegistryDockerImagesState,
-} from "./resources/registry/dockerImage/types.ts";
+import type { ImagesConfig, ImagesState } from "../generic/resources/docker/image/types.ts";
 
 export interface GithubCredentials {
   /**
@@ -17,12 +14,12 @@ export interface GithubCredentials {
 
 export interface GithubConfig {
   registry?: {
-    dockerImage?: RegistryDockerImagesConfig;
+    dockerImage?: ImagesConfig;
   };
 }
 
 export interface GithubState {
   registry?: {
-    dockerImage?: RegistryDockerImagesState;
+    dockerImage?: ImagesState;
   };
 }

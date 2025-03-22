@@ -32,20 +32,19 @@ export interface ImageConfig extends VersionedResource {
   dockerfile?: string;
 }
 
-export interface RegistryDockerImagesConfig {
+export interface ImagesConfig {
   [repository: string]: ImageConfig;
 }
 
 export interface ImageState {
   version: string;
-  sha256: string;
   createdAt: string;
   updatedAt?: string;
   dependsOn: ResourceDependency[];
   config: WithBranch<ImageConfig>;
 }
 
-export interface RegistryDockerImagesState {
+export interface ImagesState {
   [repository: string]: {
     current: string;
     versions: {

@@ -1,6 +1,6 @@
 import { findResourceDependencies } from "@/dependencies.ts";
 import { logger } from "@/logger.ts";
-import { createObjectKey, getObject } from "./utils.ts";
+import { createObject, createObjectKey } from "./utils.ts";
 import { Type } from "@/types/plan.ts";
 import { omitUndefined } from "@/utils/object.ts";
 import { assertBranch } from "@/utils/resource.ts";
@@ -83,7 +83,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
     for (const [name, object] of Object.entries(config)) {
       const withTags = mergeProjectTags(object, tags);
-      const { version, path } = await getObject(name, object);
+      const { version, path } = await createObject(name, object);
 
       next[name] = {
         name,

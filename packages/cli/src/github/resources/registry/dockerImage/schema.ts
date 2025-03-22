@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { implement } from "../../../../utils/zod.ts";
-import type { ImageConfig } from "./types.ts";
-import { branchPatternSchema, transformBranch } from "../../../../utils/resource.ts";
-import { branchSchema } from "../../../../utils/resource.ts";
+import { implement } from "@/utils/zod.ts";
+import type { ImageConfig } from "@/generic/resources/docker/image/types.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "@/utils/resource.ts";
 
 export const imageConfigSchema = implement<ImageConfig>()
   .with({

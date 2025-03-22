@@ -6,12 +6,13 @@ import type { Context } from "./types/context.ts";
 import type { ResourceDependency, SavedResource } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
+import { matchGithubPath } from "@/github/path.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=state.)(.*)/);
 
 export const matchStatePath = memoize((path: string) =>
-  matchAWSPath(path) ?? matchCloudflarePath(path)
+  matchAWSPath(path) ?? matchCloudflarePath(path) ?? matchGithubPath(path)
 );
 
 export function dependenciesSearch(

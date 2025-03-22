@@ -1,12 +1,12 @@
 import { PlanError, PlanErrorCode } from "../error.ts";
-import {
-  createRegistryDockerImageDestroyPlan,
-  createRegistryDockerImageExecutors,
-  createRegistryDockerImagePlan,
-} from "./resources/registry/dockerImage/plan.ts";
+import { createDockerImageExecutor } from "@/generic/resources/docker/image/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 import { isEmpty } from "../utils/object.ts";
+import {
+  createRegistryDockerImageDestroyPlan,
+  createRegistryDockerImagePlan,
+} from "@/github/resources/registry/dockerImage/plan.ts";
 
 export async function createGithubPlan(context: Context): Promise<Plan> {
   const {
@@ -34,6 +34,11 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
   }
 
   const {
+    username,
+    accessToken,
+  } = github.getCredentials();
+
+  const {
     registry: {
       dockerImage: imagesState,
     } = {},
@@ -46,7 +51,12 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
   } = githubConfig ?? {};
 
   if (!isEmpty(imagesState) || !isEmpty(imagesConfig)) {
-    const dockerExecutors = createRegistryDockerImageExecutors(github);
+    const dockerExecutors = await createDockerImageExecutor(
+      "ghcr.io",
+      username,
+      accessToken,
+    );
+
     plan.push(createRegistryDockerImagePlan(
       dockerExecutors,
       tags,
@@ -79,13 +89,22 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
     );
   }
   const {
+    username,
+    accessToken,
+  } = github.getCredentials();
+
+  const {
     registry: {
       dockerImage: imagesState,
     } = {},
   } = githubState ?? {};
 
   if (!isEmpty(imagesState)) {
-    const dockerExecutors = createRegistryDockerImageExecutors(github);
+    const dockerExecutors = await createDockerImageExecutor(
+      "ghcr.io",
+      username,
+      accessToken,
+    );
     plan.push(createRegistryDockerImageDestroyPlan(
       dockerExecutors,
       imagesState,

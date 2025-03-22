@@ -1,22 +1,13 @@
-import type { Tags } from "../../../../types/config.ts";
-import type { GithubClient } from "../../../client/client.ts";
-import type { RegistryDockerImagesConfig, RegistryDockerImagesState } from "./types.ts";
+import { createDockerImagesPlanFactory } from "@/generic/resources/docker/image/plan.ts";
+import { registryDockerImagePath } from "./path.ts";
 
-export function createRegistryDockerImageExecutors(_: GithubClient) {
-}
+const { createDockerImagesPlan, createDockerImagesDestroyPlan } = createDockerImagesPlanFactory(
+  registryDockerImagePath,
+  "Github",
+  "GHCR",
+);
 
-export async function createRegistryDockerImagePlan(
-  _executors: ReturnType<typeof createRegistryDockerImageExecutors>,
-  _tags?: Tags,
-  _state?: RegistryDockerImagesState,
-  _config?: RegistryDockerImagesConfig,
-) {
-  return await Promise.resolve([]);
-}
-
-export async function createRegistryDockerImageDestroyPlan(
-  _executors: ReturnType<typeof createRegistryDockerImageExecutors>,
-  _state?: RegistryDockerImagesState,
-) {
-  return await Promise.resolve([]);
-}
+export {
+  createDockerImagesDestroyPlan as createRegistryDockerImageDestroyPlan,
+  createDockerImagesPlan as createRegistryDockerImagePlan,
+};

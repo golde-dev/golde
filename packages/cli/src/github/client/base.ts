@@ -8,6 +8,13 @@ export class GithubClientBase {
     this.accessToken = accessToken;
   }
 
+  public getCredentials() {
+    return {
+      username: this.username,
+      accessToken: this.accessToken,
+    };
+  }
+
   public async verifyUserToken() {
   }
 }

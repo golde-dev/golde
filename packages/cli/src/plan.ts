@@ -6,7 +6,7 @@ import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
-import type { ExecutionUnit, Plan, Unit } from "./types/plan.ts";
+import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { UnitGroups } from "./types/plan.ts";
 
 export function sortByPath<T extends { path: string }>(plan: T[]): T[] {

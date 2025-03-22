@@ -194,7 +194,7 @@ async function createFromIncludes(
   }
 }
 
-export async function getObject(name: string, config: ObjectConfig): Promise<Object> {
+export const createObject = async (name: string, config: ObjectConfig): Promise<Object> => {
   const {
     source,
     includes,
@@ -210,7 +210,7 @@ export async function getObject(name: string, config: ObjectConfig): Promise<Obj
     path,
     version: newVersion,
   };
-}
+};
 
 export function createObjectKey(branch: string, version: string, name: string) {
   const key = `${slugify(branch)}.${version}.${slugify(name)}`;
