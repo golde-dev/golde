@@ -1,20 +1,19 @@
-import { memoize } from "@es-toolkit/es-toolkit";
 import type { DockerClient } from "../../../client/docker.ts";
 import type { ImageConfig } from "./types.ts";
+import { memoizeAsync } from "@/utils/memoize.ts";
 
-export const buildImage = memoize(
-  (
-    { client: _, repositoryName: __, image: ___ }: {
+export const buildImage = memoizeAsync(
+  async (
+    { client, image }: {
       client: DockerClient;
-      repositoryName: string;
       image: ImageConfig;
     },
   ) => {
-    return {
+    const { tags = [], context } = image;
+
+    await client.buildImage(context, tags);
+    return await Promise.resolve({
       version: "1.0.0",
-    };
-  },
-  {
-    getCacheKey: ({ repositoryName, image }) => `${repositoryName}_${JSON.stringify(image)}`,
+    });
   },
 );

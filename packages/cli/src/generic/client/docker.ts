@@ -70,10 +70,11 @@ export class DockerClient {
     }
   }
 
-  public async buildImage(imageName: string, tags: string): Promise<void> {
+  public async buildImage(context: string = ".", tags: string[]): Promise<void> {
     try {
+      const tagsArgs = tags.map((tag) => ["-t", tag]).flat();
       await new Deno.Command("docker", {
-        args: ["build", "-t", imageName, "-t", tags, "."],
+        args: ["build", ...tagsArgs, context],
       });
     } catch (error) {
       throw new Error("Failed to build image", { cause: error });

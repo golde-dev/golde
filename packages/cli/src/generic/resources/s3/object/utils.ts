@@ -12,6 +12,7 @@ import {
 } from "@/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 import slugify from "@sindresorhus/slugify";
+import { memoizeAsync } from "@/utils/memoize.ts";
 
 async function getVersion(
   path: string,
@@ -194,23 +195,25 @@ async function createFromIncludes(
   }
 }
 
-export const createObject = async (name: string, config: ObjectConfig): Promise<Object> => {
-  const {
-    source,
-    includes,
-    version,
-    context = ".",
-  } = config;
+export const createObject = memoizeAsync(
+  async (name: string, config: ObjectConfig): Promise<Object> => {
+    const {
+      source,
+      includes,
+      version,
+      context = ".",
+    } = config;
 
-  const [path, newVersion] = source
-    ? await createFromSource(context, name, source, version)
-    : await createFromIncludes(context, name, includes, version);
+    const [path, newVersion] = source
+      ? await createFromSource(context, name, source, version)
+      : await createFromIncludes(context, name, includes, version);
 
-  return {
-    path,
-    version: newVersion,
-  };
-};
+    return {
+      path,
+      version: newVersion,
+    };
+  },
+);
 
 export function createObjectKey(branch: string, version: string, name: string) {
   const key = `${slugify(branch)}.${version}.${slugify(name)}`;
