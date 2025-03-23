@@ -1,5 +1,6 @@
 import { getContextRefHash, getRefHash } from "@/utils/git.ts";
 import { getDirHash, getFileHash } from "@/utils/hash.ts";
+import { stat } from "node:fs/promises";
 
 /**
  * Prefix with hash type and output length to identify hash type and byte length
@@ -51,10 +52,7 @@ const prefixLastUpdated = (lastUpdated: number) => `fm:${lastUpdated}`;
  * Get last updated version for a file
  */
 export async function getLastUpdatedVersion(path: string) {
-  const { mtime } = await Deno.lstat(path);
-  if (!mtime) {
-    throw new Error(`Failed to get last updated for ${path}`);
-  }
+  const { mtime } = await stat(path);
   return prefixLastUpdated(mtime.valueOf());
 }
 
@@ -73,9 +71,6 @@ const prefixContextRefHash = (hash: string) => `gch:${hash}`;
  */
 export function getGitContextVersion(context: string) {
   const hash = getContextRefHash(context);
-  if (!hash) {
-    throw new Error(`Failed to get git context ref hash for ${context}`);
-  }
   return prefixContextRefHash(hash);
 }
 

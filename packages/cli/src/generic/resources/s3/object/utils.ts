@@ -1,6 +1,5 @@
 import slugify from "@sindresorhus/slugify";
 import { logger } from "@/logger.ts";
-import { copy } from "@std/fs";
 import { basename, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
@@ -13,7 +12,10 @@ import {
 } from "@/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 import { memoizeAsync } from "@/utils/memoize.ts";
-import { existsSync, mkdtempSync, statSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { copy } from "@std/fs/copy";
 
 async function getVersion(
   path: string,
@@ -91,13 +93,14 @@ async function createFromSource(
   }
 
   try {
-    const tmpDir = mkdtempSync(`golde-bucket-object-${name}`);
+    const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-${name}`));
     const toPath = join(tmpDir, basename(fromPath));
     logger.debug(`[Plan] Object ${name} copying`, {
       from: fromPath,
       to: toPath,
     });
 
+    // TODO: switch to node:fs/promises cp once it is available with force option
     await copy(fromPath, toPath, {
       preserveTimestamps: true,
       overwrite: true,
@@ -120,7 +123,7 @@ async function createFromIncludes(
   includes: Include[] = [],
   version?: Version,
 ): Promise<[string, string]> {
-  const tmpDir = mkdtempSync(`golde-bucket-object-${name}`);
+  const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-${name}`));
   const contextBase = resolve(context);
 
   try {
@@ -140,6 +143,7 @@ async function createFromIncludes(
           from: fromPath,
           to: toPath,
         });
+        // TODO: switch to node:fs/promises cp once it is available with force option
         await copy(fromPath, toPath, { preserveTimestamps: true });
         continue;
       }
@@ -152,6 +156,7 @@ async function createFromIncludes(
           from: fromPath,
           to: fileToPath,
         });
+        // TODO: switch to node:fs/promises cp once it is available with force option
         await copy(fromPath, fileToPath, {
           preserveTimestamps: true,
           overwrite: false,
@@ -184,6 +189,7 @@ async function createFromIncludes(
 
     return [archivePath, newVersion];
   } catch (error) {
+    logger.error(`[Plan] Bucket object ${name}, include failed`, error);
     throw new PlanError(
       `Bucket object ${name}, include failed`,
       PlanErrorCode.SOURCE_ERROR,

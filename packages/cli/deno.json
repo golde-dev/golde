@@ -29,7 +29,6 @@
     "@std/toml": "jsr:@std/toml@^1.0.1",
     "@std/log": "jsr:@std/log@^0.224.8",
     "@std/expect": "jsr:@std/expect@^1.0.5",
-    "@std/path": "jsr:@std/path@^1.0.6",
     "@std/testing": "jsr:@std/testing@^1.0.3",
     "@deno-library/compress": "jsr:@deno-library/compress@^0.5.5",
     "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.0",

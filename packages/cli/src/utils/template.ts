@@ -6,7 +6,7 @@ import { get, isArray, isPlainObject, isString } from "@es-toolkit/es-toolkit/co
 import type { Config } from "@/types/config.ts";
 import type { Resource, SavedResource } from "@/types/dependencies.ts";
 import { matchStatePath } from "@/dependencies.ts";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
@@ -204,7 +204,7 @@ export const fileTemplate = (value: string): string => {
   const [fileName] = match;
 
   if (existsSync(fileName)) {
-    return Deno.readTextFileSync(fileName);
+    return readFileSync(fileName, { encoding: "utf-8" });
   } else {
     throw new ConfigError(
       "Template file is missing",

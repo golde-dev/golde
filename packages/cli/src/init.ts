@@ -5,7 +5,7 @@ import { ZodError, type ZodSchema } from "zod";
 import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
 import { GoldeError } from "./golde/client/base.ts";
 import type { GoldeClient } from "./golde/client/client.ts";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
@@ -62,7 +62,7 @@ const config = {
 export default config;
 `;
 
-  Deno.writeTextFileSync("./golde.config.js", config);
+  writeFileSync("./golde.config.js", config, { encoding: "utf-8" });
 }
 
 function createTSConfig(projectName: string) {
@@ -80,7 +80,7 @@ const config: Config = {
 export default config;
 `;
 
-  Deno.writeTextFileSync("./golde.config.ts", config);
+  writeFileSync("./golde.config.ts", config, { encoding: "utf-8" });
 }
 
 function createJSONConfig(projectName: string) {
@@ -96,8 +96,9 @@ function createJSONConfig(projectName: string) {
 }
 `;
 
-  Deno.writeTextFileSync("./golde.config.json", config);
+  writeFileSync("./golde.config.json", config, { encoding: "utf-8" });
 }
+
 
 export async function confirmCreateProject(name: string): Promise<boolean> {
   try {

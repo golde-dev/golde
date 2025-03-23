@@ -25,6 +25,7 @@ import type {
 import { get } from "@es-toolkit/es-toolkit/compat";
 import type { ResourceDependency } from "@/types/dependencies.ts";
 import { sortByPath } from "@/plan.ts";
+import { exit } from "node:process";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {
@@ -240,7 +241,7 @@ export async function executePlan(
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);
     }
-    return Deno.exit(1);
+    return exit(1);
   }
 }
 
@@ -276,7 +277,7 @@ export async function updateState(
     if (error instanceof Error) {
       logger.error(`[Apply] Failed to update state: ${error.message}`);
     }
-    Deno.exit(1);
+    exit(1);
   }
 }
 

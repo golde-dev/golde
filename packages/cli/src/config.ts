@@ -6,10 +6,11 @@ import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { dynamicImport } from "./utils/import.ts";
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
 import { basename, extname, resolve } from "node:path";
-import { decode } from "./utils/text.ts";
 import {
   configTemplate,
   envTemplate,
@@ -17,9 +18,7 @@ import {
   gitTemplate,
   resolveTemplate,
 } from "./utils/template.ts";
-
 import type { Config } from "./types/config.ts";
-import { existsSync } from "node:fs";
 
 const loadConfig = async (
   path: string,
@@ -35,16 +34,12 @@ const loadConfig = async (
       return config;
     }
     case ".toml": {
-      const tomlConfig = decode(
-        Deno.readFileSync(path),
-      );
+      const tomlConfig = await readFile(path, { encoding: "utf-8" });
       return parseToml(tomlConfig);
     }
     case ".yml":
     case ".yaml": {
-      const yamlConfig = decode(
-        Deno.readFileSync(path),
-      );
+      const yamlConfig = await readFile(path, { encoding: "utf-8" });
       return parseYaml(yamlConfig);
     }
     default:

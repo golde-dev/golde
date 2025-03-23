@@ -4,10 +4,10 @@ import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
 import { walk } from "@std/fs/walk";
-import { copy } from "@std/fs/copy";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
+import { copy } from "@std/fs/copy";
 
 const { local, dev } = parseArgs(Deno.args, {
   boolean: ["local", "dev"],
@@ -110,10 +110,14 @@ function devUpdateExamples(examples: string[]) {
       const from = resolve(npmDistDir);
       const to = join(exampleBaseDir, example, goldeModules);
 
+      console.log(from, to);
+
       return copy(
         from,
         to,
-        { overwrite: true },
+        {
+          overwrite: true,
+        },
       );
     }),
   );

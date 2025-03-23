@@ -23,8 +23,8 @@ import {
   AGENT_VERSIONS_DIR,
 } from "./constants/name.ts";
 import { VERSION } from "./version.ts";
-import { join } from "@std/path";
 import { logger } from "./logger.ts";
+import { join } from "node:path";
 
 function isLinkChanges(nextTarget: string, linkName: string) {
   if (!existsSync(linkName)) {
