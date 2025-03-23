@@ -6,7 +6,7 @@ WORKDIR /app
 COPY ./yarn.lock yarn.lock
 COPY ./.yarn .yarn
 COPY ./.yarnrc.yml .yarnrc.yml
-COPY ./package.json package.json
+COPY ./package.json package.jsn
 
 RUN yarn workspaces focus --production @golde/example-github-ghcr-docker-image
 
