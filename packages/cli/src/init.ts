@@ -4,9 +4,9 @@ import { projectNameSchema } from "./schema.ts";
 import { ZodError, type ZodSchema } from "zod";
 import { createGoldeClient, getGoldeConfig } from "./golde/client/factory.ts";
 import { GoldeError } from "./golde/client/base.ts";
-import { resolve } from "@std/path/resolve";
-import { existsSync } from "@std/fs/exists";
 import type { GoldeClient } from "./golde/client/client.ts";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
@@ -34,7 +34,7 @@ const getProjectType = () => {
   const packagePath = resolve("./package.json");
   if (existsSync(packagePath)) {
     const source = JSON.parse(
-      Deno.readTextFileSync(packagePath),
+      readFileSync(packagePath, { encoding: "utf-8" }),
     ) as PackageJSON;
 
     projectInfo.name = source.name;

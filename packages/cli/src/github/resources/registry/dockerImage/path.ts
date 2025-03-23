@@ -7,6 +7,7 @@ export const BASE_PATH = "github.registry.dockerImage";
 const stateAttributes = ensureAllowedKeys<ImageState>({
   createdAt: true,
   updatedAt: true,
+  imageId: true,
   version: true,
 }).map((attribute) => `${attribute}`);
 

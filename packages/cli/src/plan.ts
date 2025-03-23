@@ -8,6 +8,7 @@ import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { UnitGroups } from "./types/plan.ts";
+import { exit } from "node:process";
 
 export function sortByPath<T extends { path: string }>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
@@ -169,7 +170,7 @@ export async function createPlan(
 
     if (!hasChanges(initialPlan)) {
       logger.info(`[Plan] No changes detected in ${formatDuration(end - start)}`);
-      Deno.exit(0);
+      exit(0);
     }
 
     logger.debug(`[Plan] Created plan in ${formatDuration(end - start)}`);
@@ -181,7 +182,7 @@ export async function createPlan(
     } else if (error instanceof Error) {
       logger.error(`[Plan] Unknown plan error: ${error.message}`);
     }
-    return Deno.exit(1);
+    return exit(1);
   }
 }
 
@@ -206,7 +207,7 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
     } else if (error instanceof Error) {
       logger.error(`[Plan] Unknown plan error: ${error.message}`);
     }
-    return Deno.exit(1);
+    return exit(1);
   }
 }
 

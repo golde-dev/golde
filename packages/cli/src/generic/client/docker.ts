@@ -1,6 +1,6 @@
-import { removePrefix } from "@/utils/object.ts";
-import { decode } from "../../utils/text.ts";
 import { PlanError, PlanErrorCode } from "@/error.ts";
+import { exec } from "node:child_process";
+import { logger } from "@/logger.ts";
 
 export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";
@@ -14,11 +14,17 @@ export class DockerClient {
   private readonly registry: string;
   private readonly username: string;
   private readonly password: string;
+  private stage: "Plan" | "Execute";
 
   public constructor(registry: string, username: string, password: string) {
     this.registry = registry;
     this.username = username;
     this.password = password;
+    this.stage = "Plan";
+  }
+
+  public setStage(stage: "Plan" | "Execute") {
+    this.stage = stage;
   }
 
   public async login() {
@@ -26,18 +32,44 @@ export class DockerClient {
       username,
       password,
       registry,
+      stage,
     } = this;
 
-    return await new Deno.Command("docker", {
-      args: ["login", "-u", username, "-p", password, registry],
-    }).output();
+    logger.debug(`[${stage}][Docker] Authenticating to docker registry`, {
+      username,
+      password: "<redacted>",
+      registry,
+    });
+
+    await new Promise((resolve, reject) => {
+      exec(`docker login -u ${username} -p ${password} ${registry}`, (error, _, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to login to docker \n ${stderr}`);
+          reject(
+            new Error("Failed to login to docker", { cause: error }),
+          );
+          return;
+        }
+        resolve(void 0);
+      });
+    });
   }
 
   public async logout() {
-    const { registry } = this;
-    return await new Deno.Command("docker", {
-      args: ["logout", registry],
-    }).output();
+    const { registry, stage } = this;
+
+    return await new Promise((resolve, reject) => {
+      exec(`docker logout ${registry}`, (error, _, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to logout from docker \n ${stderr}`);
+          reject(
+            new Error("Failed to logout from docker", { cause: error }),
+          );
+          return;
+        }
+        resolve(void 0);
+      });
+    });
   }
 
   public async verifyCredentials() {
@@ -50,26 +82,19 @@ export class DockerClient {
   }
 
   public async verifyInstalled() {
-    try {
-      const { success, stderr } = await new Deno.Command("docker", {
-        args: ["info", "--format", "json"],
-      }).output();
-
-      const stdErrDecoded = decode(stderr);
-      if (!success) {
-        throw new Error(
-          `Failed to run docker info`,
-          { cause: stdErrDecoded },
-        );
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes("No such file or directory")) {
-          throw new Error("Docker is not installed", { cause: error });
+    const { stage } = this;
+    return await new Promise((resolve, reject) => {
+      exec(`docker info --format json`, (error, _, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to run docker info \n ${stderr}`);
+          reject(
+            new Error("Failed to run docker info", { cause: error }),
+          );
+          return;
         }
-      }
-      throw new Error("Failed to verify docker install", { cause: error });
-    }
+        resolve(void 0);
+      });
+    });
   }
 
   public async buildImage(
@@ -77,36 +102,32 @@ export class DockerClient {
     context: string = ".",
     tags: string[],
   ): Promise<string> {
-    try {
-      const tagsArgs = tags.map((tag) => ["-t", `${imageName}:${tag}`]).flat();
-      const { stderr, success } = await new Deno.Command("docker", {
-        args: ["build", ...tagsArgs, context],
-      }).output();
+    const { stage } = this;
 
-      if (!success) {
-        throw new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, {
-          cause: decode(stderr),
-        });
-      }
-      const imageIdLine = decode(stderr)
-        .split("\n")
-        .toReversed()
-        .find((line) => line.includes("writing image sha256:")) ?? "";
+    const tagsArgs = tags
+      .map((tag) => ["-t", `${imageName}:${tag}`])
+      .flat()
+      .join(" ");
 
-      const regex = /sha256:([a-f0-9]{64})/;
-      const match = imageIdLine.match(regex);
-      if (!match) {
-        throw new PlanError("Failed to get image version", PlanErrorCode.BUILD_ERROR, {
-          cause: decode(stderr),
-        });
-      }
-      return match[1];
-    } catch (error) {
-      if (error instanceof PlanError) {
-        throw error;
-      }
-      throw new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, { cause: error });
-    }
+    return await new Promise((resolve, reject) => {
+      exec(`docker build ${context} ${tagsArgs} --quiet`, (error, stdout, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to build image ${imageName} \n ${stderr}`);
+
+          reject(
+            new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, {
+              cause: {
+                error,
+                stderr,
+                stdout,
+              },
+            }),
+          );
+          return;
+        }
+        resolve(stdout.trim());
+      });
+    });
   }
 
   public async pushImage(imageName: string, tags: string): Promise<void> {

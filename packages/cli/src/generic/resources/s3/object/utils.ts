@@ -1,6 +1,7 @@
+import slugify from "@sindresorhus/slugify";
 import { logger } from "@/logger.ts";
-import { copy, exists } from "@std/fs";
-import { basename, join, resolve } from "@std/path";
+import { copy } from "@std/fs";
+import { basename, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import {
@@ -11,8 +12,8 @@ import {
   getLastUpdatedVersion,
 } from "@/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
-import slugify from "@sindresorhus/slugify";
 import { memoizeAsync } from "@/utils/memoize.ts";
+import { existsSync, mkdtempSync, statSync } from "node:fs";
 
 async function getVersion(
   path: string,
@@ -29,11 +30,11 @@ async function getVersion(
     return await getGitContextVersion(context);
   }
   if (version === "FileHash") {
-    const stat = await Deno.lstat(path);
-    if (stat.isFile) {
+    const stat = statSync(path);
+    if (stat.isFile()) {
       return await getFileHashVersion(path);
     }
-    if (stat.isDirectory) {
+    if (stat.isDirectory()) {
       return await getDirHashVersion(path);
     }
     throw new Error(`Not implemented for this type of file: ${version}`);
@@ -82,7 +83,7 @@ async function createFromSource(
   const contextBase = resolve(context);
   const fromPath = join(contextBase, source);
 
-  if (!await exists(fromPath)) {
+  if (!existsSync(fromPath)) {
     throw new PlanError(
       `Bucket object ${name}, source ${source} does not exist`,
       PlanErrorCode.SOURCE_NOT_FOUND,
@@ -90,9 +91,7 @@ async function createFromSource(
   }
 
   try {
-    const tmpDir = await Deno.makeTempDir({
-      prefix: `golde-bucket-object-${name}`,
-    });
+    const tmpDir = mkdtempSync(`golde-bucket-object-${name}`);
     const toPath = join(tmpDir, basename(fromPath));
     logger.debug(`[Plan] Object ${name} copying`, {
       from: fromPath,
@@ -121,9 +120,7 @@ async function createFromIncludes(
   includes: Include[] = [],
   version?: Version,
 ): Promise<[string, string]> {
-  const tmpDir = await Deno.makeTempDir({
-    prefix: `golde-bucket-object-${name}`,
-  });
+  const tmpDir = mkdtempSync(`golde-bucket-object-${name}`);
   const contextBase = resolve(context);
 
   try {
@@ -131,7 +128,7 @@ async function createFromIncludes(
       const fromPath = join(contextBase, from);
       const toPath = join(tmpDir, to);
 
-      if (!await exists(fromPath)) {
+      if (!existsSync(fromPath)) {
         throw new PlanError(
           `[Plan] Bucket object ${name}, include ${from} does not exist`,
           PlanErrorCode.SOURCE_NOT_FOUND,
@@ -147,9 +144,9 @@ async function createFromIncludes(
         continue;
       }
 
-      const fromStat = Deno.lstatSync(fromPath);
+      const fromStat = statSync(fromPath);
 
-      if (fromStat.isFile) {
+      if (fromStat.isFile()) {
         const fileToPath = join(tmpDir, basename(fromPath));
         logger.debug(`Object ${name} copying`, {
           from: fromPath,
@@ -162,7 +159,7 @@ async function createFromIncludes(
         continue;
       }
 
-      if (fromStat.isDirectory) {
+      if (fromStat.isDirectory()) {
         for (const entry of Deno.readDirSync(fromPath)) {
           const entryFromPath = join(fromPath, entry.name);
           const entryToPath = join(tmpDir, entry.name);

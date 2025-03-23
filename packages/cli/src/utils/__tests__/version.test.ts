@@ -1,7 +1,7 @@
 import { expect } from "@std/expect/expect";
 import { getDirHashVersion, getFileHashVersion } from "../version.ts";
 import { describe, it } from "@std/testing/bdd";
-import { join } from "@std/path";
+import { join } from "node:path";
 
 describe("getFileHashVersion", () => {
   it("should calculate file hash version", async () => {

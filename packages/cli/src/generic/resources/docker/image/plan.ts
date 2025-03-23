@@ -24,16 +24,18 @@ export interface GenericExecutors {
   client: DockerClient;
   createDockerImage: (
     imageName: string,
+    imageId: string,
     version: string,
     config: WithBranch<ImageConfig>,
   ) => Promise<OmitExecutionContext<ImageState>>;
   updateDockerImage: (
     imageName: string,
+    imageId: string,
     version: string,
     config: WithBranch<ImageConfig>,
     state: ImageState,
   ) => Promise<OmitExecutionContext<ImageState>>;
-  deleteDockerImage: (imageName: string, version: string) => Promise<void>;
+  deleteDockerImage: (imageName: string, imageId: string, version: string) => Promise<void>;
   assertCreatePermission?: (imageName: string) => Promise<void>;
   assertDeletePermission?: (imageName: string) => Promise<void>;
   assertUpdatePermission?: (imageName: string) => Promise<void>;
@@ -76,17 +78,19 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       [imageName: string]: {
         imageName: string;
         version: string;
+        imageId: string;
         config: ImageConfig;
         dependsOn: ResourceDependency[];
       };
     } = {};
 
     for (const [imageName, image] of Object.entries(config)) {
-      const { version } = await buildImage({ client, imageName, image });
+      const { version, imageId } = await buildImage({ client, imageName, image });
 
       next[imageName] = {
         imageName,
         version,
+        imageId,
         config: image,
         dependsOn: findResourceDependencies(image),
       };
@@ -122,7 +126,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
 
     const creating = Object.keys(next).filter((key) => !(key in previous));
     for (const key of creating) {
-      const { config, imageName, version, dependsOn } = next[key];
+      const { config, imageName, imageId, version, dependsOn } = next[key];
 
       assertBranch(config);
 
@@ -137,7 +141,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       > = {
         type: Type.CreateVersion,
         executor: createDockerImage,
-        args: [imageName, version, config],
+        args: [imageName, imageId, version, config],
         version,
         path: dockerImagePath(imageName),
         config,
@@ -151,7 +155,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       const deletedValues = Object.values(previous[key]);
 
       for (const { imageName, state } of deletedValues) {
-        const { version } = state;
+        const { version, imageId } = state;
 
         if (!isTemplate(imageName)) {
           await assertDeletePermission?.(imageName);
@@ -161,7 +165,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
           type: Type.DeleteVersion,
           executor: deleteDockerImage,
           version: state.version,
-          args: [imageName, version],
+          args: [imageName, imageId, version],
           path: dockerImagePath(imageName),
           state,
           dependsOn: state.dependsOn,
@@ -172,7 +176,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
 
     const updating = Object.keys(previous).filter((key) => key in next);
     for (const key of updating) {
-      const { version, config: nextConfig, dependsOn, imageName } = next[key];
+      const { version, config: nextConfig, dependsOn, imageName, imageId } = next[key];
       const previousObjectVersion = previous[key][version];
       const previousCurrent = Object.values(previous[key]).find(({ isCurrent }) => isCurrent);
 
@@ -226,7 +230,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
           > = {
             type: Type.UpdateVersion,
             executor: updateDockerImage,
-            args: [imageName, version, nextConfig, prevState],
+            args: [imageName, imageId, version, nextConfig, prevState],
             version,
             state: prevState,
             path: dockerImagePath(imageName),
@@ -248,7 +252,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       > = {
         type: Type.CreateVersion,
         executor: createDockerImage,
-        args: [imageName, version, nextConfig],
+        args: [imageName, imageId, version, nextConfig],
         version,
         path: dockerImagePath(imageName),
         config: nextConfig,
@@ -279,7 +283,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       const entriesToDelete = Object.values(previous[key]);
 
       for (const { imageName, state } of entriesToDelete) {
-        const { version } = state;
+        const { version, imageId } = state;
 
         if (!isTemplate(imageName)) {
           await assertDeletePermission?.(imageName);
@@ -288,7 +292,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
         const deleteUnit: DeleteUnit<ImageState, typeof deleteDockerImage> = {
           type: Type.Delete,
           executor: deleteDockerImage,
-          args: [imageName, version],
+          args: [imageName, imageId, version],
           path: key,
           state: state,
           dependsOn: state.dependsOn,

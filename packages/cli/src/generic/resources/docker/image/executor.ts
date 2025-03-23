@@ -12,32 +12,38 @@ export async function createDockerImageExecutor(
   await client.verifyInstalled();
   await client.verifyCredentials();
 
-  function assertCreatePermission(_repositoryName: string) {
+  function assertCreatePermission(_imageName: string) {
     return Promise.resolve();
   }
 
-  function assertDeletePermission(_repositoryName: string) {
+  function assertDeletePermission(_imageName: string) {
     return Promise.resolve();
   }
 
-  function assertUpdatePermission(_repositoryName: string) {
+  function assertUpdatePermission(_imageName: string) {
     return Promise.resolve();
   }
 
   function createDockerImage(
-    _repositoryName: string,
+    _imageName: string,
+    _imageId: string,
     _version: string,
     _config: ImageConfig,
   ): Promise<OmitExecutionContext<ImageState>> {
     throw new Error("Method not implemented.");
   }
 
-  function deleteDockerImage(_repositoryName: string, _version: string): Promise<void> {
+  function deleteDockerImage(
+    _imageName: string,
+    _imageId: string,
+    _version: string,
+  ): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
   function updateDockerImage(
-    _repositoryName: string,
+    _imageName: string,
+    _imageId: string,
     _version: string,
     _config: ImageConfig,
     _state: ImageState,

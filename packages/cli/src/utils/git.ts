@@ -2,7 +2,8 @@ import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
 import { memoize } from "@es-toolkit/es-toolkit";
 import { decode } from "./text.ts";
-import { relative, resolve } from "@std/path";
+import { relative } from "@std/path";
+import { resolve } from "node:path";
 
 export interface GitInfo {
   defaultBranch: string;

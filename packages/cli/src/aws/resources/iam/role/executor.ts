@@ -3,13 +3,13 @@ import { PlanError, PlanErrorCode } from "../../../../error.ts";
 import { logger } from "../../../../logger.ts";
 import { stringify } from "../../../../utils/object.ts";
 import { nowStringDate } from "../../../../utils/date.ts";
-import { join } from "@std/path";
 import type { OmitExecutionContext, WithBranch } from "../../../../types/config.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
 import { toTagsList } from "../../../../utils/tags.ts";
 import type { AWSClient } from "../../../client/client.ts";
 import type { RoleConfig, RoleState } from "./types.ts";
+import { join } from "node:path";
 
 function aimRoleArn({ accountId }: AWSClient, roleName: string, path: string = "/") {
   if (!accountId) {

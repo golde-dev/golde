@@ -6,7 +6,7 @@ import type { GitVersion, ImageVersion } from "@/types/version.ts";
 import { getGitContextVersion, getGitVersion } from "@/utils/version.ts";
 
 function prefixImageHash(imageHash: string): string {
-  return `ih-sha256:${imageHash}`;
+  return `ih-:${imageHash}`;
 }
 
 async function getVersion(
@@ -43,12 +43,12 @@ export const buildImage = memoizeAsync(
       version,
     } = image;
 
-    const imageHash = await client.buildImage(imageName, context, tags);
-    const versionId = await getVersion(imageHash, context, version);
+    const imageId = await client.buildImage(imageName, context, tags);
+    const versionId = await getVersion(imageId, context, version);
 
     return await Promise.resolve({
       version: versionId,
-      sha256: imageHash,
+      imageId: imageId,
     });
   },
 );

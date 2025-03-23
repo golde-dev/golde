@@ -19,6 +19,7 @@ import { lockDependencies, releaseLocks } from "./lock.ts";
 import type { LevelName } from "@std/log";
 import { createOutput } from "./output.ts";
 import { configure } from "./configure.ts";
+import { exit } from "node:process";
 
 // TODO: handel .env.example errors
 await load({
@@ -47,7 +48,7 @@ program
 
       await configure();
       logger.info("Successfully configured Golde CLI");
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -64,7 +65,7 @@ program
 
       await initConfig();
       logger.info("Config created");
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -97,7 +98,7 @@ program
       const context = await initializeContext(branchName, loadedConfig);
 
       logger.info(`[Config] current config for ${branchName}`, context.config);
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -124,7 +125,7 @@ program
       } = await initializeContext(branchName, loadedConfig);
 
       logger.info(`[State] Current state for ${branchName}`, previousState);
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -153,7 +154,7 @@ program
       await getExternalResources(context, plan);
 
       logger.info("Config is valid");
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -189,7 +190,7 @@ program
       const context = await initializeContext(branchName, loadedConfig, yes);
 
       const _destroyPlan = await createDestroyPlan(context);
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -217,7 +218,7 @@ program
       } = options;
       logger.configure(logLevel, json);
       logger.warn("This command is not implemented yet");
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -252,7 +253,7 @@ program
       validatePlan(finalPlan);
       printPlan(finalPlan);
 
-      Deno.exit(0);
+      exit(0);
     },
   );
 
@@ -307,7 +308,7 @@ program
         createOutput(context, state);
       }
       await releaseLocks(context, locks);
-      Deno.exit(0);
+      exit(0);
     },
   );
 

@@ -1,13 +1,13 @@
 import slugify from "@sindresorhus/slugify";
 import { ensureDir, existsSync } from "@std/fs";
-import { exists } from "@std/fs/exists";
-import { join } from "@std/path";
 import { readJSON, writeJSON } from "../utils/json.ts";
 import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
 import type { SavedResource } from "@/types/dependencies.ts";
+import { cwd } from "node:process";
+import { join } from "node:path";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -15,7 +15,7 @@ export class FSStateClient implements AbstractStateClient {
   public constructor(
     path: string = ".golde",
   ) {
-    this.path = join(Deno.cwd(), path);
+    this.path = join(cwd(), path);
   }
 
   /**
@@ -98,7 +98,7 @@ export class FSStateClient implements AbstractStateClient {
    */
   public async getLocks(_: string, branch: string): Promise<Lock[]> {
     const path = this.getStateLockPath(branch);
-    if (!await exists(path)) {
+    if (!existsSync(path)) {
       return [];
     }
     return await readJSON<Lock[]>(path);

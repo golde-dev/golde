@@ -2,15 +2,13 @@ import { validateConfig } from "./schema.ts";
 import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { isEmpty } from "./utils/object.ts";
-import { existsSync } from "@std/fs";
-import { resolve } from "@std/path/resolve";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
 import { dynamicImport } from "./utils/import.ts";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
 import { isPlainObject } from "@es-toolkit/es-toolkit";
-import { basename, extname } from "@std/path";
+import { basename, extname, resolve } from "node:path";
 import { decode } from "./utils/text.ts";
 import {
   configTemplate,
@@ -21,6 +19,7 @@ import {
 } from "./utils/template.ts";
 
 import type { Config } from "./types/config.ts";
+import { existsSync } from "node:fs";
 
 const loadConfig = async (
   path: string,

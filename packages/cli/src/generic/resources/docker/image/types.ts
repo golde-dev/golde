@@ -38,6 +38,7 @@ export interface ImagesConfig {
 
 export interface ImageState {
   version: string;
+  imageId: string;
   createdAt: string;
   updatedAt?: string;
   dependsOn: ResourceDependency[];

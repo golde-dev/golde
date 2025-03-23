@@ -4,10 +4,10 @@ import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
 import { walk } from "@std/fs/walk";
-import { existsSync } from "@std/fs/exists";
-import { basename, join, resolve } from "@std/path";
 import { copy } from "@std/fs/copy";
 import { homedir } from "node:os";
+import { basename, join, resolve } from "node:path";
+import { existsSync } from "node:fs";
 
 const { local, dev } = parseArgs(Deno.args, {
   boolean: ["local", "dev"],
