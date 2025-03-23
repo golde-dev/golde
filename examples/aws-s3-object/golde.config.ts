@@ -62,7 +62,7 @@ const config: Config = {
         },
         "git-hash-context.copy.tar": {
           branch: "master",
-          version: "ContextGitHash",
+          version: "GitContextHash",
           context: "./src",
           source: "base.txt",
           bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",

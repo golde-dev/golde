@@ -117,9 +117,16 @@ export enum PlanErrorCode {
   SOURCE_NOT_FOUND = "SOURCE_NOT_FOUND",
 
   /**
-   * When source file error
+   * When there is issue with creating source
+   * eg: when trying to compress file for bucket object
    */
   SOURCE_ERROR = "SOURCE_ERROR",
+
+  /**
+   * When build resource failed
+   * eg: when build docker image failed
+   */
+  BUILD_ERROR = "BUILD_ERROR",
 }
 
 export class PlanError extends Error {

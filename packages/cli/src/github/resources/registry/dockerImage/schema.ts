@@ -11,7 +11,7 @@ export const imageConfigSchema = implement<ImageConfig>()
       .enum([
         "ImageHash",
         "GitHash",
-        "ContextGitHash",
+        "GitContextHash",
       ]),
     tags: z.array(z.string()).optional(),
     labels: z.record(z.string(), z.string()).optional(),

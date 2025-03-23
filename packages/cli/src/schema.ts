@@ -5,7 +5,7 @@ import { tagsSchema } from "./utils/tags.ts";
 import { awsConfigSchema, awsCredentialsSchema } from "./aws/schema.ts";
 import { cloudflareConfigSchema, cloudflareCredentialsSchema } from "./cloudflare/schema.ts";
 import { goldeCredentialsSchema } from "./golde/schema.ts";
-import { githubCredentialsSchema } from "./github/schema.ts";
+import { githubConfigSchema, githubCredentialsSchema } from "./github/schema.ts";
 import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
 import type { Config, ProvidersConfig } from "./types/config.ts";
 import type { ZodType } from "zod";
@@ -37,6 +37,7 @@ export const schema: ZodType<Config> = z
     state: stateSchema.optional(),
     providers: providersSchema.optional(),
     aws: awsConfigSchema.optional(),
+    github: githubConfigSchema.optional(),
     cloudflare: cloudflareConfigSchema.optional(),
     // output: outputSchema.optional(),
   })

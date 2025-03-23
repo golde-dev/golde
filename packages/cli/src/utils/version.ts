@@ -7,7 +7,7 @@ import { getDirHash, getFileHash } from "@/utils/hash.ts";
  * h - hash
  * @example fh-sha384-OLBgp1GsljhM2TJ-sbHjaiH9txEUvgdDTAzHv2P24donTt6_529l-9Ua0vFImLlb
  */
-const prefixFileHash = (hash: string) => `fh-sha384-${hash}`;
+const prefixFileHash = (hash: string) => `fh-sha384:${hash}`;
 
 /**
  * Return file hash encoded in base64url with prefix to identify hash type and byte length
@@ -26,7 +26,7 @@ export async function getFileHashVersion(path: string): Promise<string> {
  * h - hash
  * @example dh-sha384-OLBgp1GsljhM2TJ-sbHjaiH9txEUvgdDTAzHv2P24donTt6_529l-9Ua0vFImLlb
  */
-const prefixDirHash = (hash: string) => `dh-sha384-${hash}`;
+const prefixDirHash = (hash: string) => `dh-sha384:${hash}`;
 
 /**
  * Get directory hash version for a directory
@@ -45,7 +45,7 @@ export async function getDirHashVersion(dirPath: string): Promise<string> {
  * m - mtime
  * @example fm-1677721600
  */
-const prefixLastUpdated = (lastUpdated: number) => `fm-${lastUpdated}`;
+const prefixLastUpdated = (lastUpdated: number) => `fm:${lastUpdated}`;
 
 /**
  * Get last updated version for a file
@@ -61,11 +61,11 @@ export async function getLastUpdatedVersion(path: string) {
 /*
   Prefix to identify context ref hash
   g - git
+  c - context
   h - hash
-  c - connext
-  @example ghc-e15fe48d96db4d22c64e316c68681f1579862b4d
+  @example gch-e15fe48d96db4d22c64e316c68681f1579862b4d
 */
-const prefixContextRefHash = (hash: string) => `crh-${hash}`;
+const prefixContextRefHash = (hash: string) => `gch:${hash}`;
 
 /**
  * Get an git hash of subfolder within a git repo
@@ -85,7 +85,7 @@ export function getGitContextVersion(context: string) {
  * h - hash
  * @example gh-e15fe48d96db4d22c64e316c68681f1579862b4d
  */
-const prefixGitHash = (hash: string) => `gh-${hash}`;
+const prefixGitHash = (hash: string) => `gh:${hash}`;
 
 export function getGitVersion() {
   const hash = getRefHash();

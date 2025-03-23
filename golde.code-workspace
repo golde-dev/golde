@@ -30,7 +30,8 @@
 			"Marcin",
 			"namecheap",
 			"Nodenv",
-			"terragrunt"
+			"terragrunt",
+			"yarnrc"
 		],
 		"biome.enabled": false,
 		"search.exclude": {

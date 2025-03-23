@@ -47,7 +47,7 @@ export const initializeContext = async (
       cloudflareClient,
       awsClient,
       slackClient,
-      dockerClient,
+      githubClient,
     ] = await Promise.all([
       golde ? createGoldeClient(golde) : undefined,
       state ? createStateClient(state, aws) : undefined,
@@ -66,7 +66,7 @@ export const initializeContext = async (
       git,
       config,
       aws: awsClient,
-      docker: dockerClient,
+      github: githubClient,
       golde: goldeClient,
       cloudflare: cloudflareClient,
       hcloud: hcloudClient,

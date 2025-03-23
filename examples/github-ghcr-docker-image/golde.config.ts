@@ -12,10 +12,16 @@ const config: Config = {
     }
   },
   github: {
-    registryDockerImage: {
-      "@golde-dev/example-docker-image-golde": {
-        context: ".",
-        tags: {"latest": true},
+    registry: {
+      dockerImage: {
+        "golde-dev/example-docker-image-golde-image-hash": {
+          context: ".",
+          version: "ImageHash"
+        },
+        "golde-dev/example-docker-image-golde-image-git-hash": {
+          context: ".",
+          version: "GitHash"
+        }
       }
     }
   },

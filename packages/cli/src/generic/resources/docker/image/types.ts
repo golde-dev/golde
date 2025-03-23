@@ -5,7 +5,7 @@ import type { GitVersion, ImageVersion } from "../../../../types/version.ts";
 export interface ImageConfig extends VersionedResource {
   /**
    * Define how what is the version of the image.
-   * If GitHash or ContextGitHash is used, image will be only build if the git hash changes.
+   * If GitHash or GitContextHash is used, image will be only build if the git hash changes.
    * If ImageHash is used, image will be always rebuild even if the git hash is the same.
    *
    * @default ImageHash

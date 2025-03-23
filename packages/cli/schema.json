@@ -275,7 +275,7 @@
                         "enum": [
                           "FileHash",
                           "GitHash",
-                          "ContextGitHash",
+                          "GitContextHash",
                           "LastUpdated"
                         ],
                         "default": "FileHash"
@@ -888,6 +888,68 @@
             }
           },
           "additionalProperties": false
+        },
+        "github": {
+          "type": "object",
+          "properties": {
+            "registry": {
+              "type": "object",
+              "properties": {
+                "dockerImage": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
+                      },
+                      "branchPattern": {
+                        "$ref": "#/definitions/golde/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
+                      },
+                      "version": {
+                        "type": "string",
+                        "enum": [
+                          "ImageHash",
+                          "GitHash",
+                          "GitContextHash"
+                        ]
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "labels": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "context": {
+                        "type": "string"
+                      },
+                      "dockerfile": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "version"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "propertyNames": {
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*$"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false,
+          "description": "Github resources config"
         },
         "cloudflare": {
           "type": "object",

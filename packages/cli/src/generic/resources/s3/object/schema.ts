@@ -17,7 +17,7 @@ export const identitySchema = z
   .enum([
     "FileHash",
     "GitHash",
-    "ContextGitHash",
+    "GitContextHash",
     "LastUpdated",
   ])
   .default("FileHash");

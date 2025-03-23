@@ -25,7 +25,7 @@ async function getVersion(
   if (version === "GitHash") {
     return await getGitVersion();
   }
-  if (version === "ContextGitHash") {
+  if (version === "GitContextHash") {
     return await getGitContextVersion(context);
   }
   if (version === "FileHash") {

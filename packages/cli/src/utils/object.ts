@@ -84,14 +84,14 @@ export function ensureAllowedKeys<T>(obj: { [K in AllowedKeyOf<T>]: true }): All
 }
 
 /**
- * Add prefix to path, if path contain . wrap it in ['path']
+ * Add prefix to string
  */
 export function prefixPath(prefix: string, path: string): string {
   return `${prefix}.${path}`;
 }
 
 /**
- * Remove prefix from path, handle ['path'] case
+ * Remove prefix from path
  */
 export function removePrefix(prefix: string, path: string): string {
   return path.replace(`${prefix}.`, "");

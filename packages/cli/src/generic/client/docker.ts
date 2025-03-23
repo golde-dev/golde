@@ -1,4 +1,6 @@
+import { removePrefix } from "@/utils/object.ts";
 import { decode } from "../../utils/text.ts";
+import { PlanError, PlanErrorCode } from "@/error.ts";
 
 export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";
@@ -70,14 +72,40 @@ export class DockerClient {
     }
   }
 
-  public async buildImage(context: string = ".", tags: string[]): Promise<void> {
+  public async buildImage(
+    imageName: string,
+    context: string = ".",
+    tags: string[],
+  ): Promise<string> {
     try {
-      const tagsArgs = tags.map((tag) => ["-t", tag]).flat();
-      await new Deno.Command("docker", {
+      const tagsArgs = tags.map((tag) => ["-t", `${imageName}:${tag}`]).flat();
+      const { stderr, success } = await new Deno.Command("docker", {
         args: ["build", ...tagsArgs, context],
-      });
+      }).output();
+
+      if (!success) {
+        throw new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, {
+          cause: decode(stderr),
+        });
+      }
+      const imageIdLine = decode(stderr)
+        .split("\n")
+        .toReversed()
+        .find((line) => line.includes("writing image sha256:")) ?? "";
+
+      const regex = /sha256:([a-f0-9]{64})/;
+      const match = imageIdLine.match(regex);
+      if (!match) {
+        throw new PlanError("Failed to get image version", PlanErrorCode.BUILD_ERROR, {
+          cause: decode(stderr),
+        });
+      }
+      return match[1];
     } catch (error) {
-      throw new Error("Failed to build image", { cause: error });
+      if (error instanceof PlanError) {
+        throw error;
+      }
+      throw new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, { cause: error });
     }
   }
 
