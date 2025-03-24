@@ -179,17 +179,38 @@ program
       const {
         logLevel,
         json,
-        config,
+        config: configPath,
         yes,
       } = options;
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
 
-      const loadedConfig = await getConfig(branchName, config);
-      const context = await initializeContext(branchName, loadedConfig, yes);
+      const config = await getConfig(branchName, configPath);
+      const context = await initializeContext(branchName, config, yes);
 
-      const _destroyPlan = await createDestroyPlan(context);
+      const initialPlan = await createDestroyPlan(context);
+      const external = await getExternalResources(context, initialPlan);
+
+      const finalContext = await getFinalContext(context, external);
+      const finalPlan = await createDestroyPlan(finalContext);
+
+      validatePlan(finalPlan);
+      printPlan(finalPlan);
+
+      const locks = await lockDependencies(context, finalPlan, external);
+      const executionUnits = filterExecutionUnits(finalPlan);
+
+      const shouldExecute = yes || await confirmExecutePlan();
+
+      if (shouldExecute) {
+        const changes = await executePlan(initialPlan, executionUnits);
+        printChanges(changes);
+
+        const state = await updateState(context, changes, locks);
+        createOutput(context, state);
+      }
+      await releaseLocks(context, locks);
       exit(0);
     },
   );

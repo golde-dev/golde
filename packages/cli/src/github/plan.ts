@@ -99,6 +99,8 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
     } = {},
   } = githubState ?? {};
 
+  console.log(imagesState);
+
   if (!isEmpty(imagesState)) {
     const dockerExecutors = await createDockerImageExecutor(
       "ghcr.io",

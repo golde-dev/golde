@@ -4,6 +4,8 @@ import { createObject, createObjectKey } from "./utils.ts";
 import { Type } from "@/types/plan.ts";
 import { omitUndefined } from "@/utils/object.ts";
 import { assertBranch } from "@/utils/resource.ts";
+import { isTemplate } from "@/utils/template.ts";
+import { isConfigEqual } from "@/utils/config.ts";
 import { mergeProjectTags } from "@/utils/tags.ts";
 import type { ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "./types.ts";
 import type { ResourceDependency } from "@/types/dependencies.ts";
@@ -11,14 +13,11 @@ import type { OmitExecutionContext, Tags, WithBranch } from "@/types/config.ts";
 import type {
   ChangeVersionUnit,
   CreateVersionUnit,
-  DeleteUnit,
   DeleteVersionUnit,
   NoopUnit,
   Plan,
   UpdateVersionUnit,
 } from "@/types/plan.ts";
-import { isTemplate } from "@/utils/template.ts";
-import { isConfigEqual } from "@/utils/config.ts";
 
 export interface GenericExecutors {
   createObject: (
@@ -298,10 +297,11 @@ export function createS3PlanFactory<E extends GenericExecutors>(
         await assertObjectExist(bucketName, objectKey);
         await assertDeletePermission?.(bucketName, objectKey);
 
-        const deleteUnit: DeleteUnit<ObjectState, typeof deleteObject> = {
-          type: Type.Delete,
+        const deleteUnit: DeleteVersionUnit<ObjectState, typeof deleteObject> = {
+          type: Type.DeleteVersion,
           executor: deleteObject,
           args: [bucketName, objectKey],
+          version,
           path: key,
           state: state,
           dependsOn: state.dependsOn,

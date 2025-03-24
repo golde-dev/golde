@@ -4,9 +4,10 @@ import type { ImageConfig } from "./types.ts";
 import { memoizeAsync } from "@/utils/memoize.ts";
 import type { GitVersion, ImageVersion } from "@/types/version.ts";
 import { getGitContextVersion, getGitVersion } from "@/utils/version.ts";
+import slugify from "@sindresorhus/slugify";
 
 function prefixImageHash(imageHash: string): string {
-  return `ih-:${imageHash}`;
+  return `ih-sha256-${imageHash}`;
 }
 
 async function getVersion(
@@ -38,12 +39,11 @@ export const buildImage = memoizeAsync(
       config: image,
     });
     const {
-      tags = [],
       context = ".",
       version,
     } = image;
 
-    const imageId = await client.buildImage(imageName, context, tags);
+    const imageId = await client.buildImage(imageName, context);
     const versionId = await getVersion(imageId, context, version);
 
     return await Promise.resolve({
@@ -52,3 +52,7 @@ export const buildImage = memoizeAsync(
     });
   },
 );
+
+export function createVersionTag(branch: string, version: string) {
+  return `b.${slugify(branch)}.v.${version}`;
+}

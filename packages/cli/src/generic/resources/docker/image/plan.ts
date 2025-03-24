@@ -1,6 +1,6 @@
 import { isTemplate } from "@/utils/template.ts";
 import { isConfigEqual } from "@/utils/config.ts";
-import { buildImage } from "./utils.ts";
+import { buildImage, createVersionTag } from "./utils.ts";
 import { findResourceDependencies } from "@/dependencies.ts";
 import { logger } from "@/logger.ts";
 import { Type } from "@/types/plan.ts";
@@ -13,7 +13,6 @@ import type { DockerClient } from "@/generic/client/docker.ts";
 import type {
   ChangeVersionUnit,
   CreateVersionUnit,
-  DeleteUnit,
   DeleteVersionUnit,
   NoopUnit,
   Plan,
@@ -35,7 +34,7 @@ export interface GenericExecutors {
     config: WithBranch<ImageConfig>,
     state: ImageState,
   ) => Promise<OmitExecutionContext<ImageState>>;
-  deleteDockerImage: (imageName: string, imageId: string, version: string) => Promise<void>;
+  deleteDockerImage: (imageName: string, tag: string) => Promise<void>;
   assertCreatePermission?: (imageName: string) => Promise<void>;
   assertDeletePermission?: (imageName: string) => Promise<void>;
   assertUpdatePermission?: (imageName: string) => Promise<void>;
@@ -155,17 +154,17 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       const deletedValues = Object.values(previous[key]);
 
       for (const { imageName, state } of deletedValues) {
-        const { version, imageId } = state;
+        const { version, config: { branch } } = state;
 
         if (!isTemplate(imageName)) {
           await assertDeletePermission?.(imageName);
         }
-
+        const versionTag = createVersionTag(branch, version);
         const deleteVersionUnit: DeleteVersionUnit<ImageState, typeof deleteDockerImage> = {
           type: Type.DeleteVersion,
           executor: deleteDockerImage,
           version: state.version,
-          args: [imageName, imageId, version],
+          args: [imageName, versionTag],
           path: dockerImagePath(imageName),
           state,
           dependsOn: state.dependsOn,
@@ -280,19 +279,20 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
 
     const previous = getPrevious(state);
     for (const key of Object.keys(previous)) {
-      const entriesToDelete = Object.values(previous[key]);
+      const imagesToDelete = Object.values(previous[key]);
 
-      for (const { imageName, state } of entriesToDelete) {
-        const { version, imageId } = state;
+      for (const { imageName, state } of imagesToDelete) {
+        const { version, config: { branch } } = state;
 
         if (!isTemplate(imageName)) {
           await assertDeletePermission?.(imageName);
         }
-
-        const deleteUnit: DeleteUnit<ImageState, typeof deleteDockerImage> = {
-          type: Type.Delete,
+        const versionTag = createVersionTag(branch, version);
+        const deleteUnit: DeleteVersionUnit<ImageState, typeof deleteDockerImage> = {
+          type: Type.DeleteVersion,
           executor: deleteDockerImage,
-          args: [imageName, imageId, version],
+          args: [imageName, versionTag],
+          version,
           path: key,
           state: state,
           dependsOn: state.dependsOn,

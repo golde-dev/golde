@@ -1,6 +1,6 @@
+import { logger } from "@/logger.ts";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { exec } from "node:child_process";
-import { logger } from "@/logger.ts";
 
 export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";
@@ -100,17 +100,11 @@ export class DockerClient {
   public async buildImage(
     imageName: string,
     context: string = ".",
-    tags: string[],
   ): Promise<string> {
     const { stage } = this;
 
-    const tagsArgs = tags
-      .map((tag) => ["-t", `${imageName}:${tag}`])
-      .flat()
-      .join(" ");
-
     return await new Promise((resolve, reject) => {
-      exec(`docker build ${context} ${tagsArgs} --quiet`, (error, stdout, stderr) => {
+      exec(`docker build ${context} --quiet`, (error, stdout, stderr) => {
         if (error) {
           logger.error(`[${stage}][Docker] Failed to build image ${imageName} \n ${stderr}`);
 
@@ -125,18 +119,75 @@ export class DockerClient {
           );
           return;
         }
-        resolve(stdout.trim());
+        resolve(stdout.trim().replace("sha256:", ""));
       });
     });
   }
 
-  public async pushImage(imageName: string, tags: string): Promise<void> {
-    try {
-      await new Deno.Command("docker", {
-        args: ["image", "push", "-t", imageName, "-t", tags, "."],
+  public async tagImage(imageId: string, imageName: string, tag: string): Promise<void> {
+    const { stage, registry } = this;
+
+    return await new Promise((resolve, reject) => {
+      exec(`docker tag ${imageId} ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to tag image ${imageName} \n ${stderr}`);
+          reject(
+            new Error("Failed to tag image", { cause: error }),
+          );
+          return;
+        }
+        resolve(void 0);
       });
-    } catch (error) {
-      throw new Error("Failed to push image", { cause: error });
+    });
+  }
+
+  public async pushImageTag(imageName: string, tag: string): Promise<void> {
+    const { stage, registry } = this;
+
+    return await new Promise((resolve, reject) => {
+      exec(`docker push ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to push image ${imageName} \n ${stderr}`);
+          reject(
+            new Error("Failed to push image", { cause: error }),
+          );
+          return;
+        }
+        resolve(void 0);
+      });
+    });
+  }
+
+  public async pushImage(
+    imageName: string,
+    imageId: string,
+    tags: string[],
+  ): Promise<void> {
+    const { stage } = this;
+
+    logger.debug(`[${stage}][Docker] Pushing image ${imageName}`);
+    for (const tag of tags) {
+      await this.tagImage(imageId, imageName, tag);
     }
+    for (const tag of tags) {
+      await this.pushImageTag(imageName, tag);
+    }
+  }
+
+  public async removeImageTag(imageName: string, tag: string): Promise<void> {
+    const { stage, registry } = this;
+
+    return await new Promise((resolve, reject) => {
+      exec(`docker rmi ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
+        if (error) {
+          logger.error(`[${stage}][Docker] Failed to remove image ${imageName} \n ${stderr}`);
+          reject(
+            new Error("Failed to remove image", { cause: error }),
+          );
+          return;
+        }
+        resolve(void 0);
+      });
+    });
   }
 }

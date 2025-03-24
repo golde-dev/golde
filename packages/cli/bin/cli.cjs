@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 const { spawnSync } = require("node:child_process");
+const { argv, exit, arch, platform } = require("node:process");
 
 function getExePath() {
-  const { arch, platform } = process;
   const extension = platform === "win32" ? ".exe" : "";
 
   try {
@@ -19,13 +19,13 @@ function getExePath() {
 }
 
 const exePath = getExePath();
-const args = process.argv.slice(2);
+const args = argv.slice(2);
 const { status } = spawnSync(
   exePath,
   args,
   { stdio: "inherit" }
 );
 
-process.exit(
+exit(
   status ?? 0
 );

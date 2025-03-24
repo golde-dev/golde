@@ -1,8 +1,8 @@
-import type { Resource, SavedResource } from "@/types/dependencies.ts";
-import type { State } from "@/types/state.ts";
 import { get, set } from "@es-toolkit/es-toolkit/compat";
 import { removePrefix } from "@/utils/object.ts";
-import { ResourceState } from "@/types/config.ts";
+import type { ResourceState } from "@/types/config.ts";
+import type { SavedResource } from "@/types/dependencies.ts";
+import type { State } from "@/types/state.ts";
 
 const AWS_RESOURCES = [
   "aws.s3.bucket",
@@ -24,6 +24,10 @@ const CLOUDFLARE_RESOURCES_VERSIONED = [
   "cloudflare.r2.object",
 ];
 
+const GITHUB_RESOURCES_VERSIONED = [
+  "github.registry.dockerImage",
+];
+
 const SIMPLE = [
   ...CLOUDFLARE_RESOURCES,
   ...AWS_RESOURCES,
@@ -32,6 +36,7 @@ const SIMPLE = [
 const VERSIONED = [
   ...CLOUDFLARE_RESOURCES_VERSIONED,
   ...AWS_VERSIONED_RESOURCES,
+  ...GITHUB_RESOURCES_VERSIONED,
 ];
 
 type SimpleResource = Record<string, object>;

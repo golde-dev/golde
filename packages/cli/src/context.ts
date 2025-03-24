@@ -16,6 +16,7 @@ import type { SavedResource } from "@/types/dependencies.ts";
 import { resolveConfigState } from "@/utils/template.ts";
 import { ConfigError } from "@/error.ts";
 import { resourcesToState } from "@/utils/state.ts";
+import { exit } from "node:process";
 
 export const initializeContext = async (
   branchName: string,
@@ -119,7 +120,7 @@ export const initializeContext = async (
     if (error instanceof Error) {
       logger.error(`[Context] Providers initialization failed: ${error.message}`);
     }
-    return Deno.exit(1);
+    return exit(1);
   }
 };
 
@@ -149,6 +150,6 @@ export function getFinalContext(context: Context, external: SavedResource[]): Co
     } else if (error instanceof Error) {
       logger.error(`[Context] Unknown error: ${error.message}`, error);
     }
-    return Deno.exit(1);
+    return exit(1);
   }
 }

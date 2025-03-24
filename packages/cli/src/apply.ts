@@ -1,4 +1,3 @@
-import { Queue } from "moderndash";
 import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
@@ -22,7 +21,7 @@ import type {
   DeleteVersionResult,
   UpdateResult,
 } from "./types/plan.ts";
-import { get } from "@es-toolkit/es-toolkit/compat";
+import { chunk, get } from "@es-toolkit/es-toolkit/compat";
 import type { ResourceDependency } from "@/types/dependencies.ts";
 import { sortByPath } from "@/plan.ts";
 import { exit } from "node:process";
@@ -85,18 +84,13 @@ export function getInitialDependsOn(
   return get(unit, "dependsOn", []);
 }
 
-export async function executePlan(
+export async function executePlanRecursively(
   initialPlan: Plan,
   plan: ExecutionPlan,
   changes: Change[] = [],
 ): Promise<Change[]> {
-  if (changes.length === 0) {
-    logger.info(`[Execute] Executing for ${plan.length} units started`);
-  }
-
   const { executionPlan, remainingPlan } = createExecutionPlan(plan, changes);
   if (executionPlan.length === 0) {
-    logger.info(`[Execute] Executing plan finished`);
     return changes;
   }
 
@@ -107,142 +101,163 @@ export async function executePlan(
     ),
   );
 
+  const chunks = chunk(executionPlan, 20);
   try {
-    const queue = new Queue(20);
-    const start = performance.now();
-    const newChanges: Change[] = await queue.add(
-      executionPlan
-        .map((unit) => async (): Promise<Change> => {
-          if (unit.type === Type.Create) {
-            const start = performance.now();
-            const state = await unit.executor(...unit.args);
-            const end = performance.now();
-            const createTime = end - start;
+    const chunksChanges: Change[] = [];
+    for (const chunk of chunks) {
+      const chunkChanges: Change[] = await Promise.all(
+        chunk
+          .map(async (unit): Promise<Change> => {
+            if (unit.type === Type.Create) {
+              const start = performance.now();
+              const state = await unit.executor(...unit.args);
+              const end = performance.now();
+              const createTime = end - start;
 
-            const create: CreateResult = {
-              type: Type.Create,
-              path: unit.path,
-              state: {
-                ...state,
-                dependsOn: getInitialDependsOn(initialPlan, unit.path),
-              },
-              config: unit.config,
-              executionTime: createTime,
-            };
-            return create;
-          } else if (unit.type === Type.CreateVersion) {
-            const start = performance.now();
-            const state = await unit.executor(...unit.args);
-            const end = performance.now();
-            const createTime = end - start;
+              const create: CreateResult = {
+                type: Type.Create,
+                path: unit.path,
+                state: {
+                  ...state,
+                  dependsOn: getInitialDependsOn(initialPlan, unit.path),
+                },
+                config: unit.config,
+                executionTime: createTime,
+              };
+              return create;
+            } else if (unit.type === Type.CreateVersion) {
+              const start = performance.now();
+              const state = await unit.executor(...unit.args);
+              const end = performance.now();
+              const createTime = end - start;
 
-            const create: CreateVersionResult = {
-              type: Type.CreateVersion,
-              path: unit.path,
-              version: unit.version,
-              isCurrent: true,
-              state: {
-                ...state,
-                dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
-              },
-              config: unit.config,
-              executionTime: createTime,
-            };
-            return create;
-          } else if (unit.type === Type.Update) {
-            const start = performance.now();
-            const state = await unit.executor(...unit.args);
-            const end = performance.now();
+              const create: CreateVersionResult = {
+                type: Type.CreateVersion,
+                path: unit.path,
+                version: unit.version,
+                isCurrent: true,
+                state: {
+                  ...state,
+                  dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
+                },
+                config: unit.config,
+                executionTime: createTime,
+              };
+              return create;
+            } else if (unit.type === Type.Update) {
+              const start = performance.now();
+              const state = await unit.executor(...unit.args);
+              const end = performance.now();
 
-            const updateTime = end - start;
-            const update: UpdateResult = {
-              type: Type.Update,
-              path: unit.path,
-              prevState: unit.state,
-              state: {
-                ...state,
-                dependsOn: getInitialDependsOn(initialPlan, unit.path),
-              },
-              config: unit.config,
-              executionTime: updateTime,
-            };
-            return update;
-          } else if (unit.type === Type.UpdateVersion) {
-            const start = performance.now();
-            const state = await unit.executor(...unit.args);
-            const end = performance.now();
+              const updateTime = end - start;
+              const update: UpdateResult = {
+                type: Type.Update,
+                path: unit.path,
+                prevState: unit.state,
+                state: {
+                  ...state,
+                  dependsOn: getInitialDependsOn(initialPlan, unit.path),
+                },
+                config: unit.config,
+                executionTime: updateTime,
+              };
+              return update;
+            } else if (unit.type === Type.UpdateVersion) {
+              const start = performance.now();
+              const state = await unit.executor(...unit.args);
+              const end = performance.now();
 
-            const updateTime = end - start;
-            const update: UpdateVersionResult = {
-              type: Type.UpdateVersion,
-              path: unit.path,
-              version: unit.version,
-              isCurrent: true,
-              prevState: unit.state,
-              state: {
-                ...state,
-                dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
-              },
-              config: unit.config,
-              executionTime: updateTime,
-            };
-            return update;
-          } else if (unit.type === Type.Delete) {
-            const start = performance.now();
-            await unit.executor(...unit.args);
-            const end = performance.now();
-            const deleteTime = end - start;
+              const updateTime = end - start;
+              const update: UpdateVersionResult = {
+                type: Type.UpdateVersion,
+                path: unit.path,
+                version: unit.version,
+                isCurrent: true,
+                prevState: unit.state,
+                state: {
+                  ...state,
+                  dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
+                },
+                config: unit.config,
+                executionTime: updateTime,
+              };
+              return update;
+            } else if (unit.type === Type.Delete) {
+              const start = performance.now();
+              await unit.executor(...unit.args);
+              const end = performance.now();
+              const deleteTime = end - start;
 
-            const deletes: DeleteResult = {
-              type: Type.Delete,
-              path: unit.path,
-              state: unit.state,
-              executionTime: deleteTime,
-            };
-            return deletes;
-          } else if (unit.type === Type.DeleteVersion) {
-            const start = performance.now();
-            await unit.executor(...unit.args);
-            const end = performance.now();
-            const deleteTime = end - start;
+              const deletes: DeleteResult = {
+                type: Type.Delete,
+                path: unit.path,
+                state: unit.state,
+                executionTime: deleteTime,
+              };
+              return deletes;
+            } else if (unit.type === Type.DeleteVersion) {
+              const start = performance.now();
+              await unit.executor(...unit.args);
+              const end = performance.now();
+              const deleteTime = end - start;
 
-            const deletesVersion: DeleteVersionResult = {
-              type: Type.DeleteVersion,
-              path: unit.path,
-              version: unit.version,
-              state: unit.state,
-              executionTime: deleteTime,
-            };
-            return deletesVersion;
-          } else if (unit.type === Type.ChangeVersion) {
-            const changeVersionUnit: ChangeVersionResult = {
-              type: Type.ChangeVersion,
-              path: unit.path,
-              version: unit.version,
-              prevVersion: unit.prevVersion,
-              isCurrent: true,
-              state: {
-                ...unit.state,
-                dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
-              },
-              executionTime: 0,
-            };
-            return changeVersionUnit;
-          } else {
-            throw new Error("Unknown type");
-          }
-        }),
-    );
-    const end = performance.now();
-    logger.info(`[Execute] Successfully executed plan in ${formatDuration(end - start)}`);
-
-    return executePlan(initialPlan, remainingPlan, changes.concat(...newChanges));
+              const deletesVersion: DeleteVersionResult = {
+                type: Type.DeleteVersion,
+                path: unit.path,
+                version: unit.version,
+                state: unit.state,
+                executionTime: deleteTime,
+              };
+              return deletesVersion;
+            } else if (unit.type === Type.ChangeVersion) {
+              const changeVersionUnit: ChangeVersionResult = {
+                type: Type.ChangeVersion,
+                path: unit.path,
+                version: unit.version,
+                prevVersion: unit.prevVersion,
+                isCurrent: true,
+                state: {
+                  ...unit.state,
+                  dependsOn: getInitialDependsOn(initialPlan, unit.path, unit.version),
+                },
+                executionTime: 0,
+              };
+              return changeVersionUnit;
+            } else {
+              throw new Error("Unknown type");
+            }
+          }),
+      );
+      chunksChanges.push(...chunkChanges);
+    }
+    return executePlanRecursively(initialPlan, remainingPlan, changes.concat(...chunksChanges));
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);
     }
     return exit(1);
   }
+}
+
+export async function executePlan(
+  initialPlan: Plan,
+  executionPlan: ExecutionPlan,
+): Promise<Change[]> {
+  logger.debug(`[Execute] Executing for ${executionPlan.length} units started`);
+
+  const start = Date.now();
+  const changes = await executePlanRecursively(
+    initialPlan,
+    executionPlan,
+  );
+  const end = Date.now();
+  logger.debug(
+    `[Execute] Executing for ${executionPlan.length} units finished in ${
+      formatDuration(end - start)
+    }`,
+  );
+
+  return changes;
 }
 
 export async function updateState(

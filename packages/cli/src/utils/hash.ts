@@ -1,16 +1,15 @@
-import { crypto } from "jsr:@std/crypto";
-import { encodeBase64Url } from "@std/encoding";
 import { createReadStream } from "node:fs";
 import { createHash } from "node:crypto";
 import { walk } from "@std/fs";
-import type { Buffer } from "node:buffer";
+import { subtle } from "node:crypto";
+import { Buffer } from "node:buffer";
 
 /**
  * Create a SHA-512 hash of a byte array and return base64-safe encoded string
  */
 export async function hashByteArray(data: Uint8Array): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest("SHA-384", data);
-  return encodeBase64Url(hashBuffer);
+  const hashBuffer = await subtle.digest("SHA-384", data);
+  return Buffer.from(hashBuffer).toString("base64url");
 }
 
 export function getFileHash(path: string): Promise<Buffer> {

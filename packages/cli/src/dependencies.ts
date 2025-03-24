@@ -2,6 +2,7 @@ import { groupBy, isPlainObject, memoize, uniq } from "@es-toolkit/es-toolkit";
 import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";
+import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
 import type { ResourceDependency, SavedResource } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
@@ -82,7 +83,8 @@ export async function getExternalResources(
   context: Context,
   plan: Plan,
 ): Promise<SavedResource[]> {
-  logger.info("[Dependencies] Resolving dependencies");
+  logger.debug("[Dependencies] Resolving dependencies");
+  const start = Date.now();
 
   const {
     config: {
@@ -119,5 +121,9 @@ export async function getExternalResources(
 
   const dependencies = await state.getResources(name, uniqueExternal);
   validateDependencies(dependencies);
+
+  const end = Date.now();
+  logger.info(`[Dependencies] Resolved dependencies in ${formatDuration(end - start)}`);
+
   return dependencies;
 }

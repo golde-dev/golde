@@ -19,6 +19,7 @@ import {
   resolveTemplate,
 } from "./utils/template.ts";
 import type { Config } from "./types/config.ts";
+import { exit } from "node:process";
 
 const loadConfig = async (
   path: string,
@@ -228,6 +229,6 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
     } else if (error instanceof Error) {
       logger.error(`[Config] Unknown error: ${error.message}`, error);
     }
-    return Deno.exit(1);
+    return exit(1);
   }
 }

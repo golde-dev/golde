@@ -110,8 +110,6 @@ function devUpdateExamples(examples: string[]) {
       const from = resolve(npmDistDir);
       const to = join(exampleBaseDir, example, goldeModules);
 
-      console.log(from, to);
-
       return copy(
         from,
         to,
