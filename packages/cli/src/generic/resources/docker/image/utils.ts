@@ -47,8 +47,8 @@ export const buildImage = memoizeAsync(
     const versionId = await getVersion(imageId, context, version);
 
     return await Promise.resolve({
-      version: versionId,
-      imageId: imageId,
+      versionId,
+      imageId,
     });
   },
 );

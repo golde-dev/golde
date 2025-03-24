@@ -3,6 +3,11 @@ import { logger } from "@/logger.ts";
 import { basename, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
+import { memoizeAsync } from "@/utils/memoize.ts";
+import { existsSync, statSync } from "node:fs";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { copy } from "@std/fs/copy";
 import {
   getDirHashVersion,
   getFileHashVersion,
@@ -11,11 +16,6 @@ import {
   getLastUpdatedVersion,
 } from "@/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
-import { memoizeAsync } from "@/utils/memoize.ts";
-import { existsSync, statSync } from "node:fs";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { copy } from "@std/fs/copy";
 
 async function getVersion(
   path: string,

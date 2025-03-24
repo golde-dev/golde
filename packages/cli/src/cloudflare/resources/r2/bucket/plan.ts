@@ -57,7 +57,7 @@ export async function createR2Plan(
   state?: R2BucketState,
   config?: R2BucketConfig,
 ): Promise<Plan> {
-  logger.debug("[Cloudflare] Creating buckets plan", {
+  logger.debug("[Plan][Cloudflare] Creating buckets plan", {
     state,
     config,
   });
@@ -125,7 +125,7 @@ export function createR2DestroyPlan(
   state?: R2BucketState,
 ) {
   const plan: Plan = [];
-  logger.debug("[Cloudflare] Creating buckets plan", {
+  logger.debug("[Plan][Cloudflare] Creating buckets destroy plan", {
     state,
   });
 

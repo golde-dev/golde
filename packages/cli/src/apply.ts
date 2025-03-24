@@ -266,7 +266,7 @@ export async function updateState(
   locks: Lock[],
 ): Promise<State> {
   try {
-    logger.info("[Apply] Updating state");
+    logger.debug("[Apply] Updating state");
     const {
       state,
       config: {

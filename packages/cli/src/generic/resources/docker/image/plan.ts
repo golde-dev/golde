@@ -1,6 +1,6 @@
 import { isTemplate } from "@/utils/template.ts";
 import { isConfigEqual } from "@/utils/config.ts";
-import { buildImage, createVersionTag } from "./utils.ts";
+import { createVersionTag } from "./utils.ts";
 import { findResourceDependencies } from "@/dependencies.ts";
 import { logger } from "@/logger.ts";
 import { Type } from "@/types/plan.ts";
@@ -9,7 +9,6 @@ import type { ResourceDependency } from "@/types/dependencies.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import type { Tags } from "@/types/config.ts";
 import type { ImageConfig, ImagesConfig, ImagesState, ImageState } from "./types.ts";
-import type { DockerClient } from "@/generic/client/docker.ts";
 import type {
   ChangeVersionUnit,
   CreateVersionUnit,
@@ -20,7 +19,10 @@ import type {
 } from "@/types/plan.ts";
 
 export interface GenericExecutors {
-  client: DockerClient;
+  buildDockerImage: (imageName: string, config: ImageConfig) => Promise<{
+    imageId: string;
+    version: string;
+  }>;
   createDockerImage: (
     imageName: string,
     imageId: string,
@@ -72,7 +74,11 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     return previous;
   }
 
-  async function getNext(client: DockerClient, config: ImagesConfig = {}, _tags?: Tags) {
+  async function getNext(
+    buildDockerImage: GenericExecutors["buildDockerImage"],
+    config: ImagesConfig = {},
+    _tags?: Tags,
+  ) {
     const next: {
       [imageName: string]: {
         imageName: string;
@@ -84,7 +90,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     } = {};
 
     for (const [imageName, image] of Object.entries(config)) {
-      const { version, imageId } = await buildImage({ client, imageName, image });
+      const { version, imageId } = await buildDockerImage(imageName, image);
 
       next[imageName] = {
         imageName,
@@ -104,7 +110,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     config?: ImagesConfig,
   ): Promise<Plan> {
     const {
-      client,
+      buildDockerImage,
       createDockerImage,
       deleteDockerImage,
       updateDockerImage,
@@ -121,7 +127,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     const plan: Plan = [];
 
     const previous = getPrevious(state);
-    const next = await getNext(client, config, tags);
+    const next = await getNext(buildDockerImage, config, tags);
 
     const creating = Object.keys(next).filter((key) => !(key in previous));
     for (const key of creating) {

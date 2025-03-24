@@ -1,18 +1,14 @@
-import { DockerClient } from "../../../client/docker.ts";
-import { createVersionTag } from "./utils.ts";
+import type { DockerClient } from "../../../client/docker.ts";
+import { buildImage, createVersionTag } from "./utils.ts";
 import { nowStringDate } from "@/utils/date.ts";
 import type { ImageConfig, ImageState } from "./types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
+import { logger } from "@/logger.ts";
 
-export async function createDockerImageExecutor(
-  registry: string,
-  username: string,
-  password: string,
-) {
-  const client = new DockerClient(registry, username, password);
-
-  await client.verifyInstalled();
-  await client.verifyCredentials();
+export function createDockerImageExecutor(client: DockerClient) {
+  const {
+    provider,
+  } = client.getProviderInfo();
 
   function assertCreatePermission(_imageName: string) {
     return Promise.resolve();
@@ -37,14 +33,17 @@ export async function createDockerImageExecutor(
       branch,
     } = config;
 
+    const versionId = createVersionTag(branch, version);
     const tagsWithConfig = [
       ...tags,
-      createVersionTag(branch, version),
+      versionId,
     ];
 
     await client.login();
     await client.pushImage(imageName, imageId, tagsWithConfig);
-
+    logger.debug(`[Execute][${provider}] Pushed docker image ${imageName}:${versionId}`, {
+      config,
+    });
     const createdAt = nowStringDate();
     return {
       version,
@@ -71,8 +70,28 @@ export async function createDockerImageExecutor(
     throw new Error("Method not implemented.");
   }
 
+  async function buildDockerImage(
+    imageName: string,
+    image: ImageConfig,
+  ) {
+    const { versionId, imageId } = await buildImage({
+      client,
+      imageName,
+      image,
+    });
+
+    logger.debug(`[Plan][${provider}] Build docker image ${imageName}:${versionId}`, {
+      image,
+      versionId,
+    });
+    return {
+      versionId,
+      imageId,
+    };
+  }
+
   return {
-    client,
+    buildDockerImage,
     createDockerImage,
     deleteDockerImage,
     updateDockerImage,

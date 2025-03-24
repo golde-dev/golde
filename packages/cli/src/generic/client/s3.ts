@@ -1,23 +1,17 @@
 import {
   DeleteObjectCommand,
-  GetObjectCommand,
-  HeadBucketCommand,
+  HeadObjectCommand,
   NoSuchKey,
+  NotFound,
   PutObjectCommand,
+  PutObjectTaggingCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import type { Logger } from "../../logger.ts";
+import type { PutObjectCommandInput, Tag } from "@aws-sdk/client-s3";
 
-export enum LogCode {
-  S3GetObjectError = "S3GetObjectError",
-  S3DeleteObjectError = "S3DeleteObjectError",
-  S3PutObjectError = "S3CreateObjectError",
-  S3HeadBucketError = "S3HeadBucketError",
-}
+import { logger } from "../../logger.ts";
 
 interface S3Options {
-  logger: Logger;
-  bucket: string;
   region: string;
   endpoint: string;
   accessKeyId: string;
@@ -35,19 +29,25 @@ export function notFoundAsUndefined<T>(
   });
 }
 
+interface S3ProviderOptions {
+  provider: string;
+  serviceName: string;
+}
+
 /**
  * S3 Client for any S3 compatible storage example: r2, s3, gcs, cloud storage
  */
 export class S3 {
-  private readonly bucket: string;
   private readonly client: S3Client;
-  private readonly logger: Logger;
+  private readonly provider: string;
+  private readonly serviceName: string;
 
   public constructor(
-    { logger, bucket, region, endpoint, accessKeyId, secretAccessKey }: S3Options,
+    { region, endpoint, accessKeyId, secretAccessKey }: S3Options,
+    { provider, serviceName }: S3ProviderOptions,
   ) {
-    this.logger = logger;
-    this.bucket = bucket;
+    this.provider = provider;
+    this.serviceName = serviceName;
     this.client = new S3Client({
       region,
       endpoint,
@@ -60,137 +60,111 @@ export class S3 {
     });
   }
 
-  /**
-   * Check api access token by doing head on bucket
-   */
-  public async verifyAccess() {
-    const command = new HeadBucketCommand({
-      Bucket: this.bucket,
-    });
-    try {
-      await this.client.send(command);
-    } catch (error) {
-      this.logger.debug(
-        "Failed to head bucket",
-        {
-          type: LogCode.S3HeadBucketError,
-          error,
-          bucket: this.bucket,
-        },
-      );
-      throw error;
-    }
+  public getProviderInfo() {
+    return {
+      provider: this.provider,
+      serviceName: this.serviceName,
+    };
   }
 
-  public async getObject(key: string) {
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
+  public async putS3Object(
+    input: PutObjectCommandInput,
+  ) {
     try {
-      const response = await this.client.send(command);
-      return {
-        stream: response.Body?.transformToWebStream(),
-        type: response.ContentType,
-      };
-    } catch (error) {
-      this.logger.debug("Failed to get object", {
-        type: LogCode.S3GetObjectError,
-        error,
-        key,
-        bucket: this.bucket,
+      logger.debug(`[${this.provider}] Create ${this.serviceName} object`, {
+        Bucket: input.Bucket,
+        Key: input.Key,
       });
-      throw error;
-    }
-  }
-  public async getJSONObject<T extends object>(
-    key: string,
-  ): Promise<T | undefined> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
-    try {
-      const response = await this.client.send(command);
-      const text = await response.Body?.transformToString();
-      if (!text) {
-        return undefined;
+      const command = new PutObjectCommand(input);
+      await this.client.send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error(`[${this.provider}] Failed to create ${this.serviceName} object`, e);
       }
-      return JSON.parse(text) as T;
-    } catch (error) {
-      this.logger.debug(
-        "Failed to get object",
-        {
-          type: LogCode.S3GetObjectError,
-          error,
-          key,
-          bucket: this.bucket,
-        },
-      );
-      throw error;
+      throw e;
     }
   }
 
-  public async deleteObject(key: string) {
-    const command = new DeleteObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
+  public async putS3ObjectTags(
+    bucket: string,
+    key: string,
+    tags: Tag[],
+  ) {
     try {
-      await this.client.send(command);
-    } catch (error) {
-      this.logger.debug(
-        "Failed to delete object",
-        {
-          type: LogCode.S3DeleteObjectError,
-          error,
-          key,
-          bucket: this.bucket,
+      logger.debug(`[${this.provider}] Update ${this.serviceName} object tags`, {
+        bucket,
+        key,
+        tags,
+      });
+
+      const command = new PutObjectTaggingCommand({
+        Bucket: bucket,
+        Key: key,
+        Tagging: {
+          TagSet: tags,
         },
-      );
-      throw error;
+      });
+      await this.client.send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error(`[${this.provider}] Failed to update ${this.serviceName} object tags`, e);
+      }
+      throw e;
     }
   }
 
-  public async putObject(key: string, body: ReadableStream | string) {
-    const command = new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-      Body: body,
-    });
+  public async checkS3ObjectExists(bucketName: string, key: string): Promise<boolean> {
     try {
+      logger.debug(`[${this.provider}] Check ${this.serviceName} object exists`, {
+        Bucket: bucketName,
+        Key: key,
+      });
+      const command = new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      });
       await this.client.send(command);
-    } catch (error) {
-      this.logger.debug(
-        "Failed to put object",
-        {
-          type: LogCode.S3PutObjectError,
-          error,
-          key,
-          bucket: this.bucket,
-        },
-      );
-      throw error;
+      return true;
+    } catch (e) {
+      if (e instanceof NotFound) {
+        return false;
+      }
+      logger.error(`[${this.provider}] Failed to check ${this.serviceName} object exists`, e);
+      throw e;
     }
   }
 
-  public async putJSONObject(key: string, object: object) {
+  public async deleteS3Object(bucketName: string, key: string): Promise<void> {
+    try {
+      logger.debug(`[${this.provider}] Delete ${this.serviceName} object`, {
+        Bucket: bucketName,
+        Key: key,
+      });
+      const command = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      });
+      await this.client.send(command);
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error(`[${this.provider}] Failed to delete ${this.serviceName} object`, e);
+      }
+      throw e;
+    }
+  }
+
+  public async putJSONObject(bucket: string, key: string, object: object) {
     const command = new PutObjectCommand({
-      Bucket: this.bucket,
+      Bucket: bucket,
       Key: key,
       Body: JSON.stringify(object, null, 2),
     });
     try {
       await this.client.send(command);
     } catch (error) {
-      this.logger.debug(
-        "Failed to put object",
-        {
-          type: LogCode.S3PutObjectError,
-          error,
-          key,
-          bucket: this.bucket,
-        },
+      logger.error(
+        `[${this.provider}] Failed to put ${this.serviceName} object`,
+        { error },
       );
       throw error;
     }

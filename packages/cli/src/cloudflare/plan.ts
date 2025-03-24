@@ -6,8 +6,11 @@ import { createR2Executors } from "./resources/r2/bucket/executor.ts";
 import { isEmpty } from "../utils/object.ts";
 import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./resources/d1/database/plan.ts";
 import { createD1DatabaseExecutors } from "./resources/d1/database/executor.ts";
+import { createR2ObjectsDestroyPlan, createR2ObjectsPlan } from "./resources/r2/object/plan.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
+import { createObjectExecutors } from "@/generic/resources/s3/object/executor.ts";
+import { S3 } from "@/generic/client/s3.ts";
 
 export async function createCloudflarePlan(context: Context): Promise<Plan> {
   const {
@@ -39,7 +42,8 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
       record: dnsRecordConfig,
     } = {},
     r2: {
-      bucket: r2BucketConfig,
+      bucket: r2BucketsConfig,
+      object: r2ObjectsConfig,
     } = {},
     d1: {
       database: d1DatabaseConfig,
@@ -51,7 +55,8 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
       record: dnsRecordState,
     } = {},
     r2: {
-      bucket: r2BucketState,
+      bucket: r2BucketsState,
+      object: r2ObjectsState,
     } = {},
     d1: {
       database: d1DatabaseState,
@@ -68,12 +73,31 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
     ));
   }
 
-  if (!isEmpty(r2BucketState) || !isEmpty(r2BucketConfig)) {
+  if (!isEmpty(r2BucketsState) || !isEmpty(r2BucketsConfig)) {
     const executors = createR2Executors(cloudflare);
     plan.push(createR2Plan(
       executors,
-      r2BucketState,
-      r2BucketConfig,
+      r2BucketsState,
+      r2BucketsConfig,
+    ));
+  }
+
+  if (!isEmpty(r2ObjectsState) || !isEmpty(r2ObjectsConfig)) {
+    const s3Client = new S3({
+      region: "auto",
+      endpoint: "auto",
+      accessKeyId: "todo",
+      secretAccessKey: "todo",
+    }, {
+      provider: "Cloudflare",
+      serviceName: "R2",
+    });
+    const executors = createObjectExecutors(s3Client);
+    plan.push(createR2ObjectsPlan(
+      executors,
+      {},
+      r2ObjectsState,
+      r2ObjectsConfig,
     ));
   }
 
@@ -115,6 +139,7 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
     } = {},
     r2: {
       bucket: r2BucketState,
+      object: r2ObjectState,
     } = {},
     d1: {
       database: d1DatabaseState,
@@ -136,6 +161,23 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
       r2BucketState,
     ));
   }
+  if (!isEmpty(r2ObjectState)) {
+    const s3Client = new S3({
+      region: "auto",
+      endpoint: "auto",
+      accessKeyId: "todo",
+      secretAccessKey: "todo",
+    }, {
+      provider: "Cloudflare",
+      serviceName: "R2",
+    });
+    const executors = createObjectExecutors(s3Client);
+    plan.push(createR2ObjectsDestroyPlan(
+      executors,
+      r2ObjectState,
+    ));
+  }
+
   if (!isEmpty(d1DatabaseState)) {
     const executors = createD1DatabaseExecutors(cloudflare);
     plan.push(createD1DatabaseDestroyPlan(

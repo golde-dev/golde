@@ -9,7 +9,8 @@ import { isConfigEqual } from "@/utils/config.ts";
 import { mergeProjectTags } from "@/utils/tags.ts";
 import type { ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "./types.ts";
 import type { ResourceDependency } from "@/types/dependencies.ts";
-import type { OmitExecutionContext, Tags, WithBranch } from "@/types/config.ts";
+import type { Tags } from "@/types/config.ts";
+import type { GenericExecutors } from "./executor.ts";
 import type {
   ChangeVersionUnit,
   CreateVersionUnit,
@@ -19,28 +20,10 @@ import type {
   UpdateVersionUnit,
 } from "@/types/plan.ts";
 
-export interface GenericExecutors {
-  createObject: (
-    name: string,
-    object: { path: string; version: string },
-    config: WithBranch<ObjectConfig>,
-  ) => Promise<OmitExecutionContext<ObjectState>>;
-  updateObject: (
-    key: string,
-    config: WithBranch<ObjectConfig>,
-    state: ObjectState,
-  ) => Promise<OmitExecutionContext<ObjectState>>;
-  deleteObject: (bucketName: string, name: string) => Promise<void>;
-  assertCreatePermission?: (bucketName: string, name: string) => Promise<void>;
-  assertDeletePermission?: (bucketName: string, name: string) => Promise<void>;
-  assertUpdatePermission?: (bucketName: string, name: string) => Promise<void>;
-  assertObjectExist: (bucketName: string, name: string) => Promise<void>;
-}
-
 export function createS3PlanFactory<E extends GenericExecutors>(
   s3ObjectPath: (name: string) => string,
-  providerName = "AWS",
-  serviceName = "S3",
+  providerName: string,
+  serviceName: string,
 ) {
   function getPrevious(objects: ObjectsState = {}) {
     const previous: {
@@ -95,7 +78,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     return next;
   }
 
-  async function createObjectPlan(
+  async function createObjectsPlan(
     executors: E,
     tags?: Tags,
     state?: ObjectsState,
@@ -267,11 +250,11 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     return await Promise.resolve(plan);
   }
 
-  async function createObjectDestroyPlan(
-    executors: GenericExecutors,
+  async function createObjectsDestroyPlan(
+    executors: E,
     state?: ObjectsState,
   ): Promise<Plan> {
-    logger.debug(`[Plan][${providerName}] ${serviceName} object planning destroying changes`, {
+    logger.debug(`[Plan][${providerName}] ${serviceName} objects planning destroying changes`, {
       state,
     });
     const {
@@ -313,7 +296,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
   }
 
   return {
-    createObjectPlan,
-    createObjectDestroyPlan,
+    createObjectsPlan,
+    createObjectsDestroyPlan,
   };
 }

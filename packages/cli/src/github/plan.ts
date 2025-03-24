@@ -7,6 +7,7 @@ import {
   createRegistryDockerImageDestroyPlan,
   createRegistryDockerImagePlan,
 } from "@/github/resources/registry/dockerImage/plan.ts";
+import { DockerClient } from "@/generic/client/docker.ts";
 
 export async function createGithubPlan(context: Context): Promise<Plan> {
   const {
@@ -51,11 +52,16 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
   } = githubConfig ?? {};
 
   if (!isEmpty(imagesState) || !isEmpty(imagesConfig)) {
-    const dockerExecutors = await createDockerImageExecutor(
+    const dockerClient = new DockerClient(
       "ghcr.io",
       username,
       accessToken,
     );
+
+    await dockerClient.verifyInstalled();
+    await dockerClient.verifyCredentials();
+
+    const dockerExecutors = createDockerImageExecutor(dockerClient);
 
     plan.push(createRegistryDockerImagePlan(
       dockerExecutors,
@@ -102,10 +108,17 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
   console.log(imagesState);
 
   if (!isEmpty(imagesState)) {
-    const dockerExecutors = await createDockerImageExecutor(
+    const dockerClient = new DockerClient(
       "ghcr.io",
       username,
       accessToken,
+    );
+
+    await dockerClient.verifyInstalled();
+    await dockerClient.verifyCredentials();
+
+    const dockerExecutors = createDockerImageExecutor(
+      dockerClient,
     );
     plan.push(createRegistryDockerImageDestroyPlan(
       dockerExecutors,

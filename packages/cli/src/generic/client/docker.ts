@@ -10,21 +10,40 @@ export interface DockerInfo {
   OSType: "windows" | "linux";
 }
 
+interface DockerOptions {
+  registry: string;
+  username: string;
+  password: string;
+}
+
+interface ProviderInfo {
+  provider: string;
+  serviceName: string;
+}
+
 export class DockerClient {
   private readonly registry: string;
   private readonly username: string;
   private readonly password: string;
-  private stage: "Plan" | "Execute";
+  private readonly provider: string;
+  private readonly serviceName: string;
 
-  public constructor(registry: string, username: string, password: string) {
+  public constructor(
+    { registry, username, password }: DockerOptions,
+    { provider, serviceName }: ProviderInfo,
+  ) {
     this.registry = registry;
     this.username = username;
     this.password = password;
-    this.stage = "Plan";
+    this.provider = provider;
+    this.serviceName = serviceName;
   }
 
-  public setStage(stage: "Plan" | "Execute") {
-    this.stage = stage;
+  public getProviderInfo() {
+    return {
+      provider: this.provider,
+      serviceName: this.serviceName,
+    };
   }
 
   public async login() {
@@ -32,10 +51,9 @@ export class DockerClient {
       username,
       password,
       registry,
-      stage,
     } = this;
 
-    logger.debug(`[${stage}][Docker] Authenticating to docker registry`, {
+    logger.debug(`[Docker] Authenticating to docker registry`, {
       username,
       password: "<redacted>",
       registry,
@@ -44,9 +62,9 @@ export class DockerClient {
     await new Promise((resolve, reject) => {
       exec(`docker login -u ${username} -p ${password} ${registry}`, (error, _, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to login to docker \n ${stderr}`);
+          logger.error(`[Docker] Failed to login to ${registry} \n ${stderr}`);
           reject(
-            new Error("Failed to login to docker", { cause: error }),
+            new Error(`Failed to login to ${registry}`, { cause: error }),
           );
           return;
         }
@@ -56,12 +74,12 @@ export class DockerClient {
   }
 
   public async logout() {
-    const { registry, stage } = this;
+    const { registry } = this;
 
     return await new Promise((resolve, reject) => {
       exec(`docker logout ${registry}`, (error, _, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to logout from docker \n ${stderr}`);
+          logger.error(`[Docker] Failed to logout from docker \n ${stderr}`);
           reject(
             new Error("Failed to logout from docker", { cause: error }),
           );
@@ -82,11 +100,10 @@ export class DockerClient {
   }
 
   public async verifyInstalled() {
-    const { stage } = this;
     return await new Promise((resolve, reject) => {
       exec(`docker info --format json`, (error, _, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to run docker info \n ${stderr}`);
+          logger.error(`[Docker] Failed to run docker info \n ${stderr}`);
           reject(
             new Error("Failed to run docker info", { cause: error }),
           );
@@ -101,12 +118,10 @@ export class DockerClient {
     imageName: string,
     context: string = ".",
   ): Promise<string> {
-    const { stage } = this;
-
     return await new Promise((resolve, reject) => {
       exec(`docker build ${context} --quiet`, (error, stdout, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to build image ${imageName} \n ${stderr}`);
+          logger.error(`[Docker] Failed to build image ${imageName} \n ${stderr}`);
 
           reject(
             new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, {
@@ -125,12 +140,12 @@ export class DockerClient {
   }
 
   public async tagImage(imageId: string, imageName: string, tag: string): Promise<void> {
-    const { stage, registry } = this;
+    const { registry } = this;
 
     return await new Promise((resolve, reject) => {
       exec(`docker tag ${imageId} ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to tag image ${imageName} \n ${stderr}`);
+          logger.error(`[Docker] Failed to tag image ${imageName} \n ${stderr}`);
           reject(
             new Error("Failed to tag image", { cause: error }),
           );
@@ -142,12 +157,12 @@ export class DockerClient {
   }
 
   public async pushImageTag(imageName: string, tag: string): Promise<void> {
-    const { stage, registry } = this;
+    const { registry } = this;
 
     return await new Promise((resolve, reject) => {
       exec(`docker push ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to push image ${imageName} \n ${stderr}`);
+          logger.error(`[Docker] Failed to push image ${imageName} \n ${stderr}`);
           reject(
             new Error("Failed to push image", { cause: error }),
           );
@@ -163,9 +178,7 @@ export class DockerClient {
     imageId: string,
     tags: string[],
   ): Promise<void> {
-    const { stage } = this;
-
-    logger.debug(`[${stage}][Docker] Pushing image ${imageName}`);
+    logger.debug(`[Docker] Pushing image ${imageName}`);
     for (const tag of tags) {
       await this.tagImage(imageId, imageName, tag);
     }
@@ -175,12 +188,12 @@ export class DockerClient {
   }
 
   public async removeImageTag(imageName: string, tag: string): Promise<void> {
-    const { stage, registry } = this;
+    const { registry } = this;
 
     return await new Promise((resolve, reject) => {
       exec(`docker rmi ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
         if (error) {
-          logger.error(`[${stage}][Docker] Failed to remove image ${imageName} \n ${stderr}`);
+          logger.error(`[Docker] Failed to remove image ${imageName} \n ${stderr}`);
           reject(
             new Error("Failed to remove image", { cause: error }),
           );

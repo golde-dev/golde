@@ -1,14 +1,17 @@
-import type { Executors } from "@/aws/resources/s3/object/executor.ts";
 import { createS3PlanFactory } from "@/generic/resources/s3/object/plan.ts";
+import type { GenericExecutors } from "@/generic/resources/s3/object/executor.ts";
 import { r2ObjectPath } from "./path.ts";
 
 const {
-  createObjectPlan,
-  createObjectDestroyPlan,
-} = createS3PlanFactory<Executors>(
+  createObjectsPlan,
+  createObjectsDestroyPlan,
+} = createS3PlanFactory<GenericExecutors>(
   r2ObjectPath,
   "Cloudflare",
   "R2",
 );
 
-export { createObjectDestroyPlan, createObjectPlan };
+export {
+  createObjectsDestroyPlan as createR2ObjectsDestroyPlan,
+  createObjectsPlan as createR2ObjectsPlan,
+};
