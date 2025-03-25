@@ -1,6 +1,26 @@
+import type { ResourceState } from "@/types/config.ts";
 import type { Change } from "../../types/plan.ts";
 import { Type } from "../../types/plan.ts";
 import type { SavedResource } from "@/types/dependencies.ts";
+
+const getCreatedAt = (state: ResourceState): string => {
+  if ("createdAt" in state) {
+    if (typeof state.createdAt === "string") {
+      return state.createdAt;
+    }
+  }
+  return new Date().toISOString();
+};
+
+const getUpdatedAt = (state: ResourceState): string => {
+  if ("updatedAt" in state) {
+    if (typeof state.updatedAt === "string") {
+      return state.updatedAt;
+    }
+  }
+  return new Date().toISOString();
+};
+
 /**
  * Given a saved resources and changeset, apply changes to resources and return new resources
  */
@@ -22,7 +42,7 @@ export function applyChangeSet<T extends SavedResource[]>(
         clonedResources.push({
           path,
           state,
-          createdAt: new Date().toISOString(),
+          createdAt: getCreatedAt(state),
         });
         break;
       case Type.CreateVersion: {
@@ -32,7 +52,7 @@ export function applyChangeSet<T extends SavedResource[]>(
           state,
           version,
           isCurrent: true,
-          createdAt: new Date().toISOString(),
+          createdAt: getCreatedAt(state),
         });
         const prevVersionIndex = clonedResources.findIndex((resource) =>
           resource.path === path && resource.isCurrent === true
@@ -53,7 +73,7 @@ export function applyChangeSet<T extends SavedResource[]>(
         clonedResources[currentIndex] = {
           ...clonedResources[currentIndex],
           state,
-          updatedAt: new Date().toISOString(),
+          updatedAt: getUpdatedAt(state),
         };
         break;
       }
@@ -68,7 +88,7 @@ export function applyChangeSet<T extends SavedResource[]>(
         clonedResources[currentIndex] = {
           ...clonedResources[currentIndex],
           state,
-          updatedAt: new Date().toISOString(),
+          updatedAt: getUpdatedAt(state),
         };
         break;
       }

@@ -108,8 +108,6 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
     } = {},
   } = githubState ?? {};
 
-  console.log(imagesState);
-
   if (!isEmpty(imagesState)) {
     const dockerClient = new DockerClient({
       registry: "ghcr.io",

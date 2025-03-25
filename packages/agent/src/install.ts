@@ -7,7 +7,7 @@ import {
   start,
   write,
 } from "@systemd-js/ctl";
-import { copySync, ensureDirSync, ensureFileSync, existsSync } from "@std/fs";
+import { copySync, ensureDirSync, ensureFileSync } from "@std/fs";
 import {
   createService,
   createUpdaterService,
@@ -25,6 +25,7 @@ import {
 import { VERSION } from "./version.ts";
 import { logger } from "./logger.ts";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 
 function isLinkChanges(nextTarget: string, linkName: string) {
   if (!existsSync(linkName)) {

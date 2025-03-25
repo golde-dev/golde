@@ -61,8 +61,7 @@ export class S3StateClient implements AbstractStateClient {
     const allResources: SavedResource[] = [];
     for (const key of stateKeys) {
       const resources = await this.s3.getJSONObject<SavedResource[]>(this.bucket, key);
-      const current = resources.filter((r) => !r.version || r.isCurrent);
-      allResources.push(...current);
+      allResources.push(...resources);
     }
 
     return allResources;
@@ -73,7 +72,9 @@ export class S3StateClient implements AbstractStateClient {
    */
   public async getResources(project: string, resources: string[]): Promise<SavedResource[]> {
     const allResources = await this.getAllResources(project);
-    return allResources.filter((resource) => resources.includes(resource.path));
+    return allResources
+      .filter((resource) => resources.includes(resource.path))
+      .filter((resource) => resource.isCurrent);
   }
 
   /**
@@ -89,12 +90,11 @@ export class S3StateClient implements AbstractStateClient {
    */
   public async getBranchResources(project: string, branch: string): Promise<SavedResource[]> {
     const stateKey = getStateKey(project, branch);
-    const resources = await notFoundAsUndefined(
-      this.s3.getJSONObject<SavedResource[]>(this.bucket, stateKey),
-    );
-    if (!resources) {
+    const exists = await this.s3.checkS3ObjectExists(this.bucket, stateKey);
+    if (!exists) {
       return [];
     }
+    const resources = await this.s3.getJSONObject<SavedResource[]>(this.bucket, stateKey);
     return resources;
   }
 
@@ -128,7 +128,7 @@ export class S3StateClient implements AbstractStateClient {
     const currentResources = await this.getBranchResources(branch, project);
     const updatedResources = applyChangeSet(currentResources, state);
 
-    await this.saveResources(branch, project, updatedResources);
+    await this.saveResources(project, branch, updatedResources);
     return resourcesToState(updatedResources);
   }
 
@@ -145,7 +145,9 @@ export class S3StateClient implements AbstractStateClient {
    */
   public async getBranchLocks(project: string, branch: string): Promise<Lock[]> {
     const lockKey = getLockKey(project, branch);
-    const locks = await notFoundAsUndefined(this.s3.getJSONObject<Lock[]>(this.bucket, lockKey));
+    const locks = await notFoundAsUndefined(
+      this.s3.getJSONObject<Lock[]>(this.bucket, lockKey),
+    );
     if (!locks) {
       return [];
     }

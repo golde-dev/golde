@@ -1,5 +1,4 @@
 import slugify from "@sindresorhus/slugify";
-import { ensureDir, existsSync } from "@std/fs";
 import { readJSON, writeJSON } from "../utils/json.ts";
 import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
@@ -9,7 +8,8 @@ import type { SavedResource } from "@/types/dependencies.ts";
 import { cwd } from "node:process";
 import { join } from "node:path";
 import { resourcesToState } from "@/utils/state.ts";
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -24,7 +24,16 @@ export class FSStateClient implements AbstractStateClient {
    * Ensure that state directory exists
    */
   public async ensureLocation() {
-    await ensureDir(this.path);
+    if (!existsSync(this.path)) {
+      await mkdir(this.path);
+    }
+  }
+
+  /**
+   * Get state file path for a branch
+   */
+  private getStatePath(branch: string) {
+    return join(this.path, `${slugify(branch)}.state.json`);
   }
 
   /**
@@ -40,8 +49,7 @@ export class FSStateClient implements AbstractStateClient {
       }
       const path = join(this.path, file);
       const resources = readJSON<SavedResource[]>(path);
-      const current = resources.filter((r) => !r.version || r.isCurrent);
-      allResources.push(...current);
+      allResources.push(...resources);
     }
     return allResources;
   }
@@ -56,10 +64,13 @@ export class FSStateClient implements AbstractStateClient {
 
   /**
    * Get specific saved resources
+   * Only get current version of resources
    */
   public async getResources(_: string, resources: string[]): Promise<SavedResource[]> {
     const allResources = await this.getAllResources();
-    return allResources.filter((resource) => resources.includes(resource.path));
+    return allResources
+      .filter((resource) => resources.includes(resource.path))
+      .filter((resource) => resource.isCurrent);
   }
 
   /**
@@ -74,22 +85,12 @@ export class FSStateClient implements AbstractStateClient {
   }
 
   /**
-   * Get state file path for a branch
-   */
-  private getStatePath(branch: string) {
-    return join(this.path, `${slugify(branch)}.state.json`);
-  }
-
-  /**
    * Get current state for a branch
    * Assume that state only belongs to a current project
    */
   public async getBranchState(_: string, branch: string): Promise<State | undefined> {
-    const path = this.getStatePath(branch);
-    if (!await existsSync(path)) {
-      return;
-    }
-    return readJSON<State>(path);
+    const resources = await this.getBranchResources(_, branch);
+    return resourcesToState(resources);
   }
 
   /**

@@ -1,15 +1,15 @@
-{
-  "cloudflare": {
-    "r2": {
-      "example-config-fs-state": {
-        "location": "EEUR",
-        "createdAt": "2024-11-04T14:18:11.439Z",
-        "storageClass": "Standard",
-        "config": {
-          "branch": "master",
-          "storageClass": "Standard"
-        }
-      }
-    }
+[
+  {
+    "path": "cloudflare.r2.bucket.example-config-fs-state",
+    "state": {
+      "location": "EEUR",
+      "createdAt": "2025-03-25T11:06:53.130Z",
+      "config": {
+        "branch": "master",
+        "storageClass": "Standard"
+      },
+      "dependsOn": []
+    },
+    "createdAt": "2025-03-25T11:06:53.222Z"
   }
-}
+]
