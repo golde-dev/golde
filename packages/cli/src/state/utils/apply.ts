@@ -1,13 +1,14 @@
 import type { Change } from "../../types/plan.ts";
 import { Type } from "../../types/plan.ts";
-import { set } from "@es-toolkit/es-toolkit/compat";
-import { omitEmptyObjects } from "../../utils/object.ts";
+import type { SavedResource } from "@/types/dependencies.ts";
 /**
- * Given a object and changeset, apply changes to state and return new state
+ * Given a saved resources and changeset, apply changes to resources and return new resources
  */
-export function applyChangeSet<T extends object>(state: T = {} as T, changes: Change[]): T {
-  const newState = structuredClone(state);
-  const emptyObject = {};
+export function applyChangeSet<T extends SavedResource[]>(
+  resources: T = {} as T,
+  changes: Change[],
+): T {
+  const clonedResources = structuredClone(resources);
 
   for (const unit of changes) {
     const {
@@ -18,39 +19,107 @@ export function applyChangeSet<T extends object>(state: T = {} as T, changes: Ch
 
     switch (type) {
       case Type.Create:
-      case Type.Update:
-        set(newState, path, state);
+        clonedResources.push({
+          path,
+          state,
+          createdAt: new Date().toISOString(),
+        });
         break;
       case Type.CreateVersion: {
         const { version } = unit;
-        set(
-          newState,
-          `${path}.current`,
+        clonedResources.push({
+          path,
+          state,
           version,
+          isCurrent: true,
+          createdAt: new Date().toISOString(),
+        });
+        const prevVersionIndex = clonedResources.findIndex((resource) =>
+          resource.path === path && resource.isCurrent === true
         );
-        set(newState, `${path}.versions.${version}`, state);
+        if (prevVersionIndex !== -1) {
+          clonedResources[prevVersionIndex] = {
+            ...clonedResources[prevVersionIndex],
+            isCurrent: false,
+          };
+        }
+        break;
+      }
+      case Type.Update: {
+        const currentIndex = clonedResources.findIndex((resource) => resource.path === path);
+        if (currentIndex === -1) {
+          throw new Error(`Unable to find resource ${path} in state`);
+        }
+        clonedResources[currentIndex] = {
+          ...clonedResources[currentIndex],
+          state,
+          updatedAt: new Date().toISOString(),
+        };
+        break;
+      }
+      case Type.UpdateVersion: {
+        const { version } = unit;
+        const currentIndex = clonedResources.findIndex((resource) =>
+          resource.path === path && resource.version === version
+        );
+        if (currentIndex === -1) {
+          throw new Error(`Unable to find resource ${path} in state`);
+        }
+        clonedResources[currentIndex] = {
+          ...clonedResources[currentIndex],
+          state,
+          updatedAt: new Date().toISOString(),
+        };
+        break;
+      }
+      case Type.Delete: {
+        const currentIndex = clonedResources.findIndex((resource) => resource.path === path);
+        if (currentIndex === -1) {
+          throw new Error(`Unable to find resource ${path} in state`);
+        }
+        clonedResources.splice(currentIndex, 1);
         break;
       }
       case Type.DeleteVersion: {
         const { version } = unit;
-        set(
-          newState,
-          `${path}.versions.${version}`,
-          emptyObject,
+        const currentIndex = clonedResources.findIndex((resource) =>
+          resource.path === path && resource.version === version
         );
+        if (currentIndex === -1) {
+          throw new Error(`Unable to find resource ${path} in state`);
+        }
+        clonedResources.splice(currentIndex, 1);
         break;
       }
       case Type.ChangeVersion: {
-        const { version } = unit;
-        set(newState, `${path}.current`, version);
+        const { version, prevVersion } = unit;
+
+        const prevVersionIndex = clonedResources.findIndex((resource) =>
+          resource.path === path && resource.version === prevVersion
+        );
+        if (prevVersionIndex === -1) {
+          throw new Error(`Unable to find resource ${path} in state`);
+        }
+        const nextVersionIndex = clonedResources.findIndex((resource) =>
+          resource.path === path && resource.version === version
+        );
+        if (nextVersionIndex === -1) {
+          throw new Error(`Unable to find resource ${path} in state`);
+        }
+        clonedResources[prevVersionIndex] = {
+          ...clonedResources[prevVersionIndex],
+          isCurrent: false,
+        };
+        clonedResources[nextVersionIndex] = {
+          ...clonedResources[nextVersionIndex],
+          isCurrent: true,
+        };
         break;
       }
-      case Type.Delete:
-        set(newState, path, emptyObject);
-        break;
+
       default:
         throw new Error("Unknown type");
     }
   }
-  return omitEmptyObjects(newState) as T;
+  return clonedResources;
 }

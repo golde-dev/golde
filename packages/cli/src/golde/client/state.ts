@@ -126,7 +126,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     }
   }
 
-  public async getLocks(project: string, branch: string): Promise<Lock[]> {
+  public async getBranchLocks(project: string, branch: string): Promise<Lock[]> {
     const query = new URLSearchParams({ branch }).toString();
 
     logger.debug("[Golde] fetching state lock", { project, branch });

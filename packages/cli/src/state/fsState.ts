@@ -8,6 +8,8 @@ import type { Change } from "../types/plan.ts";
 import type { SavedResource } from "@/types/dependencies.ts";
 import { cwd } from "node:process";
 import { join } from "node:path";
+import { resourcesToState } from "@/utils/state.ts";
+import { readdirSync } from "node:fs";
 
 export class FSStateClient implements AbstractStateClient {
   private readonly path: string;
@@ -26,22 +28,53 @@ export class FSStateClient implements AbstractStateClient {
   }
 
   /**
-   * Get state for all branches
+   * Get all resources for a project
+   * For versioned resources only include current
    */
-  public getState(_: string): Promise<State | undefined> {
-    throw new Error("Method not implemented.");
-  }
-
-  public getResources(_: string, _resources: string[]): Promise<SavedResource[]> {
-    throw new Error("Method not implemented.");
-  }
-
-  public getBranchResources(_project: string, _branch: string): Promise<SavedResource[]> {
-    throw new Error("Method not implemented.");
+  private getAllResources(): SavedResource[] {
+    const files = readdirSync(this.path, { encoding: "utf-8" });
+    const allResources: SavedResource[] = [];
+    for (const file of files) {
+      if (!file.endsWith(".state.json")) {
+        continue;
+      }
+      const path = join(this.path, file);
+      const resources = readJSON<SavedResource[]>(path);
+      const current = resources.filter((r) => !r.version || r.isCurrent);
+      allResources.push(...current);
+    }
+    return allResources;
   }
 
   /**
-   * Get state path for a branch
+   * Get all resources from all branches
+   */
+  public async getState(_: string): Promise<State | undefined> {
+    const allResources = await this.getAllResources();
+    return resourcesToState(allResources);
+  }
+
+  /**
+   * Get specific saved resources
+   */
+  public async getResources(_: string, resources: string[]): Promise<SavedResource[]> {
+    const allResources = await this.getAllResources();
+    return allResources.filter((resource) => resources.includes(resource.path));
+  }
+
+  /**
+   * Get branch resources
+   */
+  public async getBranchResources(_: string, branch: string): Promise<SavedResource[]> {
+    const path = this.getStatePath(branch);
+    if (!existsSync(path)) {
+      return [];
+    }
+    return await readJSON<SavedResource[]>(path);
+  }
+
+  /**
+   * Get state file path for a branch
    */
   private getStatePath(branch: string) {
     return join(this.path, `${slugify(branch)}.state.json`);
@@ -62,20 +95,20 @@ export class FSStateClient implements AbstractStateClient {
   /**
    * Save state to file
    */
-  private saveState(branch: string, state: State): void {
+  private saveResources(branch: string, resources: SavedResource[]): void {
     const path = this.getStatePath(branch);
-    writeJSON(path, state);
+    writeJSON(path, resources);
   }
 
   /**
    * Update state by applying changes to state
    */
   public async applyChanges(project: string, branch: string, changes: Change[]): Promise<State> {
-    const currentState = await this.getBranchState(project, branch);
-    const updatedState = applyChangeSet(currentState, changes);
+    const currentResources = await this.getBranchResources(project, branch);
+    const updatedResources = applyChangeSet(currentResources, changes);
 
-    await this.saveState(branch, updatedState);
-    return updatedState;
+    await this.saveResources(branch, updatedResources);
+    return resourcesToState(updatedResources);
   }
 
   /**
@@ -96,7 +129,7 @@ export class FSStateClient implements AbstractStateClient {
   /**
    * Get locks for a branch
    */
-  public async getLocks(_: string, branch: string): Promise<Lock[]> {
+  public async getBranchLocks(_: string, branch: string): Promise<Lock[]> {
     const path = this.getStateLockPath(branch);
     if (!existsSync(path)) {
       return [];

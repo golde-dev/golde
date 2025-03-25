@@ -216,52 +216,53 @@ export const fileTemplate = (value: string): string => {
 
 const stateRe = new RegExp(/(?<=state.)(.*)/);
 
-export const resourcesTemplate = (resources: SavedResource[]) => (value: string): string => {
-  const match = stateRe.exec(value.trim());
-  if (!match) {
-    return originalTemplateString(value);
-  }
-  const [stateMatch] = match;
-
-  const deps = matchStatePath(stateMatch);
-
-  if (deps) {
-    const [resourcePath, _, resourceAttribute] = deps;
-    const selectedResources = resources.filter(({ path }) => path === resourcePath);
-    if (selectedResources.length === 0) {
+export const resourcesTemplate =
+  (resources: Omit<SavedResource, "createdAt" | "updatedAt">[]) => (value: string): string => {
+    const match = stateRe.exec(value.trim());
+    if (!match) {
       return originalTemplateString(value);
     }
+    const [stateMatch] = match;
 
-    const [firstResource] = selectedResources;
-    if (selectedResources.length === 1 && firstResource) {
+    const deps = matchStatePath(stateMatch);
+
+    if (deps) {
+      const [resourcePath, _, resourceAttribute] = deps;
+      const selectedResources = resources.filter(({ path }) => path === resourcePath);
+      if (selectedResources.length === 0) {
+        return originalTemplateString(value);
+      }
+
       const [firstResource] = selectedResources;
-      const value = get(firstResource.state, resourceAttribute);
-      if (typeof value === "string") {
-        return value;
+      if (selectedResources.length === 1 && firstResource) {
+        const [firstResource] = selectedResources;
+        const value = get(firstResource.state, resourceAttribute);
+        if (typeof value === "string") {
+          return value;
+        }
       }
-    }
-    const currentResource = selectedResources.find(({ isCurrent }) => isCurrent);
-    if (selectedResources.length > 0 && currentResource) {
-      const value = get(currentResource.state, resourceAttribute);
-      if (typeof value === "string") {
-        return value;
+      const currentResource = selectedResources.find(({ isCurrent }) => isCurrent);
+      if (selectedResources.length > 0 && currentResource) {
+        const value = get(currentResource.state, resourceAttribute);
+        if (typeof value === "string") {
+          return value;
+        }
       }
-    }
 
-    throw new ConfigError(
-      `Failed to resolve state dependency on ${stateMatch}`,
-      ConfigErrorCode.INVALID_CONFIG,
-    );
-  }
-  return originalTemplateString(value);
-};
+      throw new ConfigError(
+        `Failed to resolve state dependency on ${stateMatch}`,
+        ConfigErrorCode.INVALID_CONFIG,
+      );
+    }
+    return originalTemplateString(value);
+  };
 /**
  * Resolve unit dependencies
  * Only resolve args and config
  */
 export const resolveUnitState = <T extends Unit>(
   unit: T,
-  resources: Resource[],
+  resources: Omit<Resource, "createdAt" | "updatedAt">[],
 ): T => {
   if (!resources.length) {
     return unit;

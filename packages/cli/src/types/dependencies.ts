@@ -16,5 +16,7 @@ export type SavedResource = {
   isCurrent?: boolean;
   version?: string;
   path: string;
+  createdAt: string;
+  updatedAt?: string;
   state: ResourceState | VersionedResourceState;
 };

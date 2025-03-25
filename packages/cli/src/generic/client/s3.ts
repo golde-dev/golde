@@ -1,13 +1,21 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
+  HeadBucketCommand,
   HeadObjectCommand,
+  ListObjectsCommand,
   NoSuchKey,
   NotFound,
   PutObjectCommand,
   PutObjectTaggingCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import type { PutObjectCommandInput, Tag } from "@aws-sdk/client-s3";
+import type {
+  GetObjectCommandInput,
+  GetObjectCommandOutput,
+  PutObjectCommandInput,
+  Tag,
+} from "@aws-sdk/client-s3";
 
 import { logger } from "../../logger.ts";
 
@@ -65,6 +73,41 @@ export class S3 {
       provider: this.provider,
       serviceName: this.serviceName,
     };
+  }
+
+  /**
+   * Check api access token by doing head on bucket
+   */
+  public async verifyAccess(bucket: string) {
+    const { provider, serviceName } = this.getProviderInfo();
+    const command = new HeadBucketCommand({
+      Bucket: bucket,
+    });
+    try {
+      await this.client.send(command);
+    } catch (error) {
+      logger.error(
+        `[${provider}] Access verification failed for ${serviceName} bucket`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  public async listObjects(bucket: string, prefix: string): Promise<string[]> {
+    const command = new ListObjectsCommand({
+      Bucket: bucket,
+      Prefix: prefix,
+    });
+    try {
+      const response = await this.client.send(command);
+      return response.Contents
+        ?.filter(({ Key }) => Key)
+        ?.map(({ Key }) => Key) as string[] ?? [];
+    } catch (error) {
+      logger.error(`[${this.provider}] Failed to list ${this.serviceName} objects`, error);
+      throw error;
+    }
   }
 
   public async putS3Object(
@@ -153,6 +196,32 @@ export class S3 {
     }
   }
 
+  public async getJSONObject<T>(bucket: string, key: string): Promise<T> {
+    try {
+      logger.debug(`[${this.provider}] Get ${this.serviceName} JSON object`, {
+        Bucket: bucket,
+        Key: key,
+      });
+      const command = new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      });
+      const response = await this.client.send<GetObjectCommandInput, GetObjectCommandOutput>(
+        command,
+      );
+      const text = await response.Body?.transformToString();
+      if (!text) {
+        throw new Error(`Got empty response from object key: ${key}`);
+      }
+      return JSON.parse(text) as T;
+    } catch (e) {
+      if (e instanceof Error) {
+        logger.error(`[${this.provider}] Failed to get ${this.serviceName} JSON object`, e);
+      }
+      throw e;
+    }
+  }
+
   public async putJSONObject(bucket: string, key: string, object: object) {
     const command = new PutObjectCommand({
       Bucket: bucket,
@@ -163,7 +232,7 @@ export class S3 {
       await this.client.send(command);
     } catch (error) {
       logger.error(
-        `[${this.provider}] Failed to put ${this.serviceName} object`,
+        `[${this.provider}] Failed to put ${this.serviceName} JSON object`,
         { error },
       );
       throw error;

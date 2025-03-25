@@ -6,9 +6,9 @@ import { logger } from "@/logger.ts";
 import { Type } from "@/types/plan.ts";
 import { assertBranch } from "@/utils/resource.ts";
 import type { ResourceDependency } from "@/types/dependencies.ts";
-import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import type { Tags } from "@/types/config.ts";
 import type { ImageConfig, ImagesConfig, ImagesState, ImageState } from "./types.ts";
+import type { GenericExecutors } from "./executor.ts";
 import type {
   ChangeVersionUnit,
   CreateVersionUnit,
@@ -17,30 +17,6 @@ import type {
   Plan,
   UpdateVersionUnit,
 } from "@/types/plan.ts";
-
-export interface GenericExecutors {
-  buildDockerImage: (imageName: string, config: ImageConfig) => Promise<{
-    imageId: string;
-    version: string;
-  }>;
-  createDockerImage: (
-    imageName: string,
-    imageId: string,
-    version: string,
-    config: WithBranch<ImageConfig>,
-  ) => Promise<OmitExecutionContext<ImageState>>;
-  updateDockerImage: (
-    imageName: string,
-    imageId: string,
-    version: string,
-    config: WithBranch<ImageConfig>,
-    state: ImageState,
-  ) => Promise<OmitExecutionContext<ImageState>>;
-  deleteDockerImage: (imageName: string, tag: string) => Promise<void>;
-  assertCreatePermission?: (imageName: string) => Promise<void>;
-  assertDeletePermission?: (imageName: string) => Promise<void>;
-  assertUpdatePermission?: (imageName: string) => Promise<void>;
-}
 
 export function createDockerImagesPlanFactory<E extends GenericExecutors>(
   dockerImagePath: (name: string) => string,
@@ -90,11 +66,11 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     } = {};
 
     for (const [imageName, image] of Object.entries(config)) {
-      const { version, imageId } = await buildDockerImage(imageName, image);
+      const { versionId, imageId } = await buildDockerImage(imageName, image);
 
       next[imageName] = {
         imageName,
-        version,
+        version: versionId,
         imageId,
         config: image,
         dependsOn: findResourceDependencies(image),

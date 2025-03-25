@@ -20,7 +20,7 @@ export abstract class AbstractStateClient {
 
   public abstract getBranchResources(project: string, branch: string): Promise<SavedResource[]>;
 
-  public abstract getLocks(project: string, branch?: string): Promise<Lock[]>;
+  public abstract getBranchLocks(project: string, branch?: string): Promise<Lock[]>;
 
   public abstract createLock(
     project: string,

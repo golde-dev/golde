@@ -1,5 +1,4 @@
 import { logger } from "../logger.ts";
-import { S3 } from "../generic/client/s3.ts";
 import { S3StateClient } from "./s3State.ts";
 import { FSStateClient } from "./fsState.ts";
 import type { AbstractStateClient } from "../types/state.ts";
@@ -43,18 +42,20 @@ export async function createStateClient(
       endpoint,
     } = config;
 
-    const credentials = getAWSCredentials(config, awsConfig);
+    const {
+      accessKeyId,
+      secretAccessKey,
+    } = getAWSCredentials(config, awsConfig);
 
-    const s3 = new S3({
-      bucket,
-      logger,
-      region,
-      endpoint,
-      ...credentials,
-    });
     try {
-      await s3.verifyAccess();
-      const stateClient = new S3StateClient(s3);
+      const stateClient = new S3StateClient({
+        bucket,
+        region,
+        endpoint,
+        accessKeyId,
+        secretAccessKey,
+      });
+      await stateClient.verifyBucketAccess();
       return stateClient;
     } catch (error) {
       logger.error(

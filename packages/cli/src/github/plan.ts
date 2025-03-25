@@ -52,11 +52,14 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
   } = githubConfig ?? {};
 
   if (!isEmpty(imagesState) || !isEmpty(imagesConfig)) {
-    const dockerClient = new DockerClient(
-      "ghcr.io",
+    const dockerClient = new DockerClient({
+      registry: "ghcr.io",
       username,
-      accessToken,
-    );
+      password: accessToken,
+    }, {
+      provider: "Github",
+      serviceName: "ghcr",
+    });
 
     await dockerClient.verifyInstalled();
     await dockerClient.verifyCredentials();
@@ -108,11 +111,14 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
   console.log(imagesState);
 
   if (!isEmpty(imagesState)) {
-    const dockerClient = new DockerClient(
-      "ghcr.io",
+    const dockerClient = new DockerClient({
+      registry: "ghcr.io",
       username,
-      accessToken,
-    );
+      password: accessToken,
+    }, {
+      provider: "Github",
+      serviceName: "ghcr",
+    });
 
     await dockerClient.verifyInstalled();
     await dockerClient.verifyCredentials();

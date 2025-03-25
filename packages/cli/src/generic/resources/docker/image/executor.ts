@@ -1,11 +1,35 @@
-import type { DockerClient } from "../../../client/docker.ts";
+import { logger } from "@/logger.ts";
 import { buildImage, createVersionTag } from "./utils.ts";
 import { nowStringDate } from "@/utils/date.ts";
+import type { DockerClient } from "../../../client/docker.ts";
 import type { ImageConfig, ImageState } from "./types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
-import { logger } from "@/logger.ts";
 
-export function createDockerImageExecutor(client: DockerClient) {
+export interface GenericExecutors {
+  buildDockerImage: (imageName: string, config: ImageConfig) => Promise<{
+    imageId: string;
+    versionId: string;
+  }>;
+  createDockerImage: (
+    imageName: string,
+    imageId: string,
+    version: string,
+    config: WithBranch<ImageConfig>,
+  ) => Promise<OmitExecutionContext<ImageState>>;
+  updateDockerImage: (
+    imageName: string,
+    imageId: string,
+    version: string,
+    config: WithBranch<ImageConfig>,
+    state: ImageState,
+  ) => Promise<OmitExecutionContext<ImageState>>;
+  deleteDockerImage: (imageName: string, tag: string) => Promise<void>;
+  assertCreatePermission?: (imageName: string) => Promise<void>;
+  assertDeletePermission?: (imageName: string) => Promise<void>;
+  assertUpdatePermission?: (imageName: string) => Promise<void>;
+}
+
+export function createDockerImageExecutor(client: DockerClient): GenericExecutors {
   const {
     provider,
   } = client.getProviderInfo();

@@ -62,7 +62,6 @@
     "npm:@sindresorhus/slugify@^2.2.1": "2.2.1",
     "npm:@types/node@*": "22.5.4",
     "npm:commander@^13.1.0": "13.1.0",
-    "npm:moderndash@^3.11.1": "3.12.0",
     "npm:sudo-prompt@^9.2.1": "9.2.1",
     "npm:zod-to-json-schema@^3.23.0": "3.23.5_zod@3.23.8",
     "npm:zod@^3.23.4": "3.23.8"
@@ -9865,9 +9864,6 @@
         "strnum"
       ]
     },
-    "hotscript@1.0.13": {
-      "integrity": "sha512-C++tTF1GqkGYecL+2S1wJTfoH6APGAsbb7PAWQ3iVIwgG/EFseAfEVOKFgAFq4yK3+6j1EjUD4UQ9dRJHX/sSQ=="
-    },
     "iconv-lite@0.4.24": {
       "integrity": "sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==",
       "dependencies": [
@@ -9876,12 +9872,6 @@
     },
     "is-fullwidth-code-point@3.0.0": {
       "integrity": "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg=="
-    },
-    "moderndash@3.12.0": {
-      "integrity": "sha512-mARaWQGOoDYdBIhmeyPYY+ymEqb0/bDSOyE1sw6abwOT7V07xAS/Yn1idwpV7nLBnTAJ5ED6jBQxoPZsoxr7jg==",
-      "dependencies": [
-        "hotscript"
-      ]
     },
     "mute-stream@2.0.0": {
       "integrity": "sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA=="
@@ -9986,7 +9976,6 @@
       "npm:@inquirer/prompts@^7.0.1",
       "npm:@sindresorhus/slugify@^2.2.1",
       "npm:commander@^13.1.0",
-      "npm:moderndash@^3.11.1",
       "npm:sudo-prompt@^9.2.1",
       "npm:zod-to-json-schema@^3.23.0",
       "npm:zod@^3.23.4"
