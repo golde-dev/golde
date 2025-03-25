@@ -1,6 +1,6 @@
 import slugify from "@sindresorhus/slugify";
 import { logger } from "@/logger.ts";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { memoizeAsync } from "@/utils/memoize.ts";
@@ -218,8 +218,18 @@ export const createObject = memoizeAsync(
   },
 );
 
+function baseDir(dir: string) {
+  return dir.replace("./", "");
+}
+
 export function createObjectKey(branch: string, version: string, name: string) {
-  const key = `${slugify(branch)}.${version}.${slugify(name)}`;
+  const dir = dirname(name);
+  const prefix = baseDir(dir);
+  const ext = extname(name);
+  const base = basename(name, ext);
+  const slug = slugify(branch);
+
+  const key = `${prefix}/${base}.b.${slug}.v.${version}${ext}`;
   if (key.length > 1024) {
     throw new Error(`Object key is too long for s3 object: ${key}`);
   }

@@ -10,10 +10,10 @@ import type { SavedResource } from "@/types/dependencies.ts";
 import { resourcesToState } from "@/utils/state.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
-  `/projects/${projectName}/${slugify(branch)}.state.json`;
+  `projects/${projectName}/${slugify(branch)}.state.json`;
 
 const getLockKey = (projectName: string, branch: string) =>
-  `/projects/${projectName}/${slugify(branch)}.lock.json`;
+  `projects/${projectName}/${slugify(branch)}.lock.json`;
 
 export interface S3StateConfig {
   bucket: string;

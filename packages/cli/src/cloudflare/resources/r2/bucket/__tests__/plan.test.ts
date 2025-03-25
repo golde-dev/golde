@@ -53,6 +53,7 @@ describe("cloudflare buckets", () => {
       } as const;
       const state: R2BucketState = {
         "bucket1": {
+          name: "bucket1",
           location: "eeur",
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
@@ -79,6 +80,7 @@ describe("cloudflare buckets", () => {
     it("should delete previously created bucket", async () => {
       const state: R2BucketState = {
         "bucket1": {
+          name: "bucket1",
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
@@ -110,6 +112,7 @@ describe("cloudflare buckets", () => {
     it("should delete and create bucket when bucket is renamed", async () => {
       const state: R2BucketState = {
         "bucket1": {
+          name: "bucket1",
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],
@@ -165,6 +168,7 @@ describe("cloudflare buckets", () => {
       } as const;
       const state: R2BucketState = {
         "bucket1": {
+          name: "bucket1",
           location: "apac",
           createdAt: "2022-01-01T00:00:00.000Z",
           dependsOn: [],

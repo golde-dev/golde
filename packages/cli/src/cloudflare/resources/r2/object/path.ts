@@ -27,7 +27,7 @@ const {
 } = matchFactory(BASE_PATH, "Cloudflare", "R2 object", stateAttributes, configAttributes);
 
 export {
-  matchResourceType as matchR2ObjectPath,
+  matchResourceType as matchR2Object,
   removeResourcePrefix as removeR2ObjectPrefix,
   resourcePath as r2ObjectPath,
 };

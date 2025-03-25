@@ -12,6 +12,7 @@ export interface R2BucketConfig {
 }
 
 export interface BucketState {
+  name: string;
   location: Region;
   updatedAt?: string;
   createdAt: string;

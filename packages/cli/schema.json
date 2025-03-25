@@ -152,6 +152,29 @@
                 "accountId": {
                   "type": "string",
                   "description": "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"
+                },
+                "s3": {
+                  "type": "object",
+                  "properties": {
+                    "endpoint": {
+                      "type": "string",
+                      "description": "Cloudflare R2 S3 endpoint https://developers.cloudflare.com/r2/api/s3/tokens/"
+                    },
+                    "accessKeyId": {
+                      "type": "string",
+                      "description": "Cloudflare R2 S3 access key id https://developers.cloudflare.com/r2/api/s3/tokens/"
+                    },
+                    "secretAccessKey": {
+                      "type": "string",
+                      "description": "Cloudflare R2 S3 secret access key https://developers.cloudflare.com/r2/api/s3/tokens/"
+                    }
+                  },
+                  "required": [
+                    "endpoint",
+                    "accessKeyId",
+                    "secretAccessKey"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "required": [

@@ -20,6 +20,7 @@ export async function createBucket(
     return {
       location: b.location,
       createdAt: b.creation_date,
+      name,
       config,
       dependsOn,
     };

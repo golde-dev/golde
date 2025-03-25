@@ -28,12 +28,12 @@ export function matchFactory(
     if (!path.startsWith(basePath)) {
       return;
     }
-    const bucketPath = removeResourcePrefix(path);
-    const match = pattern.exec(bucketPath);
+    const resPath = removeResourcePrefix(path);
+    const match = pattern.exec(resPath);
 
     if (!match) {
       throw new PlanError(
-        `Incorrect ${providerName} ${resourceName} path: ${path}`,
+        `Incorrect ${providerName} ${resourceName} path: "${path}"`,
         PlanErrorCode.INCORRECT_PATH,
       );
     }

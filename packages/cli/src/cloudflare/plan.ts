@@ -10,7 +10,6 @@ import { createR2ObjectsDestroyPlan, createR2ObjectsPlan } from "./resources/r2/
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 import { createObjectExecutors } from "@/generic/resources/s3/object/executor.ts";
-import { S3 } from "@/generic/client/s3.ts";
 
 export async function createCloudflarePlan(context: Context): Promise<Plan> {
   const {
@@ -83,15 +82,13 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
   }
 
   if (!isEmpty(r2ObjectsState) || !isEmpty(r2ObjectsConfig)) {
-    const s3Client = new S3({
-      region: "auto",
-      endpoint: "auto",
-      accessKeyId: "todo",
-      secretAccessKey: "todo",
-    }, {
-      provider: "Cloudflare",
-      serviceName: "R2",
-    });
+    const s3Client = cloudflare.getS3Client();
+    if (!s3Client) {
+      throw new PlanError(
+        "Cloudflare R2 S3 client is required when using R2 objects, configure providers.cloudflare.s3",
+        PlanErrorCode.PROVIDER_MISSING,
+      );
+    }
     const executors = createObjectExecutors(s3Client);
     plan.push(createR2ObjectsPlan(
       executors,
@@ -162,15 +159,13 @@ export async function createCloudflareDestroyPlan(context: Context): Promise<Pla
     ));
   }
   if (!isEmpty(r2ObjectState)) {
-    const s3Client = new S3({
-      region: "auto",
-      endpoint: "auto",
-      accessKeyId: "todo",
-      secretAccessKey: "todo",
-    }, {
-      provider: "Cloudflare",
-      serviceName: "R2",
-    });
+    const s3Client = cloudflare.getS3Client();
+    if (!s3Client) {
+      throw new PlanError(
+        "Cloudflare R2 S3 client is required when using R2 objects, configure providers.cloudflare.s3",
+        PlanErrorCode.PROVIDER_MISSING,
+      );
+    }
     const executors = createObjectExecutors(s3Client);
     plan.push(createR2ObjectsDestroyPlan(
       executors,

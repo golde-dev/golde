@@ -1,4 +1,6 @@
+import { S3 } from "@/generic/client/s3.ts";
 import { logger } from "../../logger.ts";
+import type { CloudflareS3Credentials } from "@/cloudflare/types.ts";
 
 interface ErrorCause {
   code: string;
@@ -48,10 +50,33 @@ export class CloudflareBase {
   protected readonly apiToken: string;
   protected readonly accountId: string;
   protected readonly baseUrl = "https://api.cloudflare.com/client/v4";
+  protected s3?: S3;
 
-  public constructor(apiToken: string, accountId: string) {
+  public constructor(apiToken: string, accountId: string, s3?: CloudflareS3Credentials) {
     this.apiToken = apiToken;
     this.accountId = accountId;
+
+    if (s3) {
+      const {
+        endpoint,
+        accessKeyId,
+        secretAccessKey,
+      } = s3;
+
+      this.s3 = new S3({
+        region: "auto",
+        endpoint,
+        accessKeyId,
+        secretAccessKey,
+      }, {
+        provider: "Cloudflare",
+        serviceName: "R2",
+      });
+    }
+  }
+
+  public getS3Client() {
+    return this.s3;
   }
 
   protected makeListRequest<T>(

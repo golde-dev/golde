@@ -3,10 +3,11 @@ import { CloudflareBase } from "./base.ts";
 import { D1Client } from "./d1.ts";
 import { DNSClient } from "./dns.ts";
 import { R2Client } from "./r2.ts";
+import type { CloudflareS3Credentials } from "../types.ts";
 
 export class CloudflareClient extends CloudflareBase {
-  constructor(apiToken: string, accountId: string) {
-    super(apiToken, accountId);
+  constructor(apiToken: string, accountId: string, s3?: CloudflareS3Credentials) {
+    super(apiToken, accountId, s3);
   }
 }
 

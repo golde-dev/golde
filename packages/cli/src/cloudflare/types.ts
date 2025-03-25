@@ -30,6 +30,12 @@ export interface CloudflareState {
   };
 }
 
+export interface CloudflareS3Credentials {
+  endpoint: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+}
+
 export interface CloudflareCredentials {
   /**
    * Cloudflare API token
@@ -41,4 +47,9 @@ export interface CloudflareCredentials {
    * @see https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
    */
   accountId: string;
+
+  /**
+   * Cloudflare R2 S3 credentials
+   */
+  s3?: CloudflareS3Credentials;
 }

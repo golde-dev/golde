@@ -33,6 +33,23 @@ export const cloudflareCredentialsSchema = implement<CloudflareCredentials>()
       .describe(
         "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids",
       ),
+    s3: z.object({
+      endpoint: z
+        .string()
+        .describe(
+          "Cloudflare R2 S3 endpoint https://developers.cloudflare.com/r2/api/s3/tokens/",
+        ),
+      accessKeyId: z
+        .string()
+        .describe(
+          "Cloudflare R2 S3 access key id https://developers.cloudflare.com/r2/api/s3/tokens/",
+        ),
+      secretAccessKey: z
+        .string()
+        .describe(
+          "Cloudflare R2 S3 secret access key https://developers.cloudflare.com/r2/api/s3/tokens/",
+        ),
+    }).optional(),
   })
   .describe("Cloudflare provider config")
   .strict();
