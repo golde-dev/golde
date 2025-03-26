@@ -12,11 +12,20 @@ export async function createBucket(
   dependsOn: ResourceDependency[] = [],
 ): Promise<OmitExecutionContext<BucketState>> {
   const start = Date.now();
-  const bucket = await this.createBucket({
-    name,
-    locationHint: config.locationHint,
-    storageClass: config.storageClass,
-  }).then((b) => {
+  const {
+    locationHint,
+    storageClass,
+    cfR2Jurisdiction = "default",
+  } = config;
+
+  const bucket = await this.createBucket(
+    {
+      name,
+      locationHint,
+      storageClass,
+    },
+    cfR2Jurisdiction,
+  ).then((b) => {
     return {
       location: b.location,
       createdAt: b.creation_date,
@@ -31,9 +40,13 @@ export async function createBucket(
 }
 export type CreateBucket = typeof createBucket;
 
-export async function deleteBucket(this: CloudflareClient, name: string) {
+export async function deleteBucket(
+  this: CloudflareClient,
+  name: string,
+  cfR2Jurisdiction?: string,
+) {
   const start = Date.now();
-  await this.deleteBucket(name);
+  await this.deleteBucket(name, cfR2Jurisdiction);
   const end = Date.now();
 
   logger.debug(`[Cloudflare]: deleting bucket ${name} in ${formatDuration(end - start)}`);

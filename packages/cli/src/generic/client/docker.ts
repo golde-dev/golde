@@ -117,9 +117,10 @@ export class DockerClient {
   public async buildImage(
     imageName: string,
     context: string = ".",
+    dockerfile: string = "Dockerfile",
   ): Promise<string> {
     return await new Promise((resolve, reject) => {
-      exec(`docker build ${context} --quiet`, (error, stdout, stderr) => {
+      exec(`docker build ${context} -f ${dockerfile} --quiet`, (error, stdout, stderr) => {
         if (error) {
           logger.error(`[Docker] Failed to build image ${imageName} \n ${stderr}`);
 

@@ -9,14 +9,14 @@ import { createProjectIfMissing, createProjectIfWanted } from "./init.ts";
 import { getGitInfo } from "./utils/git.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { createSlackClient } from "./slack/client/factory.ts";
-import type { Context } from "./types/context.ts";
-import type { Config } from "./types/config.ts";
 import { createGithubClient } from "./github/client/factory.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
 import { resolveConfigState } from "@/utils/template.ts";
 import { ConfigError } from "@/error.ts";
 import { resourcesToState } from "@/utils/state.ts";
 import { exit } from "node:process";
+import type { Context } from "./types/context.ts";
+import type { Config } from "./types/config.ts";
+import type { SavedResource } from "@/types/dependencies.ts";
 
 export const initializeContext = async (
   branchName: string,
@@ -75,13 +75,11 @@ export const initializeContext = async (
     };
 
     if (goldeClient) {
-      if (yes) {
-        await createProjectIfMissing(goldeClient, name);
-      } else {
-        await createProjectIfWanted(goldeClient, name);
-      }
+      const project = yes
+        ? await createProjectIfMissing(goldeClient, name)
+        : await createProjectIfWanted(goldeClient, name);
 
-      if (state) {
+      if (state && project) {
         await goldeClient.changeStateConfig(name, state);
       }
     }

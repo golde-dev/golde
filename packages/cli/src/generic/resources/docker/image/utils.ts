@@ -41,9 +41,10 @@ export const buildImage = memoizeAsync(
     const {
       context = ".",
       version,
+      dockerfile = "Dockerfile",
     } = image;
 
-    const imageId = await client.buildImage(imageName, context);
+    const imageId = await client.buildImage(imageName, context, dockerfile);
     const versionId = await getVersion(imageId, context, version);
 
     return await Promise.resolve({

@@ -1060,6 +1060,14 @@
                           "Standard",
                           "InfrequentAccess"
                         ]
+                      },
+                      "cfR2Jurisdiction": {
+                        "type": "string",
+                        "enum": [
+                          "default",
+                          "eu",
+                          "fedramp"
+                        ]
                       }
                     },
                     "additionalProperties": false

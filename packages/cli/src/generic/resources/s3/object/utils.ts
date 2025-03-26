@@ -70,7 +70,7 @@ async function compress(path: string, name: string) {
       from: path,
       to: archivePath,
     });
-    await tar.compress(path, archivePath);
+    await tar.compress(path, archivePath, { debug: true });
     return archivePath;
   }
   return path;
@@ -93,8 +93,9 @@ async function createFromSource(
   }
 
   try {
-    const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-${name}`));
+    const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-`));
     const toPath = join(tmpDir, basename(fromPath));
+
     logger.debug(`[Plan] Object ${name} copying`, {
       from: fromPath,
       to: toPath,
@@ -123,7 +124,7 @@ async function createFromIncludes(
   includes: Include[] = [],
   version?: Version,
 ): Promise<[string, string]> {
-  const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-${name}`));
+  const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-`));
   const contextBase = resolve(context);
 
   try {

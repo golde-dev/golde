@@ -86,13 +86,14 @@ export async function createR2Plan(
   const deleting = Object.keys(previous).filter((key) => !(key in next));
   for (const key of deleting) {
     const { state, name } = previous[key];
+    const { config, dependsOn } = state;
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
       type: Type.Delete,
       executor: executors.deleteBucket,
-      args: [name],
+      args: [name, config.cfR2Jurisdiction],
       path: key,
       state,
-      dependsOn: state.dependsOn,
+      dependsOn: dependsOn,
     };
     plan.push(deleteUnit);
   }

@@ -5,6 +5,7 @@ import type { ResourceDependency } from "../../../../types/dependencies.ts";
 export interface BucketConfig extends ResourceConfig {
   locationHint?: Region;
   storageClass?: StorageClass;
+  cfR2Jurisdiction?: "default" | "eu" | "fedramp";
 }
 
 export interface R2BucketConfig {

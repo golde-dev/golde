@@ -99,7 +99,6 @@ function createJSONConfig(projectName: string) {
   writeFileSync("./golde.config.json", config, { encoding: "utf-8" });
 }
 
-
 export async function confirmCreateProject(name: string): Promise<boolean> {
   try {
     const shouldCreate = await confirm({
@@ -127,11 +126,10 @@ export async function createProjectIfWanted(
     return;
   }
   const shouldCreate = await confirmCreateProject(name);
-
   if (!shouldCreate) {
-    throw new Error("Unable to continue, when using golde project is required");
+    return;
   }
-  await golde.createProject(name);
+  return await golde.createProject(name);
 }
 
 export async function createProjectIfMissing(
@@ -143,7 +141,7 @@ export async function createProjectIfMissing(
     logger.debug(`Project ${name} already exists`);
     return;
   }
-  await golde.createProject(name);
+  return await golde.createProject(name);
 }
 
 export async function initConfig() {

@@ -6,29 +6,32 @@ import { CloudflareBase, CloudflareError } from "./base.ts";
  * @see https://developers.cloudflare.com/api/operations/r2-create-bucket
  */
 interface BucketRequest {
-  name: string;
-  locationHint?: Region;
-  storageClass?: StorageClass;
+  "name": string;
+  "locationHint"?: Region;
+  "storageClass"?: StorageClass;
 }
 
 interface Bucket {
-  creation_date: string;
-  location: Region;
-  name: string;
-  storage_class: StorageClass;
+  "creation_date": string;
+  "location": Region;
+  "name": string;
+  "storage_class": StorageClass;
 }
 
 export class R2Client extends CloudflareBase {
   /**
    * Create bucket in r2
    */
-  public async createBucket(config: BucketRequest): Promise<Bucket> {
+  public async createBucket(config: BucketRequest, cfR2Jurisdiction = "default"): Promise<Bucket> {
     logger.debug("[Cloudflare] Creating r2 bucket", config);
     try {
       const bucket = await this.makeRequest<Bucket>(
         `/accounts/${this.accountId}/r2/buckets`,
         "POST",
         config,
+        {
+          "cf-r2-jurisdiction": cfR2Jurisdiction,
+        },
       );
       return bucket;
     } catch (e) {
@@ -42,12 +45,17 @@ export class R2Client extends CloudflareBase {
   /**
    * Delete bucket in R2
    */
-  public async deleteBucket(name: string): Promise<void> {
+  public async deleteBucket(name: string, cfR2Jurisdiction = "default"): Promise<void> {
     logger.debug("[Cloudflare] Deleting r2 bucket", { name });
     try {
       await this.makeRequest(
         `/accounts/${this.accountId}/r2/buckets/${name}`,
         "DELETE",
+        {
+          headers: {
+            "cf-r2-jurisdiction": cfR2Jurisdiction,
+          },
+        },
       );
     } catch (e) {
       if (e instanceof CloudflareError) {

@@ -18,6 +18,11 @@ export const bucketSchema = implement<BucketConfig>()
       "Standard",
       "InfrequentAccess",
     ]).optional(),
+    cfR2Jurisdiction: z.enum([
+      "default",
+      "eu",
+      "fedramp",
+    ]).optional(),
   })
   .strict()
   .transform(transformBranch);

@@ -16,6 +16,7 @@ const configAttributes = ensureAllowedKeys<BucketConfig>({
   storageClass: true,
   branch: true,
   branchPattern: true,
+  cfR2Jurisdiction: true,
 }).map((attribute) => `config.${attribute}`);
 
 const {

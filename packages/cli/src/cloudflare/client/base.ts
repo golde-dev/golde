@@ -131,6 +131,7 @@ export class CloudflareBase {
     path: string,
     method = "GET",
     body?: object,
+    headers?: Record<string, string>,
   ): Promise<T> {
     logger.debug("[Cloudflare] request", {
       path,
@@ -144,6 +145,7 @@ export class CloudflareBase {
       headers: {
         "Authorization": `Bearer ${this.apiToken}`,
         "Content-Type": "application/json",
+        ...headers,
       },
     }).then(async (r) => {
       if (!r.ok) {
@@ -174,15 +176,26 @@ export class CloudflareBase {
   }
 
   /**
-   * Verify that user supplied token is active
+   * Verify that user or account supplied token is active
    */
   public async verifyUserToken(): Promise<void> {
-    const { status } = await this.makeRequest<VerifyTokenResult>(
-      "/user/tokens/verify",
-    );
+    const { accountId } = this;
 
-    if (status !== "active") {
-      throw new CloudflareError(`Token is not active: ${status}`);
+    try {
+      const { status: userTokenStatus } = await this.makeRequest<VerifyTokenResult>(
+        "/user/tokens/verify",
+      );
+      if (userTokenStatus !== "active") {
+        throw new CloudflareError(`Token is not active: ${userTokenStatus}`);
+      }
+    } catch {
+      const { status: accountTokenStatus } = await this.makeRequest<VerifyTokenResult>(
+        `/accounts/${accountId}/tokens/verify`,
+      );
+
+      if (accountTokenStatus !== "active") {
+        throw new CloudflareError(`Token is not active: ${accountTokenStatus}`);
+      }
     }
   }
 }
