@@ -47,13 +47,6 @@ export function applyChangeSet<T extends SavedResource[]>(
         break;
       case Type.CreateVersion: {
         const { version } = unit;
-        clonedResources.push({
-          path,
-          state,
-          version,
-          isCurrent: true,
-          createdAt: getCreatedAt(state),
-        });
         const prevVersionIndex = clonedResources.findIndex((resource) =>
           resource.path === path && resource.isCurrent === true
         );
@@ -63,6 +56,13 @@ export function applyChangeSet<T extends SavedResource[]>(
             isCurrent: false,
           };
         }
+        clonedResources.push({
+          path,
+          state,
+          version,
+          isCurrent: true,
+          createdAt: getCreatedAt(state),
+        });
         break;
       }
       case Type.Update: {
