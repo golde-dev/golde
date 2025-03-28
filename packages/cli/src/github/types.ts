@@ -12,13 +12,13 @@ export interface GithubCredentials {
   accessToken: string;
 }
 
-export interface GithubConfig {
+export interface GithubResourcesConfig {
   registry?: {
     dockerImage?: ImagesConfig;
   };
 }
 
-export interface GithubState {
+export interface GithubResourcesState {
   registry?: {
     dockerImage?: ImagesState;
   };

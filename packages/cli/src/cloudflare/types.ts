@@ -4,7 +4,7 @@ import type { DNSConfig } from "./resources/dns/record/types.ts";
 import type { DNSState } from "./resources/dns/record/types.ts";
 import type { R2BucketConfig, R2BucketState } from "./resources/r2/bucket/types.ts";
 
-export interface CloudflareConfig {
+export interface CloudflareResourcesConfig {
   dns?: {
     record?: DNSConfig;
   };
@@ -17,7 +17,7 @@ export interface CloudflareConfig {
   };
 }
 
-export interface CloudflareState {
+export interface CloudflareResourcesState {
   dns?: {
     record?: DNSState;
   };

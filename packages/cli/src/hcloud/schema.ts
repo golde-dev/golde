@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import { serversSchema } from "./resources/servers/schema.ts";
-import type { HCloudConfig, HCloudCredentials } from "./types.ts";
+import type { HCloudCredentials, HCloudResourcesConfig } from "./types.ts";
 
-export const hcloudConfigSchema = implement<HCloudConfig>()
+export const hcloudConfigSchema = implement<HCloudResourcesConfig>()
   .with({
     servers: serversSchema.optional(),
   })

@@ -4,12 +4,12 @@ import type { State } from "./types/state.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { isEmpty } from "@es-toolkit/es-toolkit/compat";
 
-export function createOutputs(context: Context, state: State): void {
+export function createOutputs(context: Context, _state: State): void {
   const {
-    config: { output },
+    config: { outputs },
   } = context;
 
-  if (isEmpty(output)) {
+  if (isEmpty(outputs)) {
     logger.info("[Output] No output defined");
     return;
   }

@@ -1,12 +1,12 @@
-import type { AWSConfig, AWSCredentials } from "../aws/types.ts";
-import type { CloudflareConfig, CloudflareCredentials } from "../cloudflare/types.ts";
-import type { GoldeClientConfig } from "../golde/types.ts";
+import type { AWSCredentials, AWSResourcesConfig } from "../aws/types.ts";
+import type { CloudflareCredentials, CloudflareResourcesConfig } from "../cloudflare/types.ts";
+import type { GoldeClientConfig, GoldeResourcesConfig } from "../golde/types.ts";
 import type { HCloudCredentials } from "../hcloud/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Outputs } from "./output.ts";
 import type { SlackCredentials } from "../slack/types.ts";
 import type { ResourceDependency } from "./dependencies.ts";
-import type { GithubConfig, GithubCredentials } from "../github/types.ts";
+import type { GithubCredentials, GithubResourcesConfig } from "../github/types.ts";
 
 export type Tags = Record<string, string>;
 export type TagList = string[];
@@ -45,16 +45,21 @@ export interface Resources {
   /**
    * Config for AWS resources
    */
-  aws?: AWSConfig;
+  aws?: AWSResourcesConfig;
   /**
    * Cloudflare resources
    */
-  cloudflare?: CloudflareConfig;
+  cloudflare?: CloudflareResourcesConfig;
 
   /**
    * Github resources
    */
-  github?: GithubConfig;
+  github?: GithubResourcesConfig;
+
+  /**
+   * Golde resources
+   */
+  golde?: GoldeResourcesConfig;
 }
 
 export type Config = {
@@ -86,7 +91,7 @@ export type Config = {
   /**
    * Config for golde outputs
    */
-  output?: Outputs;
+  outputs?: Outputs;
 };
 
 export interface ConfigLock {

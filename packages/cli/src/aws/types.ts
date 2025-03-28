@@ -26,7 +26,7 @@ export type WithRegion<T extends AWSResource> = T & {
   region: string;
 };
 
-export interface AWSConfig {
+export interface AWSResourcesConfig {
   /**
    * App Runner
    */
@@ -82,7 +82,7 @@ export interface AWSConfig {
   };
 }
 
-export interface AWSState {
+export interface AWSResourcesState {
   /**
    * App Runner Service
    */

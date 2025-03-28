@@ -1,14 +1,16 @@
-import type { AWSState } from "../aws/types.ts";
-import type { CloudflareState } from "../cloudflare/types.ts";
+import type { AWSResourcesState } from "../aws/types.ts";
+import type { CloudflareResourcesState } from "../cloudflare/types.ts";
 import type { Lock } from "./lock.ts";
-import type { GithubState } from "../github/types.ts";
+import type { GithubResourcesState } from "../github/types.ts";
 import type { Change } from "./plan.ts";
 import type { SavedResource } from "@/types/dependencies.ts";
+import type { GoldeResourcesState } from "../golde/types.ts";
 
 export interface State {
-  aws?: AWSState;
-  github?: GithubState;
-  cloudflare?: CloudflareState;
+  aws?: AWSResourcesState;
+  github?: GithubResourcesState;
+  cloudflare?: CloudflareResourcesState;
+  golde?: GoldeResourcesState;
 }
 
 export abstract class AbstractStateClient {

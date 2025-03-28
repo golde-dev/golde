@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import type { GithubCredentials } from "./types.ts";
-import type { GithubConfig } from "./types.ts";
+import type { GithubResourcesConfig } from "./types.ts";
 import { registryDockerImagesSchema } from "./resources/registry/dockerImage/schema.ts";
 
 export const githubCredentialsSchema = implement<GithubCredentials>()
@@ -16,7 +16,7 @@ export const githubCredentialsSchema = implement<GithubCredentials>()
   .describe("Github provider config")
   .strict();
 
-export const githubConfigSchema = implement<GithubConfig>()
+export const githubResourcesConfigSchema = implement<GithubResourcesConfig>()
   .with({
     registry: z.object({
       dockerImage: registryDockerImagesSchema.optional(),

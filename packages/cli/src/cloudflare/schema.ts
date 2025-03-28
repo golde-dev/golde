@@ -1,12 +1,12 @@
 import { implement } from "../utils/zod.ts";
-import type { CloudflareConfig, CloudflareCredentials } from "./types.ts";
+import type { CloudflareCredentials, CloudflareResourcesConfig } from "./types.ts";
 import { r2BucketsSchema } from "./resources/r2/bucket/schema.ts";
 import { s3ObjectSchema } from "@/generic/resources/s3/object/schema.ts";
 import { dnsSchema } from "./resources/dns/record/schema.ts";
 import { z } from "zod";
 import { d1DatabaseSchema } from "./resources/d1/database/schema.ts";
 
-export const cloudflareConfigSchema = implement<CloudflareConfig>()
+export const cloudflareResourcesConfigSchema = implement<CloudflareResourcesConfig>()
   .with({
     dns: z.object({
       record: dnsSchema.optional(),

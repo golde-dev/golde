@@ -1,14 +1,15 @@
 import { logger } from "./logger.ts";
+import { exit } from "node:process";
 import { createCloudflareDestroyPlan, createCloudflarePlan } from "./cloudflare/plan.ts";
 import { createAWSDestroyPlan, createAWSPlan } from "./aws/plan.ts";
 import { createGithubDestroyPlan, createGithubPlan } from "./github/plan.ts";
+import { createGoldeDestroyPlan, createGoldePlan } from "@/golde/plan.ts";
 import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
 import type { Context } from "./types/context.ts";
 import type { ExecutionUnit, Plan } from "./types/plan.ts";
 import type { UnitGroups } from "./types/plan.ts";
-import { exit } from "node:process";
 
 export function sortByPath<T extends { path: string }>(plan: T[]): T[] {
   return plan.toSorted(({ path: pathA }, { path: pathB }) => pathA.localeCompare(pathB));
@@ -162,6 +163,7 @@ export async function createPlan(
           createAWSPlan(context),
           createCloudflarePlan(context),
           createGithubPlan(context),
+          createGoldePlan(context),
         ],
       )
     ).flat();
@@ -195,6 +197,7 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
           createAWSDestroyPlan(context),
           createCloudflareDestroyPlan(context),
           createGithubDestroyPlan(context),
+          createGoldeDestroyPlan(context),
         ],
       )
     ).flat();

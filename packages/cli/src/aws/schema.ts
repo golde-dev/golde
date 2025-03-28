@@ -8,9 +8,9 @@ import { cloudwatchLogGroupSchema } from "./resources/cloudwatch/logGroup/schema
 import { lambdaFunctionSchema } from "./resources/lambda/function/schema.ts";
 import { iamUserSchema } from "./resources/iam/user/schema.ts";
 import { appRunnerServiceSchema } from "./resources/appRunner/service/schema.ts";
-import type { AWSConfig, AWSCredentials } from "./types.ts";
+import type { AWSCredentials, AWSResourcesConfig } from "./types.ts";
 
-export const awsConfigSchema = implement<AWSConfig>()
+export const awsResourcesConfigSchema = implement<AWSResourcesConfig>()
   .with({
     appRunner: z.object({
       service: appRunnerServiceSchema.optional(),
