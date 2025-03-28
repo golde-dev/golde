@@ -16,10 +16,10 @@ import { confirmExecutePlan, executePlan, printChanges, updateState } from "./ap
 import { getBranchName, verifyInstalled } from "./utils/git.ts";
 import { getExternalResources } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
-import type { LevelName } from "@std/log";
-import { createOutput } from "./output.ts";
+import { createOutputs } from "./output.ts";
 import { configure } from "./configure.ts";
 import { exit } from "node:process";
+import type { LevelName } from "@std/log";
 
 // TODO: handel .env.example errors
 await load({
@@ -30,10 +30,7 @@ await verifyInstalled();
 
 const program = new Command();
 
-program
-  .name("golde")
-  .description("Golde CLI")
-  .version(VERSION);
+program.name("golde").description("Golde CLI").version(VERSION);
 
 program
   .command("configure")
@@ -41,9 +38,7 @@ program
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-j, --json", "log output as json")
   .action(
-    async function (
-      { logLevel, json }: { logLevel: LevelName; json: boolean },
-    ) {
+    async ({ logLevel, json }: { logLevel: LevelName; json: boolean }) => {
       logger.configure(logLevel, json);
 
       await configure();
@@ -58,9 +53,7 @@ program
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-j, --json", "log output as json")
   .action(
-    async function (
-      { logLevel, json }: { logLevel: LevelName; json: boolean },
-    ) {
+    async ({ logLevel, json }: { logLevel: LevelName; json: boolean }) => {
       logger.configure(logLevel, json);
 
       await initConfig();
@@ -78,19 +71,13 @@ program
   .option("-f, --format", "config output format", "json")
   .option("-j, --json", "logging output as json")
   .action(
-    async function (
-      options: {
-        logLevel: LevelName;
-        config: string;
-        json: boolean;
-        format: "json" | "yaml" | "toml";
-      },
-    ) {
-      const {
-        logLevel,
-        json,
-        config: configPath,
-      } = options;
+    async (options: {
+      logLevel: LevelName;
+      config: string;
+      json: boolean;
+      format: "json" | "yaml" | "toml";
+    }) => {
+      const { logLevel, json, config: configPath } = options;
 
       logger.configure(logLevel, json);
       const branchName = getBranchName();
@@ -115,20 +102,23 @@ program
   .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
   .action(
-    async function (
-      { logLevel, json, config }: {
-        logLevel: LevelName;
-        config: string;
-        json: boolean;
-      },
-    ) {
+    async ({
+      logLevel,
+      json,
+      config,
+    }: {
+      logLevel: LevelName;
+      config: string;
+      json: boolean;
+    }) => {
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
       const loadedConfig = await getConfig(branchName, config);
-      const {
-        previousState,
-      } = await initializeContext(branchName, loadedConfig);
+      const { previousState } = await initializeContext(
+        branchName,
+        loadedConfig,
+      );
 
       logger.info(`[State] Current state for ${branchName}`, previousState);
       exit(0);
@@ -142,13 +132,15 @@ program
   .option("-c, --config <config>", "location of config file")
   .option("-j, --json", "log output as json")
   .action(
-    async function (
-      { logLevel, json, config }: {
-        logLevel: LevelName;
-        config: string;
-        json: boolean;
-      },
-    ) {
+    async ({
+      logLevel,
+      json,
+      config,
+    }: {
+      logLevel: LevelName;
+      config: string;
+      json: boolean;
+    }) => {
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
@@ -173,21 +165,14 @@ program
   .option("-y, --yes", "destroy without prompting")
   .option("-a, --all", "destroy all resources across all branches")
   .action(
-    async function (
-      options: {
-        logLevel: LevelName;
-        config: string;
-        json: boolean;
-        yes: boolean;
-        all: boolean;
-      },
-    ) {
-      const {
-        logLevel,
-        json,
-        config: configPath,
-        yes,
-      } = options;
+    async (options: {
+      logLevel: LevelName;
+      config: string;
+      json: boolean;
+      yes: boolean;
+      all: boolean;
+    }) => {
+      const { logLevel, json, config: configPath, yes } = options;
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
@@ -207,14 +192,14 @@ program
       const locks = await lockDependencies(context, finalPlan, external);
       const executionUnits = filterExecutionUnits(finalPlan);
 
-      const shouldExecute = yes || await confirmExecutePlan();
+      const shouldExecute = yes || (await confirmExecutePlan());
 
       if (shouldExecute) {
         const changes = await executePlan(initialPlan, executionUnits);
         printChanges(changes);
 
         const state = await updateState(context, changes, locks);
-        createOutput(context, state);
+        createOutputs(context, state);
       }
       await releaseLocks(context, locks);
       exit(0);
@@ -229,20 +214,13 @@ program
   .option("-j, --json", "log output as json")
   .option("-y, --yes", "destroy without prompting")
   .action(
-    function (
-      options: {
-        logLevel: LevelName;
-        config: string;
-        json: boolean;
-        yes: boolean;
-      },
-    ) {
-      const {
-        logLevel,
-        json,
-        config: _,
-        yes: __,
-      } = options;
+    (options: {
+      logLevel: LevelName;
+      config: string;
+      json: boolean;
+      yes: boolean;
+    }) => {
+      const { logLevel, json, config: _, yes: __ } = options;
       logger.configure(logLevel, json);
       logger.warn("This command is not implemented yet");
       exit(0);
@@ -255,18 +233,12 @@ program
   .option("-l, --logLevel <level>", "define log level", "INFO")
   .option("-c, --config <config>", "location of config file")
   .action(
-    async function (
-      options: {
-        logLevel: LevelName;
-        config: string;
-        json: boolean;
-      },
-    ) {
-      const {
-        logLevel,
-        json,
-        config,
-      } = options;
+    async (options: {
+      logLevel: LevelName;
+      config: string;
+      json: boolean;
+    }) => {
+      const { logLevel, json, config } = options;
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
@@ -292,20 +264,13 @@ program
   .option("-y, --yes", "apply plan without prompting")
   .option("-j, --json", "log output as json")
   .action(
-    async function (
-      options: {
-        logLevel: LevelName;
-        yes: boolean;
-        config: string;
-        json: boolean;
-      },
-    ) {
-      const {
-        logLevel,
-        json,
-        config: configPath,
-        yes = false,
-      } = options;
+    async (options: {
+      logLevel: LevelName;
+      yes: boolean;
+      config: string;
+      json: boolean;
+    }) => {
+      const { logLevel, json, config: configPath, yes = false } = options;
       logger.configure(logLevel, json);
 
       const branchName = getBranchName();
@@ -325,14 +290,14 @@ program
       const locks = await lockDependencies(context, finalPlan, external);
       const executionUnits = filterExecutionUnits(finalPlan);
 
-      const shouldExecute = yes || await confirmExecutePlan();
+      const shouldExecute = yes || (await confirmExecutePlan());
 
       if (shouldExecute) {
         const changes = await executePlan(initialPlan, executionUnits);
         printChanges(changes);
 
         const state = await updateState(context, changes, locks);
-        createOutput(context, state);
+        createOutputs(context, state);
       }
       await releaseLocks(context, locks);
       exit(0);

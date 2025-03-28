@@ -42,7 +42,7 @@ export class SlackClient {
       },
     }).then(async (r) => {
       if (!r.ok) {
-        throw new SlackError(`Slack request failed`, {
+        throw new SlackError("Slack request failed", {
           url: r.url,
           status: r.status,
           statusText: r.statusText,
@@ -56,24 +56,24 @@ export class SlackClient {
       if (error instanceof SlackError) {
         throw error;
       }
-      throw new SlackError(`Slack request failed`, error);
+      throw new SlackError("Slack request failed", error);
     });
   }
 
   public async verifyToken(): Promise<void> {
     logger.debug("[Slack] verifying token");
     try {
-      await this.makeRequest<void>(`auth.test`, "GET");
+      await this.makeRequest<void>("auth.test", "GET");
     } catch (error) {
       if (error instanceof SlackError) {
         throw error;
       }
-      throw new SlackError(`Slack token verification failed`);
+      throw new SlackError("Slack token verification failed");
     }
   }
 
   public async sendMessage(channel: string, message: string): Promise<void> {
-    await this.makeRequest<void>(`chat.postMessage`, "POST", {
+    await this.makeRequest<void>("chat.postMessage", "POST", {
       channel,
       text: message,
     });
