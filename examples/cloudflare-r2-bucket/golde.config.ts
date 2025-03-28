@@ -1,4 +1,4 @@
-import type {Config} from "@golde/cli";
+import type { Config } from "@golde/cli";
 
 const config: Config = {
   name: "example-cloudflare-r2-bucket",
@@ -16,11 +16,13 @@ const config: Config = {
       accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
     },
   },
-  cloudflare: {
-    r2: {
-      bucket: {
-        "example-cloudflare-r2-bucket": {
-          storageClass: "Standard"
+  resources: {
+    cloudflare: {
+      r2: {
+        bucket: {
+          "example-cloudflare-r2-bucket": {
+            storageClass: "Standard"
+          }
         }
       }
     }

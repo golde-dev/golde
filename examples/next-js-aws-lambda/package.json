@@ -1,5 +1,5 @@
 {
-  "name": "@golde/example-aws-lambda-next-js",
+  "name": "@golde/next-js-aws-lambda",
   "version": "0.1.0",
   "private": true,
   "packageManager": "yarn@4.5.1",

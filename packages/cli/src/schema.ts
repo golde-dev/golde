@@ -7,8 +7,9 @@ import { cloudflareConfigSchema, cloudflareCredentialsSchema } from "./cloudflar
 import { goldeCredentialsSchema } from "./golde/schema.ts";
 import { githubConfigSchema, githubCredentialsSchema } from "./github/schema.ts";
 import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
-import type { Config, ProvidersConfig } from "./types/config.ts";
+import type { Config, ProvidersConfig, Resources } from "./types/config.ts";
 import type { ZodType } from "zod";
+import { implement } from "./utils/zod.ts";
 
 export const projectNameSchema = z
   .string()
@@ -30,15 +31,19 @@ export const providersSchema: ZodType<ProvidersConfig> = z
 
 export const outputSchema = z.record(z.string());
 
+export const resourceSchema = implement<Resources>().with({
+  aws: awsConfigSchema.optional(),
+  github: githubConfigSchema.optional(),
+  cloudflare: cloudflareConfigSchema.optional(),
+});
+
 export const schema: ZodType<Config> = z
   .object({
     name: projectNameSchema,
     tags: tagsSchema.optional(),
     state: stateSchema.optional(),
     providers: providersSchema.optional(),
-    aws: awsConfigSchema.optional(),
-    github: githubConfigSchema.optional(),
-    cloudflare: cloudflareConfigSchema.optional(),
+    resources: resourceSchema.optional(),
     // output: outputSchema.optional(),
   })
   .strict();

@@ -21,19 +21,21 @@ const config: Config = {
       }
     },
   },
-  cloudflare: {
-    r2: {
-      bucket: {
-        "example-bucket-r2-object": {
-          storageClass: "Standard"
-        }
-      },
-      object: {
-        "copy.txt": {
-          branch: "master",
-          source: "./src/base.txt",
-          bucketName: "{{ state.cloudflare.r2.bucket.example-bucket-r2-object.name }}",
+  resources: {
+    cloudflare: {
+      r2: {
+        bucket: {
+          "example-bucket-r2-object": {
+            storageClass: "Standard"
+          }
         },
+        object: {
+          "copy.txt": {
+            branch: "master",
+            source: "./src/base.txt",
+            bucketName: "{{ state.cloudflare.r2.bucket.example-bucket-r2-object.name }}",
+          },
+        }
       }
     }
   }

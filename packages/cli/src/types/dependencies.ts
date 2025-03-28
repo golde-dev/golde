@@ -1,7 +1,7 @@
 import type { ResourceState, VersionedResourceState } from "./config.ts";
 
 export interface ResourceDependency {
-  statePath: string;
+  valuePath: string;
   resourcePath: string;
   resourceName: string;
   resourceAttribute: string;

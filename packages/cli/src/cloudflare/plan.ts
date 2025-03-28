@@ -17,7 +17,9 @@ export async function createCloudflarePlan(context: Context): Promise<Plan> {
       cloudflare: cloudflareState,
     } = {},
     config: {
-      cloudflare: cloudflareConfig,
+      resources: {
+        cloudflare: cloudflareConfig,
+      } = {},
     },
     cloudflare,
     tags,

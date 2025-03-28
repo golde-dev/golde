@@ -169,7 +169,7 @@ describe("resolveTemplate", () => {
 describe("resolveStateDependencies", () => {
   it("should resolve dependencies for a single unit", () => {
     const dependOn = {
-      statePath: "aws.s3.bucket.my-bucket.name",
+      valuePath: "aws.s3.bucket.my-bucket.name",
       resourcePath: "aws.s3.bucket.my-bucket",
       resourceName: "my-bucket",
       resourceAttribute: "name",
@@ -229,14 +229,14 @@ describe("resolveStateDependencies", () => {
     expect(resolveUnitState(unit, [deps])).toEqual(expected);
   });
 
-  it("should throw if state path reference is invalid", () => {
+  it("should throw if resources path reference is invalid", () => {
     const unit: CreateUnit<
       { bucketName: string } & ResourceConfig,
       { bucketName: string } & ResourceState
     > = {
       type: Type.Create,
       path: "aws.s3.object.my-object",
-      args: [`{{ state.aws.s3.bucket.my-bucket.invalid }}`],
+      args: [`{{ resources.aws.s3.bucket.my-bucket.invalid }}`],
       executor: (bucketName: string) =>
         Promise.resolve({
           bucketName,
@@ -247,13 +247,13 @@ describe("resolveStateDependencies", () => {
           dependsOn: [],
         }),
       config: {
-        bucketName: `{{ state.aws.s3.bucket.my-bucket.invalid }}`,
+        bucketName: `{{ resources.aws.s3.bucket.my-bucket.invalid }}`,
         branch: "master",
       },
       dependsOn: [
         {
-          statePath: "aws.s3.bucket.my-bucket.name",
-          resourcePath: "state.aws.s3.bucket.my-bucket",
+          valuePath: "aws.s3.bucket.my-bucket.name",
+          resourcePath: "resources.aws.s3.bucket.my-bucket",
           resourceName: "my-bucket",
           resourceAttribute: "name",
         },
@@ -261,7 +261,7 @@ describe("resolveStateDependencies", () => {
     };
 
     const deps = {
-      path: "state.aws.s3.bucket.my-bucket",
+      path: "resources.aws.s3.bucket.my-bucket",
       type: Type.Noop,
       state: {
         differentName: "my-bucket",
@@ -273,7 +273,7 @@ describe("resolveStateDependencies", () => {
     };
 
     expect(() => resolveUnitState(unit, [deps])).toThrow(
-      "Failed to resolve unit aws.s3.object.my-object dependency on state.aws.s3.bucket.my-bucket, attribute invalid is missing",
+      "Failed to resolve unit aws.s3.object.my-object dependency on resources.aws.s3.bucket.my-bucket, attribute invalid is missing",
     );
   });
 });

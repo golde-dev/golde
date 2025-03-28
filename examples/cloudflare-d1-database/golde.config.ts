@@ -1,4 +1,4 @@
-import type {Config} from "@golde/cli";
+import type { Config } from "@golde/cli";
 
 const config: Config = {
   name: "example-cloudflare-d1-database",
@@ -11,12 +11,14 @@ const config: Config = {
       accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
     },
   },
-  cloudflare: {
-    d1: {
-      database: {
-        "example-cloudflare-d1-database": {
-          branch: "master",
-          locationHint: "apac",
+  resources: {
+    cloudflare: {
+      d1: {
+        database: {
+          "example-cloudflare-d1-database": {
+            branch: "master",
+            locationHint: "apac",
+          }
         }
       }
     }

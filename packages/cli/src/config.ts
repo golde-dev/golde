@@ -232,3 +232,8 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
     return exit(1);
   }
 }
+
+// TODO: redact secrets
+export function printConfig(config: Config) {
+  logger.info(JSON.stringify(config, null, 2));
+}

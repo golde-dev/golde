@@ -214,17 +214,17 @@ export const fileTemplate = (value: string): string => {
   }
 };
 
-const stateRe = new RegExp(/(?<=state.)(.*)/);
+const resourcesRe = new RegExp(/(?<=resources.)(.*)/);
 
 export const resourcesTemplate =
   (resources: Omit<SavedResource, "createdAt" | "updatedAt">[]) => (value: string): string => {
-    const match = stateRe.exec(value.trim());
+    const match = resourcesRe.exec(value.trim());
     if (!match) {
       return originalTemplateString(value);
     }
-    const [stateMatch] = match;
+    const [resourceMatch] = match;
 
-    const deps = matchStatePath(stateMatch);
+    const deps = matchStatePath(resourceMatch);
 
     if (deps) {
       const [resourcePath, _, resourceAttribute] = deps;
@@ -250,7 +250,7 @@ export const resourcesTemplate =
       }
 
       throw new ConfigError(
-        `Failed to resolve state dependency on ${stateMatch}`,
+        `Failed to resolve state dependency on ${resourceMatch}`,
         ConfigErrorCode.INVALID_CONFIG,
       );
     }

@@ -32,7 +32,9 @@ export async function createAWSPlan(context: Context): Promise<Plan> {
       aws: awsState,
     } = {},
     config: {
-      aws: awsConfig,
+      resources: {
+        aws: awsConfig,
+      } = {},
     },
     aws,
     tags,

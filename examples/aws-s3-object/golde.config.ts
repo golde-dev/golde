@@ -16,57 +16,59 @@ const config: Config = {
       secretAccessKey: "{{ env.AWS_SECRET_ACCESS_KEY }}",
     },
   },
-  aws: {
-    s3: {
-      bucket: {
-        "golde-example-aws-s3-object": {
-          tags: {
-            "BucketTag": "example-aws-s3-object",
+  resources: {
+    aws: {
+      s3: {
+        bucket: {
+          "golde-example-aws-s3-object": {
+            tags: {
+              "BucketTag": "example-aws-s3-object",
+            },
+          }
+        },
+        object: {
+          "includes.tar": {
+            branch: "master",
+            includes: [
+              { from: "./src/nested", to: "." },
+              { from: "./src/base.txt", to: "." },
+              { from: "./src/nested", to: "./moved/nested" },
+
+              { from: "./src/base.txt", to: "./renamed.txt" },
+            ],
+            bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+          },
+          "copy.txt": {
+            branch: "master",
+            source: "./src/base.txt",
+            bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+          },
+          "file-hash.copy.tar": {
+            branch: "master",
+            version: "FileHash",
+            source: "./src/base.txt",
+            bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+          },
+          "file-last-updated.copy.tar": {
+            branch: "master",
+            version: "LastUpdated",
+            source: "./src/base.txt",
+            bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+          },
+          "git-hash.copy.tar": {
+            branch: "master",
+            version: "GitHash",
+            source: "./src/base.txt",
+            bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
+          },
+          "git-hash-context.copy.tar": {
+            branch: "master",
+            version: "GitContextHash",
+            context: "./src",
+            source: "base.txt",
+            bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
           },
         }
-      },
-      object: {
-        "includes.tar": {
-          branch: "master",
-          includes: [
-            { from: "./src/nested", to: "." },
-            { from: "./src/base.txt", to: "." },
-            { from: "./src/nested", to: "./moved/nested" },
-
-            { from: "./src/base.txt", to: "./renamed.txt" },
-          ],
-          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
-        },
-        "copy.txt": {
-          branch: "master",
-          source: "./src/base.txt",
-          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
-        },
-        "file-hash.copy.tar": {
-          branch: "master",
-          version: "FileHash",
-          source: "./src/base.txt",
-          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
-        },
-        "file-last-updated.copy.tar": {
-          branch: "master",
-          version: "LastUpdated",
-          source: "./src/base.txt",
-          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
-        },
-        "git-hash.copy.tar": {
-          branch: "master",
-          version: "GitHash",
-          source: "./src/base.txt",
-          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
-        },
-        "git-hash-context.copy.tar": {
-          branch: "master",
-          version: "GitContextHash",
-          context: "./src",
-          source: "base.txt",
-          bucketName: "{{ state.aws.s3.bucket.golde-example-aws-s3-object.name }}",
-        },
       }
     }
   }

@@ -15,7 +15,9 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
       github: githubState,
     } = {},
     config: {
-      github: githubConfig,
+      resources: {
+        github: githubConfig,
+      } = {},
     },
     github,
     tags,

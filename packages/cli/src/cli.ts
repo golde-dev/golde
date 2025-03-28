@@ -1,7 +1,7 @@
 import { load } from "@std/dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
-import { getConfig } from "./config.ts";
+import { getConfig, printConfig } from "./config.ts";
 import {
   createDestroyPlan,
   createPlan,
@@ -89,15 +89,21 @@ program
       const {
         logLevel,
         json,
-        config,
+        config: configPath,
       } = options;
 
       logger.configure(logLevel, json);
       const branchName = getBranchName();
-      const loadedConfig = await getConfig(branchName, config);
-      const context = await initializeContext(branchName, loadedConfig);
+      const config = await getConfig(branchName, configPath);
+      const context = await initializeContext(branchName, config);
 
-      logger.info(`[Config] current config for ${branchName}`, context.config);
+      const initialPlan = await createPlan(context);
+      const external = await getExternalResources(context, initialPlan);
+
+      const { config: finalConfig } = await getFinalContext(context, external);
+
+      logger.info(`[Config] current config for ${branchName}`);
+      printConfig(finalConfig);
       exit(0);
     },
   );

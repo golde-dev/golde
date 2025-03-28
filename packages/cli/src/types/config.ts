@@ -41,24 +41,7 @@ export interface ProvidersConfig {
   hcloud?: HCloudCredentials;
 }
 
-export type Config = {
-  /**
-   * Name of project
-   * @note Change to project name will result with state becoming detached from project
-   */
-  name: string;
-  /**
-   * These would be merged with resource specific tags
-   */
-  tags?: Tags;
-  /**
-   * Config for providers (aws, golde, cloudflare, etc)
-   */
-  providers?: ProvidersConfig;
-  /**
-   * Config for state management, define how projects state will be stored
-   */
-  state?: StateConfig;
+export interface Resources {
   /**
    * Config for AWS resources
    */
@@ -72,6 +55,34 @@ export type Config = {
    * Github resources
    */
   github?: GithubConfig;
+}
+
+export type Config = {
+  /**
+   * Name of project
+   * @note Change to project name will result with state becoming detached from project
+   */
+  name: string;
+  /**
+   * These would be merged with resource specific tags
+   */
+  tags?: Tags;
+
+  /**
+   * Config for providers (aws, golde, cloudflare, etc)
+   */
+  providers?: ProvidersConfig;
+
+  /**
+   * Resources config
+   */
+  resources?: Resources;
+
+  /**
+   * Config for state management, define how projects state will be stored
+   */
+  state?: StateConfig;
+
   output?: Output | Output[];
 };
 

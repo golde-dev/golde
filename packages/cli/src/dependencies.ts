@@ -10,7 +10,7 @@ import { Type } from "./types/plan.ts";
 import { matchGithubPath } from "@/github/path.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
-const stateRe = new RegExp(/(?<=state.)(.*)/);
+const stateRe = new RegExp(/(?<=resources.)(.*)/);
 
 export const matchStatePath = memoize((path: string) =>
   matchAWSPath(path) ?? matchCloudflarePath(path) ?? matchGithubPath(path)
@@ -28,13 +28,13 @@ export function dependenciesSearch(
     if (placeholder === trimmed) {
       const match = stateRe.exec(key.trim());
       if (match) {
-        const [statePath] = match;
+        const [valuePath] = match;
 
-        const depsMatch = matchStatePath(statePath);
+        const depsMatch = matchStatePath(valuePath);
         if (depsMatch) {
           const [resourcePath, resourceName, resourceAttribute] = depsMatch;
           dependencies.push({
-            statePath,
+            valuePath,
             resourcePath,
             resourceName,
             resourceAttribute,
@@ -55,7 +55,7 @@ export function findResourceDependencies(
 ): ResourceDependency[] {
   if (typeof value === "string") {
     dependenciesSearch(value, dependencies);
-  } else if (value instanceof Array) {
+  } else if (Array.isArray(value)) {
     value.map((val) => findResourceDependencies(val, dependencies));
   } else if (isPlainObject(value)) {
     Object.entries(value).forEach(([key, val]) => {

@@ -1,4 +1,4 @@
-import type {Config} from '@golde/cli';
+import type { Config } from '@golde/cli';
 
 const config: Config = {
   name: "example-aws-cloudwatch-log-group",
@@ -16,14 +16,16 @@ const config: Config = {
       secretAccessKey: "{{ env.AWS_SECRET_ACCESS_KEY }}",
     },
   },
-  aws: {
-    cloudwatch: {
-      logGroup: {
-        "/aws/aws-cloudwatch-log-group": {
-          retentionInDays: 30,
-          tags: {
-            "GroupTag": "Example Log tag",
-          },
+  resources: {
+    aws: {
+      cloudwatch: {
+        logGroup: {
+          "/aws/aws-cloudwatch-log-group": {
+            retentionInDays: 30,
+            tags: {
+              "GroupTag": "Example Log tag",
+            },
+          }
         }
       }
     }

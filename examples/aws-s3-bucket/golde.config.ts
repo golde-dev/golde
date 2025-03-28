@@ -1,4 +1,4 @@
-import type {Config} from '@golde/cli';
+import type { Config } from '@golde/cli';
 
 const config: Config = {
   name: "example-aws-s3-bucket",
@@ -16,13 +16,15 @@ const config: Config = {
       secretAccessKey: "{{ env.AWS_SECRET_ACCESS_KEY }}",
     },
   },
-  aws: {
-    s3: {
-      bucket: {
-        "golde-example-aws-s3-bucket": {
-          tags: {
-            "BucketTag": "Example",
-          },
+  resources: {
+    aws: {
+      s3: {
+        bucket: {
+          "golde-example-aws-s3-bucket": {
+            tags: {
+              "BucketTag": "Example",
+            },
+          }
         }
       }
     }
