@@ -2,6 +2,7 @@ import type { GoldeClient } from "@/golde/client/client.ts";
 import type { ContainerConfig, ContainerState } from "./types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import { PlanError, PlanErrorCode } from "@/error.ts";
+import { logger } from "@/logger.ts";
 
 export function createDockerContainerExecutors(golde: GoldeClient) {
   async function createContainer(
@@ -11,6 +12,8 @@ export function createDockerContainerExecutors(golde: GoldeClient) {
     const {
       createdAt,
     } = await golde.createDockerContainer(name, config);
+
+    logger.debug("[Execute][Golde] Created docker container", { name, config });
 
     return {
       createdAt,
@@ -27,6 +30,8 @@ export function createDockerContainerExecutors(golde: GoldeClient) {
       updatedAt,
     } = await golde.updateDockerContainer(name, config);
 
+    logger.debug("[Execute][Golde] Updated docker container", { name, config });
+
     return {
       ...state,
       updatedAt,
@@ -38,6 +43,7 @@ export function createDockerContainerExecutors(golde: GoldeClient) {
     name: string,
   ): Promise<void> {
     await golde.deleteDockerContainer(name);
+    logger.debug("[Execute][Golde] Deleted docker container", { name });
   }
 
   async function assertContainerNameAvailable(name: string) {

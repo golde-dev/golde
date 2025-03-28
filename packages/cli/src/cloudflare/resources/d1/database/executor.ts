@@ -21,7 +21,9 @@ export async function createDatabase(
   });
 
   const end = Date.now();
-  logger.debug(`[Cloudflare] Created D1 database ${name} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Execute][Cloudflare] Created D1 database ${name} in ${formatDuration(end - start)}`,
+  );
 
   return {
     uuid,
@@ -38,7 +40,9 @@ export async function deleteDatabase(
   const start = Date.now();
   await this.deleteD1Database(name);
   const end = Date.now();
-  logger.debug(`[Cloudflare] Deleted D1 database ${name} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Execute][Cloudflare] Deleted D1 database ${name} in ${formatDuration(end - start)}`,
+  );
 }
 
 export type DeleteDatabase = typeof deleteDatabase;
@@ -47,7 +51,9 @@ export async function assertDatabaseExist(this: CloudflareClient, name: string) 
   const start = performance.now();
   const exists = await this.checkD1DatabaseExists(name);
   const end = performance.now();
-  logger.debug(`[Cloudflare] Checked D1 database ${name} exists in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Plan][Cloudflare] Checked D1 database ${name} exists in ${formatDuration(end - start)}`,
+  );
   if (!exists) {
     throw new PlanError(`D1 database ${name} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
   }
@@ -61,7 +67,7 @@ export async function assertDatabaseNotExist(
   const exists = await this.checkD1DatabaseExists(name);
   const end = performance.now();
   logger.debug(
-    `[Cloudflare] Checked D1 database ${name} not exists in ${formatDuration(end - start)}`,
+    `[Plan][Cloudflare] Checked D1 database ${name} not exists in ${formatDuration(end - start)}`,
   );
   if (exists) {
     throw new PlanError(`D1 Database ${name} already exists`, PlanErrorCode.RESOURCE_EXISTS);

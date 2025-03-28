@@ -50,7 +50,7 @@ export async function createRole(
   });
 
   if (inlinePolicy) {
-    logger.debug(`[AWS] Putting inline policy to role ${roleName}`);
+    logger.debug(`[Execute][AWS] Putting inline policy to role ${roleName}`);
     const inlinePolicyDocument = stringify(inlinePolicy);
     await this.putInlinePolicyToIAMRole(
       roleName,
@@ -64,7 +64,7 @@ export async function createRole(
   }
 
   const end = Date.now();
-  logger.debug(`[AWS] Created AIM role ${roleName} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Created AIM role ${roleName} in ${formatDuration(end - start)}`);
 
   const arn = aimRoleArn(this, roleName, path);
   const createdAt = nowStringDate();
@@ -83,7 +83,7 @@ export async function deleteRole(
   const start = Date.now();
   await this.deleteIAMRole(name);
   const end = Date.now();
-  logger.debug(`[AWS] Deleted AIM role ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Deleted AIM role ${name} in ${formatDuration(end - start)}`);
 }
 
 export type DeleteRole = typeof deleteRole;
@@ -114,13 +114,13 @@ export async function updateRole(
   const start = performance.now();
 
   if (!isEqual(previousTags, tags)) {
-    logger.debug(`[AWS] Updating tags to role ${name}`);
+    logger.debug(`[Execute][AWS] Updating tags to role ${name}`);
     const tagsList = toTagsList(tags) ?? [];
     await this.updateIAmRoleTags(roleName, tagsList);
   }
 
   if (!isEqual(previousAssumeRolePolicy, assumeRolePolicy)) {
-    logger.debug(`[AWS] Updating assume role policy to role ${name}`);
+    logger.debug(`[Execute][AWS] Updating assume role policy to role ${name}`);
     const assumeRolePolicyDocument = stringify(assumeRolePolicy);
     await this.updateAssumeRolePolicyToIAMRole(
       roleName,
@@ -129,11 +129,11 @@ export async function updateRole(
   }
 
   if (!inlinePolicy && previousInlinePolicy) {
-    logger.debug(`[AWS] Removing inline policy from role ${name}`);
+    logger.debug(`[Execute][AWS] Removing inline policy from role ${name}`);
     await this.removeInlinePolicyFromIAMRole(roleName);
   } else if (inlinePolicy) {
     if (!isEqual(previousInlinePolicy, inlinePolicy)) {
-      logger.debug(`[AWS] Updating inline policy to role ${name}`);
+      logger.debug(`[Execute][AWS] Updating inline policy to role ${name}`);
       const inlinePolicyDocument = stringify(inlinePolicy);
       await this.putInlinePolicyToIAMRole(
         roleName,
@@ -143,23 +143,23 @@ export async function updateRole(
   }
 
   if (!isEqual(previousManagedPoliciesArns, managedPoliciesArns)) {
-    logger.debug(`[AWS] Updating managed policies to role ${name}`);
+    logger.debug(`[Execute][AWS] Updating managed policies to role ${name}`);
     for (const policyArn of managedPoliciesArns) {
       if (!previousManagedPoliciesArns.includes(policyArn)) {
-        logger.debug(`[AWS] Attaching managed policy ${policyArn} to role ${name}`);
+        logger.debug(`[Execute][AWS] Attaching managed policy ${policyArn} to role ${name}`);
         await this.attachManagedPolicyToIAMRole(roleName, policyArn);
       }
     }
     for (const policyArn of previousManagedPoliciesArns) {
       if (!managedPoliciesArns.includes(policyArn)) {
-        logger.debug(`[AWS] Removing managed policy ${policyArn} from role ${name}`);
+        logger.debug(`[Execute][AWS] Removing managed policy ${policyArn} from role ${name}`);
         await this.removeManagedPolicyFromIAMRole(roleName, policyArn);
       }
     }
   }
 
   const end = performance.now();
-  logger.debug(`[AWS] Updated AIM role ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Updated AIM role ${name} in ${formatDuration(end - start)}`);
 
   const updatedAt = nowStringDate();
 
@@ -177,7 +177,7 @@ export async function assertRoleExist(this: AWSClient, name: string) {
   const start = performance.now();
   const exists = await this.checkIAMRoleExists(name);
   const end = performance.now();
-  logger.debug(`[AWS] Checked IAM role ${name} exists in ${formatDuration(end - start)}`);
+  logger.debug(`[Plan][AWS] Checked IAM role ${name} exists in ${formatDuration(end - start)}`);
   if (!exists) {
     throw new PlanError(`Bucket ${name} does not exist`, PlanErrorCode.RESOURCE_NOT_FOUND);
   }
@@ -187,7 +187,7 @@ export async function assertRoleNotExist(this: AWSClient, name: string) {
   const start = performance.now();
   const exists = await this.checkIAMRoleExists(name);
   const end = performance.now();
-  logger.debug(`[AWS] Checked IAM role ${name} exists in ${formatDuration(end - start)}`);
+  logger.debug(`[Plan][AWS] Checked IAM role ${name} exists in ${formatDuration(end - start)}`);
   if (exists) {
     throw new PlanError(`AIM role ${name} already exists`, PlanErrorCode.RESOURCE_EXISTS);
   }
@@ -209,7 +209,7 @@ export async function assertCreatePermission(this: AWSClient, name: string, path
   );
   const end = performance.now();
   logger.debug(
-    `[AWS] Checked create permission for role ${name} in ${formatDuration(end - start)}`,
+    `[Plan][AWS] Checked create permission for role ${name} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
     logger.error(`[AWS] Create permission denied for role ${name}`, reason);
@@ -225,10 +225,10 @@ export async function assertDeletePermission(this: AWSClient, name: string, path
   );
   const end = performance.now();
   logger.debug(
-    `[AWS] Checked permission to delete role ${roleArn} in ${formatDuration(end - start)}`,
+    `[Plan][AWS] Checked permission to delete role ${roleArn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[AWS] Delete permission denied for role ${roleArn}`, reason);
+    logger.error(`[Plan][AWS] Delete permission denied for role ${roleArn}`, reason);
     throw new PlanError(`Cannot delete role ${roleArn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -250,10 +250,10 @@ export async function assertUpdatePermission(this: AWSClient, name: string, path
   );
   const end = performance.now();
   logger.debug(
-    `[AWS] Checked permission for update role ${roleArn} in ${formatDuration(end - start)}`,
+    `[Plan][AWS] Checked permission for update role ${roleArn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[AWS] Update permissions denied for ${roleArn}`, reason);
+    logger.error(`[Plan][AWS] Update permissions denied for ${roleArn}`, reason);
     throw new PlanError(`Cannot update role ${roleArn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

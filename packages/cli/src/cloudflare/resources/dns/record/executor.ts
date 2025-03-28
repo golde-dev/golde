@@ -28,7 +28,9 @@ async function createZoneRecord(
     comment: config.comment,
   });
   const end = performance.now();
-  logger.debug(`[Cloudflare] Created dns record ${name} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Execute][Cloudflare] Created dns record ${name} in ${formatDuration(end - start)}`,
+  );
 
   return {
     id,
@@ -64,7 +66,9 @@ async function updateZoneRecord(
     comment: config.comment,
   });
   const end = performance.now();
-  logger.debug(`[Cloudflare] Updated dns record ${name} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Execute][Cloudflare] Updated dns record ${name} in ${formatDuration(end - start)}`,
+  );
   return {
     id,
     zoneId,
@@ -84,7 +88,7 @@ async function deleteZoneRecord(
   const start = performance.now();
   await this.deleteZoneRecord(zoneName, recordId);
   const end = performance.now();
-  logger.debug(`[Cloudflare] Deleted dns record in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][Cloudflare] Deleted dns record in ${formatDuration(end - start)}`);
 }
 
 export type DeleteZoneRecord = typeof deleteZoneRecord;

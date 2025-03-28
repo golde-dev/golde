@@ -197,6 +197,19 @@
               ],
               "additionalProperties": false,
               "description": "Hetzner provider config"
+            },
+            "slack": {
+              "type": "object",
+              "properties": {
+                "apiToken": {
+                  "type": "string",
+                  "description": "Slack API token"
+                }
+              },
+              "required": [
+                "apiToken"
+              ],
+              "additionalProperties": false
             }
           },
           "additionalProperties": false
@@ -1126,6 +1139,48 @@
                       },
                       "propertyNames": {
                         "pattern": "^[a-z0-9][a-z0-9-_]*$"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "golde": {
+              "type": "object",
+              "properties": {
+                "docker": {
+                  "type": "object",
+                  "properties": {
+                    "container": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "branch": {
+                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
+                          },
+                          "branchPattern": {
+                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
+                          },
+                          "tags": {
+                            "$ref": "#/definitions/golde/properties/tags"
+                          },
+                          "server": {
+                            "type": "string",
+                            "description": "Name of server to run container on"
+                          },
+                          "image": {
+                            "type": "string",
+                            "description": "Name and version of image to run"
+                          }
+                        },
+                        "required": [
+                          "server",
+                          "image"
+                        ],
+                        "additionalProperties": false
                       }
                     }
                   },

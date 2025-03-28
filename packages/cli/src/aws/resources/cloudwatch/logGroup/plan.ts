@@ -5,6 +5,8 @@ import { Type } from "../../../../types/plan.ts";
 import { addDefaultRegion, assertRegion } from "../../../utils.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
 import { cloudwatchLogGroupPath } from "./path.ts";
+import { findResourceDependencies } from "../../../../dependencies.ts";
+import { isConfigEqual } from "@/utils/config.ts";
 import type { Tags } from "../../../../types/config.ts";
 import type { CreateLogGroup, DeleteLogGroup, Executors, UpdateLogGroup } from "./executor.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../../types/plan.ts";
@@ -15,8 +17,6 @@ import type {
   LogGroupConfig,
   LogGroupState,
 } from "./types.ts";
-import { findResourceDependencies } from "../../../../dependencies.ts";
-import { isConfigEqual } from "@/utils/config.ts";
 
 function getCurrent(logGroups: CloudwatchLogGroupState = {}) {
   const previous: {

@@ -1,6 +1,6 @@
 import { parseArgs } from "@std/cli/parse-args";
-import { ensureDir } from "@std/fs/ensure-dir";
 import { logger } from "./src/logger.ts";
+import { mkdir } from "node:fs/promises";
 
 logger.configure("INFO", true);
 
@@ -16,7 +16,7 @@ if (local) {
 }
 
 async function compileLocal() {
-  await ensureDir("./dist/bin");
+  await mkdir("./dist/bin", { recursive: true });
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/agent-linux-x64"),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/agent-linux-arm64"),
@@ -24,7 +24,7 @@ async function compileLocal() {
 }
 
 async function compileProd() {
-  await ensureDir("./dist/bin");
+  await mkdir("./dist/bin", { recursive: true });
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/agent-linux-x64"),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/agent-linux-arm64"),

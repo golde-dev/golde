@@ -42,7 +42,7 @@ export async function createLogGroup(
     tags,
   });
   const end = performance.now();
-  logger.debug(`[AWS] Created log group ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][AWS] Created log group ${name} in ${formatDuration(end - start)}`);
 
   const arn = logGroupArn(this, region, name);
   const createdAt = nowStringDate();
@@ -66,7 +66,9 @@ export async function deleteLogGroup(
   await this.deleteCloudwatchLogGroup(region, name);
 
   const end = Date.now();
-  logger.debug(`[AWS] Deleted cloudwatch log group ${name} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Execute][AWS] Deleted cloudwatch log group ${name} in ${formatDuration(end - start)}`,
+  );
 }
 
 export type DeleteLogGroup = typeof deleteLogGroup;
@@ -106,7 +108,9 @@ export async function updateLogGroup(
   }
 
   const end = performance.now();
-  logger.debug(`[AWS] Updated cloudwatch log group ${name} in ${formatDuration(end - start)}`);
+  logger.debug(
+    `[Execute][AWS] Updated cloudwatch log group ${name} in ${formatDuration(end - start)}`,
+  );
 
   return {
     arn,

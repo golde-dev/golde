@@ -35,7 +35,7 @@ export async function createBucket(
     };
   });
   const end = Date.now();
-  logger.debug(`[Cloudflare]: created bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][Cloudflare]: created bucket ${name} in ${formatDuration(end - start)}`);
   return bucket;
 }
 export type CreateBucket = typeof createBucket;
@@ -49,7 +49,7 @@ export async function deleteBucket(
   await this.deleteBucket(name, cfR2Jurisdiction);
   const end = Date.now();
 
-  logger.debug(`[Cloudflare]: deleting bucket ${name} in ${formatDuration(end - start)}`);
+  logger.debug(`[Execute][Cloudflare]: deleting bucket ${name} in ${formatDuration(end - start)}`);
 }
 export type DeleteBucket = typeof deleteBucket;
 
