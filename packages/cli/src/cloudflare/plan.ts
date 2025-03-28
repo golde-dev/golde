@@ -7,9 +7,9 @@ import { isEmpty } from "../utils/object.ts";
 import { createD1DatabaseDestroyPlan, createD1DatabasePlan } from "./resources/d1/database/plan.ts";
 import { createD1DatabaseExecutors } from "./resources/d1/database/executor.ts";
 import { createR2ObjectsDestroyPlan, createR2ObjectsPlan } from "./resources/r2/object/plan.ts";
+import { createObjectExecutors } from "@/generic/resources/s3/object/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
-import { createObjectExecutors } from "@/generic/resources/s3/object/executor.ts";
 
 export async function createCloudflarePlan(context: Context): Promise<Plan> {
   const {

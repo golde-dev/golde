@@ -10,10 +10,10 @@ export function createOutputs(context: Context, _state: State): void {
   } = context;
 
   if (isEmpty(outputs)) {
-    logger.info("[Output] No output defined");
+    logger.info("[Output] No outputs defined");
     return;
   }
-  logger.debug("[Output] Start output creation");
+  logger.debug("[Output] Start outputs creation");
   const start = performance.now();
 
   const end = performance.now();

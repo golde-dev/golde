@@ -1,5 +1,6 @@
 {
   "eslint.useFlatConfig": true,
+  "biome.enabled": false,
   "cSpell.words": [
     "apac",
     "astro",
