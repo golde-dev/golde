@@ -110,8 +110,8 @@ export function createS3PlanFactory<E extends GenericExecutors>(
 
       assertBranch(config);
 
-      const { bucketName, branch } = config;
-      const objectKey = createObjectKey(branch, version, name);
+      const { bucketName } = config;
+      const objectKey = createObjectKey(version, name);
       const object = {
         path,
         version,
@@ -138,9 +138,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const deletedValues = Object.values(previous[key]);
 
       for (const { name, state } of deletedValues) {
-        const { version, config: { bucketName, branch } } = state;
+        const { version, config: { bucketName } } = state;
 
-        const objectKey = createObjectKey(branch, version, name);
+        const objectKey = createObjectKey(version, name);
 
         await assertObjectExist(bucketName, objectKey);
         await assertDeletePermission?.(bucketName, objectKey);
@@ -165,7 +165,7 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const previousCurrent = Object.values(previous[key]).find(({ isCurrent }) => isCurrent);
 
       assertBranch(nextConfig);
-      const objectKey = createObjectKey(nextConfig.branch, version, name);
+      const objectKey = createObjectKey(version, name);
 
       if (previousObjectVersion) {
         const { config: previousConfig, isCurrent, state: prevState } = previousObjectVersion;
@@ -273,9 +273,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       const entriesToDelete = Object.values(previous[key]);
 
       for (const { name, state } of entriesToDelete) {
-        const { version, config: { bucketName, branch } } = state;
+        const { version, config: { bucketName } } = state;
 
-        const objectKey = createObjectKey(branch, version, name);
+        const objectKey = createObjectKey(version, name);
 
         await assertObjectExist(bucketName, objectKey);
         await assertDeletePermission?.(bucketName, objectKey);

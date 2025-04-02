@@ -70,7 +70,7 @@ export class FSStateClient implements AbstractStateClient {
     const allResources = await this.getAllResources();
     return allResources
       .filter((resource) => resources.includes(resource.path))
-      .filter((resource) => resource.isCurrent);
+      .filter((resource) => resource.isCurrent === true || resource.isCurrent === undefined);
   }
 
   /**

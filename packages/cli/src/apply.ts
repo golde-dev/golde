@@ -90,6 +90,7 @@ export async function executePlanRecursively(
   changes: Change[] = [],
 ): Promise<Change[]> {
   const { executionPlan, remainingPlan } = createExecutionPlan(plan, changes);
+
   if (executionPlan.length === 0) {
     return changes;
   }

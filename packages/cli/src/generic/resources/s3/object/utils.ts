@@ -1,6 +1,5 @@
-import slugify from "@sindresorhus/slugify";
 import { logger } from "@/logger.ts";
-import { basename, dirname, extname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { memoizeAsync } from "@/utils/memoize.ts";
@@ -52,7 +51,7 @@ async function compress(path: string, name: string) {
       from: path,
       to: archivePath,
     });
-    await zip.compress(path, archivePath);
+    await zip.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   if (name.endsWith(".tar.gz")) {
@@ -61,7 +60,7 @@ async function compress(path: string, name: string) {
       from: path,
       to: archivePath,
     });
-    await tgz.compress(path, archivePath);
+    await tgz.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   if (name.endsWith(".tar")) {
@@ -70,7 +69,7 @@ async function compress(path: string, name: string) {
       from: path,
       to: archivePath,
     });
-    await tar.compress(path, archivePath, { debug: true });
+    await tar.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   return path;
@@ -223,14 +222,13 @@ function baseDir(dir: string) {
   return dir.replace("./", "");
 }
 
-export function createObjectKey(branch: string, version: string, name: string) {
+export function createObjectKey(version: string, name: string) {
   const dir = dirname(name);
   const prefix = baseDir(dir);
-  const ext = extname(name);
-  const base = basename(name, ext);
-  const slug = slugify(branch);
 
-  const key = `${prefix}/${base}.b.${slug}.v.${version}${ext}`;
+  const base = basename(name);
+
+  const key = `${prefix}/${version}.${base}`;
   if (key.length > 1024) {
     throw new Error(`Object key is too long for s3 object: ${key}`);
   }
