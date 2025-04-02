@@ -3,7 +3,7 @@ import {spawnTask, parallelTask, seriesTask, task} from "@chyzwar/runner";
 import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
 import {debounce} from "es-toolkit";
-import { parseArgs } from 'util';
+import {parseArgs} from 'util';
 
 
 spawnTask("verdaccio", 

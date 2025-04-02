@@ -2,13 +2,10 @@ import config from "../config.ts";
 import { Command } from "commander";
 import { logger } from "../logger.ts";
 import { start } from "../start.ts";
-import { load } from "@std/dotenv";
 import { install } from "../install.ts";
 import { upgrade } from "../upgrade.ts";
 import type { LevelName } from "@std/log";
 import { VERSION } from "../version.ts";
-
-await load({ export: true });
 
 const program = new Command();
 
