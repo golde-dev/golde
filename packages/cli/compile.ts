@@ -1,10 +1,19 @@
-import { parseArgs } from "@std/cli/parse-args";
 import { ensureDir } from "@std/fs/ensure-dir";
 import { decode } from "./src/utils/text.ts";
 import { logger } from "./src/logger.ts";
+import { parseArgs } from "node:util";
 
-const { local, dev } = parseArgs(Deno.args, {
-  boolean: ["local", "dev"],
+const { values: { dev, local } } = parseArgs({
+  options: {
+    dev: {
+      type: "boolean",
+      default: false,
+    },
+    local: {
+      type: "boolean",
+      default: false,
+    },
+  },
 });
 
 if (dev) {

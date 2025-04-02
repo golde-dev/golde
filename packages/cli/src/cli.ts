@@ -1,4 +1,4 @@
-import { load } from "@std/dotenv";
+import { config } from "dotenv";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig, printConfig } from "./config.ts";
@@ -21,9 +21,8 @@ import { configure } from "./configure.ts";
 import { exit } from "node:process";
 import type { LevelName } from "@std/log";
 
-// TODO: handel .env.example errors
-await load({
-  export: true,
+await config({
+  override: true,
 });
 
 await verifyInstalled();
