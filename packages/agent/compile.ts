@@ -1,12 +1,18 @@
-import { parseArgs } from "@std/cli/parse-args";
+import { parseArgs } from "node:util";
 import { logger } from "./src/logger.ts";
 import { mkdir } from "node:fs/promises";
 
 logger.configure("INFO", true);
 
 const decoder = new TextDecoder();
-const { local } = parseArgs(Deno.args, {
-  boolean: ["local"],
+
+const { values: { local } } = parseArgs({
+  options: {
+    local: {
+      type: "boolean",
+      default: false,
+    },
+  },
 });
 
 if (local) {

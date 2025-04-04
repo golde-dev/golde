@@ -92,7 +92,11 @@ export async function executePlanRecursively(
   const { executionPlan, remainingPlan } = createExecutionPlan(plan, changes);
 
   if (executionPlan.length === 0) {
-    return changes;
+    if (remainingPlan.length === 0) {
+      return changes;
+    }
+    logger.error("Failed to execute plan, unresolved dependencies", remainingPlan);
+    throw new Error("Failed to execute plan, unresolved dependencies");
   }
 
   logger.info(
@@ -131,7 +135,6 @@ export async function executePlanRecursively(
               const state = await unit.executor(...unit.args);
               const end = performance.now();
               const createTime = end - start;
-
               const create: CreateVersionResult = {
                 type: Type.CreateVersion,
                 path: unit.path,

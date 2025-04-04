@@ -1,4 +1,4 @@
-import { parseArgs } from "@std/cli/parse-args";
+import { config } from "dotenv";
 import { TextLineStream } from "@std/streams";
 import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
@@ -6,11 +6,28 @@ import { logger } from "./src/logger.ts";
 import { walk } from "@std/fs/walk";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { copy } from "@std/fs/copy";
+import { env } from "node:process";
+import { parseArgs } from "node:util";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import type { PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/client-s3";
 
-const { local, dev } = parseArgs(Deno.args, {
-  boolean: ["local", "dev"],
+config({
+  override: true,
+});
+
+const { values: { dev, local } } = parseArgs({
+  options: {
+    dev: {
+      type: "boolean",
+      default: false,
+    },
+    local: {
+      type: "boolean",
+      default: false,
+    },
+  },
 });
 
 const localRegistry = "http://localhost:4873/";
@@ -258,6 +275,7 @@ async function publish() {
     packages,
     publicRegistry,
   );
+  await uploadToS3();
   await commitExamplesChanges();
   await uploadReleaseArtifacts();
 }
@@ -268,6 +286,7 @@ async function publishLocal() {
 
   try {
     await updateLocalCLI();
+    await uploadToS3();
     await publishNPMPackages(
       packages,
       localRegistry,
@@ -282,10 +301,56 @@ async function publishLocal() {
   }
 }
 
+async function uploadToS3() {
+  logger.info("Publishing CLI to S3 bucket");
+
+  const endpoint = env.S3_ENDPOINT;
+  if (!endpoint) {
+    logger.error("S3 endpoint not found skipping upload");
+    return;
+  }
+  const accessKeyId = env.S3_ACCESS_KEY_ID;
+  if (!accessKeyId) {
+    logger.error("S3 access key id not found skipping upload");
+    return;
+  }
+  const secretAccessKey = env.S3_SECRET_ACCESS_KEY;
+  if (!secretAccessKey) {
+    logger.error("S3 secret access key not found skipping upload");
+    return;
+  }
+  const client = new S3Client({
+    region: "auto",
+    endpoint,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
+  });
+  const cliLinuxX64 = readFileSync("./dist/bin/cli-linux-x64");
+  const cliLinuxX64Command = new PutObjectCommand({
+    Bucket: "golde-download",
+    Key: "cli-linux-x64",
+    Body: cliLinuxX64,
+  });
+  await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliLinuxX64Command);
+
+  const cliInstall = readFileSync("./scripts/install-golde-cli.sh");
+  const cliInstallCommand = new PutObjectCommand({
+    Bucket: "golde-download",
+    Key: "install-golde-cli.sh",
+    Body: cliInstall,
+  });
+  await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliInstallCommand);
+}
+
 async function publishLocalDev() {
   logger.info("Publishing to local registry");
   await devUpdateExamples(examples);
   await devLocalCLI();
+  await uploadToS3();
 }
 
 if (dev) {

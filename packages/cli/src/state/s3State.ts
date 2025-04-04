@@ -1,13 +1,13 @@
 import slugify from "@sindresorhus/slugify";
 import { notFoundAsUndefined } from "../generic/client/s3.ts";
 import { S3 } from "../generic/client/s3.ts";
+import { resourcesToState } from "@/utils/state.ts";
+import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
-import { applyChangeSet } from "./utils/apply.ts";
 import type { SavedResource } from "@/types/dependencies.ts";
-import { resourcesToState } from "@/utils/state.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
   `projects/${projectName}/${slugify(branch)}.state.json`;
@@ -55,7 +55,7 @@ export class S3StateClient implements AbstractStateClient {
    * For versioned resources only include current
    */
   private async getAllResources(project: string): Promise<SavedResource[]> {
-    const keys = await this.s3.listObjects(this.bucket, `/projects/${project}/`);
+    const keys = await this.s3.listObjects(this.bucket, `projects/${project}/`);
     const stateKeys = keys.filter((key) => key.endsWith(".state.json"));
 
     const allResources: SavedResource[] = [];
@@ -125,7 +125,7 @@ export class S3StateClient implements AbstractStateClient {
    * Apply changes to resources for a branch and project
    */
   public async applyChanges(project: string, branch: string, state: Change[]): Promise<State> {
-    const currentResources = await this.getBranchResources(branch, project);
+    const currentResources = await this.getBranchResources(project, branch);
     const updatedResources = applyChangeSet(currentResources, state);
 
     await this.saveResources(project, branch, updatedResources);

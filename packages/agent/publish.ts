@@ -1,6 +1,6 @@
-import { parseArgs } from "@std/cli/parse-args";
 import { exec } from "sudo-prompt";
 import { logger } from "./src/logger.ts";
+import { parseArgs } from "node:util";
 
 logger.configure("INFO", true);
 
@@ -8,11 +8,15 @@ const decoder = new TextDecoder();
 const { version } = JSON.parse(
   Deno.readTextFileSync("../../lerna.json"),
 );
-const flags = parseArgs(Deno.args, {
-  boolean: ["local"],
-});
 
-const { local } = flags;
+const { values: { local } } = parseArgs({
+  options: {
+    local: {
+      type: "boolean",
+      default: false,
+    },
+  },
+});
 
 if (local) {
   publishLocal();

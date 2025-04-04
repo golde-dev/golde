@@ -3,7 +3,7 @@ import {spawnTask, parallelTask, seriesTask, task} from "@chyzwar/runner";
 import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
 import {debounce} from "es-toolkit";
-import { parseArgs } from 'util';
+import {parseArgs} from 'util';
 
 
 spawnTask("verdaccio", 
@@ -179,7 +179,7 @@ task("version:local", () => {
     JSON.stringify(
       {
         version: new Date().toISOString().replaceAll(":", "-"),
-        goldeURL: "https://api.golde.localhost/v1",
+        goldeURL: "https://api.golde.dev/v1",
       },
     ),
   )

@@ -42,6 +42,7 @@ export function applyChangeSet<T extends SavedResource[]>(
         clonedResources.push({
           path,
           state,
+          isCurrent: true,
           createdAt: getCreatedAt(state),
         });
         break;
@@ -73,6 +74,7 @@ export function applyChangeSet<T extends SavedResource[]>(
         clonedResources[currentIndex] = {
           ...clonedResources[currentIndex],
           state,
+          isCurrent: true,
           updatedAt: getUpdatedAt(state),
         };
         break;
@@ -136,7 +138,6 @@ export function applyChangeSet<T extends SavedResource[]>(
         };
         break;
       }
-
       default:
         throw new Error("Unknown type");
     }
