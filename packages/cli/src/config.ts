@@ -218,7 +218,7 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
           logger.error(`[Config] git variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error("[Config] Config failed validation", error.cause);
+          logger.error(`[Config] Invalid config: ${error.message}`, error.cause);
           break;
         case ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND:
           logger.warn("[Config] No managed config value found", { error });

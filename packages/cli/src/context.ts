@@ -140,7 +140,7 @@ export function getFinalContext(context: Context, external: SavedResource[]): Co
     if (error instanceof ConfigError) {
       switch (error.code) {
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error("[Context] Config failed validation", error.cause);
+          logger.error(`[Context] Invalid config: ${error.message}`, error.cause);
           break;
         default:
           logger.error(`[Context] Configuration error: ${error.message}`);
