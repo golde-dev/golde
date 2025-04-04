@@ -190,7 +190,7 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
     const resolvedManaged = resolveManagedConfig(resolvedBase, managedConfig);
 
     const end = performance.now();
-    logger.info(`[Config] Initialized config in ${formatDuration(end - start)}`);
+    logger.info(`[Config] Initialized config for ${branchName} in ${formatDuration(end - start)}`);
     return resolvedManaged;
   } catch (error) {
     if (error instanceof ConfigError) {

@@ -8,10 +8,10 @@ import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { copy } from "@std/fs/copy";
+import { env } from "node:process";
 import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/client-s3";
-import { env } from "node:process";
 
 config({
   override: true,
@@ -319,11 +319,6 @@ async function uploadToS3() {
     logger.error("S3 secret access key not found skipping upload");
     return;
   }
-  console.log({
-    endpoint,
-    accessKeyId,
-    secretAccessKey,
-  });
   const client = new S3Client({
     region: "auto",
     endpoint,
@@ -334,13 +329,21 @@ async function uploadToS3() {
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
   });
-  const body = readFileSync("./dist/bin/cli-linux-x64");
-  const command = new PutObjectCommand({
+  const cliLinuxX64 = readFileSync("./dist/bin/cli-linux-x64");
+  const cliLinuxX64Command = new PutObjectCommand({
     Bucket: "golde-download",
     Key: "cli-linux-x64",
-    Body: body,
+    Body: cliLinuxX64,
   });
-  await client.send<PutObjectCommandInput, PutObjectCommandOutput>(command);
+  await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliLinuxX64Command);
+
+  const cliInstall = readFileSync("./scripts/install-golde-cli.sh");
+  const cliInstallCommand = new PutObjectCommand({
+    Bucket: "golde-download",
+    Key: "install-golde-cli.sh",
+    Body: cliInstall,
+  });
+  await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliInstallCommand);
 }
 
 async function publishLocalDev() {

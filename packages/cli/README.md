@@ -3,5 +3,5 @@
 ## Install
 
 ```sh
-curl -fsSL https://golde.dev/download/client/install.sh | bash
+curl -fsSL https://download.golde.dev/install-golde-cli.sh | bash
 ```
