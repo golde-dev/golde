@@ -15,6 +15,7 @@ const configAttributes = ensureAllowedKeys<ObjectConfig>({
   bucketName: true,
   source: true,
   version: true,
+  maxVersions: true,
   context: true,
   branch: true,
   branchPattern: true,

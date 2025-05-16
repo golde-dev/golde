@@ -30,6 +30,7 @@ export const objectConfigSchema = implement<ObjectConfig>()
     includes: includesSchema.optional(),
     version: identitySchema.optional(),
     source: sourceSchema.optional(),
+    maxVersions: z.number().optional(),
     context: z.string().optional(),
     bucketName: z.string(),
   })

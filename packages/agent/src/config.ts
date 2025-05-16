@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { config } from "dotenv";
+import { loadEnvFile } from "node:process";
 import { exit } from "node:process";
 
-config({ override: true });
+loadEnvFile();
 
 const defaultLogLevel = "INFO";
 const defaultPretty = "false";

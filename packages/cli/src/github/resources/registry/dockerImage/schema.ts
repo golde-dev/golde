@@ -7,6 +7,7 @@ export const imageConfigSchema = implement<ImageConfig>()
   .with({
     branch: branchSchema,
     branchPattern: branchPatternSchema,
+    maxVersions: z.number().optional(),
     version: z
       .enum([
         "ImageHash",

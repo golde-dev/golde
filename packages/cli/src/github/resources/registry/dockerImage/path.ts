@@ -14,6 +14,7 @@ const stateAttributes = ensureAllowedKeys<ImageState>({
 const configAttributes = ensureAllowedKeys<ImageConfig>({
   version: true,
   context: true,
+  maxVersions: true,
   dockerfile: true,
   branch: true,
   branchPattern: true,

@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+import { loadEnvFile } from "node:process";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig, printConfig } from "./config.ts";
@@ -21,9 +21,7 @@ import { configure } from "./configure.ts";
 import { exit } from "node:process";
 import type { LevelName } from "@std/log";
 
-await config({
-  override: true,
-});
+loadEnvFile();
 
 await verifyInstalled();
 

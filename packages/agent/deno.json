@@ -22,7 +22,6 @@
     "@systemd-js/conf": "npm:@systemd-js/conf@^0.10.0",
     "@systemd-js/ctl": "npm:@systemd-js/ctl@^0.10.0",
     "commander": "npm:commander@^12.1.0",
-    "dotenv": "npm:dotenv@^16.4.7",
     "sudo-prompt": "npm:sudo-prompt@^9.2.1",
     "zod": "npm:zod@^3.23.4"
   }

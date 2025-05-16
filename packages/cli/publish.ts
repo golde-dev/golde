@@ -1,5 +1,4 @@
-import { config } from "dotenv";
-import { TextLineStream } from "@std/streams";
+import { exit, loadEnvFile } from "node:process";
 import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
@@ -13,9 +12,7 @@ import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/client-s3";
 
-config({
-  override: true,
-});
+loadEnvFile();
 
 const { values: { dev, local } } = parseArgs({
   options: {
@@ -94,22 +91,13 @@ async function publishNPMPackages(
       stderr: "piped",
     });
 
-    const process = command.spawn();
+    const { stdout, stderr, success } = await command.output();
 
-    const reader = process.stdout
-      .pipeThrough(new TextDecoderStream())
-      .pipeThrough(new TextLineStream());
-
-    for await (const line of reader) {
-      logger.info(line);
-    }
-
-    const stderrReader = process.stderr
-      .pipeThrough(new TextDecoderStream())
-      .pipeThrough(new TextLineStream());
-
-    for await (const line of stderrReader) {
-      logger.error(line);
+    logger.info(decode(stdout));
+    logger.error(decode(stderr));
+    if (!success) {
+      logger.error("Failed to publish package");
+      exit(1);
     }
   }
 }
