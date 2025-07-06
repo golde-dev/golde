@@ -1,15 +1,12 @@
-import { ensureDir } from "@std/fs/ensure-dir";
 import { decode } from "./src/utils/text.ts";
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
+import { mkdirSync } from "node:fs";
+import { existsSync } from "node:fs";
 
-const { values: { dev, local } } = parseArgs({
+const { values: { dev } } = parseArgs({
   options: {
     dev: {
-      type: "boolean",
-      default: false,
-    },
-    local: {
       type: "boolean",
       default: false,
     },
@@ -18,28 +15,18 @@ const { values: { dev, local } } = parseArgs({
 
 if (dev) {
   compileDev();
-} else if (local) {
-  compileLocal();
 } else {
   compileProd();
-}
-
-async function compileLocal() {
-  await ensureDir("./dist/bin");
-  await Promise.all([
-    compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", true),
-    compile("aarch64-unknown-linux-gnu", "./dist/bin/cli-linux-arm64", true),
-    compile("x86_64-pc-windows-msvc", "./dist/bin/cli-win32-x64", true),
-    compile("x86_64-apple-darwin", "./dist/bin/cli-darwin-x64", true),
-    compile("aarch64-apple-darwin", "./dist/bin/cli-darwin-arm64", true),
-  ]);
 }
 
 /**
  * Detect and only compile for current arch
  */
 async function compileDev() {
-  await ensureDir("./dist/bin");
+  if(existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
+
   if (Deno.build.os === "linux") {
     await Promise.all([
       compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", true),
@@ -59,7 +46,9 @@ async function compileDev() {
 }
 
 async function compileProd() {
-  await ensureDir("./dist/bin");
+  if(existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", false),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/cli-linux-arm64", false),

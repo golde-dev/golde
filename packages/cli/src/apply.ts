@@ -2,8 +2,14 @@ import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
+import { sortByPath } from "@/plan.ts";
+import { exit } from "node:process";
+import { chunk, get } from "@es-toolkit/es-toolkit/compat";
 import { hasResolved, resolveUnitState } from "./utils/template.ts";
 import type { Context } from "./types/context.ts";
+import type { State } from "./types/state.ts";
+import type { Lock } from "./types/lock.ts";
+import type { ResourceDependency } from "./types/dependencies.ts";
 import type {
   Change,
   ExecutionGroup,
@@ -11,8 +17,6 @@ import type {
   Plan,
   UpdateVersionResult,
 } from "./types/plan.ts";
-import type { State } from "./types/state.ts";
-import type { Lock } from "./types/lock.ts";
 import type {
   ChangeVersionResult,
   CreateResult,
@@ -21,10 +25,6 @@ import type {
   DeleteVersionResult,
   UpdateResult,
 } from "./types/plan.ts";
-import { chunk, get } from "@es-toolkit/es-toolkit/compat";
-import type { ResourceDependency } from "@/types/dependencies.ts";
-import { sortByPath } from "@/plan.ts";
-import { exit } from "node:process";
 
 export async function confirmExecutePlan(): Promise<boolean> {
   try {

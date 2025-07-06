@@ -3,12 +3,17 @@ import {spawnTask, parallelTask, seriesTask, task} from "@chyzwar/runner";
 import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
 import {debounce} from "es-toolkit";
-import {parseArgs} from 'util';
+import {parseArgs} from 'node:util';
 
-
-spawnTask("verdaccio", 
-  "yarn", ["dlx", "verdaccio@6.0.0-rc.1"],
-);
+const {positionals: [firstPositional]} = parseArgs({
+  args: process.argv.slice(3),
+  strict: false,
+  options: {
+    filer: {
+      type: "string",
+    }
+  }
+})
 
 spawnTask("start:docs", 
   "yarn", ["dev"], 
@@ -35,12 +40,14 @@ spawnTask("dist:docs",
     cwd: "./packages/docs",
   }
 );
+
 spawnTask("dist:agent", 
   "deno", ["task", "dist"], 
   {
     cwd: "./packages/agent",
   }
 );
+
 spawnTask("dist:cli", 
   "deno", ["task", "dist"], 
   {
@@ -48,28 +55,16 @@ spawnTask("dist:cli",
   }
 );
 
-parallelTask("post-version", [
-  "dist:agent", 
-  "dist:cli",
-]);
-
 parallelTask("dist", [
   "dist:agent", 
   "dist:cli",
   "dist:docs",
 ]);
 
-spawnTask("dist:agent:local", 
-  "deno", ["task", "dist:local"], 
+spawnTask("dist:agent:dev", 
+  "deno", ["task", "dist:dev"], 
   {
     cwd: "./packages/agent",
-  }
-);
-
-spawnTask("dist:cli:local", 
-  "deno", ["task", "dist:local"], 
-  {
-    cwd: "./packages/cli",
   }
 );
 
@@ -80,34 +75,19 @@ spawnTask("dist:cli:dev",
   }
 );
 
-
-parallelTask("dist:local", [
-  "dist:agent:local", 
-  "dist:cli:local",
-]);
-
 parallelTask("dist:dev", [
+  "dist:agent:dev", 
   "dist:cli:dev",
 ]);
 
-const {positionals: [pattern]} = parseArgs({
-  args: process.argv.slice(3),
-  strict: false,
-  options: {
-    filer: {
-      type: "string",
-    }
-  }
-})
-
 spawnTask("test:agent", 
-  "deno", pattern ? [
+  "deno", firstPositional ? [
     "test", 
     "--allow-env", 
     "--allow-read", 
     "--allow-run",
     "--filter",
-    pattern
+    firstPositional
   ] :[
     "test", 
     "--allow-env", 
@@ -118,14 +98,15 @@ spawnTask("test:agent",
     cwd: "./packages/agent",
   }
 );
+
 spawnTask("test:cli", 
-  "deno", pattern ? [
+  "deno", firstPositional ? [
     "test", 
     "--allow-env", 
     "--allow-read", 
     "--allow-run",
     "--filter",
-    pattern
+    firstPositional
   ] :[
     "test", 
     "--allow-env", 
@@ -152,6 +133,7 @@ spawnTask("lint:agent",
     cwd: "./packages/agent",
   }
 );
+
 spawnTask("lint:cli", 
   "deno", ["lint", "src/"], 
   {
@@ -191,12 +173,6 @@ spawnTask("publish:cli",
     cwd: "./packages/cli",
   }
 );
-spawnTask("publish:cli:local",
-  "deno", ["task", "publish:local"],
-  {
-    cwd: "./packages/cli",
-  }
-);
 spawnTask("publish:cli:dev",
   "deno", ["task", "publish:dev"],
   {
@@ -211,32 +187,13 @@ spawnTask("publish:agent",
   }
 );
 
-spawnTask("publish:agent:local",
-  "deno", ["task", "publish:local"],
-  {
-    cwd: "./packages/agent",
-  }
-);
-
 parallelTask("publish", [
   "publish:cli",
   "publish:agent",
 ]);
 
-parallelTask("publish:local", [
-  "publish:cli:local",
-  "publish:agent:local",
-]);
-
 parallelTask("publish:dev", [
   "publish:cli:dev",
-]);
-
-seriesTask("local", [
-  "version:local",
-  "dist:local",
-  "publish:local",
-  "version:clean"
 ]);
 
 seriesTask("dev", [
@@ -246,13 +203,6 @@ seriesTask("dev", [
   "version:clean"
 ]);
 
-
-seriesTask("local:cli", [
-  "version:local",
-  "dist:cli:local",
-  "publish:cli:local",
-  "version:clean"
-]);
 
 
 task("dev:watch", () => {

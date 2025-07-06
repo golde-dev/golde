@@ -2,13 +2,6 @@ import { loadEnvFile } from "node:process";
 import { logger } from "./logger.ts";
 import { Command } from "commander";
 import { getConfig, printConfig } from "./config.ts";
-import {
-  createDestroyPlan,
-  createPlan,
-  filterExecutionUnits,
-  printPlan,
-  validatePlan,
-} from "./plan.ts";
 import { getFinalContext, initializeContext } from "./context.ts";
 import { initConfig } from "./init.ts";
 import { VERSION } from "./version.ts";
@@ -19,9 +12,19 @@ import { lockDependencies, releaseLocks } from "./lock.ts";
 import { createOutputs } from "./output.ts";
 import { configure } from "./configure.ts";
 import { exit } from "node:process";
+import { existsSync } from "node:fs";
+import {
+  createDestroyPlan,
+  createPlan,
+  filterExecutionUnits,
+  printPlan,
+  validatePlan,
+} from "./plan.ts";
 import type { LevelName } from "@std/log";
 
-loadEnvFile();
+if (existsSync(".env")) {
+  loadEnvFile();
+}
 
 await verifyInstalled();
 

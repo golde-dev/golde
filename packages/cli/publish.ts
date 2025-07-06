@@ -1,12 +1,11 @@
 import { exit, loadEnvFile } from "node:process";
-import { exec } from "sudo-prompt";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
 import { walk } from "@std/fs/walk";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import { copy } from "@std/fs/copy";
+import { copy } from "@std/fs";
 import { env } from "node:process";
 import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -14,20 +13,15 @@ import type { PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/cli
 
 loadEnvFile();
 
-const { values: { dev, local } } = parseArgs({
+const { values: { dev } } = parseArgs({
   options: {
     dev: {
-      type: "boolean",
-      default: false,
-    },
-    local: {
       type: "boolean",
       default: false,
     },
   },
 });
 
-const localRegistry = "http://localhost:4873/";
 const publicRegistry = "https://registry.npmjs.org/";
 
 const packages = [
@@ -49,24 +43,6 @@ for await (const { path } of walk("../../examples", { maxDepth: 1 })) {
 const decoder = new TextDecoder();
 function decode(buffer: BufferSource): string {
   return decoder.decode(buffer);
-}
-
-async function startVerdaccio() {
-  try {
-    await fetch(localRegistry);
-    logger.info("Verdaccio already running");
-  } catch {
-    const command = new Deno.Command("yarn", {
-      args: ["dlx", "verdaccio"],
-      stdout: "piped",
-      stderr: "piped",
-    });
-
-    const process = command.spawn();
-    return () => {
-      process.kill();
-    };
-  }
 }
 
 async function uploadReleaseArtifacts() {
@@ -107,7 +83,7 @@ function devUpdateExamples(examples: string[]) {
 
   return Promise.all(
     examples.map((example) => {
-      logger.info(`Updating ${example}`);
+      logger.info(`Updating example ${example}`);
 
       const goldeModules = `/node_modules/@golde`;
       const npmDistDir = "./dist/npm/@golde";
@@ -126,56 +102,7 @@ function devUpdateExamples(examples: string[]) {
   );
 }
 
-async function updateLocalExamples(
-  examples: string[],
-  registry: string,
-) {
-  for (const example of examples) {
-    logger.info(`Updating ${example}`);
-    const { hostname } = new URL(registry);
-    await new Deno.Command("yarn", {
-      args: ["config", "set", "npmRegistryServer", registry],
-      cwd: `../../examples/${example}`,
-    }).output();
-    await new Deno.Command("yarn", {
-      args: [
-        "config",
-        "set",
-        "unsafeHttpWhitelist",
-        "--json",
-        `["${hostname}"]`,
-      ],
-      cwd: `../../examples/${example}`,
-    }).output();
-
-    const o = await new Deno.Command("yarn", {
-      args: ["up", "@golde/*", "--caret"],
-      cwd: `../../examples/${example}`,
-    }).output();
-    logger.info(decode(o.stdout));
-    logger.error(decode(o.stderr));
-
-    await new Deno.Command("yarn", {
-      args: ["config", "unset", "npmRegistryServer"],
-      cwd: `../../examples/${example}`,
-    }).output();
-    await new Deno.Command("yarn", {
-      args: ["config", "unset", "unsafeHttpWhitelist"],
-      cwd: `../../examples/${example}`,
-    }).output();
-
-    await new Deno.Command("git", {
-      args: ["restore", "yarn.lock"],
-      cwd: `../../examples/${example}`,
-    }).output();
-    await new Deno.Command("git", {
-      args: ["restore", "package.json"],
-      cwd: `../../examples/${example}`,
-    }).output();
-  }
-}
-
-async function updateExamples(
+async function prodUpdateExamples(
   examples: string[],
   registry: string,
 ) {
@@ -220,26 +147,7 @@ async function commitExamplesChanges() {
   logger.error(decode(o2.stderr));
 }
 
-function updateLocalCLI(): Promise<void> {
-  logger.info("Updating local CLI");
-
-  return new Promise((resolve, reject) => {
-    exec(
-      `cp ${import.meta.dirname}/dist/bin/cli-linux-x64 /usr/local/bin/golde`,
-      { name: "Golde CLI update" },
-      function (error, stdout, stderr) {
-        if (error) {
-          logger.error({ error, stderr }, "Failed to update local agent");
-          reject(error);
-        }
-        logger.info(stdout);
-        resolve();
-      },
-    );
-  });
-}
-
-async function devLocalCLI(): Promise<void> {
+async function updateLocalCLI(): Promise<void> {
   logger.info("Updating local CLI");
 
   const home = homedir();
@@ -252,41 +160,19 @@ async function devLocalCLI(): Promise<void> {
   );
 }
 
-async function publish() {
+async function publishProd() {
   logger.info("Publishing to remote registry");
   await publishNPMPackages(
     packages,
     publicRegistry,
   );
-  // TODO: decide if we want to update examples in first release
-  await updateExamples(
+  await prodUpdateExamples(
     packages,
     publicRegistry,
   );
   await uploadToS3();
   await commitExamplesChanges();
   await uploadReleaseArtifacts();
-}
-
-async function publishLocal() {
-  logger.info("Publishing to local registry");
-  const stopVerdaccio = await startVerdaccio();
-
-  try {
-    await updateLocalCLI();
-    await uploadToS3();
-    await publishNPMPackages(
-      packages,
-      localRegistry,
-    );
-    await updateLocalExamples(
-      examples,
-      localRegistry,
-    );
-  } finally {
-    logger.info("Stopping Verdaccio");
-    stopVerdaccio?.();
-  }
 }
 
 async function uploadToS3() {
@@ -334,17 +220,15 @@ async function uploadToS3() {
   await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliInstallCommand);
 }
 
-async function publishLocalDev() {
+async function publishDev() {
   logger.info("Publishing to local registry");
   await devUpdateExamples(examples);
-  await devLocalCLI();
+  await updateLocalCLI();
   await uploadToS3();
 }
 
 if (dev) {
-  publishLocalDev();
-} else if (local) {
-  publishLocal();
+  publishDev();
 } else {
-  publish();
+  publishProd();
 }

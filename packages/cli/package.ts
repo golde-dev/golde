@@ -102,7 +102,9 @@ function createBinPackage(name: string, os: string, cpu: "x64" | "arm64") {
     ? `${packageBinPath}/${name}.exe`
     : `${packageBinPath}/${name}`;
 
-  const binDistPath = name.includes("win32") ? `dist/bin/${name}.exe` : `dist/bin/${name}`;
+  const binDistPath = name.includes("win32") 
+    ? `dist/bin/${name}.exe` 
+    : `dist/bin/${name}`;
 
   Deno.mkdirSync(packagePath, { recursive: true });
   Deno.mkdirSync(packageBinPath, { recursive: true });

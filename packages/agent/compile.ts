@@ -1,28 +1,31 @@
 import { parseArgs } from "node:util";
 import { logger } from "./src/logger.ts";
-import { mkdir } from "node:fs/promises";
+import { mkdirSync } from "node:fs";
+import { existsSync } from "node:fs";
 
 logger.configure("INFO", true);
 
 const decoder = new TextDecoder();
 
-const { values: { local } } = parseArgs({
+const { values: { dev } } = parseArgs({
   options: {
-    local: {
+    dev: {
       type: "boolean",
       default: false,
     },
   },
 });
 
-if (local) {
+if (dev) {
   compileLocal();
 } else {
   compileProd();
 }
 
 async function compileLocal() {
-  await mkdir("./dist/bin", { recursive: true });
+  if (existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/agent-linux-x64"),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/agent-linux-arm64"),
@@ -30,7 +33,9 @@ async function compileLocal() {
 }
 
 async function compileProd() {
-  await mkdir("./dist/bin", { recursive: true });
+  if (existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/agent-linux-x64"),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/agent-linux-arm64"),
