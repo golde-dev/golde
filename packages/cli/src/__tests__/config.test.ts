@@ -18,15 +18,17 @@ describe("resolveConfig", () => {
           secretAccessKey: "{{ env.TEST }}",
         },
       },
-      cloudflare: {
-        r2: {
-          bucket: {
-            [`bucket-{{ env.NAME }}`]: {
-              storageClass: "Standard",
+      resources: {
+        cloudflare: {
+          r2: {
+            bucket: {
+              [`bucket-{{ env.NAME }}`]: {
+                storageClass: "Standard",
+              },
             },
           },
         },
-      },
+      }
     }, gitInfo);
 
     expect(config).toEqual({
@@ -37,16 +39,18 @@ describe("resolveConfig", () => {
           secretAccessKey: "test",
         },
       },
-      cloudflare: {
-        r2: {
-          bucket: {
-            "bucket-name": {
-              branch: "master",
-              storageClass: "Standard",
+      resources: {    
+        cloudflare: {
+          r2: {
+            bucket: {
+              "bucket-name": {
+                branch: "master",
+                storageClass: "Standard",
+              },
             },
           },
         },
-      },
+      }
     });
   });
 
@@ -65,16 +69,18 @@ describe("resolveConfig", () => {
         "BRANCH_NAME": "{{ git.BRANCH_NAME }}",
         "BRANCH_SLUG": "{{ git.BRANCH_SLUG }}",
       },
-      cloudflare: {
-        r2: {
-          bucket: {
-            [`{{ git.BRANCH_NAME }}-{{ git.BRANCH_SLUG }}`]: {
-              storageClass: "Standard",
-              branch: "master",
+      resources: {
+        cloudflare: {
+          r2: {
+            bucket: {
+              [`{{ git.BRANCH_NAME }}-{{ git.BRANCH_SLUG }}`]: {
+                storageClass: "Standard",
+                branch: "master",
+              },
             },
           },
         },
-      },
+      }
     }, gitInfo);
 
     expect(config).toEqual({
@@ -83,16 +89,18 @@ describe("resolveConfig", () => {
         BRANCH_NAME: "master",
         BRANCH_SLUG: "master",
       },
-      cloudflare: {
-        r2: {
-          bucket: {
-            "master-master": {
-              storageClass: "Standard",
-              branch: "master",
+      resources: {
+        cloudflare: {
+          r2: {
+            bucket: {
+              "master-master": {
+                storageClass: "Standard",
+                branch: "master",
+              },
             },
           },
         },
-      },
+      }
     });
   });
 
@@ -105,6 +113,95 @@ describe("resolveConfig", () => {
     const config = resolveConfig(
       {
         name: "test",
+        resources: {
+          cloudflare: {
+            r2: {
+              bucket: {
+                [`bucket`]: {
+                  storageClass: "Standard",
+                  branch: "master",
+                },
+                [`bucket-branch-{{ git.BRANCH_SLUG }}`]: {
+                  storageClass: "Standard",
+                  branch: "{{ git.BRANCH_NAME }}",
+                },
+                [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
+                  storageClass: "Standard",
+                  branchPattern: "feature/*",
+                  branch: "{{ git.BRANCH_NAME }}",
+                },
+              },
+            },
+          },
+        }
+      },
+      gitInfo,
+      "feature/test",
+    );
+
+    expect(config).toEqual({
+      name: "test",
+      resources: {
+        cloudflare: {
+          r2: {
+            bucket: {
+              "bucket-branch-feature-test": {
+                storageClass: "Standard",
+                branch: "feature/test",
+              },
+              "bucket-pattern-feature-test": {
+                storageClass: "Standard",
+                branchPattern: "feature/*",
+                branch: "feature/test",
+              },
+            },
+          },
+        },
+      }
+    });
+  });
+
+  it("should exclude resources when pattern do not match", () => {
+    const gitInfo = {
+      branchName: "dependencies/test",
+      branchSlug: "dependencies-test",
+    } as GitInfo;
+
+    const config = resolveConfig(
+      {
+        name: "test",
+        resources: {
+          cloudflare: {
+            r2: {
+              bucket: {
+                [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
+                  storageClass: "Standard",
+                  branchPattern: "feature/*",
+                  branch: "{{ git.BRANCH_NAME }}",
+                },
+              },
+            },
+          },
+        }
+      },
+      gitInfo,
+      "feature/test",
+    );
+
+    expect(config).toEqual({
+      name: "test",
+    });
+  });
+
+  it("should return full config if argument branch name is omitted", () => {
+    const gitInfo = {
+      branchName: "feature/test",
+      branchSlug: "feature-test",
+    } as GitInfo;
+
+    const config = resolveConfig({
+      name: "test",
+      resources: {
         cloudflare: {
           r2: {
             bucket: {
@@ -124,111 +221,32 @@ describe("resolveConfig", () => {
             },
           },
         },
-      },
-      gitInfo,
-      "feature/test",
-    );
-
-    expect(config).toEqual({
-      name: "test",
-      cloudflare: {
-        r2: {
-          bucket: {
-            "bucket-branch-feature-test": {
-              storageClass: "Standard",
-              branch: "feature/test",
-            },
-            "bucket-pattern-feature-test": {
-              storageClass: "Standard",
-              branchPattern: "feature/*",
-              branch: "feature/test",
-            },
-          },
-        },
-      },
-    });
-  });
-
-  it("should exclude resources when pattern do not match", () => {
-    const gitInfo = {
-      branchName: "dependencies/test",
-      branchSlug: "dependencies-test",
-    } as GitInfo;
-
-    const config = resolveConfig(
-      {
-        name: "test",
-        cloudflare: {
-          r2: {
-            bucket: {
-              [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
-                storageClass: "Standard",
-                branchPattern: "feature/*",
-                branch: "{{ git.BRANCH_NAME }}",
-              },
-            },
-          },
-        },
-      },
-      gitInfo,
-      "feature/test",
-    );
-
-    expect(config).toEqual({
-      name: "test",
-    });
-  });
-
-  it("should return full config if argument branch name is omitted", () => {
-    const gitInfo = {
-      branchName: "feature/test",
-      branchSlug: "feature-test",
-    } as GitInfo;
-
-    const config = resolveConfig({
-      name: "test",
-      cloudflare: {
-        r2: {
-          bucket: {
-            [`bucket`]: {
-              storageClass: "Standard",
-              branch: "master",
-            },
-            [`bucket-branch-{{ git.BRANCH_SLUG }}`]: {
-              storageClass: "Standard",
-              branch: "{{ git.BRANCH_NAME }}",
-            },
-            [`bucket-pattern-{{ git.BRANCH_SLUG }}`]: {
-              storageClass: "Standard",
-              branchPattern: "feature/*",
-              branch: "{{ git.BRANCH_NAME }}",
-            },
-          },
-        },
-      },
+      }
     }, gitInfo);
 
     expect(config).toEqual({
       name: "test",
-      cloudflare: {
-        r2: {
-          bucket: {
+      resources: {
+        cloudflare: {
+          r2: {
             bucket: {
-              storageClass: "Standard",
-              branch: "master",
-            },
-            "bucket-branch-feature-test": {
-              storageClass: "Standard",
-              branch: "feature/test",
-            },
-            "bucket-pattern-feature-test": {
-              storageClass: "Standard",
-              branchPattern: "feature/*",
-              branch: "feature/test",
+              bucket: {
+                storageClass: "Standard",
+                branch: "master",
+              },
+              "bucket-branch-feature-test": {
+                storageClass: "Standard",
+                branch: "feature/test",
+              },
+              "bucket-pattern-feature-test": {
+                storageClass: "Standard",
+                branchPattern: "feature/*",
+                branch: "feature/test",
+              },
             },
           },
         },
-      },
+      }
     });
   });
 });

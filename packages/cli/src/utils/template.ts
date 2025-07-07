@@ -223,7 +223,7 @@ export const resourcesTemplate =
       return originalTemplateString(value);
     }
     const [resourceMatch] = match;
-
+ 
     const deps = matchStatePath(resourceMatch);
 
     if (deps) {
