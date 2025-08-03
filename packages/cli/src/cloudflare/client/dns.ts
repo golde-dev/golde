@@ -86,7 +86,7 @@ export class DNSClient extends CloudflareBase {
     config: ZoneRecordRequest,
   ): Promise<ZoneRecord> {
     const zoneId = await this.getZoneId(zoneName);
-    logger.debug("Creating dns record", { zoneName, config });
+    logger.debug({ zoneName, config }, "Creating dns record");
     try {
       const record = await this.makeRequest<ZoneRecord>(
         `/zones/${zoneId}/dns_records`,
@@ -96,7 +96,7 @@ export class DNSClient extends CloudflareBase {
       return record;
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("Cloudflare: failed to dns record", e.cause);
+        logger.error(e.cause, "Cloudflare: failed to dns record");
       }
       throw e;
     }
@@ -111,7 +111,7 @@ export class DNSClient extends CloudflareBase {
     config: ZoneRecordRequest,
   ): Promise<ZoneRecord> {
     const zoneId = await this.getZoneId(zoneName);
-    logger.debug("Updating dns record", { zoneId, recordId, config });
+    logger.debug({ zoneId, recordId, config }, "Updating dns record");
     try {
       const record = await this.makeRequest<ZoneRecord>(
         `/zones/${zoneId}/dns_records/${recordId}`,
@@ -121,7 +121,7 @@ export class DNSClient extends CloudflareBase {
       return record;
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("Cloudflare: failed to update dns record", e.cause);
+        logger.error(e.cause, "Cloudflare: failed to update dns record");
       }
       throw e;
     }
@@ -135,7 +135,7 @@ export class DNSClient extends CloudflareBase {
     recordId: string,
   ): Promise<void> {
     const zoneId = await this.getZoneId(zoneName);
-    logger.debug("Deleting dns record", { zoneId, recordId });
+    logger.debug({ zoneId, recordId }, "Deleting dns record");
     try {
       await this.makeRequest(
         `/zones/${zoneId}/dns_records/${recordId}`,
@@ -143,7 +143,7 @@ export class DNSClient extends CloudflareBase {
       );
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("Cloudflare: failed to delete dns record", e.cause);
+        logger.error(e.cause, "Cloudflare: failed to delete dns record");
       }
       throw e;
     }

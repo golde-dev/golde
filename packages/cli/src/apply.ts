@@ -95,15 +95,15 @@ export async function executePlanRecursively(
     if (remainingPlan.length === 0) {
       return changes;
     }
-    logger.error("Failed to execute plan, unresolved dependencies", remainingPlan);
+    logger.error(remainingPlan, "Failed to execute plan, unresolved dependencies");
     throw new Error("Failed to execute plan, unresolved dependencies");
   }
 
   logger.info(
-    `[Execute] Executing plan ${executionPlan.length} units`,
     executionPlan.map((unit) =>
       "version" in unit ? `${unit.path} version ${unit.version}` : `${unit.path}`
     ),
+    `[Execute] Executing plan ${executionPlan.length} units`
   );
 
   const chunks = chunk(executionPlan, 20);
@@ -285,9 +285,9 @@ export async function updateState(
     const end = performance.now();
 
     if (logger.level === "DEBUG") {
-      logger.debug(`[Apply] Updated state in ${formatDuration(end - start)}`, {
+      logger.debug({
         state: updatedState,
-      });
+      }, `[Apply] Updated state in ${formatDuration(end - start)}`);
     } else {
       logger.info(`[Apply] Updated state in ${formatDuration(end - start)}`);
     }
@@ -309,10 +309,10 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.Create].length} resources created`);
     sortByPath(plan[Type.Create]).forEach((create) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${create.path}`, {
+        logger.debug({
           state: create.state,
           executionTime: create.executionTime,
-        });
+        }, `    ${create.path}`);
       } else {
         logger.info(`   ${create.path}`);
       }
@@ -323,11 +323,11 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.CreateVersion].length} resources versions created`);
     sortByPath(plan[Type.CreateVersion]).forEach((create) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${create.path}`, {
+        logger.debug({
           version: create.version,
           state: create.state,
           executionTime: create.executionTime,
-        });
+        }, `${create.path}`);
       } else {
         logger.info(`   ${create.path}`);
         logger.info(`   version::${create.version}`);
@@ -339,10 +339,10 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.Delete].length} resources deleted`);
     sortByPath(plan[Type.Delete]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${deleted.path}`, {
+        logger.debug({
           state: deleted.state,
           executionTime: deleted.executionTime,
-        });
+        }, `${deleted.path}`);
       } else {
         logger.info(`   ${deleted.path}`);
       }
@@ -353,11 +353,11 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.DeleteVersion].length} resources versions deleted`);
     sortByPath(plan[Type.DeleteVersion]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${deleted.path}`, {
+        logger.debug({
           version: deleted.version,
           state: deleted.state,
           executionTime: deleted.executionTime,
-        });
+        }, `${deleted.path}`);
       } else {
         logger.info(`   ${deleted.path}`);
         logger.info(`   version::${deleted.version}`);
@@ -369,11 +369,11 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.Update].length} Resources updated`);
     sortByPath(plan[Type.Update]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${update.path}`, {
+        logger.debug({
           config: update.config,
           state: update.state,
           executionTime: update.executionTime,
-        });
+        }, `    ${update.path}`);
       } else {
         logger.info(`   ${update.path}`);
       }
@@ -384,12 +384,12 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.UpdateVersion].length} Resources version updated`);
     sortByPath(plan[Type.UpdateVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${update.path}`, {
+        logger.debug({
           version: update.version,
           config: update.config,
           state: update.state,
           executionTime: update.executionTime,
-        });
+        }, `${update.path}`);
       } else {
         logger.info(`   ${update.path}`);
         logger.info(`   version::${update.version}`);
@@ -401,12 +401,12 @@ export function printChanges(changes: Change[]): void {
     logger.info(`[Execution] ${plan[Type.ChangeVersion].length} resources versions changed`);
     sortByPath(plan[Type.ChangeVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${update.path}`, {
+        logger.debug({
           prevVersion: update.prevVersion,
           newVersion: update.version,
           state: update.state,
           executionTime: update.executionTime,
-        });
+        }, `${update.path}`);
       } else {
         logger.info(`   ${update.path}`);
         logger.info(`   version::${update.version}`);

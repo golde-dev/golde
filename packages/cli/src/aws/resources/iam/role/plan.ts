@@ -73,11 +73,11 @@ export async function createIAMRolePlan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[Plan][AWS] Planning for IAM roles changes",
     {
       state,
       config,
     },
+    "[Plan][AWS][IAM] Planning roles changes",
   );
   const plan: Plan = [];
 
@@ -180,9 +180,7 @@ export async function createIAMRoleDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[Plan][AWS] Creating destroy buckets plan", {
-    state,
-  });
+  logger.debug({state}, "[Plan][AWS][IAM] Creating destroy roles plan", );
 
   const previous = getCurrent(state);
   for (const key of Object.keys(previous)) {

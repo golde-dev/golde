@@ -134,7 +134,7 @@ export async function assertCreatePermission(this: AWSClient, bucket: string, ke
     `[Plan][AWS] Checked permission for s3 bucket ${arn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[Execute][AWS] Create permission s3 denied for bucket ${arn}`, reason);
+    logger.error(reason, `[Execute][AWS] Create permission s3 denied for bucket ${arn}`);
     throw new PlanError(`Cannot create s3 bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -151,7 +151,7 @@ export async function assertDeletePermission(this: AWSClient, bucket: string, ke
     `[Plan][AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[Plan][AWS] Delete permission denied for bucket ${arn}`, reason);
+    logger.error(reason, `[Plan][AWS] Delete permission denied for bucket ${arn}`);
     throw new PlanError(`Cannot delete bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -167,7 +167,7 @@ export async function assertUpdatePermission(this: AWSClient, bucket: string, ke
     `[Plan][AWS] Checked permission for bucket ${arn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[Plan][AWS] Update tags permission denied for bucket ${arn}`, reason);
+    logger.error(reason, `[Plan][AWS] Update tags permission denied for bucket ${arn}`);
     throw new PlanError(`Cannot update bucket ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

@@ -65,9 +65,9 @@ export function createDockerImageExecutor(client: DockerClient): GenericExecutor
 
     await client.login();
     await client.pushImage(imageName, imageId, tagsWithConfig);
-    logger.debug(`[Execute][${provider}] Pushed docker image ${imageName}:${versionId}`, {
+    logger.debug({
       config,
-    });
+    }, `[Execute][${provider}] Pushed docker image ${imageName}:${versionId}`);
     const createdAt = nowStringDate();
     return {
       version,
@@ -104,10 +104,10 @@ export function createDockerImageExecutor(client: DockerClient): GenericExecutor
       image,
     });
 
-    logger.debug(`[Plan][${provider}] Build docker image ${imageName}:${versionId}`, {
+    logger.debug({
       image,
       versionId,
-    });
+    }, `[Plan][${provider}] Build docker image ${imageName}:${versionId}`);
     return {
       versionId,
       imageId,

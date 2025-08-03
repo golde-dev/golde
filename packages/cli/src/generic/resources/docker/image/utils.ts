@@ -35,9 +35,9 @@ export const buildImage = memoizeAsync(
       image: ImageConfig;
     },
   ) => {
-    logger.debug(`[Plan] Building image ${imageName}`, {
+    logger.debug({
       config: image,
-    });
+    }, `[Plan] Building image ${imageName}`);
     const {
       context = ".",
       version,

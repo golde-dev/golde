@@ -53,11 +53,11 @@ export class DockerClient {
       registry,
     } = this;
 
-    logger.debug(`[Docker] Authenticating to docker registry`, {
+    logger.debug({
       username,
       password: "<redacted>",
       registry,
-    });
+    }, `[Docker] Authenticating to docker registry`);
 
     await new Promise((resolve, reject) => {
       exec(`docker login -u ${username} -p ${password} ${registry}`, (error, _, stderr) => {

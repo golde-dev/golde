@@ -47,28 +47,28 @@ async function compress(path: string, name: string) {
   // TODO: zip is not working issue with workers
   if (name.endsWith(".zip")) {
     const archivePath = `${path}.zip`;
-    logger.debug(`[Plan] Object ${name} compressing`, {
+    logger.debug({
       from: path,
       to: archivePath,
-    });
+    }, `[Plan] Object ${name} compressing`);
     await zip.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   if (name.endsWith(".tar.gz")) {
     const archivePath = `${path}.tar.gz`;
-    logger.debug(`[Plan] Object ${name} compressing `, {
+    logger.debug({
       from: path,
       to: archivePath,
-    });
+    }, `[Plan] Object ${name} compressing`);
     await tgz.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   if (name.endsWith(".tar")) {
     const archivePath = `${path}.tar`;
-    logger.debug(`[Plan] Object ${name} compressing`, {
+    logger.debug({
       from: path,
       to: archivePath,
-    });
+    }, `[Plan] Object ${name} compressing`);
     await tar.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
@@ -95,10 +95,10 @@ async function createFromSource(
     const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-`));
     const toPath = join(tmpDir, basename(fromPath));
 
-    logger.debug(`[Plan] Object ${name} copying`, {
+    logger.debug({
       from: fromPath,
       to: toPath,
-    });
+    }, `[Plan] Object ${name} copying`);
 
     // TODO: switch to node:fs/promises cp once it is available with force option
     await copy(fromPath, toPath, {
@@ -139,10 +139,10 @@ async function createFromIncludes(
       }
 
       if (toPath !== tmpDir) {
-        logger.debug(`Object ${name} copying`, {
+        logger.debug({
           from: fromPath,
           to: toPath,
-        });
+        }, `Object ${name} copying`);
         // TODO: switch to node:fs/promises cp once it is available with force option
         await copy(fromPath, toPath, { preserveTimestamps: true });
         continue;
@@ -152,10 +152,10 @@ async function createFromIncludes(
 
       if (fromStat.isFile()) {
         const fileToPath = join(tmpDir, basename(fromPath));
-        logger.debug(`Object ${name} copying`, {
+        logger.debug({
           from: fromPath,
           to: fileToPath,
-        });
+        }, `Object ${name} copying`);
         // TODO: switch to node:fs/promises cp once it is available with force option
         await copy(fromPath, fileToPath, {
           preserveTimestamps: true,
@@ -169,10 +169,10 @@ async function createFromIncludes(
           const entryFromPath = join(fromPath, entry.name);
           const entryToPath = join(tmpDir, entry.name);
 
-          logger.debug(`Object ${name} copying`, {
+          logger.debug({
             from: entryFromPath,
             to: entryToPath,
-          });
+          }, `Object ${name} copying`);
 
           await copy(entryFromPath, entryToPath, {
             preserveTimestamps: true,
@@ -189,7 +189,7 @@ async function createFromIncludes(
 
     return [archivePath, newVersion];
   } catch (error) {
-    logger.error(`[Plan] Bucket object ${name}, include failed`, error);
+    logger.error(error, `[Plan] Bucket object ${name}, include failed`);
     throw new PlanError(
       `Bucket object ${name}, include failed`,
       PlanErrorCode.SOURCE_ERROR,

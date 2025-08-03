@@ -28,11 +28,11 @@ export class SlackClient {
     method = "GET",
     body?: object,
   ): Promise<T> {
-    logger.debug("[Slack] request", {
+    logger.debug({
       path,
       body,
       method,
-    });
+    }, "[Slack] request");
     return fetch(`${this.baseUrl}${path}`, {
       method,
       body: JSON.stringify(body),

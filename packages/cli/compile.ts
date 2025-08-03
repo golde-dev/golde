@@ -66,7 +66,7 @@ type Target =
   | "aarch64-apple-darwin";
 
 async function compile(target: Target, path: string, local: boolean) {
-  logger.info(`CLI compiling target: ${target}`);
+  logger.info(`[Compile][CLI] Compiling target: ${target}`);
 
   const perms = [
     "--allow-read",
@@ -83,7 +83,6 @@ async function compile(target: Target, path: string, local: boolean) {
     "compile",
     ...cert,
     ...perms,
-    "--no-check",
     "--target",
     target,
     "--output",
@@ -96,11 +95,16 @@ async function compile(target: Target, path: string, local: boolean) {
   }).output();
 
   if (!success) {
-    logger.error(`Failed CLI compilation for ${target} path: ${path}`);
-    logger.info(decode(stdout));
-    logger.error(decode(stderr));
-    Deno.exit(1);
+    logger.error(`[Compile][CLI] Failed compilation for ${target} path: ${path}`);
+    const error = decode(stderr);
+    if (error) {
+      console.log(error);
+    }
+    const output = decode(stdout);
+    if (output) {
+      console.log(output);
+    }
   } else {
-    logger.info(`CLI complete target: ${target}`);
+    logger.info(`[Compile][CLI] completed target: ${target}`);
   }
 }

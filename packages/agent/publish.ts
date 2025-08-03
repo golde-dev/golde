@@ -1,4 +1,3 @@
-import { exec } from "sudo-prompt";
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 
@@ -34,22 +33,9 @@ async function uploadReleaseArtifacts() {
   logger.error(decoder.decode(stderr));
 }
 
-function updateLocalAgent(): Promise<void> {
+function updateLocalAgent() {
   logger.info("Updating local agent");
-  return new Promise((resolve, reject) => {
-    exec(
-      `${import.meta.dirname}/dist/bin/agent-linux-x64 install`,
-      { name: "Golde Agent" },
-      function (error, stdout, stderr) {
-        if (error) {
-          logger.error({ error, stderr }, "Failed to update local agent");
-          reject(error);
-        }
-        logger.info("stdout: " + stdout);
-        resolve();
-      },
-    );
-  });
+ 
 }
 
 function publish() {

@@ -35,11 +35,11 @@ export async function createGoldeClient(
     return client;
   } catch (error) {
     logger.error(
-      "Failed to initialize golde client, check your apiKey",
       {
         error,
         apiKey: "<redacted>",
       },
+      "Failed to initialize golde client, check your apiKey"
     );
     throw error;
   }

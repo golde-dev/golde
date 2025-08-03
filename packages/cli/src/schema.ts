@@ -8,10 +8,7 @@ import { goldeCredentialsSchema, goldeResourcesConfigSchema } from "./golde/sche
 import { githubCredentialsSchema, githubResourcesConfigSchema } from "./github/schema.ts";
 import { slackCredentialsSchema, slackOutputsSchema } from "@/slack/schema.ts";
 import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
-import {
-  cloudflareCredentialsSchema,
-  cloudflareResourcesConfigSchema,
-} from "./cloudflare/schema.ts";
+import { cloudflareCredentialsSchema, cloudflareResourcesConfigSchema} from "./cloudflare/schema.ts";
 import type { Config, ProvidersConfig, Resources } from "./types/config.ts";
 import type { ZodType } from "zod";
 import type { Outputs } from "@/types/output.ts";

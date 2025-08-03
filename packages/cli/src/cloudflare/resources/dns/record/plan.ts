@@ -79,11 +79,11 @@ export const createDNSPlan = (
 ): Promise<Plan> => {
   const plan: Plan = [];
   logger.debug(
-    "Planning for cloudflare dns changes",
     {
       state,
       config,
     },
+    "[Plan][Cloudflare][DNS] Planning for cloudflare dns changes"
   );
 
   const previous = getPrevious(state);
@@ -167,10 +167,10 @@ export function createDNSDestroyPlan(
 ) {
   const plan: Plan = [];
   logger.debug(
-    "Planning for cloudflare dns changes",
     {
       state,
     },
+    "[Plan][Cloudflare][DNS] Planning for cloudflare dns changes",
   );
 
   const previous = getPrevious(state);

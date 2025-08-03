@@ -28,10 +28,10 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.Noop].length} resources that are already up to date`);
     sortByPath(plan[Type.Noop]).forEach((noop) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${noop.path}`, {
+        logger.debug({
           config: noop.config,
           state: noop.state,
-        });
+        }, `${noop.path}`);
       } else {
         logger.info(`   ${noop.path}`);
       }
@@ -42,10 +42,10 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.Create].length} resources to create`);
     sortByPath(plan[Type.Create]).forEach((create) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${create.path}`, {
+        logger.debug({
           config: create.config,
           dependsOn: create.dependsOn.map(({ resourcePath }) => resourcePath),
-        });
+        }, `    ${create.path}`);
       } else {
         logger.info(`   ${create.path}`);
       }
@@ -56,11 +56,11 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.CreateVersion].length} resources versions to create`);
     sortByPath(plan[Type.CreateVersion]).forEach((create) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${create.path}`, {
+        logger.debug({
           version: create.version,
           config: create.config,
           dependsOn: create.dependsOn.map(({ resourcePath }) => resourcePath),
-        });
+        }, `${create.path}`);
       } else {
         logger.info(`   ${create.path}`);
         logger.info(`   version::${create.version}`);
@@ -72,9 +72,9 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.Delete].length} resources to delete`);
     sortByPath(plan[Type.Delete]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${deleted.path}`, {
+        logger.debug({
           state: deleted.state,
-        });
+        }, `${deleted.path}`);
       } else {
         logger.info(`   ${deleted.path}`);
       }
@@ -85,10 +85,10 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.DeleteVersion].length} resources versions to delete`);
     sortByPath(plan[Type.DeleteVersion]).forEach((deleted) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${deleted.path}`, {
+        logger.debug({
           version: deleted.version,
           state: deleted.state,
-        });
+        }, `${deleted.path}`);
       } else {
         logger.info(`   ${deleted.path}`);
         logger.info(`   version::${deleted.version}`);
@@ -100,11 +100,11 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.Update].length} Resources to update`);
     sortByPath(plan[Type.Update]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`    ${update.path}`, {
+        logger.debug({
           config: update.config,
           state: update.state,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
-        });
+        }, `    ${update.path}`);
       } else {
         logger.info(`   ${update.path}`);
       }
@@ -115,12 +115,12 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.UpdateVersion].length} Resources version to update`);
     sortByPath(plan[Type.UpdateVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${update.path}`, {
+        logger.debug({
           version: update.version,
           config: update.config,
           state: update.state,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
-        });
+        }, `${update.path}`);
       } else {
         logger.info(`   ${update.path}`);
         logger.info(`   version::${update.version}`);
@@ -132,13 +132,13 @@ export function printPlan(flatPlan: Plan) {
     logger.info(`[Plan] ${plan[Type.ChangeVersion].length} resources versions to change`);
     sortByPath(plan[Type.ChangeVersion]).forEach((update) => {
       if (logger.level === "DEBUG") {
-        logger.debug(`${update.path}`, {
+        logger.debug({
           version: update.version,
           config: update.config,
           previousVersion: update.prevVersion,
           newVersion: update.version,
           dependsOn: update.dependsOn.map(({ resourcePath }) => resourcePath),
-        });
+        }, `${update.path}`);
       } else {
         logger.info(`   ${update.path}`);
         logger.info(`   version::${update.version}`);

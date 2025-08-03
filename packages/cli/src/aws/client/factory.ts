@@ -13,13 +13,13 @@ export async function createAWSClient(
     return client;
   } catch (error) {
     logger.error(
-      "Failed to initialize aws client, check your credentials",
-      {
+       {
         error,
         region,
         secretAccessKey: "<redacted>",
         accessKeyId: "<redacted>",
       },
+      "Failed to initialize aws client, check your credentials",
     );
     throw error;
   }

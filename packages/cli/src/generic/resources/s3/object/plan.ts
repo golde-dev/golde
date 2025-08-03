@@ -94,10 +94,10 @@ export function createS3PlanFactory<E extends GenericExecutors>(
       assertObjectExist,
     } = executors;
 
-    logger.debug(`[Plan][${providerName}] ${serviceName} object planning changes`, {
+    logger.debug({
       state,
       config,
-    });
+    }, `[Plan][${providerName}] ${serviceName} object planning changes`);
 
     const plan: Plan = [];
 
@@ -254,9 +254,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     executors: E,
     state?: ObjectsState,
   ): Promise<Plan> {
-    logger.debug(`[Plan][${providerName}] ${serviceName} objects planning destroying changes`, {
+    logger.debug({
       state,
-    });
+    }, `[Plan][${providerName}] ${serviceName} objects planning destroying changes`, );
     const {
       deleteObject,
       assertObjectExist,
@@ -264,9 +264,9 @@ export function createS3PlanFactory<E extends GenericExecutors>(
     } = executors;
 
     const plan: Plan = [];
-    logger.debug(`[Plan][${providerName}] ${serviceName} creating destroy objects plan`, {
+    logger.debug({
       state,
-    });
+    }, `[Plan][${providerName}] ${serviceName} creating destroy objects plan`);
 
     const previous = getPrevious(state);
     for (const key of Object.keys(previous)) {

@@ -3,10 +3,10 @@ import { writeJSON } from "./utils/json.ts";
 import { homedir } from "node:os";
 import { GoldeClient } from "./golde/client/client.ts";
 import { logger } from "./logger.ts";
-import type { GoldeClientConfig } from "./golde/types.ts";
 import { exit } from "node:process";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
+import type { GoldeClientConfig } from "./golde/types.ts";
 
 export async function configure() {
   const apiKey = await input({

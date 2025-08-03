@@ -54,7 +54,7 @@ export class HCloudClientBase {
       },
     }).then(async (d) => {
       if (!d.ok) {
-        logger.debug("HCloud request failed", { body, path, method });
+        logger.debug({ body, path, method }, "HCloud request failed");
         throw new HCloudError("HCloud Request failed", {
           status: d.status,
           statusText: d.statusText,
@@ -62,7 +62,7 @@ export class HCloudClientBase {
       }
       const { error, meta: _, ...rest } = await d.json() as T;
       if (error) {
-        logger.debug("HCloud request error", { error, path, body, method });
+        logger.debug({ error, path, body, method }, "HCloud request error");
         throw new HCloudError(`HCloud Request failed: ${path}`, error);
       }
       return rest;

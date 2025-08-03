@@ -28,7 +28,7 @@ import type {
 export class IAMClient extends AWSClientBase {
   public async checkIAMRoleExists(role: string, region?: string) {
     try {
-      logger.debug("[AWS] Check AIM role exists", { role });
+      logger.debug({ role }, "[AWS] Check AIM role exists");
       const command = new GetRoleCommand({
         RoleName: role,
       });
@@ -45,7 +45,7 @@ export class IAMClient extends AWSClientBase {
     input: CreateRoleCommandInput,
   ): Promise<CreateRoleCommandOutput> {
     try {
-      logger.debug("[AWS] Creating IAM role", { input });
+      logger.debug({ input }, "[AWS] Creating IAM role");
       const command = new CreateRoleCommand(input);
       const result = await this
         .getIAMClient()
@@ -54,7 +54,7 @@ export class IAMClient extends AWSClientBase {
       return result;
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to create IAM role", e);
+        logger.error(e, "[AWS] Failed to create IAM role");
       }
       throw e;
     }
@@ -65,7 +65,7 @@ export class IAMClient extends AWSClientBase {
     assumeRolePolicyDocument: string,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Updating assume role policy to role", { role, assumeRolePolicyDocument });
+      logger.debug({ role, assumeRolePolicyDocument }, "[AWS] Updating assume role policy to role");
       const command = new UpdateAssumeRolePolicyCommand({
         RoleName: role,
         PolicyDocument: assumeRolePolicyDocument,
@@ -75,7 +75,7 @@ export class IAMClient extends AWSClientBase {
         .send<UpdateAssumeRolePolicyCommandInput, UpdateAssumeRolePolicyCommandOutput>(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update assume role policy to role", e);
+        logger.error(e, "[AWS] Failed to update assume role policy to role");
       }
       throw e;
     }
@@ -83,7 +83,7 @@ export class IAMClient extends AWSClientBase {
 
   public async updateIAmRoleTags(role: string, tags: Tag[]) {
     try {
-      logger.debug("[AWS] Updating tags to role", { role, tags });
+      logger.debug({ role, tags }, "[AWS] Updating tags to role");
       const command = new TagRoleCommand({
         RoleName: role,
         Tags: tags,
@@ -93,7 +93,7 @@ export class IAMClient extends AWSClientBase {
         .send<TagRoleCommandInput, TagRoleCommandOutput>(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update tags to role", e);
+        logger.error(e, "[AWS] Failed to update tags to role");
       }
       throw e;
     }
@@ -104,7 +104,7 @@ export class IAMClient extends AWSClientBase {
     policyArn: string,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Attaching policy to role", { role, policyArn });
+      logger.debug({ role, policyArn }, "[AWS] Attaching policy to role");
       const command = new AttachRolePolicyCommand({
         RoleName: role,
         PolicyArn: policyArn,
@@ -114,7 +114,7 @@ export class IAMClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to attach policy to role", e);
+        logger.error(e, "[AWS] Failed to attach policy to role");
       }
       throw e;
     }
@@ -122,7 +122,7 @@ export class IAMClient extends AWSClientBase {
 
   public async removeManagedPolicyFromIAMRole(role: string, policyArn: string): Promise<void> {
     try {
-      logger.debug("[AWS] Removing managed policy from role", { role, policyArn });
+      logger.debug({ role, policyArn }, "[AWS] Removing managed policy from role");
       const command = new DetachRolePolicyCommand({
         RoleName: role,
         PolicyArn: policyArn,
@@ -132,7 +132,7 @@ export class IAMClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to remove managed policy from role", e);
+        logger.error(e, "[AWS] Failed to remove managed policy from role");
       }
       throw e;
     }
@@ -140,7 +140,7 @@ export class IAMClient extends AWSClientBase {
 
   public async deleteIAMRole(role: string): Promise<void> {
     try {
-      logger.debug("[AWS] Deleting IAM role", { role });
+      logger.debug({ role }, "[AWS] Deleting IAM role");
       const command = new DeleteRoleCommand({
         RoleName: role,
       });
@@ -149,7 +149,7 @@ export class IAMClient extends AWSClientBase {
         .send<DeleteRoleCommandInput, DeleteRoleCommandOutput>(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to delete IAM role", e);
+        logger.error(e, "[AWS] Failed to delete IAM role");
       }
       throw e;
     }
@@ -160,7 +160,7 @@ export class IAMClient extends AWSClientBase {
     policy: string,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Putting inline policy to role", { role, policy, name });
+      logger.debug({ role, policy, name }, "[AWS] Putting inline policy to role");
       const command = new PutRolePolicyCommand({
         RoleName: role,
         PolicyName: `${role}-inline-policy`,
@@ -171,7 +171,7 @@ export class IAMClient extends AWSClientBase {
         .send<PutRolePolicyCommandInput, PutRolePolicyCommandOutput>(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to put inline policy to role", e);
+        logger.error(e, "[AWS] Failed to put inline policy to role");
       }
       throw e;
     }
@@ -179,7 +179,7 @@ export class IAMClient extends AWSClientBase {
 
   public async removeInlinePolicyFromIAMRole(role: string): Promise<void> {
     try {
-      logger.debug("[AWS] Removing inline policy from role", { role });
+      logger.debug({ role }, "[AWS] Removing inline policy from role");
       const command = new DeleteRolePolicyCommand({
         RoleName: role,
         PolicyName: `${role}-inline-policy`,
@@ -189,7 +189,7 @@ export class IAMClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to remove inline policy from role", e);
+        logger.error(e, "[AWS] Failed to remove inline policy from role");
       }
       throw e;
     }

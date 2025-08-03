@@ -46,7 +46,7 @@ function decode(buffer: BufferSource): string {
 }
 
 async function uploadReleaseArtifacts() {
-  logger.info("Updating artifacts");
+  logger.info("[Publish][CLI] Updating artifacts");
   const o = await new Deno.Command("gh", {
     args: ["release", "upload", VERSION, "*"],
     cwd: `./dist/bin`,
@@ -72,7 +72,7 @@ async function publishNPMPackages(
     logger.info(decode(stdout));
     logger.error(decode(stderr));
     if (!success) {
-      logger.error("Failed to publish package");
+      logger.error("[Publish][CLI] Failed to publish package");
       exit(1);
     }
   }
@@ -83,7 +83,7 @@ function devUpdateExamples(examples: string[]) {
 
   return Promise.all(
     examples.map((example) => {
-      logger.info(`Updating example ${example}`);
+      logger.info(`[Publish][CLI] Updating example ${example}`);
 
       const goldeModules = `/node_modules/@golde`;
       const npmDistDir = "./dist/npm/@golde";
@@ -107,7 +107,7 @@ async function prodUpdateExamples(
   registry: string,
 ) {
   for (const example of examples) {
-    logger.info(`Updating ${example}`);
+    logger.info(`[Publish][CLI] Updating ${example}`);
 
     await new Deno.Command("yarn", {
       args: ["config", "set", "npmRegistryServer", registry],
@@ -129,7 +129,7 @@ async function prodUpdateExamples(
 }
 
 async function commitExamplesChanges() {
-  logger.info("Committing examples changes");
+  logger.info("[Publish][CLI] Committing examples changes");
   const o1 = await new Deno.Command("git", {
     args: ["add", "."],
     cwd: `../../examples`,
@@ -148,7 +148,7 @@ async function commitExamplesChanges() {
 }
 
 async function updateLocalCLI(): Promise<void> {
-  logger.info("Updating local CLI");
+  logger.info("[Publish][CLI] Updating local CLI");
 
   const home = homedir();
   const from = resolve("./dist/bin/cli-linux-x64");
@@ -161,7 +161,7 @@ async function updateLocalCLI(): Promise<void> {
 }
 
 async function publishProd() {
-  logger.info("Publishing to remote registry");
+  logger.info("[Publish][CLI] Publishing to remote registry");
   await publishNPMPackages(
     packages,
     publicRegistry,
@@ -176,21 +176,21 @@ async function publishProd() {
 }
 
 async function uploadToS3() {
-  logger.info("Publishing CLI to S3 bucket");
+  logger.info("[Publish][CLI] Publishing CLI to S3 bucket");
 
   const endpoint = env.S3_ENDPOINT;
   if (!endpoint) {
-    logger.error("S3 endpoint not found skipping upload");
+    logger.error("[Publish][CLI] S3 endpoint not found skipping upload");
     return;
   }
   const accessKeyId = env.S3_ACCESS_KEY_ID;
   if (!accessKeyId) {
-    logger.error("S3 access key id not found skipping upload");
+    logger.error("[Publish][CLI] S3 access key id not found skipping upload");
     return;
   }
   const secretAccessKey = env.S3_SECRET_ACCESS_KEY;
   if (!secretAccessKey) {
-    logger.error("S3 secret access key not found skipping upload");
+    logger.error("[Publish][CLI] S3 secret access key not found skipping upload");
     return;
   }
   const client = new S3Client({
@@ -221,7 +221,7 @@ async function uploadToS3() {
 }
 
 async function publishDev() {
-  logger.info("Publishing to local registry");
+  logger.info("[Publish][CLI] Publishing to local registry");
   await devUpdateExamples(examples);
   await updateLocalCLI();
   await uploadToS3();

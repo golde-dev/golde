@@ -22,7 +22,7 @@ interface D1Database {
 
 export class D1Client extends CloudflareBase {
   public async createD1Database(config: D1DatabaseRequest) {
-    logger.debug("[Cloudflare] Creating d1 database", { config });
+    logger.debug({ config }, "[Cloudflare] Creating d1 database");
     try {
       const bucket = await this.makeRequest<D1Database>(
         `accounts/${this.accountId}}/d1/database`,
@@ -32,14 +32,14 @@ export class D1Client extends CloudflareBase {
       return bucket;
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("[Cloudflare] Failed to create d1 database", e.cause);
+        logger.error(e.cause, "[Cloudflare] Failed to create d1 database");
       }
       throw e;
     }
   }
 
   public async deleteD1Database(name: string) {
-    logger.debug("[Cloudflare] Deleting D1 database", { name });
+    logger.debug({ name }, "[Cloudflare] Deleting D1 database");
     try {
       await this.makeRequest(
         `/accounts/${this.accountId}/d1/database/${name}`,
@@ -47,14 +47,14 @@ export class D1Client extends CloudflareBase {
       );
     } catch (e) {
       if (e instanceof CloudflareError) {
-        logger.error("[Cloudflare] Failed to delete D1 database", e.cause);
+        logger.error(e.cause, "[Cloudflare] Failed to delete D1 database");
       }
       throw e;
     }
   }
 
   public async checkD1DatabaseExists(name: string): Promise<boolean> {
-    logger.debug("[Cloudflare] Deleting D1 database", { name });
+    logger.debug({ name }, "[Cloudflare] Deleting D1 database");
     try {
       await this.makeRequest(
         `/accounts/${this.accountId}/d1/database/${name}`,

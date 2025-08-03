@@ -15,7 +15,7 @@ export class DockerClient extends GoldeClientBase {
     name: string,
     config: ContainerConfig,
   ): Promise<Container> {
-    logger.debug("[Golde] creating docker container", { name, config });
+    logger.debug({ name, config }, "[Golde] creating docker container");
     try {
       const container = await this.makeRequest<Container>(
         `/docker/containers`,
@@ -25,7 +25,7 @@ export class DockerClient extends GoldeClientBase {
       return container;
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("[Golde] Failed to create docker container", e.cause);
+        logger.error(e.cause, "[Golde] Failed to create docker container");
       }
       throw e;
     }
@@ -35,7 +35,7 @@ export class DockerClient extends GoldeClientBase {
     name: string,
     config: ContainerConfig,
   ): Promise<Container> {
-    logger.debug("[Golde] updating docker container", { name, config });
+    logger.debug({ name, config }, "[Golde] updating docker container");
     try {
       const container = await this.makeRequest<Container>(
         `/docker/containers/${name}`,
@@ -45,7 +45,7 @@ export class DockerClient extends GoldeClientBase {
       return container;
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("[Golde] Failed to update docker container", e.cause);
+        logger.error(e.cause, "[Golde] Failed to update docker container");
       }
       throw e;
     }
@@ -54,7 +54,7 @@ export class DockerClient extends GoldeClientBase {
   public async deleteDockerContainer(
     name: string,
   ): Promise<void> {
-    logger.debug("[Golde] deleting docker container", { name });
+    logger.debug({ name }, "[Golde] deleting docker container");
     try {
       await this.makeRequest<void>(
         `/docker/containers/${name}`,
@@ -62,14 +62,14 @@ export class DockerClient extends GoldeClientBase {
       );
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("[Golde] Failed to delete docker container", e.cause);
+        logger.error(e.cause, "[Golde] Failed to delete docker container");
       }
       throw e;
     }
   }
 
   public async hasContainer(name: string): Promise<boolean> {
-    logger.debug("[Golde] fetching docker container", { name });
+    logger.debug({ name }, "[Golde] fetching docker container");
     try {
       const container = await notFoundAsUndefined(this.makeRequest<Container>(
         `/docker/containers/${name}`,
@@ -78,7 +78,7 @@ export class DockerClient extends GoldeClientBase {
       return Boolean(container);
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("[Golde] Failed to get docker container", e.cause);
+        logger.error(e.cause, "[Golde] Failed to get docker container");
       }
       throw e;
     }

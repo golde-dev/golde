@@ -213,9 +213,7 @@ export async function initConfig() {
           if (error.cause?.status === 409) {
             logger.error(`[Init] Project: ${projectName} already exists`);
           } else {
-            logger.error("[Init] Failed to create project in golde", {
-              error,
-            });
+            logger.error(error, "[Init] Failed to create project in golde");
           }
         }
       }

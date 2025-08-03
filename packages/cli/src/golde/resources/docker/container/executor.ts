@@ -13,7 +13,7 @@ export function createDockerContainerExecutors(golde: GoldeClient) {
       createdAt,
     } = await golde.createDockerContainer(name, config);
 
-    logger.debug("[Execute][Golde] Created docker container", { name, config });
+    logger.debug({ name, config }, "[Execute][Golde] Created docker container");
 
     return {
       createdAt,
@@ -30,7 +30,7 @@ export function createDockerContainerExecutors(golde: GoldeClient) {
       updatedAt,
     } = await golde.updateDockerContainer(name, config);
 
-    logger.debug("[Execute][Golde] Updated docker container", { name, config });
+    logger.debug({ name, config }, "[Execute][Golde] Updated docker container");
 
     return {
       ...state,
@@ -43,7 +43,7 @@ export function createDockerContainerExecutors(golde: GoldeClient) {
     name: string,
   ): Promise<void> {
     await golde.deleteDockerContainer(name);
-    logger.debug("[Execute][Golde] Deleted docker container", { name });
+    logger.debug({ name }, "[Execute][Golde] Deleted docker container");
   }
 
   async function assertContainerNameAvailable(name: string) {

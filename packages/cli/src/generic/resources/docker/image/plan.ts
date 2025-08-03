@@ -95,10 +95,10 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       assertUpdatePermission,
     } = executors;
 
-    logger.debug(`[Plan][${providerName}] ${serviceName} docker images planning`, {
+    logger.debug({
       state,
       config,
-    });
+    }, `[Plan][${providerName}] ${serviceName} docker images planning`);
 
     const plan: Plan = [];
 
@@ -255,9 +255,9 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     } = executors;
 
     const plan: Plan = [];
-    logger.debug(`[Plan][${providerName}] ${serviceName} creating destroy images plan`, {
+    logger.debug({
       state,
-    });
+    }, `[Plan][${providerName}] ${serviceName} creating destroy images plan`);
 
     const previous = getPrevious(state);
     for (const key of Object.keys(previous)) {

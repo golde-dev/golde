@@ -81,11 +81,11 @@ export async function createLambdaFunctionPlan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[Plan][AWS] Planning for lambda function changes",
-    {
+      {
       state,
       config,
     },
+    "[Plan][AWS][LambdaFunction] Planning changes",
   );
   const plan: Plan = [];
 
@@ -196,9 +196,7 @@ export async function createLambdaFunctionDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[Plan][AWS] Creating destroy lambda functions plan", {
-    state,
-  });
+  logger.debug({state}, "[Plan][AWS][LambdaFunction] Creating destroy lambda functions plan", );
 
   const previous = getCurrent(state);
   for (const key of Object.keys(previous)) {

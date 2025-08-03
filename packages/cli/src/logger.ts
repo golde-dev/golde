@@ -1,57 +1,45 @@
-import {
-  ConsoleHandler,
-  debug,
-  error,
-  formatters,
-  getLevelName,
-  info,
-  setup,
-  warn,
-} from "@std/log";
+import { pino } from "pino";
+import pretty from "pino-pretty";
 
-import type { LevelName, LogLevel, LogRecord } from "@std/log";
+const prettyLogger = pino(pretty());
+const jsonLogger = pino();
 
-const {
-  jsonFormatter,
-} = formatters;
-
-function prettyFormatter(logRecord: LogRecord) {
-  const { msg, args, level } = logRecord;
-  return `${getLevelName(level as LogLevel).padEnd(5)}| ${msg} ${
-    args.map((arg: unknown) => JSON.stringify(arg, null, 2)).join(" ")
-  }`;
+function prettyTable(data: unknown[], title: string) {
+  prettyLogger.info(title);
+  console.table(data);
 }
 
-let level: LevelName = "INFO";
-
-export function configure(newLevel: LevelName, jsonFormat: boolean = false): void {
-  level = newLevel;
-  setup({
-    handlers: {
-      default: new ConsoleHandler(level, {
-        formatter: jsonFormat ? jsonFormatter : prettyFormatter,
-        useColors: false,
-      }),
-    },
-    loggers: {
-      default: {
-        level,
-        handlers: ["default"],
-      },
-    },
-  });
+function jsonTable(data: unknown[], title: string) {
+  jsonLogger.info(title);
+  console.table(data);
 }
 
-configure(level);
+type LoggerFn = (metaOrMessage: unknown | string, message?: string) => void;
 
 export const logger = {
-  configure,
-  info,
-  error,
-  debug,
-  warn,
-  get level() {
-    return level;
+  info: prettyLogger.info.bind(prettyLogger) as LoggerFn,
+  error: prettyLogger.error.bind(prettyLogger) as LoggerFn,
+  debug: prettyLogger.debug.bind(prettyLogger) as LoggerFn,
+  warn: prettyLogger.warn.bind(prettyLogger) as LoggerFn,
+  table: prettyTable,
+  level: "info",
+  configure(level: string, json: boolean = false) {
+    this.level = level;
+    if (json) {
+      jsonLogger.level = level;
+      this.info = jsonLogger.info.bind(jsonLogger);
+      this.error = jsonLogger.error.bind(jsonLogger);
+      this.debug = jsonLogger.debug.bind(jsonLogger);
+      this.warn = jsonLogger.warn.bind(jsonLogger);
+      this.table = jsonTable;
+    } else {
+      prettyLogger.level = level;
+      this.info = prettyLogger.info.bind(prettyLogger);
+      this.error = prettyLogger.error.bind(prettyLogger);
+      this.debug = prettyLogger.debug.bind(prettyLogger);
+      this.warn = prettyLogger.warn.bind(prettyLogger);
+      this.table = prettyTable;
+    }
   },
 };
 

@@ -80,11 +80,11 @@ export async function createCloudwatchLogGroupPlan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[Plan][AWS] Planning for cloudwatch log group changes",
-    {
+     {
       state,
       config,
     },
+    "[Plan][AWS][Cloudwatch] Planning for log group changes",
   );
   const plan: Plan = [];
 
@@ -195,9 +195,9 @@ export async function createCloudwatchLogGroupDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[Plan][AWS] Creating destroy cloudwatch log group plan", {
+  logger.debug({
     state,
-  });
+  }, "[Plan][AWS][Cloudwatch] Creating destroy log group plan");
 
   const previous = getCurrent(state);
   for (const key of Object.keys(previous)) {

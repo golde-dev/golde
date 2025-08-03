@@ -16,11 +16,11 @@ const getAWSCredentials = (
 
   if (!accessKeyId || !secretAccessKey) {
     logger.error(
-      "Missing accessKeyId or secretAccessKey for AWS",
       {
         accessKeyId: "<redacted>",
         secretAccessKey: "<redacted>",
       },
+      "Missing accessKeyId or secretAccessKey for AWS",
     );
     throw new Error("Missing accessKeyId or secretAccessKey for AWS client");
   }
@@ -59,7 +59,6 @@ export async function createStateClient(
       return stateClient;
     } catch (error) {
       logger.error(
-        "Failed to initialize s3 state client, please verify config",
         {
           error,
           bucket,
@@ -68,6 +67,7 @@ export async function createStateClient(
           accessKeyId: "<redacted>",
           secretAccessKey: "<redacted>",
         },
+        "Failed to initialize s3 state client, please verify config",
       );
       throw error;
     }
@@ -84,11 +84,11 @@ export async function createStateClient(
       return stateClient;
     } catch (error) {
       logger.error(
-        "Failed to initialize fs state client, check your config",
         {
           error,
           path,
         },
+        "Failed to initialize fs state client, check your config",
       );
       throw error;
     }

@@ -47,7 +47,7 @@ type Target =
   | "aarch64-unknown-linux-gnu";
 
 async function compile(target: Target, path: string) {
-  logger.info(`Agent Compiling target: ${target}`);
+  logger.info(`[Compile][Agent] Compiling target: ${target}`);
 
   const perms = [
     "--allow-read",
@@ -73,11 +73,16 @@ async function compile(target: Target, path: string) {
   }).output();
 
   if (!success) {
-    logger.error(`Failed Agent compilation for ${target} path: ${path}`);
-    logger.info(decoder.decode(stdout));
-    logger.error(decoder.decode(stderr));
-    Deno.exit(1);
+    logger.error(`[Compile][Agent] Failed compilation for ${target} path: ${path}`);
+    const error = decoder.decode(stderr);
+    if (error) {
+      console.log(error);
+    }
+    const output = decoder.decode(stdout);
+    if (output) {
+      console.log(output);
+    }
   } else {
-    logger.info(`Agent complete target: ${target}`);
+    logger.info(`[Compile][Agent] Agent complete target: ${target}`);
   }
 }
