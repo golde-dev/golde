@@ -6,7 +6,7 @@ import { memoizeAsync } from "@/utils/memoize.ts";
 import { existsSync, statSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import {cp} from "node:fs/promises";
+import { copy } from "@std/fs";
 
 import {
   getDirHashVersion,
@@ -101,7 +101,7 @@ async function createFromSource(
       to: toPath,
     }, `[Plan] Object ${name} copying`);
 
-    await cp(fromPath, toPath, { preserveTimestamps: true, force: true});
+    await copy(fromPath, toPath, { preserveTimestamps: true, overwrite: true});
     const archivePath = await compress(toPath, name);
     const newVersion = await getVersion(toPath, context, version);
     return [archivePath, newVersion];
@@ -141,7 +141,7 @@ async function createFromIncludes(
           to: toPath,
         }, `Object ${name} copying`);
   
-        await cp(fromPath, toPath, { force: true, preserveTimestamps: true });
+        await copy(fromPath, toPath, { overwrite: true, preserveTimestamps: true });
         continue;
       }
 
@@ -153,7 +153,7 @@ async function createFromIncludes(
           from: fromPath,
           to: fileToPath,
         }, `Object ${name} copying`);
-        await cp(fromPath, fileToPath, { preserveTimestamps: true, force: false});
+        await copy(fromPath, fileToPath, { preserveTimestamps: true, overwrite: false});
         continue;
       }
 
@@ -167,7 +167,7 @@ async function createFromIncludes(
             to: entryToPath,
           }, `Object ${name} copying`);
 
-          await cp(entryFromPath, entryToPath, { preserveTimestamps: true, force: false});
+          await copy(entryFromPath, entryToPath, { preserveTimestamps: true, overwrite: false});
         }
         continue;
       }

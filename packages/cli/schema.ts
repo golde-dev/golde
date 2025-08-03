@@ -5,5 +5,5 @@ import { writeJSON } from "./src/utils/json.ts";
 
 const jsonSchema = zodToJsonSchema(schema, "golde");
 
-logger.info("Writing schema.json");
+logger.info("[Schema][CLI] Writing schema.json");
 await writeJSON("schema.json", jsonSchema);

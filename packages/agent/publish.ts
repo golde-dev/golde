@@ -1,9 +1,10 @@
+import { readFileSync } from "node:fs";
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 
 const decoder = new TextDecoder();
 const { version } = JSON.parse(
-  Deno.readTextFileSync("../../lerna.json"),
+  readFileSync("../../lerna.json", { encoding: "utf-8" }),
 );
 
 const { values: { local } } = parseArgs({
