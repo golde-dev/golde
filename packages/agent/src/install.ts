@@ -7,7 +7,6 @@ import {
   start,
   write,
 } from "@systemd-js/ctl";
-import { copySync, ensureDirSync, ensureFileSync } from "@std/fs";
 import {
   createService,
   createUpdaterService,
@@ -25,7 +24,7 @@ import {
 import { VERSION } from "./version.ts";
 import { logger } from "./logger.ts";
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 
 function isLinkChanges(nextTarget: string, linkName: string) {
   if (!existsSync(linkName)) {
@@ -33,6 +32,18 @@ function isLinkChanges(nextTarget: string, linkName: string) {
   }
   const currentTarget = Deno.readLinkSync(linkName);
   return currentTarget !== nextTarget;
+}
+
+function ensureDirSync(path: string) {
+  if (!existsSync(path)) {
+    mkdirSync(path, { recursive: true });
+  }
+}
+
+function ensureFileSync(path: string) {
+  if (!existsSync(path)) {
+    writeFileSync(path, "");
+  }
 }
 
 export async function install() {
@@ -50,8 +61,8 @@ export async function install() {
 
   if (!existsSync(versionedAgentPath)) {
     logger.info("Copying new agent to version " + VERSION);
-    copySync(execPath, versionedAgentPath, {
-      overwrite: true,
+    cpSync(execPath, versionedAgentPath, {
+      force: true,
     });
   }
 

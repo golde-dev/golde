@@ -6,7 +6,8 @@ import { memoizeAsync } from "@/utils/memoize.ts";
 import { existsSync, statSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { copy } from "@std/fs/copy";
+import {cp} from "node:fs/promises";
+
 import {
   getDirHashVersion,
   getFileHashVersion,
@@ -100,11 +101,7 @@ async function createFromSource(
       to: toPath,
     }, `[Plan] Object ${name} copying`);
 
-    // TODO: switch to node:fs/promises cp once it is available with force option
-    await copy(fromPath, toPath, {
-      preserveTimestamps: true,
-      overwrite: true,
-    });
+    await cp(fromPath, toPath, { preserveTimestamps: true, force: true});
     const archivePath = await compress(toPath, name);
     const newVersion = await getVersion(toPath, context, version);
     return [archivePath, newVersion];
@@ -143,8 +140,8 @@ async function createFromIncludes(
           from: fromPath,
           to: toPath,
         }, `Object ${name} copying`);
-        // TODO: switch to node:fs/promises cp once it is available with force option
-        await copy(fromPath, toPath, { preserveTimestamps: true });
+  
+        await cp(fromPath, toPath, { force: true, preserveTimestamps: true });
         continue;
       }
 
@@ -156,11 +153,7 @@ async function createFromIncludes(
           from: fromPath,
           to: fileToPath,
         }, `Object ${name} copying`);
-        // TODO: switch to node:fs/promises cp once it is available with force option
-        await copy(fromPath, fileToPath, {
-          preserveTimestamps: true,
-          overwrite: false,
-        });
+        await cp(fromPath, fileToPath, { preserveTimestamps: true, force: false});
         continue;
       }
 
@@ -174,10 +167,7 @@ async function createFromIncludes(
             to: entryToPath,
           }, `Object ${name} copying`);
 
-          await copy(entryFromPath, entryToPath, {
-            preserveTimestamps: true,
-            overwrite: false,
-          });
+          await cp(entryFromPath, entryToPath, { preserveTimestamps: true, force: false});
         }
         continue;
       }

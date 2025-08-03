@@ -4,8 +4,8 @@ import { exit } from "node:process";
 
 loadEnvFile();
 
-const defaultLogLevel = "INFO";
-const defaultPretty = "false";
+const defaultLogLevel = "info";
+const defaultPretty = false;
 
 const schema = z.object({
   API_LOG_PRETTY: z
@@ -24,7 +24,7 @@ const result = schema.safeParse({
 });
 
 if (!result.success) {
-  console.error("Invalid environment variables:", result.error.format());
+  console.error("Invalid environment variables:", z.treeifyError(result.error));
   exit(1);
 }
 

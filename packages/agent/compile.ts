@@ -3,8 +3,6 @@ import { logger } from "./src/logger.ts";
 import { mkdirSync } from "node:fs";
 import { existsSync } from "node:fs";
 
-logger.configure("INFO", true);
-
 const decoder = new TextDecoder();
 
 const { values: { dev } } = parseArgs({

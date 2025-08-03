@@ -1,8 +1,6 @@
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 
-logger.configure("INFO", true);
-
 const decoder = new TextDecoder();
 const { version } = JSON.parse(
   Deno.readTextFileSync("../../lerna.json"),

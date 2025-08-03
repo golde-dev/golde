@@ -1,11 +1,11 @@
 import { exit, loadEnvFile } from "node:process";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
-import { walk } from "@std/fs/walk";
+import { walk } from "@std/fs";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import { copy } from "@std/fs";
+import { cp } from "node:fs/promises";
 import { env } from "node:process";
 import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -91,11 +91,11 @@ function devUpdateExamples(examples: string[]) {
       const from = resolve(npmDistDir);
       const to = join(exampleBaseDir, example, goldeModules);
 
-      return copy(
+      return cp(
         from,
         to,
         {
-          overwrite: true,
+          force: true,
         },
       );
     }),
@@ -153,10 +153,10 @@ async function updateLocalCLI(): Promise<void> {
   const home = homedir();
   const from = resolve("./dist/bin/cli-linux-x64");
   const to = join(home, ".local/bin/golde");
-  await copy(
+  await cp(
     from,
     to,
-    { overwrite: true },
+    { force: true },
   );
 }
 

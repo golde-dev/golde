@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "exports": {},
   "tasks": {
-    "schema": "deno run --allow-write --allow-run --allow-read --allow-env ./schema.ts",
+    "schema": "deno run --allow-write --allow-run --allow-sys --allow-read --allow-env ./schema.ts",
     "package": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net package.ts",
     "publish": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts",
     "publish:dev": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --dev",
