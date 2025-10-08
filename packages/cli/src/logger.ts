@@ -1,3 +1,4 @@
+import { exit } from "node:process";
 import { pino } from "pino";
 import pretty from "pino-pretty";
 
@@ -24,6 +25,10 @@ export const logger = {
   table: prettyTable,
   level: "info",
   configure(level: string, json: boolean = false) {
+    if (level !== "info" && level !== "error" && level !== "debug" && level !== "warn") {
+      logger.error(`[Config] Invalid log level ${level}`);
+      exit(1);
+    }
     this.level = level;
     if (json) {
       jsonLogger.level = level;

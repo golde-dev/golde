@@ -11,7 +11,9 @@ import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/client-s3";
 
-loadEnvFile();
+if (existsSync(".env")) {
+  loadEnvFile();
+}
 
 const { values: { dev } } = parseArgs({
   options: {
@@ -160,20 +162,6 @@ async function updateLocalCLI(): Promise<void> {
   );
 }
 
-async function publishProd() {
-  logger.info("[Publish][CLI] Publishing to remote registry");
-  await publishNPMPackages(
-    packages,
-    publicRegistry,
-  );
-  await prodUpdateExamples(
-    packages,
-    publicRegistry,
-  );
-  await uploadToS3();
-  await commitExamplesChanges();
-  await uploadReleaseArtifacts();
-}
 
 async function uploadToS3() {
   logger.info("[Publish][CLI] Publishing CLI to S3 bucket");
@@ -203,13 +191,24 @@ async function uploadToS3() {
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
   });
-  const cliLinuxX64 = readFileSync("./dist/bin/cli-linux-x64");
-  const cliLinuxX64Command = new PutObjectCommand({
-    Bucket: "golde-download",
-    Key: "cli-linux-x64",
-    Body: cliLinuxX64,
-  });
-  await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliLinuxX64Command);
+
+  const versions = [
+    "cli-linux-x64",
+    "cli-linux-arm64",
+    "cli-win32-x64.exe",
+    "cli-darwin-arm64",
+    "cli-darwin-x64",
+  ]
+
+  for (const version of versions) {
+    const binary = readFileSync(`./dist/bin/${version}`);
+    const cliBinaryCommand = new PutObjectCommand({
+      Bucket: "mapka-download",
+      Key: version,
+      Body: binary,
+    });
+    await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliBinaryCommand);
+  }
 
   const cliInstall = readFileSync("./scripts/install-golde-cli.sh");
   const cliInstallCommand = new PutObjectCommand({
@@ -220,8 +219,24 @@ async function uploadToS3() {
   await client.send<PutObjectCommandInput, PutObjectCommandOutput>(cliInstallCommand);
 }
 
+
+async function publishProd() {
+  logger.info("[Publish][CLI] Publishing to remote registry");
+  await publishNPMPackages(
+    packages,
+    publicRegistry,
+  );
+  await prodUpdateExamples(
+    packages,
+    publicRegistry,
+  );
+  await uploadToS3();
+  await commitExamplesChanges();
+  await uploadReleaseArtifacts();
+}
+
 async function publishDev() {
-  logger.info("[Publish][CLI] Publishing to local registry");
+  logger.info("[Publish][CLI] Publishing locally");
   await devUpdateExamples(examples);
   await updateLocalCLI();
   await uploadToS3();

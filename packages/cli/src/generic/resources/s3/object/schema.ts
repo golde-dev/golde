@@ -41,4 +41,11 @@ export const objectConfigSchema = implement<ObjectConfig>()
     "S3 Object Either source or includes must be defined",
   );
 
-export const s3ObjectSchema = z.record(objectConfigSchema);
+
+/**
+ * Use safe character set for S3 object keys
+ * https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
+ */
+const objectKeySchema = z.string().regex(/^[a-zA-Z0-9!_.*'()-]+$/);
+
+export const s3ObjectSchema = z.record(objectKeySchema, objectConfigSchema);

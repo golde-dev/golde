@@ -10,7 +10,6 @@ import { slackCredentialsSchema, slackOutputsSchema } from "@/slack/schema.ts";
 import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
 import { cloudflareCredentialsSchema, cloudflareResourcesConfigSchema} from "./cloudflare/schema.ts";
 import type { Config, ProvidersConfig, Resources } from "./types/config.ts";
-import type { ZodType } from "zod";
 import type { Outputs } from "@/types/output.ts";
 
 export const projectNameSchema = z
@@ -21,8 +20,7 @@ export const projectNameSchema = z
     "Projects name may include alphanumeric characters and the following special symbols: -, _, @, ., /, #, &, +.",
   );
 
-export const providersSchema: ZodType<ProvidersConfig> = z
-  .object({
+export const providersSchema =  implement<ProvidersConfig>().with({
     golde: goldeCredentialsSchema.optional(),
     aws: awsCredentialsSchema.optional(),
     github: githubCredentialsSchema.optional(),
@@ -30,7 +28,6 @@ export const providersSchema: ZodType<ProvidersConfig> = z
     hcloud: hcloudCredentialsSchema.optional(),
     slack: slackCredentialsSchema.optional(),
   })
-  .strict();
 
 export const outputsSchema = implement<Outputs>().with({
   slack: slackOutputsSchema.optional(),
@@ -59,8 +56,8 @@ export function validateConfig(config: unknown): Config {
     throw new ConfigError(
       "Failed schema validation",
       ConfigErrorCode.INVALID_CONFIG,
-      error.flatten(),
+      z.treeifyError(error),
     );
   }
-  return data;
+  return data as Config;
 }

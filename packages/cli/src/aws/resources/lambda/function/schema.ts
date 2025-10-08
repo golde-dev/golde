@@ -57,7 +57,7 @@ export const zipFunctionSchema = implement<ZipFunctionConfig>().with({
   description: z.string().optional(),
   region: z.string().optional(),
   layerArns: z.array(z.string()).optional(),
-  tags: z.record(z.string()).optional(),
+  tags: z.record(z.string(), z.string()).optional(),
 })
   .strict()
   .transform(transformBranch);
@@ -74,7 +74,7 @@ export const imageFunctionSchema = implement<ImageFunctionConfig>().with({
   memorySize: z.number().optional(),
   description: z.string().optional(),
   region: z.string().optional(),
-  tags: z.record(z.string()).optional(),
+  tags: z.record(z.string(), z.string()).optional(),
 })
   .strict()
   .transform(transformBranch);

@@ -8,6 +8,6 @@ export const hCloudServerSchema: ZodType<HCloudServerConfig> = z.object({
 export const serversSchema: ZodType<ServersConfig> = z
   .object({
     hcloud: z
-      .record(hCloudServerSchema)
+      .record(z.string(), hCloudServerSchema)
       .optional(),
   });

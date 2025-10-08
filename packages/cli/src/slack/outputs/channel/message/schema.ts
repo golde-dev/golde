@@ -7,4 +7,4 @@ export const messageConfigSchema = implement<MessageConfig>().with({
 	text: z.string(),
 }); 
 
-export const messagesConfigSchema = z.record(messageConfigSchema);
+export const messagesConfigSchema = z.record(z.string(), messageConfigSchema);

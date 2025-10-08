@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { tagsSchema } from "../../../../utils/tags.ts";
-import { branchPatternSchema, branchSchema, transformBranch } from "../../../../utils/resource.ts";
-import type { DNSConfig, RecordConfig, RecordType } from "./types.ts";
+import { tagsSchema } from "@/utils/tags.ts";
+import { domainNameSchema } from "@/generic/schema.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "@/utils/resource.ts";
+import type { DNSConfig, RecordConfig } from "./types.ts";
 import type { ZodType } from "zod";
 
-const recordTypeSchema: ZodType<RecordType> = z.union([
+const recordTypeSchema = z.union([
   z.literal("A"),
   z.literal("AAAA"),
   z.literal("CAA"),
@@ -23,6 +24,7 @@ const recordTypeSchema: ZodType<RecordType> = z.union([
   z.literal("TXT"),
 ]);
 
+
 const dnsRecordSchema: ZodType<RecordConfig> = z
   .object({
     value: z.string(),
@@ -40,11 +42,13 @@ const dnsRecordSchema: ZodType<RecordConfig> = z
   .transform(transformBranch);
 
 const dnsRecordsSchema = z
-  .record(dnsRecordSchema)
+  .record(domainNameSchema, dnsRecordSchema)
   .optional();
+
 
 export const dnsSchema: ZodType<DNSConfig> = z
   .record(
+    domainNameSchema,
     z.record(
       recordTypeSchema,
       dnsRecordsSchema,
