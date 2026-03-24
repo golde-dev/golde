@@ -1,0 +1,23 @@
+{
+  "name": "@golde/cli",
+  "version": "0.4.1",
+  "description": "Golde CLI",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cli",
+    "golde",
+    "PaaS",
+    "IaC",
+    "cloud"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/golde-dev/golde.git"
+  },
+  "bugs": {
+    "url": "https://github.com/golde-dev/golde/issues"
+  }
+}

@@ -11,7 +11,7 @@ let {
   default: {
     version,
   },
-} = await import("../../../lerna.json", {
+} = await import("../package.json", {
   with: { type: "json" },
 }) as WithVersion;
 
