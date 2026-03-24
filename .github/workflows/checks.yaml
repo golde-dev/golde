@@ -22,18 +22,20 @@ jobs:
         node-version: '24.0.2'
         cache: 'yarn'
         
-    - uses: denoland/setup-deno@v2
+    - name: "Setup Deno"
+      uses: denoland/setup-deno@v2
       with:
         deno-version: v2.x
+        cache: true
 
     - name: Install
       run: yarn install
+
+    - name: Lint
+      run: yarn lint
 
     - name: Build
       run: yarn dist
 
     - name: Test
       run: yarn test
-  
-    - name: Lint
-      run: yarn lint

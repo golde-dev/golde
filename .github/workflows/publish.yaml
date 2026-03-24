@@ -16,7 +16,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - never
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,28 +33,30 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: "Use NodeJS 22"
+    - name: "Setup Node"
       uses: actions/setup-node@v4
       with:
         node-version: '24.0.2'
         registry-url: 'https://registry.npmjs.org'
         cache: 'yarn'
 
-    - uses: denoland/setup-deno@v2
+    - name: "Setup Deno"
+      uses: denoland/setup-deno@v2
       with:
         deno-version: v2.x
-        
+        cache: true
+
     - name: Install
       run: yarn install
-      
-    - name: Test
-      run: yarn test
 
     - name: Lint
       run: yarn lint
 
     - name: Build
       run: yarn dist
+
+    - name: Test
+      run: yarn test
 
     - name: Setup git user
       run: |
