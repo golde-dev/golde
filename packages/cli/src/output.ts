@@ -2,7 +2,7 @@ import { logger } from "./logger.ts";
 import type { Context } from "./types/context.ts";
 import type { State } from "./types/state.ts";
 import { formatDuration } from "./utils/duration.ts";
-import { isEmpty } from "@es-toolkit/es-toolkit/compat";
+import { isEmpty } from "es-toolkit/compat";
 
 export function createOutputs(context: Context, _state: State): void {
   const {

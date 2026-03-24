@@ -4,7 +4,7 @@ import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
 import { sortByPath } from "@/plan.ts";
 import { exit } from "node:process";
-import { chunk, get } from "@es-toolkit/es-toolkit/compat";
+import { chunk, get } from "es-toolkit/compat";
 import { hasResolved, resolveUnitState } from "./utils/template.ts";
 import type { Context } from "./types/context.ts";
 import type { State } from "./types/state.ts";

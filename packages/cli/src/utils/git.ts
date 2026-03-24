@@ -1,6 +1,6 @@
 import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
-import { memoize } from "@es-toolkit/es-toolkit";
+import { memoize } from "es-toolkit";
 import { relative, resolve } from "node:path";
 
 export interface GitInfo {

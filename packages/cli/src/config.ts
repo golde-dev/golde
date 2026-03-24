@@ -9,7 +9,7 @@ import { dynamicImport } from "./utils/import.ts";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
-import { isPlainObject } from "@es-toolkit/es-toolkit";
+import { isPlainObject } from "es-toolkit";
 import { basename, extname, resolve } from "node:path";
 import {
   configTemplate,

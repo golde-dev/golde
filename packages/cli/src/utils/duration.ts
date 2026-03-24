@@ -1,4 +1,4 @@
-import { round } from "@es-toolkit/es-toolkit";
+import { round } from "es-toolkit";
 
 export function formatDuration(duration: number) {
   if (duration < 1000) {

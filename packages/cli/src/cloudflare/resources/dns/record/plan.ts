@@ -1,5 +1,5 @@
 import { logger } from "../../../../logger.ts";
-import { isEqual } from "@es-toolkit/es-toolkit";
+import { isEqual } from "es-toolkit";
 import { dnsPath } from "./path.ts";
 import { mergeProjectTags } from "../../../../utils/tags.ts";
 import { assertBranch } from "../../../../utils/resource.ts";

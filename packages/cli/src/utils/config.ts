@@ -1,6 +1,6 @@
-import { isPlainObject, isString } from "@es-toolkit/es-toolkit";
+import { isPlainObject, isString } from "es-toolkit";
 import { isTemplate } from "./template.ts";
-import { isArray, isNumber } from "@es-toolkit/es-toolkit/compat";
+import { isArray, isNumber } from "es-toolkit/compat";
 
 /**
  * Deeply compare two configs.
