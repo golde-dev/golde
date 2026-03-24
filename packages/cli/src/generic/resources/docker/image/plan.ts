@@ -242,7 +242,131 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
       plan.push(createVersionUnit);
     }
 
-    return await Promise.resolve(plan);
+    const planWithCleanup = await addMaxVersionsCleanup(plan, previous, next, executors);
+    return planWithCleanup;
+  }
+
+  async function addMaxVersionsCleanup(
+    plan: Plan,
+    previous: ReturnType<typeof getPrevious>,
+    next: Awaited<ReturnType<typeof getNext>>,
+    executors: E,
+  ): Promise<Plan> {
+    const cleanupUnits: Plan = [];
+
+    for (const [name, nextEntry] of Object.entries(next)) {
+      const { config } = nextEntry;
+      const maxVersions = config.maxVersions;
+      if (maxVersions === undefined) continue;
+
+      const resourcePath = dockerImagePath(name);
+
+      const planUnitsForName = plan.filter((unit) => unit.path === resourcePath);
+
+      const versionsBeingDeleted = new Set(
+        planUnitsForName
+          .filter((u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion)
+          .map((u) => u.version),
+      );
+
+      const versionsBeingCreated = new Set(
+        planUnitsForName
+          .filter((u): u is CreateVersionUnit<ImageConfig, ImageState, typeof executors.createDockerImage> => u.type === Type.CreateVersion)
+          .map((u) => u.version),
+      );
+
+      // Determine which version will be "current" after plan execution
+      let currentVersionAfterPlan: string | undefined;
+
+      const createVersionUnit = planUnitsForName.find(
+        (u): u is CreateVersionUnit<ImageConfig, ImageState, typeof executors.createDockerImage> => u.type === Type.CreateVersion,
+      );
+      const changeVersionUnit = planUnitsForName.find(
+        (u): u is ChangeVersionUnit<ImageConfig, ImageState> => u.type === Type.ChangeVersion,
+      );
+
+      const existingVersions = previous[name] ?? {};
+
+      if (createVersionUnit) {
+        currentVersionAfterPlan = createVersionUnit.version;
+      } else if (changeVersionUnit) {
+        currentVersionAfterPlan = changeVersionUnit.version;
+      } else {
+        const currentEntry = Object.values(existingVersions).find((v) => v.isCurrent);
+        currentVersionAfterPlan = currentEntry?.state.version;
+      }
+
+      // Build projected version list from existing versions
+      const projectedVersions: Array<{
+        version: string;
+        createdAt: string;
+        isExisting: boolean;
+      }> = [];
+
+      for (const [version, entry] of Object.entries(existingVersions)) {
+        if (!versionsBeingDeleted.has(version)) {
+          projectedVersions.push({
+            version,
+            createdAt: entry.state.createdAt,
+            isExisting: true,
+          });
+        }
+      }
+
+      // Count newly created versions (not eligible for cleanup)
+      for (const version of versionsBeingCreated) {
+        if (!projectedVersions.some((v) => v.version === version)) {
+          projectedVersions.push({
+            version,
+            createdAt: new Date().toISOString(),
+            isExisting: false,
+          });
+        }
+      }
+
+      const excessCount = projectedVersions.length - maxVersions;
+      if (excessCount <= 0) continue;
+
+      // Only delete non-current existing versions, sorted oldest first
+      const deletionCandidates = projectedVersions
+        .filter((v) => v.version !== currentVersionAfterPlan)
+        .filter((v) => v.isExisting)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+      const toDelete = deletionCandidates.slice(0, excessCount);
+
+      logger.debug({
+        name,
+        maxVersions,
+        projectedCount: projectedVersions.length,
+        deletingCount: toDelete.length,
+        deletingVersions: toDelete.map((v) => v.version),
+      }, `[Plan][${providerName}] ${serviceName} image ${name} maxVersions cleanup`);
+
+      for (const candidate of toDelete) {
+        const entry = existingVersions[candidate.version];
+        const { state, imageName } = entry;
+        const { config: { branch } } = state;
+        const versionTag = createVersionTag(branch, candidate.version);
+
+        if (!isTemplate(imageName)) {
+          await executors.assertDeletePermission?.(imageName);
+        }
+
+        const deleteVersionUnit: DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> = {
+          type: Type.DeleteVersion,
+          executor: executors.deleteDockerImage,
+          version: candidate.version,
+          args: [imageName, versionTag],
+          path: resourcePath,
+          state,
+          dependsOn: state.dependsOn,
+        };
+        cleanupUnits.push(deleteVersionUnit);
+      }
+    }
+
+    return [...plan, ...cleanupUnits];
   }
 
   async function createDockerImagesDestroyPlan(

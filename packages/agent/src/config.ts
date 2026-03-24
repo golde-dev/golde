@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { loadEnvFile } from "node:process";
-import { exit } from "node:process";
+import { exit, env } from "node:process";
 
 loadEnvFile();
 
@@ -18,9 +18,9 @@ const schema = z.object({
 });
 
 const result = schema.safeParse({
-  API_LOG_PRETTY: Deno.env.get("API_LOG_PRETTY"),
-  API_LOG_LEVEL: Deno.env.get("API_LOG_LEVEL"),
-  API_PORT: Deno.env.get("API_PORT"),
+  API_LOG_PRETTY: env.API_LOG_PRETTY,
+  API_LOG_LEVEL: env.API_LOG_LEVEL,
+  API_PORT: env.API_PORT,
 });
 
 if (!result.success) {

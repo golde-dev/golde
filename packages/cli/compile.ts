@@ -3,6 +3,7 @@ import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 import { mkdirSync } from "node:fs";
 import { existsSync } from "node:fs";
+import { platform } from "node:os";
 
 const { values: { dev } } = parseArgs({
   options: {
@@ -19,6 +20,7 @@ if (dev) {
   compileProd();
 }
 
+const plat = platform()
 /**
  * Detect and only compile for current arch
  */
@@ -27,18 +29,18 @@ async function compileDev() {
     await mkdirSync("./dist/bin", { recursive: true });
   }
 
-  if (Deno.build.os === "linux") {
+  if (plat === "linux") {
     await Promise.all([
       compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", true),
     ]);
   }
-  if (Deno.build.os === "darwin") {
+  if (plat === "darwin") {
     await Promise.all([
       compile("x86_64-apple-darwin", "./dist/bin/cli-darwin-x64", true),
       compile("aarch64-apple-darwin", "./dist/bin/cli-darwin-arm64", true),
     ]);
   }
-  if (Deno.build.os === "windows") {
+  if (plat === "win32") {
     await Promise.all([
       compile("x86_64-pc-windows-msvc", "./dist/bin/cli-win32-x64", true),
     ]);
@@ -98,11 +100,11 @@ async function compile(target: Target, path: string, local: boolean) {
     logger.error(`[Compile][CLI] Failed compilation for ${target} path: ${path}`);
     const error = decode(stderr);
     if (error) {
-      console.log(error);
+      logger.error(error);
     }
     const output = decode(stdout);
     if (output) {
-      console.log(output);
+      logger.info(output);
     }
   } else {
     logger.info(`[Compile][CLI] completed target: ${target}`);

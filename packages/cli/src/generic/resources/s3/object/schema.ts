@@ -30,7 +30,7 @@ export const objectConfigSchema = implement<ObjectConfig>()
     includes: includesSchema.optional(),
     version: identitySchema.optional(),
     source: sourceSchema.optional(),
-    maxVersions: z.number().optional(),
+    maxVersions: z.number().int().min(1).optional(),
     context: z.string().optional(),
     bucketName: z.string(),
   })
@@ -46,6 +46,12 @@ export const objectConfigSchema = implement<ObjectConfig>()
  * Use safe character set for S3 object keys
  * https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
  */
-const objectKeySchema = z.string().regex(/^[a-zA-Z0-9!_.*'()-]+$/);
+const objectKeySchema = z
+  .string()
+  .min(1, { message: "S3 object key must not be empty" })
+  .max(1024, { message: "S3 object key must be at most 1024 characters" })
+  .regex(/^[a-zA-Z0-9!_.*'()\-/]+$/, {
+    message: "S3 object key must only contain safe characters (alphanumeric, ! - _ . * ' ( ) /)",
+  });
 
 export const s3ObjectSchema = z.record(objectKeySchema, objectConfigSchema);

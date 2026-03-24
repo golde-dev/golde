@@ -74,11 +74,11 @@ async function compile(target: Target, path: string) {
     logger.error(`[Compile][Agent] Failed compilation for ${target} path: ${path}`);
     const error = decoder.decode(stderr);
     if (error) {
-      console.log(error);
+      console.error(error);
     }
     const output = decoder.decode(stdout);
     if (output) {
-      console.log(output);
+      console.info(output);
     }
   } else {
     logger.info(`[Compile][Agent] Agent complete target: ${target}`);

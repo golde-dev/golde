@@ -5,5 +5,5 @@ import { writeJSON } from "./src/utils/json.ts";
 
 
 logger.info("[Schema][CLI] Writing schema.json");
-const jsonSchema = z.toJSONSchema(schema);
+const jsonSchema = z.toJSONSchema(schema, {unrepresentable: "any"});
 await writeJSON("schema.json", jsonSchema);
