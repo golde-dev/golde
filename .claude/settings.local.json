@@ -20,7 +20,8 @@
       "Bash(deno lint:*)",
       "Bash(deno check:*)",
       "Bash(gh auth:*)",
-      "Bash(yarn lint:cli)"
+      "Bash(yarn lint:cli)",
+      "Bash(yarn lint:*)"
     ]
   }
 }
