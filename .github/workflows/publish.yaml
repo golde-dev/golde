@@ -10,7 +10,7 @@ name: Publish
 #   To configure authToken for npm both registry-url and secret is needed.
 #   When publishing public package, publishConfig.access need to be configured on each package
 #
-#   Lerna need fetch-depth: 0 (full fetch) on checkout to be able generate full changelog
+#   Lerna need fetch-depth: 0 (full fetch) on checkout to be able generate full changelog 
 
 on:
   pull_request:
