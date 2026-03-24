@@ -4,6 +4,7 @@ import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
 import {debounce} from "es-toolkit";
 import {parseArgs} from 'node:util';
+import { ChildProcessWithoutNullStreams } from 'node:child_process';
 
 const {positionals: [firstPositional]} = parseArgs({
   args: process.argv.slice(3),
@@ -80,39 +81,45 @@ parallelTask("dist:dev", [
   "dist:cli:dev",
 ]);
 
-spawnTask("test:agent", 
+spawnTask("test:agent",
   "deno", firstPositional ? [
-    "test", 
-    "--allow-env", 
-    "--allow-read", 
+    "test",
+    "--allow-env",
+    "--allow-read",
     "--allow-run",
+    "--allow-sys",
     "--filter",
     firstPositional
   ] :[
-    "test", 
-    "--allow-env", 
-    "--allow-read", 
-    "--allow-run"
-  ], 
+    "test",
+    "--allow-env",
+    "--allow-read",
+    "--allow-run",
+    "--allow-sys"
+  ],
   {
     cwd: "./packages/agent",
   }
 );
 
-spawnTask("test:cli", 
+spawnTask("test:cli",
   "deno", firstPositional ? [
-    "test", 
-    "--allow-env", 
-    "--allow-read", 
+    "test",
+    "--allow-env",
+    "--allow-read",
     "--allow-run",
+    "--allow-sys",
+    "--allow-write",
     "--filter",
     firstPositional
   ] :[
-    "test", 
-    "--allow-env", 
-    "--allow-read", 
-    "--allow-run"
-  ], 
+    "test",
+    "--allow-env",
+    "--allow-read",
+    "--allow-run",
+    "--allow-sys",
+    "--allow-write"
+  ],
   {
     cwd: "./packages/cli",
   }
@@ -207,7 +214,7 @@ seriesTask("dev", [
 
 task("dev:watch", () => {
   return new Promise(() => {
-    let devProcess;
+    let devProcess: ChildProcessWithoutNullStreams | null = null;
     const dev = debounce(() => {
       if (devProcess) {
         devProcess.kill();
