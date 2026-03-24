@@ -27,7 +27,7 @@ const recordTypeSchema = z.union([
 
 const dnsRecordSchema: ZodType<RecordConfig> = z
   .object({
-    value: z.string(),
+    value: z.union([z.string(), z.array(z.string()).min(1)]),
     ttl: z
       .number()
       .optional()

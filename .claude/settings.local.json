@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun install:*)",
+      "Bash(bun run:*)",
+      "Bash(cat:*)",
+      "Bash(convert:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(identify:*)",
+      "Bash(ls:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(which:*)",
+      "Bash(deno test:*)",
+      "Bash(deno lint:*)",
+      "Bash(deno check:*)"
+    ]
+  }
+}

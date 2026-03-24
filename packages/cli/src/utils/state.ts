@@ -28,6 +28,12 @@ const GITHUB_RESOURCES_VERSIONED = [
   "github.registry.dockerImage",
 ];
 
+const CLOUDFLARE_DNS_PATH = "cloudflare.dns.record";
+const DNS_RECORD_TYPES = new Set([
+  "A", "AAAA", "CAA", "CNAME", "DKIM", "DMARC", "DNSKEY",
+  "DS", "MX", "NS", "PTR", "SOA", "SPF", "SRV", "SVCB", "TXT",
+]);
+
 const SIMPLE = [
   ...CLOUDFLARE_RESOURCES,
   ...AWS_RESOURCES,
@@ -51,6 +57,31 @@ export function resourcesToState(
   const resultedState: State = {};
 
   resourcesLoop: for (const { path, state, isCurrent, version } of resources) {
+    // Handle DNS records specially due to nested zone/type/name structure
+    if (path.startsWith(CLOUDFLARE_DNS_PATH)) {
+      const resourceName = removePrefix(CLOUDFLARE_DNS_PATH, path);
+      const parts = resourceName.split(".");
+
+      // Find the record type part (e.g., "A", "AAAA", "CNAME")
+      const typeIndex = parts.findIndex((p) => DNS_RECORD_TYPES.has(p));
+      if (typeIndex === -1) {
+        throw new Error(`Invalid DNS record path, no record type found: ${path}`);
+      }
+
+      const zone = parts.slice(0, typeIndex).join(".");
+      const recordType = parts[typeIndex];
+      const name = parts.slice(typeIndex + 1).join(".");
+
+      // deno-lint-ignore no-explicit-any
+      const dnsState: Record<string, Record<string, Record<string, any>>> = get(resultedState, CLOUDFLARE_DNS_PATH, {});
+      if (!dnsState[zone]) dnsState[zone] = {};
+      if (!dnsState[zone][recordType]) dnsState[zone][recordType] = {};
+      dnsState[zone][recordType][name] = state;
+      set(resultedState, CLOUDFLARE_DNS_PATH, dnsState);
+
+      continue resourcesLoop;
+    }
+
     for (const resourceTypePath of SIMPLE) {
       if (path.startsWith(resourceTypePath)) {
         const resourceName = removePrefix(resourceTypePath, path);

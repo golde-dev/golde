@@ -40,6 +40,13 @@ const config: Config = {
                 ttl: 3600,
                 proxied: false,
               },
+              "lb.cloudflare-dns": {
+                value: ["192.168.1.1", "192.168.1.2", "192.168.1.3"],
+                branch: "master",
+                ttl: 3600,
+                proxied: false,
+                comment: "Round-robin load balancing",
+              },
             }
           }
         }

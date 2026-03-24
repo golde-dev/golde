@@ -7,16 +7,16 @@ describe("matchDNSRecord", () => {
   it("should match dns path and attribute path", () => {
     const examples = [
       {
-        path: `${dnsPath("acme.dev", "A", "@")}.id`,
+        path: `${dnsPath("acme.dev", "A", "@")}.zoneId`,
         resourcePath: dnsPath("acme.dev", "A", "@"),
         recordPath: dnsRecordPath("acme.dev", "A", "@"),
-        attributePath: "id",
+        attributePath: "zoneId",
       },
       {
-        path: `${dnsPath("acme.dev", "A", "sub")}.id`,
+        path: `${dnsPath("acme.dev", "A", "sub")}.updatedAt`,
         resourcePath: dnsPath("acme.dev", "A", "sub"),
         recordPath: dnsRecordPath("acme.dev", "A", "sub"),
-        attributePath: "id",
+        attributePath: "updatedAt",
       },
       {
         path: `${dnsPath("acme.dev", "A", "sub.sub")}.zoneId`,
@@ -57,6 +57,7 @@ describe("matchDNSRecord", () => {
       `cloudflare.dns.record.my.dev.invalidType`,
       `cloudflare.dns.record.my.dev.A.test.invalid.invalid`,
       `cloudflare.dns.record.my.dev.A.@.invalidAttribute`,
+      `cloudflare.dns.record.my.dev.A.@.id`,
     ];
 
     for (const path of examples) {
