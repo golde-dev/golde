@@ -55,6 +55,12 @@ jobs:
     - name: Test
       run: yarn run test
 
+    - name: Setup git user
+      run: |
+        echo "Setup git user to github action user"
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor}}@users.noreply.github.com"
+
     - name: Version
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -63,12 +69,6 @@ jobs:
 
     - name: Build
       run: yarn run dist
-
-    - name: Setup git user
-      run: |
-        echo "Setup git user to github action user"
-        git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor}}@users.noreply.github.com"
 
     - name: Publish
       env:
