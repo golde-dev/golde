@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
   "npmClient": "yarn",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "changelogPreset": "conventional-changelog-conventionalcommits",
   "packages": [
     "packages/cli/dist/npm/@golde/*"
