@@ -1,6 +1,6 @@
 import { logger } from "@/logger.ts";
 import { PlanError, PlanErrorCode } from "@/error.ts";
-import { exec } from "node:child_process";
+import { $ } from "execa";
 
 export interface DockerInfo {
   CgroupDriver?: "systemd" | "cgroupfs";
@@ -47,11 +47,7 @@ export class DockerClient {
   }
 
   public async login() {
-    const {
-      username,
-      password,
-      registry,
-    } = this;
+    const { username, password, registry } = this;
 
     logger.debug({
       username,
@@ -59,35 +55,23 @@ export class DockerClient {
       registry,
     }, `[Docker] Authenticating to docker registry`);
 
-    await new Promise((resolve, reject) => {
-      exec(`docker login -u ${username} -p ${password} ${registry}`, (error, _, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to login to ${registry} \n ${stderr}`);
-          reject(
-            new Error(`Failed to login to ${registry}`, { cause: error }),
-          );
-          return;
-        }
-        resolve(void 0);
-      });
-    });
+    try {
+      await $({ input: password })`docker login -u ${username} --password-stdin ${registry}`;
+    } catch (error) {
+      logger.error(`[Docker] Failed to login to ${registry}`);
+      throw new Error(`Failed to login to ${registry}`, { cause: error });
+    }
   }
 
   public async logout() {
     const { registry } = this;
 
-    return await new Promise((resolve, reject) => {
-      exec(`docker logout ${registry}`, (error, _, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to logout from docker \n ${stderr}`);
-          reject(
-            new Error("Failed to logout from docker", { cause: error }),
-          );
-          return;
-        }
-        resolve(void 0);
-      });
-    });
+    try {
+      await $`docker logout ${registry}`;
+    } catch (error) {
+      logger.error(`[Docker] Failed to logout from docker`);
+      throw new Error("Failed to logout from docker", { cause: error });
+    }
   }
 
   public async verifyCredentials() {
@@ -100,18 +84,12 @@ export class DockerClient {
   }
 
   public async verifyInstalled() {
-    return await new Promise((resolve, reject) => {
-      exec(`docker info --format json`, (error, _, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to run docker info \n ${stderr}`);
-          reject(
-            new Error("Failed to run docker info", { cause: error }),
-          );
-          return;
-        }
-        resolve(void 0);
-      });
-    });
+    try {
+      await $`docker info --format json`;
+    } catch (error) {
+      logger.error(`[Docker] Failed to run docker info`);
+      throw new Error("Failed to run docker info", { cause: error });
+    }
   }
 
   public async buildImage(
@@ -119,59 +97,35 @@ export class DockerClient {
     context: string = ".",
     dockerfile: string = "Dockerfile",
   ): Promise<string> {
-    return await new Promise((resolve, reject) => {
-      exec(`docker build ${context} -f ${dockerfile} --quiet`, (error, stdout, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to build image ${imageName} \n ${stderr}`);
-
-          reject(
-            new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, {
-              cause: {
-                error,
-                stderr,
-                stdout,
-              },
-            }),
-          );
-          return;
-        }
-        resolve(stdout.trim().replace("sha256:", ""));
-      });
-    });
+    try {
+      const { stdout } = await $`docker build ${context} -f ${dockerfile} --quiet`;
+      return stdout.trim().replace("sha256:", "");
+    } catch (error) {
+      logger.error(`[Docker] Failed to build image ${imageName}`);
+      throw new PlanError("Failed to build image", PlanErrorCode.BUILD_ERROR, { cause: error });
+    }
   }
 
   public async tagImage(imageId: string, imageName: string, tag: string): Promise<void> {
     const { registry } = this;
 
-    return await new Promise((resolve, reject) => {
-      exec(`docker tag ${imageId} ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to tag image ${imageName} \n ${stderr}`);
-          reject(
-            new Error("Failed to tag image", { cause: error }),
-          );
-          return;
-        }
-        resolve(void 0);
-      });
-    });
+    try {
+      await $`docker tag ${imageId} ${registry}/${imageName}:${tag}`;
+    } catch (error) {
+      logger.error(`[Docker] Failed to tag image ${imageName}`);
+      throw new Error("Failed to tag image", { cause: error });
+    }
   }
 
   public async pushImageTag(imageName: string, tag: string): Promise<void> {
     const { registry } = this;
 
-    return await new Promise((resolve, reject) => {
-      exec(`docker push ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to push image ${imageName} \n ${stderr}`);
-          reject(
-            new Error("Failed to push image", { cause: error }),
-          );
-          return;
-        }
-        resolve(void 0);
-      });
-    });
+    try {
+      await $`docker push ${registry}/${imageName}:${tag}`;
+    } catch (error) {
+      logger.error(`[Docker] Failed to push image ${imageName}`);
+      throw new Error("Failed to push image", { cause: error });
+    }
   }
 
   public async pushImage(
@@ -191,17 +145,11 @@ export class DockerClient {
   public async removeImageTag(imageName: string, tag: string): Promise<void> {
     const { registry } = this;
 
-    return await new Promise((resolve, reject) => {
-      exec(`docker rmi ${registry}/${imageName}:${tag}`, (error, _, stderr) => {
-        if (error) {
-          logger.error(`[Docker] Failed to remove image ${imageName} \n ${stderr}`);
-          reject(
-            new Error("Failed to remove image", { cause: error }),
-          );
-          return;
-        }
-        resolve(void 0);
-      });
-    });
+    try {
+      await $`docker rmi ${registry}/${imageName}:${tag}`;
+    } catch (error) {
+      logger.error(`[Docker] Failed to remove image ${imageName}`);
+      throw new Error("Failed to remove image", { cause: error });
+    }
   }
 }

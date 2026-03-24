@@ -1,9 +1,15 @@
 import { logger } from "@/logger.ts";
 import { buildImage, createVersionTag } from "./utils.ts";
 import { nowStringDate } from "@/utils/date.ts";
+import { formatDuration } from "@/utils/duration.ts";
 import type { DockerClient } from "../../../client/docker.ts";
 import type { ImageConfig, ImageState } from "./types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
+
+export interface RegistryClient {
+  deletePackageVersion: (packageName: string, tag: string) => Promise<void>;
+  deletePackage: (packageName: string) => Promise<void>;
+}
 
 export interface GenericExecutors {
   buildDockerImage: (imageName: string, config: ImageConfig) => Promise<{
@@ -23,15 +29,20 @@ export interface GenericExecutors {
     config: WithBranch<ImageConfig>,
     state: ImageState,
   ) => Promise<OmitExecutionContext<ImageState>>;
-  deleteDockerImage: (imageName: string, tag: string) => Promise<void>;
+  deleteDockerImage: (imageName: string) => Promise<void>;
+  deleteDockerImageTag: (imageName: string, tag: string) => Promise<void>;
   assertCreatePermission?: (imageName: string) => Promise<void>;
   assertDeletePermission?: (imageName: string) => Promise<void>;
   assertUpdatePermission?: (imageName: string) => Promise<void>;
 }
 
-export function createDockerImageExecutor(client: DockerClient): GenericExecutors {
+export function createDockerImageExecutor(
+  client: DockerClient,
+  registryClient?: RegistryClient,
+): GenericExecutors {
   const {
     provider,
+    serviceName,
   } = client.getProviderInfo();
 
   function assertCreatePermission(_imageName: string) {
@@ -77,11 +88,35 @@ export function createDockerImageExecutor(client: DockerClient): GenericExecutor
     };
   }
 
-  function deleteDockerImage(
-    _imageName: string,
-    _tag: string,
+  async function deleteDockerImage(
+    imageName: string,
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    if (!registryClient) {
+      throw new Error("Registry client required for image deletion");
+    }
+
+    const start = performance.now();
+    await registryClient.deletePackage(imageName);
+    const end = performance.now();
+    logger.debug(
+      `[Execute][${provider}] Deleted ${serviceName} image ${imageName} in ${formatDuration(end - start)}`,
+    );
+  }
+
+  async function deleteDockerImageTag(
+    imageName: string,
+    tag: string,
+  ): Promise<void> {
+    if (!registryClient) {
+      throw new Error("Registry client required for image tag deletion");
+    }
+
+    const start = performance.now();
+    await registryClient.deletePackageVersion(imageName, tag);
+    const end = performance.now();
+    logger.debug(
+      `[Execute][${provider}] Deleted ${serviceName} image ${imageName}:${tag} in ${formatDuration(end - start)}`,
+    );
   }
 
   function updateDockerImage(
@@ -118,9 +153,12 @@ export function createDockerImageExecutor(client: DockerClient): GenericExecutor
     buildDockerImage,
     createDockerImage,
     deleteDockerImage,
+    deleteDockerImageTag,
     updateDockerImage,
     assertCreatePermission,
     assertDeletePermission,
     assertUpdatePermission,
   };
 }
+
+export type Executors = ReturnType<typeof createDockerImageExecutor>;

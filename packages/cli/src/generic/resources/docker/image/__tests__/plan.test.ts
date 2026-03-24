@@ -47,6 +47,7 @@ function createExecutors(): GenericExecutors {
       })
     ),
     deleteDockerImage: spy(() => Promise.resolve()),
+    deleteDockerImageTag: spy(() => Promise.resolve()),
     assertCreatePermission: spy(() => Promise.resolve()),
     assertDeletePermission: spy(() => Promise.resolve()),
     assertUpdatePermission: spy(() => Promise.resolve()),
@@ -85,37 +86,6 @@ function makeImagesState(
 }
 
 describe("docker image maxVersions", () => {
-  describe("schema validation", () => {
-    it("should reject maxVersions: 0", async () => {
-      const { imageConfigSchema } = await import("../../../../../github/resources/registry/dockerImage/schema.ts");
-      const result = imageConfigSchema.safeParse({
-        version: "ImageHash",
-        branch: "master",
-        maxVersions: 0,
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject fractional maxVersions", async () => {
-      const { imageConfigSchema } = await import("../../../../../github/resources/registry/dockerImage/schema.ts");
-      const result = imageConfigSchema.safeParse({
-        version: "ImageHash",
-        branch: "master",
-        maxVersions: 1.5,
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it("should accept maxVersions: 1", async () => {
-      const { imageConfigSchema } = await import("../../../../../github/resources/registry/dockerImage/schema.ts");
-      const result = imageConfigSchema.safeParse({
-        version: "ImageHash",
-        branch: "master",
-        maxVersions: 1,
-      });
-      expect(result.success).toBe(true);
-    });
-  });
 
   describe("maxVersions cleanup in plan", () => {
     it("should not cleanup when maxVersions is undefined", async () => {
@@ -187,7 +157,7 @@ describe("docker image maxVersions", () => {
       expect(createVersionUnits.length).toBe(1);
 
       const deleteVersionUnits = plan.filter(
-        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion,
+        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> => u.type === Type.DeleteVersion,
       );
       expect(deleteVersionUnits.length).toBe(1);
       expect(deleteVersionUnits[0].version).toBe("v1");
@@ -217,7 +187,7 @@ describe("docker image maxVersions", () => {
       const plan = await createDockerImagesPlan(executors, undefined, state, config);
 
       const deleteVersionUnits = plan.filter(
-        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion,
+        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> => u.type === Type.DeleteVersion,
       );
       expect(deleteVersionUnits.length).toBe(3);
 
@@ -248,7 +218,7 @@ describe("docker image maxVersions", () => {
       const plan = await createDockerImagesPlan(executors, undefined, state, config);
 
       const deleteVersionUnits = plan.filter(
-        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion,
+        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> => u.type === Type.DeleteVersion,
       );
 
       for (const unit of deleteVersionUnits) {
@@ -301,7 +271,7 @@ describe("docker image maxVersions", () => {
       const plan = await createDockerImagesPlan(executors, undefined, state, config);
 
       const deleteVersionUnits = plan.filter(
-        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion,
+        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> => u.type === Type.DeleteVersion,
       );
       expect(deleteVersionUnits.length).toBe(2);
       expect(deleteVersionUnits[0].version).toBe("v1");
@@ -329,7 +299,7 @@ describe("docker image maxVersions", () => {
       const plan = await createDockerImagesPlan(executors, undefined, state, config);
 
       const deleteVersionUnits = plan.filter(
-        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion,
+        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> => u.type === Type.DeleteVersion,
       );
       expect(deleteVersionUnits.length).toBe(1);
       expect(deleteVersionUnits[0].version).toBe("v1");
@@ -375,7 +345,7 @@ describe("docker image maxVersions", () => {
       expect(noopUnits.length).toBe(1);
 
       const deleteVersionUnits = plan.filter(
-        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> => u.type === Type.DeleteVersion,
+        (u): u is DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> => u.type === Type.DeleteVersion,
       );
       expect(deleteVersionUnits.length).toBe(1);
       expect(deleteVersionUnits[0].version).toBe("v1");

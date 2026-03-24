@@ -88,7 +88,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     const {
       buildDockerImage,
       createDockerImage,
-      deleteDockerImage,
+      deleteDockerImageTag,
       updateDockerImage,
       assertCreatePermission,
       assertDeletePermission,
@@ -142,9 +142,9 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
           await assertDeletePermission?.(imageName);
         }
         const versionTag = createVersionTag(branch, version);
-        const deleteVersionUnit: DeleteVersionUnit<ImageState, typeof deleteDockerImage> = {
+        const deleteVersionUnit: DeleteVersionUnit<ImageState, typeof deleteDockerImageTag> = {
           type: Type.DeleteVersion,
-          executor: deleteDockerImage,
+          executor: deleteDockerImageTag,
           version: state.version,
           args: [imageName, versionTag],
           path: dockerImagePath(imageName),
@@ -353,9 +353,9 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
           await executors.assertDeletePermission?.(imageName);
         }
 
-        const deleteVersionUnit: DeleteVersionUnit<ImageState, typeof executors.deleteDockerImage> = {
+        const deleteVersionUnit: DeleteVersionUnit<ImageState, typeof executors.deleteDockerImageTag> = {
           type: Type.DeleteVersion,
-          executor: executors.deleteDockerImage,
+          executor: executors.deleteDockerImageTag,
           version: candidate.version,
           args: [imageName, versionTag],
           path: resourcePath,
@@ -374,7 +374,7 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
     state?: ImagesState,
   ): Promise<Plan> {
     const {
-      deleteDockerImage,
+      deleteDockerImageTag,
       assertDeletePermission,
     } = executors;
 
@@ -394,9 +394,9 @@ export function createDockerImagesPlanFactory<E extends GenericExecutors>(
           await assertDeletePermission?.(imageName);
         }
         const versionTag = createVersionTag(branch, version);
-        const deleteUnit: DeleteVersionUnit<ImageState, typeof deleteDockerImage> = {
+        const deleteUnit: DeleteVersionUnit<ImageState, typeof deleteDockerImageTag> = {
           type: Type.DeleteVersion,
-          executor: deleteDockerImage,
+          executor: deleteDockerImageTag,
           args: [imageName, versionTag],
           version,
           path: key,
