@@ -20,14 +20,18 @@ export const getDefaultBranch = memoize(() => {
       .toString()
       .trim() ?? "master";
   } catch {
-    /**
-     * This need be improved as it not always the case that remote is origin
-     */
-    return execSync("git symbolic-ref refs/remotes/origin/HEAD --short")
-      .toString()
-      .trim()
-      .split("/")
-      .at(1) ?? "master";
+    try {
+      /**
+       * This need be improved as it not always the case that remote is origin
+       */
+      return execSync("git symbolic-ref refs/remotes/origin/HEAD --short")
+        .toString()
+        .trim()
+        .split("/")
+        .at(1) ?? "master";
+    } catch {
+      return "master";
+    }
   }
 });
 
@@ -81,7 +85,7 @@ export const getGitInfo = memoize((branch?: string): GitInfo => {
 /**
  * Verify if git is installed
  */
-export const verifyInstalled = async () => {
+export const verifyInstalled = () => {
   try {
     execSync("git --version");
   } catch (error) {

@@ -47,7 +47,7 @@ function ensureFileSync(path: string) {
   }
 }
 
-export async function install() {
+export function install() {
   ensureDirSync(AGENT_DIR);
   ensureDirSync(AGENT_VERSIONS_DIR);
   ensureDirSync(AGENT_BIN_DIR);
