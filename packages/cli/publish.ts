@@ -50,7 +50,7 @@ function decode(buffer: BufferSource): string {
 async function uploadReleaseArtifacts() {
   logger.info("[Publish][CLI] Updating artifacts");
   const o = await new Deno.Command("gh", {
-    args: ["release", "upload", VERSION, "*"],
+    args: ["release", "upload", `v${VERSION}`, "*"],
     cwd: `./dist/bin`,
   }).output();
   logger.info(decode(o.stdout));
@@ -147,6 +147,13 @@ async function commitExamplesChanges() {
     .output();
   logger.info(decode(o2.stdout));
   logger.error(decode(o2.stderr));
+
+  const o3 = await new Deno.Command("git", {
+    args: ["push"],
+  })
+    .output();
+  logger.info(decode(o3.stdout));
+  logger.error(decode(o3.stderr));
 }
 
 async function updateLocalCLI(): Promise<void> {
@@ -227,7 +234,7 @@ async function publishProd() {
     publicRegistry,
   );
   await prodUpdateExamples(
-    packages,
+    examples,
     publicRegistry,
   );
   await uploadToS3();

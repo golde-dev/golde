@@ -6,6 +6,7 @@
   "packages": [
     "packages/cli/dist/npm/@golde/*"
   ],
+  "granularPathspec": false,
   "command": {
     "version": {
       "noPrivate": true,
