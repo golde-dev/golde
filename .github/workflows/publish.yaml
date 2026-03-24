@@ -50,16 +50,16 @@ jobs:
       run: yarn install
 
     - name: Lint
-      run: yarn lint
+      run: yarn run lint
 
     - name: Test
-      run: yarn test
+      run: yarn run test
 
     - name: Version
-      run: yarn version
+      run: yarn run version
 
     - name: Build
-      run: yarn dist
+      run: yarn run dist
 
     - name: Setup git user
       run: |
