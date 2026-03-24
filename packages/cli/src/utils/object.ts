@@ -1,4 +1,4 @@
-import { isPlainObject } from "@es-toolkit/es-toolkit";
+import { isPlainObject } from "es-toolkit";
 
 /**
  * Check if object is empty

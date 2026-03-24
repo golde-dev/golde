@@ -81,6 +81,7 @@ parallelTask("dist:dev", [
   "dist:cli:dev",
 ]);
 
+
 spawnTask("test:agent",
   "deno", firstPositional ? [
     "test",
@@ -157,10 +158,6 @@ parallelTask("lint", [
 spawnTask("version",
   "lerna", ["version", "--yes"],
 )
-
-seriesTask("post-version", [
-  "dist",
-]);
 
 task("version:clean", () => {
   rmSync("./local.json", { force: true });

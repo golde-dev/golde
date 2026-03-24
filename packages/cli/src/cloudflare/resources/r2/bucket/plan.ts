@@ -1,4 +1,4 @@
-import { isEqual } from "@es-toolkit/es-toolkit";
+import { isEqual } from "es-toolkit";
 import { Type } from "../../../../types/plan.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
 import { logger } from "../../../../logger.ts";

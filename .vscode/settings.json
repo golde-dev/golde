@@ -18,6 +18,7 @@
     "Nodenv",
     "pino",
     "proxiable",
+    "sindresorhus",
     "tenacify",
     "treeify",
     "Tunables",

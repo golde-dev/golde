@@ -63,7 +63,7 @@ async function publishNPMPackages(
 ) {
   for (const pkg of pkgs) {
     const command = new Deno.Command("npm", {
-      args: ["publish", "--registry", registry, "--loglevel", "warn"],
+      args: ["publish", "--registry", registry, "--loglevel",  "warn", "--access",  "public"],
       cwd: `dist/npm/@golde/${pkg}`,
       stdout: "piped",
       stderr: "piped",

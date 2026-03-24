@@ -1,4 +1,4 @@
-import { groupBy, isPlainObject, memoize, uniq } from "@es-toolkit/es-toolkit";
+import { groupBy, isPlainObject, memoize, uniq } from "es-toolkit";
 import { logger } from "./logger.ts";
 import { matchAWSPath } from "./aws/path.ts";
 import { matchCloudflarePath } from "./cloudflare/path.ts";

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { Tags } from "../types/config.ts";
 
-import { isUndefined } from "@es-toolkit/es-toolkit";
+import { isUndefined } from "es-toolkit";
 import { isEmpty } from "./object.ts";
 
 /**

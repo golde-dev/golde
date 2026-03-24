@@ -1,4 +1,4 @@
-import { get, set } from "@es-toolkit/es-toolkit/compat";
+import { get, set } from "es-toolkit/compat";
 import { removePrefix } from "@/utils/object.ts";
 import type { ResourceState } from "@/types/config.ts";
 import type { SavedResource } from "@/types/dependencies.ts";

@@ -12,7 +12,6 @@
     "lint": "runner lint",
     "dist": "runner dist",
     "version": "runner version",
-    "post-version": "runner post-version",
     "publish": "runner publish",
     "prepare": "husky"
   },

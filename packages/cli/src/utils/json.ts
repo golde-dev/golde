@@ -1,4 +1,4 @@
-import { isPlainObject } from "@es-toolkit/es-toolkit";
+import { isPlainObject } from "es-toolkit";
 import { readFileSync, writeFileSync } from "node:fs";
 
 export function writeJSON(path: string, data: object | unknown[]): void {

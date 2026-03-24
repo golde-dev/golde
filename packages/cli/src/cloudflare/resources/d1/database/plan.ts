@@ -1,6 +1,6 @@
 import { logger } from "../../../../logger.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
-import { isEqual } from "@es-toolkit/es-toolkit";
+import { isEqual } from "es-toolkit";
 import { Type } from "../../../../types/plan.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
 import { d1DatabasePath } from "./path.ts";

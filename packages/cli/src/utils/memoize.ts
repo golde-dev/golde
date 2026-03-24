@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { isPlainObject, isPrimitive } from "@es-toolkit/es-toolkit";
-import { isArray } from "@es-toolkit/es-toolkit/compat";
+import { isPlainObject, isPrimitive } from "es-toolkit";
+import { isArray } from "es-toolkit/compat";
 
 const cache = new Map<string, Promise<unknown>>();
 

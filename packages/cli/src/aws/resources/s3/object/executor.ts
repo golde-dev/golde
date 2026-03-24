@@ -1,4 +1,4 @@
-import { isEqual } from "@es-toolkit/es-toolkit";
+import { isEqual } from "es-toolkit";
 import { readFile } from "node:fs/promises";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { logger } from "@/logger.ts";

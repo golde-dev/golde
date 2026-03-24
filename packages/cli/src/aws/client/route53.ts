@@ -1,5 +1,5 @@
 import { logger } from "../../logger.ts";
-import { memoize } from "@es-toolkit/es-toolkit";
+import { memoize } from "es-toolkit";
 import { AWSClientBase } from "./base.ts";
 import {
   ChangeResourceRecordSetsCommand,

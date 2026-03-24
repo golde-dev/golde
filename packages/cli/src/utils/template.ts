@@ -2,7 +2,7 @@ import { ConfigError, ConfigErrorCode } from "../error.ts";
 import type { GitInfo } from "./git.ts";
 import type { ManagedConfig } from "../config.ts";
 import type { Unit } from "@/types/plan.ts";
-import { get, isArray, isPlainObject, isString } from "@es-toolkit/es-toolkit/compat";
+import { get, isArray, isPlainObject, isString } from "es-toolkit/compat";
 import type { Config } from "@/types/config.ts";
 import type { Resource, SavedResource } from "@/types/dependencies.ts";
 import { matchStatePath } from "@/dependencies.ts";

@@ -52,11 +52,14 @@ jobs:
     - name: Lint
       run: yarn lint
 
-    - name: Build
-      run: yarn dist
-
     - name: Test
       run: yarn test
+
+    - name: Version
+      run: yarn version
+
+    - name: Build
+      run: yarn dist
 
     - name: Setup git user
       run: |
@@ -64,8 +67,9 @@ jobs:
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor}}@users.noreply.github.com"
 
-    - name: Version, rebuild and publish
+    - name: Publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn run version && yarn post-version && yarn publish
+      run: |
+        yarn run publish

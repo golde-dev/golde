@@ -1,0 +1,53 @@
+{
+  "name": "@golde/cli",
+  "version": "0.4.1",
+  "description": "Golde CLI",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cli",
+    "golde",
+    "PaaS",
+    "IaC",
+    "cloud"
+  ],
+  "scripts": {
+    "schema": "deno run --allow-write --allow-run --allow-sys --allow-read --allow-env ./schema.ts",
+    "package": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net package.ts",
+    "publish": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts",
+    "publish:dev": "deno run --allow-write --allow-env --allow-net --allow-sys --allow-read --allow-run publish.ts --dev",
+    "dist": "deno check src && deno task schema && deno task compile && deno task package",
+    "dist:dev": "deno check src && deno task schema && deno task compile:dev && deno task package --local",
+    "compile": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts",
+    "compile:dev": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --dev"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/golde-dev/golde.git"
+  },
+  "bugs": {
+    "url": "https://github.com/golde-dev/golde/issues"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1015.0",
+    "@aws-sdk/client-route-53": "^3.1015.0",
+    "@aws-sdk/client-sts": "^3.1015.0",
+    "@aws-sdk/client-iam": "^3.1015.0",
+    "@aws-sdk/client-lambda": "^3.1015.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1015.0",
+    "@aws-sdk/client-resource-groups-tagging-api": "^3.1015.0",
+    "@inquirer/prompts": "^8.3.2",
+    "@sindresorhus/slugify": "^3.0.0",
+    "es-toolkit": "^1.45.1",
+    "execa": "^9.6.1",
+    "commander": "^14.0.3",
+    "pino": "^10.3.1",
+    "pino-pretty": "^13.1.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.8"
+  }
+}
