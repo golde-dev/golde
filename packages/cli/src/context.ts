@@ -60,7 +60,7 @@ export const initializeContext = async (
     ]);
 
     const git = getGitInfo(branchName);
-    logger.debug("Git info", git);
+    logger.debug(git, "Git info");
 
     const contextBase = {
       tags,
@@ -140,13 +140,13 @@ export function getFinalContext(context: Context, external: SavedResource[]): Co
     if (error instanceof ConfigError) {
       switch (error.code) {
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error(`[Context] Invalid config: ${error.message}`, error.cause);
+          logger.error(error.cause, `[Context] Invalid config: ${error.message}`);
           break;
         default:
           logger.error(`[Context] Configuration error: ${error.message}`);
       }
     } else if (error instanceof Error) {
-      logger.error(`[Context] Unknown error: ${error.message}`, error);
+      logger.error(error, `[Context] Unknown error: ${error.message}`);
     }
     return exit(1);
   }

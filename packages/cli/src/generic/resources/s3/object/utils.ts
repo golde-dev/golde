@@ -3,10 +3,11 @@ import { basename, dirname, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { memoizeAsync } from "@/utils/memoize.ts";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { copy } from "@std/fs/copy";
+import { copy } from "@std/fs";
+
 import {
   getDirHashVersion,
   getFileHashVersion,
@@ -47,28 +48,28 @@ async function compress(path: string, name: string) {
   // TODO: zip is not working issue with workers
   if (name.endsWith(".zip")) {
     const archivePath = `${path}.zip`;
-    logger.debug(`[Plan] Object ${name} compressing`, {
+    logger.debug({
       from: path,
       to: archivePath,
-    });
+    }, `[Plan] Object ${name} compressing`);
     await zip.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   if (name.endsWith(".tar.gz")) {
     const archivePath = `${path}.tar.gz`;
-    logger.debug(`[Plan] Object ${name} compressing `, {
+    logger.debug({
       from: path,
       to: archivePath,
-    });
+    }, `[Plan] Object ${name} compressing`);
     await tgz.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
   if (name.endsWith(".tar")) {
     const archivePath = `${path}.tar`;
-    logger.debug(`[Plan] Object ${name} compressing`, {
+    logger.debug({
       from: path,
       to: archivePath,
-    });
+    }, `[Plan] Object ${name} compressing`);
     await tar.compress(path, archivePath, { excludeSrc: true });
     return archivePath;
   }
@@ -95,16 +96,12 @@ async function createFromSource(
     const tmpDir = await mkdtemp(join(tmpdir(), `golde-bucket-object-`));
     const toPath = join(tmpDir, basename(fromPath));
 
-    logger.debug(`[Plan] Object ${name} copying`, {
+    logger.debug({
       from: fromPath,
       to: toPath,
-    });
+    }, `[Plan] Object ${name} copying`);
 
-    // TODO: switch to node:fs/promises cp once it is available with force option
-    await copy(fromPath, toPath, {
-      preserveTimestamps: true,
-      overwrite: true,
-    });
+    await copy(fromPath, toPath, { preserveTimestamps: true, overwrite: true});
     const archivePath = await compress(toPath, name);
     const newVersion = await getVersion(toPath, context, version);
     return [archivePath, newVersion];
@@ -139,12 +136,12 @@ async function createFromIncludes(
       }
 
       if (toPath !== tmpDir) {
-        logger.debug(`Object ${name} copying`, {
+        logger.debug({
           from: fromPath,
           to: toPath,
-        });
-        // TODO: switch to node:fs/promises cp once it is available with force option
-        await copy(fromPath, toPath, { preserveTimestamps: true });
+        }, `Object ${name} copying`);
+  
+        await copy(fromPath, toPath, { overwrite: true, preserveTimestamps: true });
         continue;
       }
 
@@ -152,32 +149,25 @@ async function createFromIncludes(
 
       if (fromStat.isFile()) {
         const fileToPath = join(tmpDir, basename(fromPath));
-        logger.debug(`Object ${name} copying`, {
+        logger.debug({
           from: fromPath,
           to: fileToPath,
-        });
-        // TODO: switch to node:fs/promises cp once it is available with force option
-        await copy(fromPath, fileToPath, {
-          preserveTimestamps: true,
-          overwrite: false,
-        });
+        }, `Object ${name} copying`);
+        await copy(fromPath, fileToPath, { preserveTimestamps: true, overwrite: false});
         continue;
       }
 
       if (fromStat.isDirectory()) {
-        for (const entry of Deno.readDirSync(fromPath)) {
+        for (const entry of readdirSync(fromPath, { withFileTypes: true })) {
           const entryFromPath = join(fromPath, entry.name);
           const entryToPath = join(tmpDir, entry.name);
 
-          logger.debug(`Object ${name} copying`, {
+          logger.debug({
             from: entryFromPath,
             to: entryToPath,
-          });
+          }, `Object ${name} copying`);
 
-          await copy(entryFromPath, entryToPath, {
-            preserveTimestamps: true,
-            overwrite: false,
-          });
+          await copy(entryFromPath, entryToPath, { preserveTimestamps: true, overwrite: false});
         }
         continue;
       }
@@ -189,7 +179,7 @@ async function createFromIncludes(
 
     return [archivePath, newVersion];
   } catch (error) {
-    logger.error(`[Plan] Bucket object ${name}, include failed`, error);
+    logger.error(error, `[Plan] Bucket object ${name}, include failed`);
     throw new PlanError(
       `Bucket object ${name}, include failed`,
       PlanErrorCode.SOURCE_ERROR,

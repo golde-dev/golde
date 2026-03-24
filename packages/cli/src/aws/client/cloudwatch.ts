@@ -38,7 +38,7 @@ export class CloudwatchClient extends AWSClientBase {
 
   public async checkCloudwatchLogGroupExists(groupName: string, region?: string) {
     try {
-      logger.debug("[AWS] Checking cloudwatch log group exists", { groupName });
+      logger.debug({ groupName }, "[AWS] Checking cloudwatch log group exists");
       const command = new DescribeLogGroupsCommand({
         logGroupNamePrefix: groupName,
       });
@@ -51,7 +51,7 @@ export class CloudwatchClient extends AWSClientBase {
         ?.some((logGroup) => logGroup.logGroupName === groupName);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to to check cloudwatch log group exists", e);
+        logger.error(e, "[AWS] Failed to to check cloudwatch log group exists");
       }
       throw e;
     }
@@ -62,7 +62,7 @@ export class CloudwatchClient extends AWSClientBase {
     input: CreateLogGroupCommandInput,
   ): Promise<CreateLogGroupCommandOutput> {
     try {
-      logger.debug("[AWS] Creating cloudwatch log group", { region, input });
+      logger.debug({ region, input }, "[AWS] Creating cloudwatch log group");
       const command = new CreateLogGroupCommand(input);
       const result = await this
         .getCloudwatchLogsClient(region)
@@ -71,7 +71,7 @@ export class CloudwatchClient extends AWSClientBase {
       return result;
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to create cloudwatch log group", e);
+        logger.error(e, "[AWS] Failed to create cloudwatch log group");
       }
       throw e;
     }
@@ -81,7 +81,7 @@ export class CloudwatchClient extends AWSClientBase {
     logGroupName: string,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Deleting cloudwatch log streams for log group", { region, name });
+      logger.debug({ region, name }, "[AWS] Deleting cloudwatch log streams for log group");
       const describeLogStreamsCommand = new DescribeLogStreamsCommand({
         logGroupName,
       });
@@ -102,7 +102,7 @@ export class CloudwatchClient extends AWSClientBase {
       }
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to delete cloudwatch log streams for log group", e);
+        logger.error(e, "[AWS] Failed to delete cloudwatch log streams for log group");
       }
       throw e;
     }
@@ -114,11 +114,11 @@ export class CloudwatchClient extends AWSClientBase {
     retentionInDays: number | undefined,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Updating cloudwatch log group retention", {
+      logger.debug({
         region,
         groupName,
         retentionInDays,
-      });
+      }, "[AWS] Updating cloudwatch log group retention");
 
       const command = new PutRetentionPolicyCommand({
         logGroupName: groupName,
@@ -129,7 +129,7 @@ export class CloudwatchClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update cloudwatch log group retention", e);
+        logger.error(e, "[AWS] Failed to update cloudwatch log group retention");
       }
       throw e;
     }
@@ -137,7 +137,7 @@ export class CloudwatchClient extends AWSClientBase {
 
   public async deleteCloudwatchLogGroup(region: string, name: string): Promise<void> {
     try {
-      logger.debug("[AWS] Deleting cloudwatch log group", { region, name });
+      logger.debug({ region, name }, "[AWS] Deleting cloudwatch log group");
 
       const command = new DeleteLogGroupCommand({
         logGroupName: name,
@@ -147,7 +147,7 @@ export class CloudwatchClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to delete cloudwatch log group", e);
+        logger.error(e, "[AWS] Failed to delete cloudwatch log group");
       }
       throw e;
     }

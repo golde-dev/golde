@@ -40,7 +40,7 @@ export class LambdaClient extends AWSClientBase {
 
   public async checkLambdaFunctionExists(lambdaName: string, region: string) {
     try {
-      logger.debug("[AWS] Check lambda function exists", { lambdaName });
+      logger.debug({ lambdaName }, "[AWS] Check lambda function exists");
       const command = new GetFunctionCommand({
         FunctionName: lambdaName,
       });
@@ -56,7 +56,7 @@ export class LambdaClient extends AWSClientBase {
     input: CreateFunctionCommandInput,
   ): Promise<CreateFunctionCommandOutput> {
     try {
-      logger.debug("[AWS] Creating lambda function", { region, input });
+      logger.debug({ region, input }, "[AWS] Creating lambda function");
       const command = new CreateFunctionCommand(input);
       const result = await this
         .getLambdaClient(region)
@@ -65,7 +65,7 @@ export class LambdaClient extends AWSClientBase {
       return result;
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to create lambda function", e);
+        logger.error(e, "[AWS] Failed to create lambda function");
       }
       throw e;
     }
@@ -73,7 +73,7 @@ export class LambdaClient extends AWSClientBase {
 
   public async deleteLambdaFunction(region: string, functionName: string): Promise<void> {
     try {
-      logger.debug("[AWS] Deleting lambda function", { region, functionName });
+      logger.debug({ region, functionName }, "[AWS] Deleting lambda function");
 
       const command = new DeleteFunctionCommand({
         FunctionName: functionName,
@@ -83,7 +83,7 @@ export class LambdaClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to delete lambda function", e);
+        logger.error(e, "[AWS] Failed to delete lambda function");
       }
       throw e;
     }
@@ -96,7 +96,7 @@ export class LambdaClient extends AWSClientBase {
     newTags: Tags = {},
   ) {
     try {
-      logger.debug("[AWS] Updating lambda function tags", { prevTags, newTags, functionArn });
+      logger.debug({ prevTags, newTags, functionArn }, "[AWS] Updating lambda function tags");
 
       const tagsToRemove = Object
         .entries(prevTags)
@@ -130,7 +130,7 @@ export class LambdaClient extends AWSClientBase {
       }
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update lambda function tags", e);
+        logger.error(e, "[AWS] Failed to update lambda function tags");
       }
       throw e;
     }
@@ -141,7 +141,7 @@ export class LambdaClient extends AWSClientBase {
     input: UpdateFunctionCodeCommandInput,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Updating lambda function code", { region, input });
+      logger.debug({ region, input }, "[AWS] Updating lambda function code");
 
       const command = new UpdateFunctionCodeCommand(input);
       await this
@@ -149,7 +149,7 @@ export class LambdaClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update lambda function code", e);
+        logger.error(e, "[AWS] Failed to update lambda function code");
       }
       throw e;
     }
@@ -160,7 +160,7 @@ export class LambdaClient extends AWSClientBase {
     input: UpdateFunctionConfigurationCommandInput,
   ): Promise<void> {
     try {
-      logger.debug("[AWS] Updating lambda function layers", { region, input });
+      logger.debug({ region, input }, "[AWS] Updating lambda function layers");
 
       const command = new UpdateFunctionConfigurationCommand(input);
       await this
@@ -168,7 +168,7 @@ export class LambdaClient extends AWSClientBase {
         .send(command);
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to update lambda function configuration", e);
+        logger.error(e, "[AWS] Failed to update lambda function configuration");
       }
       throw e;
     }

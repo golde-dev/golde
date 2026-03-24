@@ -110,6 +110,7 @@ export type ResourceConfig = {
 
 export type Versioned = {
   version?: string;
+  maxVersions?: number;
 };
 
 export type VersionedResource = ResourceConfig & Versioned;

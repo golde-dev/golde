@@ -7,6 +7,7 @@ import type { Config } from "@/types/config.ts";
 import type { Resource, SavedResource } from "@/types/dependencies.ts";
 import { matchStatePath } from "@/dependencies.ts";
 import { existsSync, readFileSync } from "node:fs";
+import process from "node:process";
 
 function originalTemplateString(string: string) {
   return `{{ ${string} }}`;
@@ -138,9 +139,9 @@ export function envTemplate(value: string): string {
   }
   const [variableName] = match;
 
-  const env = Deno.env.get(variableName);
-  if (env) {
-    return env;
+  const envValue = process.env[variableName];
+  if (envValue) {
+    return envValue;
   } else {
     throw new ConfigError(
       "Env variable is missing",
@@ -223,7 +224,7 @@ export const resourcesTemplate =
       return originalTemplateString(value);
     }
     const [resourceMatch] = match;
-
+ 
     const deps = matchStatePath(resourceMatch);
 
     if (deps) {

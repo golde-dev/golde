@@ -8,6 +8,7 @@ import { nowStringDate } from "@/utils/date.ts";
 import type { Object, ObjectConfig, ObjectState } from "@/generic/resources/s3/object/types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import type { S3 } from "@/generic/client/s3.ts";
+import { readFile } from "node:fs/promises";
 
 export interface GenericExecutors {
   createObject: (
@@ -50,7 +51,7 @@ export const createObjectExecutors = (client: S3): GenericExecutors => {
       version,
     } = object;
 
-    const body = await Deno.readFile(path);
+    const body = await readFile(path);
 
     const start = performance.now();
     await client.putS3Object({

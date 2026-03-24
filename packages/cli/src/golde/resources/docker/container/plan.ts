@@ -73,11 +73,11 @@ export async function createDockerContainerPlan(
   } = executors;
 
   logger.debug(
-    "[Plan][Golde] Planning for Golde Docker containers",
     {
       state,
       config,
     },
+     "[Plan][Golde] Planning for Golde Docker containers",
   );
   const plan: Plan = [];
 
@@ -165,9 +165,9 @@ export async function createDockerContainerDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[Plan][Golde] Creating destroy docker containers plan", {
+  logger.debug({
     state,
-  });
+  }, "[Plan][Golde] Creating destroy docker containers plan");
 
   const previous = getPrevious(state);
   for (const key of Object.keys(previous)) {

@@ -1,28 +1,29 @@
 import { parseArgs } from "node:util";
 import { logger } from "./src/logger.ts";
-import { mkdir } from "node:fs/promises";
-
-logger.configure("INFO", true);
+import { mkdirSync } from "node:fs";
+import { existsSync } from "node:fs";
 
 const decoder = new TextDecoder();
 
-const { values: { local } } = parseArgs({
+const { values: { dev } } = parseArgs({
   options: {
-    local: {
+    dev: {
       type: "boolean",
       default: false,
     },
   },
 });
 
-if (local) {
+if (dev) {
   compileLocal();
 } else {
   compileProd();
 }
 
 async function compileLocal() {
-  await mkdir("./dist/bin", { recursive: true });
+  if (existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/agent-linux-x64"),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/agent-linux-arm64"),
@@ -30,7 +31,9 @@ async function compileLocal() {
 }
 
 async function compileProd() {
-  await mkdir("./dist/bin", { recursive: true });
+  if (existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/agent-linux-x64"),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/agent-linux-arm64"),
@@ -42,7 +45,7 @@ type Target =
   | "aarch64-unknown-linux-gnu";
 
 async function compile(target: Target, path: string) {
-  logger.info(`Agent Compiling target: ${target}`);
+  logger.info(`[Compile][Agent] Compiling target: ${target}`);
 
   const perms = [
     "--allow-read",
@@ -68,11 +71,16 @@ async function compile(target: Target, path: string) {
   }).output();
 
   if (!success) {
-    logger.error(`Failed Agent compilation for ${target} path: ${path}`);
-    logger.info(decoder.decode(stdout));
-    logger.error(decoder.decode(stderr));
-    Deno.exit(1);
+    logger.error(`[Compile][Agent] Failed compilation for ${target} path: ${path}`);
+    const error = decoder.decode(stderr);
+    if (error) {
+      console.error(error);
+    }
+    const output = decoder.decode(stdout);
+    if (output) {
+      console.info(output);
+    }
   } else {
-    logger.info(`Agent complete target: ${target}`);
+    logger.info(`[Compile][Agent] Agent complete target: ${target}`);
   }
 }

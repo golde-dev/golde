@@ -1,1190 +1,432 @@
 {
-  "$ref": "#/definitions/golde",
-  "definitions": {
-    "golde": {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "pattern": "^[A-Za-z0-9_@./#&+-]*$"
+    },
+    "tags": {
       "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "minLength": 2,
-          "pattern": "^[A-Za-z0-9_@./#&+-]*$"
-        },
-        "tags": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 0,
-            "maxLength": 255,
-            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
-          },
-          "propertyNames": {
-            "minLength": 1,
-            "maxLength": 128,
-            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
-          }
-        },
-        "state": {
-          "anyOf": [
-            {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "const": "s3",
-                  "description": "Type of state backend for s3 backed state"
-                },
-                "bucket": {
-                  "type": "string",
-                  "description": "Name of s3 bucket"
-                },
-                "region": {
-                  "type": "string",
-                  "description": "name of region, use auto for R2"
-                },
-                "endpoint": {
-                  "type": "string",
-                  "description": "s3 endpoint"
-                },
-                "accessKeyId": {
-                  "type": "string",
-                  "description": "access key id"
-                },
-                "secretAccessKey": {
-                  "type": "string",
-                  "description": "s3 access key"
-                }
-              },
-              "required": [
-                "type",
-                "bucket",
-                "region",
-                "endpoint"
-              ],
-              "additionalProperties": false
-            },
-            {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "const": "fs",
-                  "description": "Type of state backend"
-                },
-                "path": {
-                  "type": "string",
-                  "description": "relative path to lock file"
-                }
-              },
-              "required": [
-                "type"
-              ],
-              "additionalProperties": false
-            }
-          ],
-          "description": "State backend config, only required self hosting state"
-        },
-        "providers": {
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 255,
+        "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      }
+    },
+    "state": {
+      "oneOf": [
+        {
           "type": "object",
           "properties": {
-            "golde": {
-              "type": "object",
-              "properties": {
-                "apiKey": {
-                  "type": "string",
-                  "description": "Golde api key"
-                }
-              },
-              "required": [
-                "apiKey"
-              ],
-              "additionalProperties": false,
-              "description": "Golde provider config"
+            "type": {
+              "type": "string",
+              "const": "s3",
+              "description": "Type of state backend for s3 backed state"
             },
-            "aws": {
+            "bucket": {
+              "type": "string",
+              "description": "Name of s3 bucket"
+            },
+            "region": {
+              "type": "string",
+              "description": "name of region, use auto for R2"
+            },
+            "endpoint": {
+              "type": "string",
+              "description": "s3 endpoint"
+            },
+            "accessKeyId": {
+              "type": "string",
+              "description": "access key id"
+            },
+            "secretAccessKey": {
+              "type": "string",
+              "description": "s3 access key"
+            }
+          },
+          "required": [
+            "type",
+            "bucket",
+            "region",
+            "endpoint"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "fs",
+              "description": "Type of state backend"
+            },
+            "path": {
+              "description": "relative path to lock file",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "State backend config, only required self hosting state"
+    },
+    "providers": {
+      "type": "object",
+      "properties": {
+        "golde": {
+          "type": "object",
+          "properties": {
+            "apiKey": {
+              "type": "string",
+              "description": "Golde api key"
+            }
+          },
+          "required": [
+            "apiKey"
+          ],
+          "additionalProperties": false,
+          "description": "Golde provider config"
+        },
+        "aws": {
+          "type": "object",
+          "properties": {
+            "accessKeyId": {
+              "type": "string",
+              "description": "AWS access key id"
+            },
+            "secretAccessKey": {
+              "type": "string",
+              "description": "AWS secret access key"
+            },
+            "region": {
+              "type": "string",
+              "description": "AWS region to use when managing aws resources"
+            }
+          },
+          "required": [
+            "accessKeyId",
+            "secretAccessKey"
+          ],
+          "additionalProperties": false,
+          "description": "AWS provider config"
+        },
+        "github": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "description": "Github username"
+            },
+            "accessToken": {
+              "type": "string",
+              "description": "Github Personal access token"
+            }
+          },
+          "required": [
+            "username",
+            "accessToken"
+          ],
+          "additionalProperties": false
+        },
+        "cloudflare": {
+          "type": "object",
+          "properties": {
+            "apiToken": {
+              "type": "string",
+              "description": "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"
+            },
+            "accountId": {
+              "type": "string",
+              "description": "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"
+            },
+            "s3": {
               "type": "object",
               "properties": {
+                "endpoint": {
+                  "type": "string",
+                  "description": "Cloudflare R2 S3 endpoint https://developers.cloudflare.com/r2/api/s3/tokens/"
+                },
                 "accessKeyId": {
                   "type": "string",
-                  "description": "AWS access key id"
+                  "description": "Cloudflare R2 S3 access key id https://developers.cloudflare.com/r2/api/s3/tokens/"
                 },
                 "secretAccessKey": {
                   "type": "string",
-                  "description": "AWS secret access key"
-                },
-                "region": {
-                  "type": "string",
-                  "description": "AWS region to use when managing aws resources"
+                  "description": "Cloudflare R2 S3 secret access key https://developers.cloudflare.com/r2/api/s3/tokens/"
                 }
               },
               "required": [
+                "endpoint",
                 "accessKeyId",
                 "secretAccessKey"
               ],
-              "additionalProperties": false,
-              "description": "AWS provider config"
-            },
-            "github": {
-              "type": "object",
-              "properties": {
-                "username": {
-                  "type": "string",
-                  "description": "Github username"
-                },
-                "accessToken": {
-                  "type": "string",
-                  "description": "Github Personal access token"
-                }
-              },
-              "required": [
-                "username",
-                "accessToken"
-              ],
-              "additionalProperties": false,
-              "description": "Github provider config"
-            },
-            "cloudflare": {
-              "type": "object",
-              "properties": {
-                "apiToken": {
-                  "type": "string",
-                  "description": "Cloudflare api key https://developers.cloudflare.com/fundamentals/api/get-started/create-token/"
-                },
-                "accountId": {
-                  "type": "string",
-                  "description": "Cloudflare account id https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids"
-                },
-                "s3": {
-                  "type": "object",
-                  "properties": {
-                    "endpoint": {
-                      "type": "string",
-                      "description": "Cloudflare R2 S3 endpoint https://developers.cloudflare.com/r2/api/s3/tokens/"
-                    },
-                    "accessKeyId": {
-                      "type": "string",
-                      "description": "Cloudflare R2 S3 access key id https://developers.cloudflare.com/r2/api/s3/tokens/"
-                    },
-                    "secretAccessKey": {
-                      "type": "string",
-                      "description": "Cloudflare R2 S3 secret access key https://developers.cloudflare.com/r2/api/s3/tokens/"
-                    }
-                  },
-                  "required": [
-                    "endpoint",
-                    "accessKeyId",
-                    "secretAccessKey"
-                  ],
-                  "additionalProperties": false
-                }
-              },
-              "required": [
-                "apiToken",
-                "accountId"
-              ],
-              "additionalProperties": false,
-              "description": "Cloudflare provider config"
-            },
-            "hcloud": {
-              "type": "object",
-              "properties": {
-                "apiKey": {
-                  "type": "string",
-                  "description": "Hetzner API token https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"
-                }
-              },
-              "required": [
-                "apiKey"
-              ],
-              "additionalProperties": false,
-              "description": "Hetzner provider config"
-            },
-            "slack": {
-              "type": "object",
-              "properties": {
-                "apiToken": {
-                  "type": "string",
-                  "description": "Slack API token"
-                }
-              },
-              "required": [
-                "apiToken"
-              ],
               "additionalProperties": false
             }
           },
+          "required": [
+            "apiToken",
+            "accountId"
+          ],
           "additionalProperties": false
         },
-        "resources": {
+        "hcloud": {
           "type": "object",
           "properties": {
-            "aws": {
+            "apiKey": {
+              "type": "string",
+              "description": "Hetzner API token https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/"
+            }
+          },
+          "required": [
+            "apiKey"
+          ],
+          "additionalProperties": false
+        },
+        "slack": {
+          "type": "object",
+          "properties": {
+            "apiToken": {
+              "type": "string",
+              "description": "Slack API token"
+            }
+          },
+          "required": [
+            "apiToken"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "aws": {
+          "type": "object",
+          "properties": {
+            "appRunner": {
               "type": "object",
               "properties": {
-                "appRunner": {
+                "service": {
                   "type": "object",
-                  "properties": {
-                    "service": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "type": "string"
-                          },
-                          "branchPattern": {
-                            "type": "string"
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          },
-                          "region": {
-                            "type": "string"
-                          }
-                        },
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "minLength": 4,
-                        "maxLength": 40,
-                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*$"
-                      }
-                    }
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 4,
+                    "maxLength": 40,
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*$"
                   },
-                  "additionalProperties": false
-                },
-                "s3": {
-                  "type": "object",
-                  "properties": {
-                    "bucket": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          },
-                          "region": {
-                            "type": "string"
-                          }
-                        },
-                        "additionalProperties": false
-                      }
-                    },
-                    "object": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          },
-                          "includes": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "from": {
-                                  "type": "string"
-                                },
-                                "to": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "from",
-                                "to"
-                              ],
-                              "additionalProperties": false
-                            }
-                          },
-                          "version": {
-                            "type": "string",
-                            "enum": [
-                              "FileHash",
-                              "GitHash",
-                              "GitContextHash",
-                              "LastUpdated"
-                            ],
-                            "default": "FileHash"
-                          },
-                          "source": {
-                            "type": "string"
-                          },
-                          "context": {
-                            "type": "string"
-                          },
-                          "bucketName": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "bucketName"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "route53": {
-                  "type": "object",
-                  "properties": {
-                    "record": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "additionalProperties": {
-                          "anyOf": [
-                            {
-                              "not": {}
-                            },
-                            {
-                              "type": "object",
-                              "additionalProperties": {
-                                "type": "object",
-                                "properties": {
-                                  "value": {
-                                    "type": "string"
-                                  },
-                                  "ttl": {
-                                    "type": "number",
-                                    "description": "TTL in seconds"
-                                  },
-                                  "proxied": {
-                                    "type": "boolean"
-                                  },
-                                  "comment": {
-                                    "type": "string"
-                                  },
-                                  "tags": {
-                                    "$ref": "#/definitions/golde/properties/tags"
-                                  },
-                                  "branch": {
-                                    "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                                  },
-                                  "branchPattern": {
-                                    "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                                  }
-                                },
-                                "required": [
-                                  "value"
-                                ],
-                                "additionalProperties": false
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "iam": {
-                  "type": "object",
-                  "properties": {
-                    "user": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "managedPoliciesArns": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          }
-                        },
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[A-Za-z0-9+=,.@-]+$"
-                      }
-                    },
-                    "role": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          },
-                          "assumeRolePolicy": {
-                            "type": "object",
-                            "properties": {
-                              "Version": {
-                                "type": "string",
-                                "enum": [
-                                  "2012-10-17"
-                                ]
-                              },
-                              "Statement": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "Sid": {
-                                      "type": "string"
-                                    },
-                                    "Principal": {
-                                      "type": "object",
-                                      "properties": {
-                                        "AWS": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string"
-                                            },
-                                            {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          ]
-                                        },
-                                        "Service": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string"
-                                            },
-                                            {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          ]
-                                        },
-                                        "Federated": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string"
-                                            },
-                                            {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          ]
-                                        },
-                                        "CanonicalUser": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string"
-                                            },
-                                            {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          ]
-                                        }
-                                      },
-                                      "additionalProperties": false
-                                    },
-                                    "Action": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string"
-                                        },
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        }
-                                      ]
-                                    },
-                                    "Resource": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string"
-                                        },
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        }
-                                      ]
-                                    },
-                                    "Effect": {
-                                      "type": "string",
-                                      "enum": [
-                                        "Allow",
-                                        "Deny"
-                                      ]
-                                    }
-                                  },
-                                  "required": [
-                                    "Action",
-                                    "Effect"
-                                  ],
-                                  "additionalProperties": false
-                                }
-                              }
-                            },
-                            "required": [
-                              "Version",
-                              "Statement"
-                            ],
-                            "additionalProperties": false
-                          },
-                          "description": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "path": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 512,
-                            "pattern": "^\\/[A-Za-z0-9=,.\\-@/]*\\/$"
-                          },
-                          "inlinePolicy": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/iam/properties/role/additionalProperties/properties/assumeRolePolicy"
-                          },
-                          "permissionsBoundaryArn": {
-                            "type": "string"
-                          },
-                          "managedPoliciesArns": {
-                            "type": "array",
-                            "items": {
-                              "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/iam/properties/role/additionalProperties/properties/permissionsBoundaryArn"
-                            }
-                          }
-                        },
-                        "required": [
-                          "assumeRolePolicy"
-                        ],
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[A-Za-z0-9+=,.@-]+$"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "cloudwatch": {
-                  "type": "object",
-                  "properties": {
-                    "logGroup": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          },
-                          "retentionInDays": {
-                            "anyOf": [
-                              {
-                                "type": "number",
-                                "const": 1
-                              },
-                              {
-                                "type": "number",
-                                "const": 3
-                              },
-                              {
-                                "type": "number",
-                                "const": 5
-                              },
-                              {
-                                "type": "number",
-                                "const": 7
-                              },
-                              {
-                                "type": "number",
-                                "const": 14
-                              },
-                              {
-                                "type": "number",
-                                "const": 30
-                              },
-                              {
-                                "type": "number",
-                                "const": 60
-                              },
-                              {
-                                "type": "number",
-                                "const": 90
-                              },
-                              {
-                                "type": "number",
-                                "const": 120
-                              },
-                              {
-                                "type": "number",
-                                "const": 150
-                              },
-                              {
-                                "type": "number",
-                                "const": 180
-                              },
-                              {
-                                "type": "number",
-                                "const": 365
-                              },
-                              {
-                                "type": "number",
-                                "const": 400
-                              },
-                              {
-                                "type": "number",
-                                "const": 545
-                              },
-                              {
-                                "type": "number",
-                                "const": 731
-                              },
-                              {
-                                "type": "number",
-                                "const": 1827
-                              },
-                              {
-                                "type": "number",
-                                "const": 2192
-                              },
-                              {
-                                "type": "number",
-                                "const": 2557
-                              },
-                              {
-                                "type": "number",
-                                "const": 2922
-                              },
-                              {
-                                "type": "number",
-                                "const": 3288
-                              },
-                              {
-                                "type": "number",
-                                "const": 3653
-                              },
-                              {
-                                "not": {}
-                              }
-                            ]
-                          },
-                          "region": {
-                            "type": "string"
-                          }
-                        },
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "minLength": 1,
-                        "maxLength": 512,
-                        "pattern": "^[\\w./-]+$"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "lambda": {
-                  "type": "object",
-                  "properties": {
-                    "function": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "packageType": {
-                                "type": "string",
-                                "const": "Image"
-                              },
-                              "branch": {
-                                "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                              },
-                              "branchPattern": {
-                                "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                              },
-                              "code": {
-                                "type": "object",
-                                "properties": {
-                                  "imageUri": {
-                                    "type": "string",
-                                    "format": "uri"
-                                  }
-                                },
-                                "required": [
-                                  "imageUri"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "loggingConfig": {
-                                "type": "object",
-                                "properties": {
-                                  "logGroupName": {
-                                    "type": "string"
-                                  }
-                                },
-                                "additionalProperties": false
-                              },
-                              "layerArns": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              "roleArn": {
-                                "type": "string"
-                              },
-                              "timeout": {
-                                "type": "number"
-                              },
-                              "memorySize": {
-                                "type": "number"
-                              },
-                              "description": {
-                                "type": "string"
-                              },
-                              "region": {
-                                "type": "string"
-                              },
-                              "tags": {
-                                "type": "object",
-                                "additionalProperties": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "required": [
-                              "packageType",
-                              "code",
-                              "roleArn"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "packageType": {
-                                "type": "string",
-                                "const": "Zip"
-                              },
-                              "branch": {
-                                "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                              },
-                              "branchPattern": {
-                                "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                              },
-                              "code": {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "zipFile": {
-                                        "type": "string",
-                                        "minLength": 1
-                                      }
-                                    },
-                                    "required": [
-                                      "zipFile"
-                                    ],
-                                    "additionalProperties": false
-                                  },
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "s3Bucket": {
-                                        "type": "string",
-                                        "minLength": 1
-                                      },
-                                      "s3Key": {
-                                        "type": "string",
-                                        "minLength": 1
-                                      },
-                                      "s3ObjectVersion": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "s3Bucket",
-                                      "s3Key"
-                                    ],
-                                    "additionalProperties": false
-                                  }
-                                ]
-                              },
-                              "runtime": {
-                                "type": "string",
-                                "enum": [
-                                  "nodejs20.x",
-                                  "nodejs18.x",
-                                  "nodejs14.x",
-                                  "python3.13",
-                                  "python3.12",
-                                  "python3.11",
-                                  "python3.10",
-                                  "python3.9",
-                                  "java21",
-                                  "java17",
-                                  "java11",
-                                  "java8.al2",
-                                  "dotnet8",
-                                  "dotnet6",
-                                  "ruby3.3",
-                                  "ruby3.2",
-                                  "provided.al2023",
-                                  "provided.al2"
-                                ]
-                              },
-                              "loggingConfig": {
-                                "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/lambda/properties/function/additionalProperties/anyOf/0/properties/loggingConfig"
-                              },
-                              "handler": {
-                                "type": "string"
-                              },
-                              "roleArn": {
-                                "type": "string"
-                              },
-                              "timeout": {
-                                "type": "number"
-                              },
-                              "memorySize": {
-                                "type": "number"
-                              },
-                              "description": {
-                                "type": "string"
-                              },
-                              "region": {
-                                "type": "string"
-                              },
-                              "layerArns": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              "tags": {
-                                "type": "object",
-                                "additionalProperties": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "required": [
-                              "packageType",
-                              "code",
-                              "runtime",
-                              "handler",
-                              "roleArn"
-                            ],
-                            "additionalProperties": false
-                          }
-                        ]
-                      },
-                      "propertyNames": {
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[A-Za-z0-9_-]+$"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
+                  "additionalProperties": {}
                 }
               },
               "additionalProperties": false
             },
-            "github": {
+            "s3": {
               "type": "object",
               "properties": {
-                "registry": {
+                "bucket": {
                   "type": "object",
-                  "properties": {
-                    "dockerImage": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "version": {
-                            "type": "string",
-                            "enum": [
-                              "ImageHash",
-                              "GitHash",
-                              "GitContextHash"
-                            ]
-                          },
-                          "tags": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "labels": {
-                            "type": "object",
-                            "additionalProperties": {
-                              "type": "string"
-                            }
-                          },
-                          "context": {
-                            "type": "string"
-                          },
-                          "dockerfile": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "version"
-                        ],
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "minLength": 1,
-                        "maxLength": 255,
-                        "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*$"
-                      }
-                    }
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 63,
+                    "pattern": "^(?!.*\\.\\.)(?!.*\\.-)(?!.*-\\.)[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"
                   },
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false,
-              "description": "Github resources config"
-            },
-            "cloudflare": {
-              "type": "object",
-              "properties": {
-                "dns": {
-                  "type": "object",
-                  "properties": {
-                    "record": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "additionalProperties": {
-                          "anyOf": [
-                            {
-                              "not": {}
-                            },
-                            {
-                              "type": "object",
-                              "additionalProperties": {
-                                "type": "object",
-                                "properties": {
-                                  "value": {
-                                    "type": "string"
-                                  },
-                                  "ttl": {
-                                    "type": "number",
-                                    "description": "TTL in seconds"
-                                  },
-                                  "proxied": {
-                                    "type": "boolean"
-                                  },
-                                  "comment": {
-                                    "type": "string"
-                                  },
-                                  "tags": {
-                                    "$ref": "#/definitions/golde/properties/tags"
-                                  },
-                                  "branch": {
-                                    "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                                  },
-                                  "branchPattern": {
-                                    "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                                  }
-                                },
-                                "required": [
-                                  "value"
-                                ],
-                                "additionalProperties": false
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  },
-                  "additionalProperties": false
+                  "additionalProperties": {}
                 },
-                "r2": {
+                "object": {
                   "type": "object",
-                  "properties": {
-                    "bucket": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "locationHint": {
-                            "type": "string",
-                            "enum": [
-                              "apac",
-                              "eeur",
-                              "enam",
-                              "weur",
-                              "wnam"
-                            ]
-                          },
-                          "storageClass": {
-                            "type": "string",
-                            "enum": [
-                              "Standard",
-                              "InfrequentAccess"
-                            ]
-                          },
-                          "cfR2Jurisdiction": {
-                            "type": "string",
-                            "enum": [
-                              "default",
-                              "eu",
-                              "fedramp"
-                            ]
-                          }
-                        },
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "minLength": 3,
-                        "maxLength": 63,
-                        "allOf": [
-                          {
-                            "pattern": "^[a-z0-9]"
-                          },
-                          {
-                            "pattern": "[a-z0-9]$"
-                          },
-                          {
-                            "pattern": "^[a-z0-9-]*$"
-                          }
-                        ]
-                      }
-                    },
-                    "object": {
-                      "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/s3/properties/object"
-                    }
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "pattern": "^[a-zA-Z0-9!_.*'()\\-/]+$"
                   },
-                  "additionalProperties": false
-                },
-                "d1": {
-                  "type": "object",
-                  "properties": {
-                    "database": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "locationHint": {
-                            "type": "string",
-                            "enum": [
-                              "apac",
-                              "eeur",
-                              "enam",
-                              "weur",
-                              "wnam"
-                            ]
-                          }
-                        },
-                        "additionalProperties": false
-                      },
-                      "propertyNames": {
-                        "pattern": "^[a-z0-9][a-z0-9-_]*$"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
+                  "additionalProperties": {}
                 }
               },
               "additionalProperties": false
             },
-            "golde": {
+            "route53": {
               "type": "object",
               "properties": {
-                "docker": {
+                "record": {
                   "type": "object",
-                  "properties": {
-                    "container": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branch"
-                          },
-                          "branchPattern": {
-                            "$ref": "#/definitions/golde/properties/resources/properties/aws/properties/appRunner/properties/service/additionalProperties/properties/branchPattern"
-                          },
-                          "tags": {
-                            "$ref": "#/definitions/golde/properties/tags"
-                          },
-                          "server": {
-                            "type": "string",
-                            "description": "Name of server to run container on"
-                          },
-                          "image": {
-                            "type": "string",
-                            "description": "Name and version of image to run"
-                          }
-                        },
-                        "required": [
-                          "server",
-                          "image"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
                   },
-                  "additionalProperties": false
+                  "additionalProperties": {
+                    "type": "object",
+                    "propertyNames": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "A"
+                        },
+                        {
+                          "type": "string",
+                          "const": "AAAA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "CAA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "CNAME"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DKIM"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DMARC"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DNSKEY"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "MX"
+                        },
+                        {
+                          "type": "string",
+                          "const": "NS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "PTR"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SOA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SPF"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SRV"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SVCB"
+                        },
+                        {
+                          "type": "string",
+                          "const": "TXT"
+                        }
+                      ]
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "pattern": "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "required": [
+                      "A",
+                      "AAAA",
+                      "CAA",
+                      "CNAME",
+                      "DKIM",
+                      "DMARC",
+                      "DNSKEY",
+                      "DS",
+                      "MX",
+                      "NS",
+                      "PTR",
+                      "SOA",
+                      "SPF",
+                      "SRV",
+                      "SVCB",
+                      "TXT"
+                    ]
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "iam": {
+              "type": "object",
+              "properties": {
+                "user": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[A-Za-z0-9+=,.@-]+$"
+                  },
+                  "additionalProperties": {}
+                },
+                "role": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[A-Za-z0-9+=,.@-]+$"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "additionalProperties": false
+            },
+            "cloudwatch": {
+              "type": "object",
+              "properties": {
+                "logGroup": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 512,
+                    "pattern": "^[\\w./-]+$"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "additionalProperties": false
+            },
+            "lambda": {
+              "type": "object",
+              "properties": {
+                "function": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {},
+                      {}
+                    ]
+                  }
                 }
               },
               "additionalProperties": false
@@ -1192,55 +434,265 @@
           },
           "additionalProperties": false
         },
-        "outputs": {
+        "github": {
           "type": "object",
           "properties": {
-            "slack": {
+            "registry": {
               "type": "object",
               "properties": {
-                "channel": {
+                "dockerImage": {
                   "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "channel": {
-                            "type": "string"
-                          },
-                          "text": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "channel",
-                          "text"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*$"
                   },
-                  "required": [
-                    "message"
-                  ],
-                  "additionalProperties": false
+                  "additionalProperties": {}
                 }
               },
-              "required": [
-                "channel"
-              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "cloudflare": {
+          "type": "object",
+          "properties": {
+            "dns": {
+              "type": "object",
+              "properties": {
+                "record": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "propertyNames": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "A"
+                        },
+                        {
+                          "type": "string",
+                          "const": "AAAA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "CAA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "CNAME"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DKIM"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DMARC"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DNSKEY"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "MX"
+                        },
+                        {
+                          "type": "string",
+                          "const": "NS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "PTR"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SOA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SPF"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SRV"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SVCB"
+                        },
+                        {
+                          "type": "string",
+                          "const": "TXT"
+                        }
+                      ]
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "pattern": "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "required": [
+                      "A",
+                      "AAAA",
+                      "CAA",
+                      "CNAME",
+                      "DKIM",
+                      "DMARC",
+                      "DNSKEY",
+                      "DS",
+                      "MX",
+                      "NS",
+                      "PTR",
+                      "SOA",
+                      "SPF",
+                      "SRV",
+                      "SVCB",
+                      "TXT"
+                    ]
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "r2": {
+              "type": "object",
+              "properties": {
+                "bucket": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 63,
+                    "allOf": [
+                      {
+                        "pattern": "^[a-z0-9]"
+                      },
+                      {
+                        "pattern": "[a-z0-9]$"
+                      },
+                      {
+                        "pattern": "^[a-z0-9-]*$"
+                      }
+                    ]
+                  },
+                  "additionalProperties": {}
+                },
+                "object": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "pattern": "^[a-zA-Z0-9!_.*'()\\-/]+$"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "additionalProperties": false
+            },
+            "d1": {
+              "type": "object",
+              "properties": {
+                "database": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9-_]*$"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "golde": {
+          "type": "object",
+          "properties": {
+            "docker": {
+              "type": "object",
+              "properties": {
+                "container": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
               "additionalProperties": false
             }
           },
           "additionalProperties": false
         }
       },
-      "required": [
-        "name"
-      ],
+      "additionalProperties": false
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "slack": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "channel"
+          ],
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": false
     }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#"
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
 }

@@ -7,6 +7,7 @@ import { GoldeError } from "./golde/client/base.ts";
 import type { GoldeClient } from "./golde/client/client.ts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { exit } from "node:process";
 
 const validate = (value: string, schema: ZodSchema): boolean | string => {
   try {
@@ -109,7 +110,7 @@ export async function confirmCreateProject(name: string): Promise<boolean> {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes("User force closed the prompt")) {
-        Deno.exit(0);
+        exit(0);
       }
     }
     throw error;
@@ -213,9 +214,7 @@ export async function initConfig() {
           if (error.cause?.status === 409) {
             logger.error(`[Init] Project: ${projectName} already exists`);
           } else {
-            logger.error("[Init] Failed to create project in golde", {
-              error,
-            });
+            logger.error(error, "[Init] Failed to create project in golde");
           }
         }
       }
@@ -223,7 +222,7 @@ export async function initConfig() {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes("User force closed the prompt")) {
-        Deno.exit(0);
+        exit(0);
       }
     }
   }

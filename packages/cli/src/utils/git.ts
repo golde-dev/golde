@@ -1,7 +1,6 @@
 import slugify from "@sindresorhus/slugify";
 import { execSync } from "node:child_process";
 import { memoize } from "@es-toolkit/es-toolkit";
-import { decode } from "./text.ts";
 import { relative, resolve } from "node:path";
 
 export interface GitInfo {
@@ -84,20 +83,10 @@ export const getGitInfo = memoize((branch?: string): GitInfo => {
  */
 export const verifyInstalled = async () => {
   try {
-    const { success, stderr } = await new Deno.Command("git", {
-      args: ["--version"],
-    }).output();
-
-    const stdErrDecoded = decode(stderr);
-    if (!success) {
-      throw new Error(
-        `Failed to git version`,
-        { cause: stdErrDecoded },
-      );
-    }
+    execSync("git --version");
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes("No such file or directory")) {
+      if (error.message.includes("ENOENT")) {
         throw new Error("Git is not installed", { cause: error });
       }
     }

@@ -87,8 +87,8 @@ export class S3 {
       await this.client.send(command);
     } catch (error) {
       logger.error(
-        `[${provider}] Access verification failed for ${serviceName} bucket`,
         error,
+        `[${provider}] Access verification failed for ${serviceName} bucket`,
       );
       throw error;
     }
@@ -105,7 +105,7 @@ export class S3 {
         ?.filter(({ Key }) => Key)
         ?.map(({ Key }) => Key) as string[] ?? [];
     } catch (error) {
-      logger.error(`[${this.provider}] Failed to list ${this.serviceName} objects`, error);
+      logger.error(error, `[${this.provider}] Failed to list ${this.serviceName} objects`);
       throw error;
     }
   }
@@ -114,17 +114,17 @@ export class S3 {
     input: PutObjectCommandInput,
   ) {
     try {
-      logger.debug(`[${this.provider}] Create ${this.serviceName} object`, {
+      logger.debug({
         Bucket: input.Bucket,
         Key: input.Key,
-      });
+      }, `[${this.provider}] Create ${this.serviceName} object`);
       const command = new PutObjectCommand(input);
       await this.client.send(command);
-    } catch (e) {
-      if (e instanceof Error) {
-        logger.error(`[${this.provider}] Failed to create ${this.serviceName} object`, e);
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error(error, `[${this.provider}] Failed to create ${this.serviceName} object`);
       }
-      throw e;
+      throw error;
     }
   }
 
@@ -134,11 +134,11 @@ export class S3 {
     tags: Tag[],
   ) {
     try {
-      logger.debug(`[${this.provider}] Update ${this.serviceName} object tags`, {
+      logger.debug({
         bucket,
         key,
         tags,
-      });
+      }, `[${this.provider}] Update ${this.serviceName} object tags`, );
 
       const command = new PutObjectTaggingCommand({
         Bucket: bucket,
@@ -148,60 +148,60 @@ export class S3 {
         },
       });
       await this.client.send(command);
-    } catch (e) {
-      if (e instanceof Error) {
-        logger.error(`[${this.provider}] Failed to update ${this.serviceName} object tags`, e);
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error(error, `[${this.provider}] Failed to update ${this.serviceName} object tags`);
       }
-      throw e;
+      throw error;
     }
   }
 
   public async checkS3ObjectExists(bucketName: string, key: string): Promise<boolean> {
     try {
-      logger.debug(`[${this.provider}] Check ${this.serviceName} object exists`, {
+      logger.debug({
         Bucket: bucketName,
         Key: key,
-      });
+      }, `[${this.provider}] Check ${this.serviceName} object exists`);
       const command = new HeadObjectCommand({
         Bucket: bucketName,
         Key: key,
       });
       await this.client.send(command);
       return true;
-    } catch (e) {
-      if (e instanceof NotFound) {
+    } catch (error) {
+      if (error instanceof NotFound) {
         return false;
       }
-      logger.error(`[${this.provider}] Failed to check ${this.serviceName} object exists`, e);
-      throw e;
+      logger.error(error, `[${this.provider}] Failed to check ${this.serviceName} object exists`);
+      throw error;
     }
   }
 
   public async deleteS3Object(bucketName: string, key: string): Promise<void> {
     try {
-      logger.debug(`[${this.provider}] Delete ${this.serviceName} object`, {
+      logger.debug({
         Bucket: bucketName,
         Key: key,
-      });
+      }, `[${this.provider}] Delete ${this.serviceName} object`);
       const command = new DeleteObjectCommand({
         Bucket: bucketName,
         Key: key,
       });
       await this.client.send(command);
-    } catch (e) {
-      if (e instanceof Error) {
-        logger.error(`[${this.provider}] Failed to delete ${this.serviceName} object`, e);
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error(error, `[${this.provider}] Failed to delete ${this.serviceName} object`);
       }
-      throw e;
+      throw error;
     }
   }
 
   public async getJSONObject<T>(bucket: string, key: string): Promise<T> {
     try {
-      logger.debug(`[${this.provider}] Get ${this.serviceName} JSON object`, {
+      logger.debug({
         Bucket: bucket,
         Key: key,
-      });
+      }, `[${this.provider}] Get ${this.serviceName} JSON object`);
       const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -214,11 +214,11 @@ export class S3 {
         throw new Error(`Got empty response from object key: ${key}`);
       }
       return JSON.parse(text) as T;
-    } catch (e) {
-      if (e instanceof Error) {
-        logger.error(`[${this.provider}] Failed to get ${this.serviceName} JSON object`, e);
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error(error, `[${this.provider}] Failed to get ${this.serviceName} JSON object`);
       }
-      throw e;
+      throw error;
     }
   }
 
@@ -232,8 +232,8 @@ export class S3 {
       await this.client.send(command);
     } catch (error) {
       logger.error(
+        error, 
         `[${this.provider}] Failed to put ${this.serviceName} JSON object`,
-        { error },
       );
       throw error;
     }

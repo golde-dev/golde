@@ -5,12 +5,9 @@
     "packages/docs"
   ],
   "scripts": {
-    "verdaccio": "runner verdaccio",
     "start": "runner start",
     "dev": "runner dev",
     "dev:watch": "runner dev:watch",
-    "local": "runner local",
-    "local:cli": "runner local:cli",
     "test": "runner test",
     "lint": "runner lint",
     "dist": "runner dist",
@@ -23,23 +20,23 @@
     "*.{js,ts,tsx}": "yarn lint"
   },
   "devDependencies": {
-    "@chyzwar/eslint-config": "^0.2.34",
-    "@chyzwar/runner": "^0.4.36",
-    "@commitlint/cli": "^19.8.0",
-    "@commitlint/config-conventional": "^19.8.0",
-    "@lerna-lite/changed": "^3.12.3",
-    "@lerna-lite/cli": "^3.12.3",
-    "@lerna-lite/publish": "^3.12.3",
-    "@lerna-lite/version": "^3.12.3",
-    "@types/node": "^22.13.10",
-    "@vitest/coverage-v8": "^3.0.8",
-    "chokidar": "^4.0.3",
-    "es-toolkit": "^1.33.0",
-    "eslint": "^9.22.0",
-    "globals": "^16.0.0",
+    "@chyzwar/eslint-config": "^0.6.0",
+    "@chyzwar/runner": "^0.10.0",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@lerna-lite/changed": "^4.11.5",
+    "@lerna-lite/cli": "^4.11.5",
+    "@lerna-lite/publish": "^4.11.5",
+    "@lerna-lite/version": "^4.11.5",
+    "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^4.1.1",
+    "chokidar": "^5.0.0",
+    "es-toolkit": "^1.45.1",
+    "eslint": "^9.39.4",
+    "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.8"
+    "lint-staged": "^16.4.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.1"
   }
 }

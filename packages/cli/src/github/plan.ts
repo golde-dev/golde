@@ -66,7 +66,7 @@ export async function createGithubPlan(context: Context): Promise<Plan> {
     await dockerClient.verifyInstalled();
     await dockerClient.verifyCredentials();
 
-    const dockerExecutors = createDockerImageExecutor(dockerClient);
+    const dockerExecutors = createDockerImageExecutor(dockerClient, github);
 
     plan.push(createRegistryDockerImagePlan(
       dockerExecutors,
@@ -123,9 +123,7 @@ export async function createGithubDestroyPlan(context: Context): Promise<Plan> {
     await dockerClient.verifyInstalled();
     await dockerClient.verifyCredentials();
 
-    const dockerExecutors = createDockerImageExecutor(
-      dockerClient,
-    );
+    const dockerExecutors = createDockerImageExecutor(dockerClient, github);
     plan.push(createRegistryDockerImageDestroyPlan(
       dockerExecutors,
       imagesState,

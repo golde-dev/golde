@@ -4,6 +4,7 @@ import { dnsPath } from "./path.ts";
 import { mergeProjectTags } from "../../../../utils/tags.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
+import { normalizeToSortedArray } from "../../../../utils/array.ts";
 import { Type } from "../../../../types/plan.ts";
 import { findResourceDependencies } from "../../../../dependencies.ts";
 import type { Tags } from "../../../../types/config.ts";
@@ -11,6 +12,14 @@ import type { DNSConfig, DNSState, RecordConfig, RecordState, RecordType } from 
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../../types/plan.ts";
 import type { CreateZoneRecord, DeleteZoneRecord, Executor, UpdateZoneRecord } from "./executor.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
+
+/**
+ * Normalize the value field for comparison purposes.
+ * Sorts arrays so ["a","b"] and ["b","a"] are treated as equal.
+ */
+function normalizeConfigForComparison(config: RecordConfig): RecordConfig {
+  return { ...config, value: normalizeToSortedArray(config.value) };
+}
 
 function getPrevious(state: DNSState = {}) {
   const records: {
@@ -79,11 +88,11 @@ export const createDNSPlan = (
 ): Promise<Plan> => {
   const plan: Plan = [];
   logger.debug(
-    "Planning for cloudflare dns changes",
     {
       state,
       config,
     },
+    "[Plan][Cloudflare][DNS] Planning for cloudflare dns changes"
   );
 
   const previous = getPrevious(state);
@@ -109,11 +118,11 @@ export const createDNSPlan = (
   const deleting = Object.keys(previous).filter((key) => !(key in next));
 
   for (const key of deleting) {
-    const { state, zone, name } = previous[key];
+    const { state, zone } = previous[key];
     const deleteUnit: DeleteUnit<RecordState, DeleteZoneRecord> = {
       type: Type.Delete,
       executor: executors.deleteZoneRecord,
-      args: [zone, name],
+      args: [zone, state],
       path: key,
       state: state,
       dependsOn: state.dependsOn,
@@ -128,7 +137,10 @@ export const createDNSPlan = (
 
     assertBranch(nextConfig);
 
-    if (!isEqual(prevConfig, nextConfig)) {
+    const normalizedPrev = normalizeConfigForComparison(prevConfig);
+    const normalizedNext = normalizeConfigForComparison(nextConfig);
+
+    if (!isEqual(normalizedPrev, normalizedNext)) {
       const updateUnit: UpdateUnit<
         RecordConfig,
         RecordState,
@@ -136,7 +148,7 @@ export const createDNSPlan = (
       > = {
         type: Type.Update,
         executor: executors.updateZoneRecord,
-        args: [zone, type, name, state.id, nextConfig],
+        args: [zone, type, name, state, nextConfig],
         path: key,
         state,
         config: nextConfig,
@@ -167,19 +179,19 @@ export function createDNSDestroyPlan(
 ) {
   const plan: Plan = [];
   logger.debug(
-    "Planning for cloudflare dns changes",
     {
       state,
     },
+    "[Plan][Cloudflare][DNS] Planning for cloudflare dns changes",
   );
 
   const previous = getPrevious(state);
   for (const key of Object.keys(previous)) {
-    const { state, zone, name } = previous[key];
+    const { state, zone } = previous[key];
     const deleteUnit: DeleteUnit<RecordState, DeleteZoneRecord> = {
       type: Type.Delete,
       executor: executors.deleteZoneRecord,
-      args: [zone, name],
+      args: [zone, state],
       path: key,
       state: state,
       dependsOn: state.dependsOn,

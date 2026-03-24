@@ -43,11 +43,11 @@ export class GoldeClientBase {
     method = "GET",
     body?: object,
   ): Promise<T> {
-    logger.debug("[Golde] request", {
+    logger.debug({
       path,
       body,
       method,
-    });
+    }, "[Golde] request");
     return fetch(`${this.baseUrl}${path}`, {
       method,
       body: JSON.stringify(body),
@@ -80,10 +80,10 @@ export class GoldeClientBase {
     method: "POST",
     body: FormData,
   ): Promise<void> {
-    logger.debug("[Golde] file request", {
+    logger.debug({
       path,
       method: "GET",
-    });
+    }, "[Golde] file request");
     return fetch(`${this.baseUrl}${path}`, {
       method,
       body,

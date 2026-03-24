@@ -13,11 +13,11 @@ export async function createCloudflareClient(
     return client;
   } catch (error) {
     logger.error(
-      "Failed to initialize cloudflare client, check your apiKey and key policy",
       {
         error,
         apiKey: "<redacted>",
       },
+      "Failed to initialize cloudflare client, check your apiKey and key policy"
     );
     throw error;
   }

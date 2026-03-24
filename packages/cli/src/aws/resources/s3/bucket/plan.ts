@@ -75,11 +75,11 @@ export async function createS3Plan(
     assertUpdatePermission,
   } = executors;
   logger.debug(
-    "[AWS] Planning for s3 changes",
     {
       state,
       config,
     },
+    "[AWS] Planning for s3 changes",
   );
   const plan: Plan = [];
 
@@ -190,9 +190,9 @@ export async function createS3DestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[AWS] Creating destroy s3 buckets plan", {
+  logger.debug({
     state,
-  });
+  }, "[AWS] Creating destroy s3 buckets plan");
 
   const previous = getCurrent(state);
   for (const key of Object.keys(previous)) {

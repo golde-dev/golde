@@ -1,12 +1,10 @@
-import { exec } from "sudo-prompt";
+import { readFileSync } from "node:fs";
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 
-logger.configure("INFO", true);
-
 const decoder = new TextDecoder();
 const { version } = JSON.parse(
-  Deno.readTextFileSync("../../lerna.json"),
+  readFileSync("../../lerna.json", { encoding: "utf-8" }),
 );
 
 const { values: { local } } = parseArgs({
@@ -34,22 +32,9 @@ async function uploadReleaseArtifacts() {
   logger.error(decoder.decode(stderr));
 }
 
-function updateLocalAgent(): Promise<void> {
+function updateLocalAgent() {
   logger.info("Updating local agent");
-  return new Promise((resolve, reject) => {
-    exec(
-      `${import.meta.dirname}/dist/bin/agent-linux-x64 install`,
-      { name: "Golde Agent" },
-      function (error, stdout, stderr) {
-        if (error) {
-          logger.error({ error, stderr }, "Failed to update local agent");
-          reject(error);
-        }
-        logger.info("stdout: " + stdout);
-        resolve();
-      },
-    );
-  });
+ 
 }
 
 function publish() {

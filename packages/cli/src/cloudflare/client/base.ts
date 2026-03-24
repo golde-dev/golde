@@ -88,11 +88,11 @@ export class CloudflareBase {
       ...extraQuery,
     }).toString();
 
-    logger.debug("[Cloudflare] list request", {
+    logger.debug({
       path,
       query,
       method: "GET",
-    });
+    }, "[Cloudflare] list request");
     return fetch(`${this.baseUrl}${path}?${query}`, {
       method: "GET",
       headers: {
@@ -133,11 +133,11 @@ export class CloudflareBase {
     body?: object,
     headers?: Record<string, string>,
   ): Promise<T> {
-    logger.debug("[Cloudflare] request", {
+    logger.debug({
       path,
       body,
       method: "GET",
-    });
+    }, "[Cloudflare] request");
 
     return fetch(`${this.baseUrl}${path}`, {
       method,

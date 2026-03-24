@@ -65,11 +65,11 @@ export async function createD1DatabasePlan(
     assertDatabaseNotExist,
   } = executors;
   logger.debug(
-    "[AWS] Planning for d1 database changes",
-    {
+     {
       state,
       config,
     },
+    "[Plan][Cloudflare][D1] Planning for d1 database changes",
   );
   const plan: Plan = [];
 
@@ -147,9 +147,9 @@ export async function createD1DatabaseDestroyPlan(
   } = executors;
 
   const plan: Plan = [];
-  logger.debug("[Cloudflare] Creating destroy D1 databases plan", {
+  logger.debug({
     state,
-  });
+  }, "[Plan][Cloudflare][D1] Creating destroy D1 databases plan");
 
   const previous = getCurrent(state);
   for (const key of Object.keys(previous)) {

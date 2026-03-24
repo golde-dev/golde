@@ -1,10 +1,10 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { configTemplate, gitTemplate, resolveTemplate, resolveUnitState } from "../template.ts";
 import { ConfigError } from "../../error.ts";
-import type { GitInfo } from "../git.ts";
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 import { Type } from "@/types/plan.ts";
+import type { GitInfo } from "../git.ts";
 import type { CreateUnit } from "@/types/plan.ts";
 import type { ResourceConfig, ResourceState } from "@/types/config.ts";
 
@@ -181,9 +181,9 @@ describe("resolveStateDependencies", () => {
       type: Type.Create,
       path: "aws.s3.object.my-object",
       args: [
-        `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        `{{ resources.aws.s3.bucket.my-bucket.name }}`,
         {
-          bucketName: "{{ state.aws.s3.bucket.my-bucket.name }}",
+          bucketName: "{{ resources.aws.s3.bucket.my-bucket.name }}",
         },
       ],
       executor: (bucketName: string) =>
@@ -196,7 +196,7 @@ describe("resolveStateDependencies", () => {
           dependsOn: [],
         }),
       config: {
-        bucketName: `{{ state.aws.s3.bucket.my-bucket.name }}`,
+        bucketName: `{{ resources.aws.s3.bucket.my-bucket.name }}`,
         branch: "master",
       },
       dependsOn: [dependOn],
@@ -273,7 +273,7 @@ describe("resolveStateDependencies", () => {
     };
 
     expect(() => resolveUnitState(unit, [deps])).toThrow(
-      "Failed to resolve unit aws.s3.object.my-object dependency on resources.aws.s3.bucket.my-bucket, attribute invalid is missing",
+      "Incorrect AWS Bucket path: aws.s3.bucket.my-bucket.invalid",
     );
   });
 });

@@ -1,10 +1,11 @@
 import { z } from "zod";
-import type { RecordConfig, RecordType, Route53RecordConfig } from "./types.ts";
+import { domainNameSchema } from "@/generic/schema.ts";
+import { tagsSchema } from "@/utils/tags.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "@/utils/resource.ts";
+import type { RecordConfig, Route53RecordConfig } from "./types.ts";
 import type { ZodType } from "zod";
-import { tagsSchema } from "../../../../utils/tags.ts";
-import { branchPatternSchema, branchSchema, transformBranch } from "../../../../utils/resource.ts";
 
-const recordTypeSchema: ZodType<RecordType> = z.union([
+const recordTypeSchema = z.union([
   z.literal("A"),
   z.literal("AAAA"),
   z.literal("CAA"),
@@ -40,11 +41,12 @@ const dnsRecordSchema: ZodType<RecordConfig> = z
   .transform(transformBranch);
 
 const dnsRecordsSchema = z
-  .record(dnsRecordSchema)
+  .record(domainNameSchema, dnsRecordSchema)
   .optional();
 
 export const route53RecordSchema: ZodType<Route53RecordConfig> = z
   .record(
+    domainNameSchema,
     z.record(
       recordTypeSchema,
       dnsRecordsSchema,

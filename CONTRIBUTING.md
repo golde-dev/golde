@@ -23,42 +23,9 @@ corepack enable
 ```
 
 Install dependencies
-
+  
 ```sh
 yarn install
-```
-
-## Configure verdaccio
-
-Start verdaccio (local npm proxy)
-
-```sh
-yarn verdaccio
-```
-
-Add local user to local verdaccio
-
-```sh
-npm adduser --registry http://localhost:4873/
-```
-
-Verify user is logged in verdaccio registry
-
-```sh
-npm whoami --registry http://localhost:4873/
-```
-
-Open verdaccio config file
-
-```sh
-code ~/.config/verdaccio/config.yaml
-
-```
-
-And change max body size to 100mb
-
-```yaml
-max_body_size: 100mb
 ```
 
 ## Start project
@@ -69,25 +36,17 @@ Start project docs and agent processes
 yarn start
 ```
 
-Create build artifacts and install then on locally
-
-- npm packages will be published to local verdaccio
-
-```sh
-yarn local
-```
-
-Quick varian will only build for current local platform,
+Quick variant will only build for current local platform,
 It would update examples by overwriting files in node_modules
 
 ```sh
-yarn quick
+yarn dev
 ```
 
-Watch for for changes in CLI package and rebuild using quick
+Watch for for changes in CLI package and rebuild using dev
 
 ```sh
-yarn quick:watch
+yarn dev:watch
 ```
 
 Create build artifacts

@@ -1,15 +1,13 @@
-import { ensureDir } from "@std/fs/ensure-dir";
 import { decode } from "./src/utils/text.ts";
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
+import { mkdirSync } from "node:fs";
+import { existsSync } from "node:fs";
+import { platform } from "node:os";
 
-const { values: { dev, local } } = parseArgs({
+const { values: { dev } } = parseArgs({
   options: {
     dev: {
-      type: "boolean",
-      default: false,
-    },
-    local: {
       type: "boolean",
       default: false,
     },
@@ -18,40 +16,31 @@ const { values: { dev, local } } = parseArgs({
 
 if (dev) {
   compileDev();
-} else if (local) {
-  compileLocal();
 } else {
   compileProd();
 }
 
-async function compileLocal() {
-  await ensureDir("./dist/bin");
-  await Promise.all([
-    compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", true),
-    compile("aarch64-unknown-linux-gnu", "./dist/bin/cli-linux-arm64", true),
-    compile("x86_64-pc-windows-msvc", "./dist/bin/cli-win32-x64", true),
-    compile("x86_64-apple-darwin", "./dist/bin/cli-darwin-x64", true),
-    compile("aarch64-apple-darwin", "./dist/bin/cli-darwin-arm64", true),
-  ]);
-}
-
+const plat = platform()
 /**
  * Detect and only compile for current arch
  */
 async function compileDev() {
-  await ensureDir("./dist/bin");
-  if (Deno.build.os === "linux") {
+  if(existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
+
+  if (plat === "linux") {
     await Promise.all([
       compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", true),
     ]);
   }
-  if (Deno.build.os === "darwin") {
+  if (plat === "darwin") {
     await Promise.all([
       compile("x86_64-apple-darwin", "./dist/bin/cli-darwin-x64", true),
       compile("aarch64-apple-darwin", "./dist/bin/cli-darwin-arm64", true),
     ]);
   }
-  if (Deno.build.os === "windows") {
+  if (plat === "win32") {
     await Promise.all([
       compile("x86_64-pc-windows-msvc", "./dist/bin/cli-win32-x64", true),
     ]);
@@ -59,7 +48,9 @@ async function compileDev() {
 }
 
 async function compileProd() {
-  await ensureDir("./dist/bin");
+  if(existsSync("./dist/bin")) {
+    await mkdirSync("./dist/bin", { recursive: true });
+  }
   await Promise.all([
     compile("x86_64-unknown-linux-gnu", "./dist/bin/cli-linux-x64", false),
     compile("aarch64-unknown-linux-gnu", "./dist/bin/cli-linux-arm64", false),
@@ -77,7 +68,7 @@ type Target =
   | "aarch64-apple-darwin";
 
 async function compile(target: Target, path: string, local: boolean) {
-  logger.info(`CLI compiling target: ${target}`);
+  logger.info(`[Compile][CLI] Compiling target: ${target}`);
 
   const perms = [
     "--allow-read",
@@ -94,7 +85,6 @@ async function compile(target: Target, path: string, local: boolean) {
     "compile",
     ...cert,
     ...perms,
-    "--no-check",
     "--target",
     target,
     "--output",
@@ -107,11 +97,16 @@ async function compile(target: Target, path: string, local: boolean) {
   }).output();
 
   if (!success) {
-    logger.error(`Failed CLI compilation for ${target} path: ${path}`);
-    logger.info(decode(stdout));
-    logger.error(decode(stderr));
-    Deno.exit(1);
+    logger.error(`[Compile][CLI] Failed compilation for ${target} path: ${path}`);
+    const error = decode(stderr);
+    if (error) {
+      logger.error(error);
+    }
+    const output = decode(stdout);
+    if (output) {
+      logger.info(output);
+    }
   } else {
-    logger.info(`CLI complete target: ${target}`);
+    logger.info(`[Compile][CLI] completed target: ${target}`);
   }
 }

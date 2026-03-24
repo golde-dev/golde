@@ -187,7 +187,7 @@ export async function assertRoleNotExist(this: AWSClient, name: string) {
   const start = performance.now();
   const exists = await this.checkIAMRoleExists(name);
   const end = performance.now();
-  logger.debug(`[Plan][AWS] Checked IAM role ${name} exists in ${formatDuration(end - start)}`);
+  logger.debug(`[Plan][AWS][IAM] Checked role ${name} exists in ${formatDuration(end - start)}`);
   if (exists) {
     throw new PlanError(`AIM role ${name} already exists`, PlanErrorCode.RESOURCE_EXISTS);
   }
@@ -212,7 +212,7 @@ export async function assertCreatePermission(this: AWSClient, name: string, path
     `[Plan][AWS] Checked create permission for role ${name} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[AWS] Create permission denied for role ${name}`, reason);
+    logger.error(reason, `[Plan][AWS][IAM] Create permission denied for role ${name}`);
     throw new PlanError(`Cannot create role ${name}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -228,7 +228,7 @@ export async function assertDeletePermission(this: AWSClient, name: string, path
     `[Plan][AWS] Checked permission to delete role ${roleArn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[Plan][AWS] Delete permission denied for role ${roleArn}`, reason);
+    logger.error(reason, `[Plan][AWS][IAM] Delete permission for ${roleArn} denied`);
     throw new PlanError(`Cannot delete role ${roleArn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -253,7 +253,7 @@ export async function assertUpdatePermission(this: AWSClient, name: string, path
     `[Plan][AWS] Checked permission for update role ${roleArn} in ${formatDuration(end - start)}`,
   );
   if (!allowed) {
-    logger.error(`[Plan][AWS] Update permissions denied for ${roleArn}`, reason);
+    logger.error(reason, `[Plan][AWS][IAM] Update permissions denied for ${roleArn}`);
     throw new PlanError(`Cannot update role ${roleArn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

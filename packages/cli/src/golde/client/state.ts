@@ -10,7 +10,7 @@ import { resourcesToState } from "@/utils/state.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
   public async getBranchResources(project: string, branch: string): Promise<SavedResource[]> {
-    logger.debug("[Golde] fetching branch resources", { project, branch });
+    logger.debug({ project, branch }, "[Golde] fetching branch resources");
 
     try {
       const query = new URLSearchParams({ branch }).toString();
@@ -28,7 +28,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   }
 
   public async getResources(project: string, resources: string[]): Promise<SavedResource[]> {
-    logger.debug("[Golde] fetching resources", { project, resources });
+    logger.debug({ project, resources }, "[Golde] fetching resources");
     try {
       const result = await this.makeRequest<SavedResource[]>(
         `/projects/${project}/resources`,
@@ -45,7 +45,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   }
 
   public async getState(project: string): Promise<State | undefined> {
-    logger.debug("[Golde] fetching project state", { project });
+    logger.debug({ project }, "[Golde] fetching project state");
     try {
       const resources = await this.makeRequest<SavedResource[]>(
         `/projects/${project}/resources`,
@@ -54,7 +54,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       return resourcesToState(resources);
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to get project state", e.cause);
+        logger.error(e.cause, "Golde failed to get project state");
       }
       throw e;
     }
@@ -62,7 +62,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
 
   public async getBranchState(project: string, branch: string): Promise<State> {
     const query = new URLSearchParams({ branch }).toString();
-    logger.debug("[Golde] fetching golde state", { project, branch });
+    logger.debug({ project, branch }, "[Golde] fetching golde state");
     try {
       const resources = await this.makeRequest<SavedResource[]>(
         `/projects/${project}/resources?${query}`,
@@ -71,7 +71,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       return resourcesToState(resources);
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to get branch state", e.cause);
+        logger.error(e.cause, "Golde failed to get branch state");
       }
       throw e;
     }
@@ -83,7 +83,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     changes: Change[],
     locks: Lock[],
   ): Promise<State> {
-    logger.debug("[Golde] Applying changes to golde state", { project, branch, changes, locks });
+    logger.debug({ project, branch, changes, locks }, "[Golde] Applying changes to golde state");
     try {
       const { id = 1 } = locks.find((lock) => lock.branch === branch) ?? {};
 
@@ -99,7 +99,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       return state;
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to apply changes", e.cause);
+        logger.error(e.cause, "Golde failed to apply changes");
       }
       throw e;
     }
@@ -110,7 +110,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     branch: string,
     resources: string[] = [],
   ): Promise<Lock> {
-    logger.debug("[Golde] creating branch lock", { project, branch });
+    logger.debug({ project, branch }, "[Golde] creating branch lock");
     try {
       const result = await this.makeRequest<Lock>(
         `/projects/${project}/lock`,
@@ -120,7 +120,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       return result;
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to create branch lock", e.cause);
+        logger.error(e.cause, "Golde failed to create branch lock");
       }
       throw e;
     }
@@ -129,7 +129,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   public async getBranchLocks(project: string, branch: string): Promise<Lock[]> {
     const query = new URLSearchParams({ branch }).toString();
 
-    logger.debug("[Golde] fetching state lock", { project, branch });
+    logger.debug({ project, branch }, "[Golde] fetching state lock");
     try {
       const result = await this.makeRequest<Lock[]>(
         `/projects/${project}/lock?${query}`,
@@ -138,7 +138,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       return result;
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to get state lock", e.cause);
+        logger.error(e.cause, "Golde failed to get state lock");
       }
       throw e;
     }
@@ -147,7 +147,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
   public async getStateConfig(
     project: string,
   ): Promise<StateConfig | undefined> {
-    logger.debug("[Golde] fetching state config", { project });
+    logger.debug({ project }, "[Golde] fetching state config");
     try {
       const result = await this.makeRequest<StateConfig | undefined>(
         `/projects/${project}/state-config`,
@@ -155,7 +155,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       return result;
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to get state config", e.cause);
+        logger.error(e.cause, "Golde failed to get state config");
       }
       throw e;
     }
@@ -169,7 +169,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     project: string,
     stateConfig: StateConfig,
   ): Promise<void> {
-    logger.debug("[Golde] changing state config", { project, stateConfig });
+    logger.debug({ project, stateConfig }, "[Golde] changing state config");
     try {
       await this.makeRequest(
         `/projects/${project}/state-config`,
@@ -178,7 +178,7 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
       );
     } catch (e) {
       if (e instanceof GoldeError) {
-        logger.error("Golde failed to change state config", e.cause);
+        logger.error(e.cause, "Golde failed to change state config", );
       }
       throw e;
     }

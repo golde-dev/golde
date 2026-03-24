@@ -21,10 +21,14 @@ export function getFileHash(path: string): Promise<Buffer> {
       hash.update(data);
     });
     stream.on("end", () => {
+      stream.destroy();
       const digest = hash.digest();
       resolve(digest);
     });
-    stream.on("error", reject);
+    stream.on("error", (err) => {
+      stream.destroy();
+      reject(err);
+    });
   });
 }
 

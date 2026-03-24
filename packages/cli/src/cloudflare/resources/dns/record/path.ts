@@ -41,14 +41,12 @@ const recordTypes: RecordType[] = [
 const recordTypePattern = recordTypes.join("|");
 
 const stateAttributes = ensureAllowedKeys<RecordState>({
-  id: true,
   zoneId: true,
   updatedAt: true,
   createdAt: true,
 });
 
 const configAttributes = ensureAllowedKeys<RecordConfig>({
-  value: true,
   ttl: true,
   proxied: true,
   comment: true,

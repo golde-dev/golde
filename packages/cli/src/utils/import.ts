@@ -1,6 +1,6 @@
-import { build, stop } from "https://deno.land/x/esbuild@v0.24.0/mod.js";
+import { build, stop } from "esbuild";
 import { denoPlugins } from "@luca/esbuild-deno-loader";
-import type { BuildOptions, Plugin } from "https://deno.land/x/esbuild@v0.24.0/mod.js";
+import type { BuildOptions, Plugin } from "esbuild";
 
 /**
  * Below is a modified version of the import function from

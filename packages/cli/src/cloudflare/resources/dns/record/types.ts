@@ -26,9 +26,9 @@ export interface RecordConfig extends ResourceConfig {
    */
   ttl?: number;
   /**
-   * IP address or value
+   * IP address or value. Normalized to string[] by schema transform.
    */
-  value: string;
+  value: string | string[];
   proxied?: boolean;
   comment?: string;
   tags?: Tags;
@@ -43,7 +43,10 @@ export interface DNSConfig {
 }
 
 export interface RecordState {
-  id: string;
+  /**
+   * Maps each value to its Cloudflare record ID.
+   */
+  records: Record<string, string>;
   zoneId: string;
   updatedAt: string;
   createdAt: string;

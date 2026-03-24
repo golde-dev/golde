@@ -10,11 +10,11 @@ export async function createSlackClient({ apiToken }: SlackCredentials): Promise
     return client;
   } catch (error) {
     logger.error(
-      "Failed to initialize slack client, check your bot token",
       {
         error,
         apiKey: "<redacted>",
       },
+      "Failed to initialize slack client, check your bot token",
     );
     throw error;
   }

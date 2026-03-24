@@ -4,7 +4,7 @@ import { logger } from "../logger.ts";
 import { start } from "../start.ts";
 import { install } from "../install.ts";
 import { upgrade } from "../upgrade.ts";
-import type { LevelName } from "@std/log";
+import type { Level } from "pino";
 import { VERSION } from "../version.ts";
 
 const program = new Command();
@@ -20,7 +20,7 @@ program
   .option("-l, --logLevel <level>", "define log level", config.API_LOG_LEVEL)
   .option("-p, --pretty", "pretty print logs", config.API_LOG_PRETTY)
   .action(
-    function ({ logLevel, pretty }: { logLevel: LevelName; pretty: boolean }) {
+    function ({ logLevel, pretty }: { logLevel: Level; pretty: boolean }) {
       logger.configure(logLevel, pretty);
       start();
     },
@@ -32,7 +32,7 @@ program
   .option("-l, --logLevel <level>", "define log level", config.API_LOG_LEVEL)
   .option("-p, --pretty", "pretty print logs", config.API_LOG_PRETTY)
   .action(
-    function ({ logLevel, pretty }: { logLevel: LevelName; pretty: boolean }) {
+    function ({ logLevel, pretty }: { logLevel: Level; pretty: boolean }) {
       logger.configure(logLevel, pretty);
       install();
     },
@@ -44,7 +44,7 @@ program
   .option("-l, --logLevel <level>", "define log level", config.API_LOG_LEVEL)
   .option("-p, --pretty", "pretty print logs", config.API_LOG_PRETTY)
   .action(
-    function ({ logLevel, pretty }: { logLevel: LevelName; pretty: boolean }) {
+    function ({ logLevel, pretty }: { logLevel: Level; pretty: boolean }) {
       logger.configure(logLevel, pretty);
       upgrade();
     },

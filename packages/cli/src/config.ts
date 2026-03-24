@@ -142,11 +142,9 @@ export async function getManagedConfig(_config: Config): Promise<ManagedConfig> 
 
 export const resolveManagedConfig = (config: Config, managedConfig: ManagedConfig): Config => {
   const configWithConfig = resolveTemplate(config, configTemplate(managedConfig));
-  logger.debug("[Config] Resolved managed config templates in config", {
-    config: configWithConfig,
-  });
+  logger.debug({ config: configWithConfig}, "[Config] Resolved managed config templates in config");
   const validatedConfig = validateConfig(configWithConfig);
-  logger.debug("[Config] Validated config with schema", { config: validatedConfig });
+  logger.debug({ config: validatedConfig }, "[Config] Validated config with schema");
 
   return validatedConfig;
 };
@@ -159,16 +157,16 @@ export const resolveConfig = (
   logger.debug("[Config] Resolving config");
 
   const configWithEnv = resolveTemplate(config, envTemplate);
-  logger.debug("[Config] Resolved env vars templates in config", { config: configWithEnv });
+  logger.debug({ config: configWithEnv }, "[Config] Resolved env vars templates in config");
 
   const configWithFiles = resolveTemplate(configWithEnv, fileTemplate);
-  logger.debug("[Config] Resolved file templates in config", { config: configWithFiles });
+  logger.debug({ config: configWithFiles }, "[Config] Resolved file templates in config");
 
   const configWithGit = resolveTemplate(configWithFiles, gitTemplate(gitInfo));
-  logger.debug("[Config] Resolved git templates in config", { config: configWithGit });
+  logger.debug({ config: configWithGit }, "[Config] Resolved git templates in config");
 
   const validatedConfig = validateConfig(configWithGit);
-  logger.debug("[Config] Validated config with schema", { config: validatedConfig });
+  logger.debug({ config: validatedConfig }, "[Config] Validated config with schema");
 
   if (!branch) {
     return validatedConfig;
@@ -218,16 +216,16 @@ export async function getConfig(branch: string, configPath?: string): Promise<Co
           logger.error(`[Config] git variable is missing: ${error.cause as string}`);
           break;
         case ConfigErrorCode.INVALID_CONFIG:
-          logger.error(`[Config] Invalid config: ${error.message}`, error.cause);
+          logger.error(error.cause, `[Config] Invalid config: ${error.message}`);
           break;
         case ConfigErrorCode.MANAGED_CONFIG_NOT_FOUND:
-          logger.warn("[Config] No managed config value found", { error });
+          logger.warn(error, "[Config] No managed config value found");
           break;
         default:
           logger.error(`[Config] Configuration error: ${error.message}`);
       }
     } else if (error instanceof Error) {
-      logger.error(`[Config] Unknown error: ${error.message}`, error);
+      logger.error(error, `[Config] Unknown error: ${error.message}`);
     }
     return exit(1);
   }

@@ -55,7 +55,7 @@ export class AWSClientBase {
 
       this.isRoot = result.Arn === `arn:aws:iam::${result.Account}:root`;
 
-      logger.debug("[AWS] Verified AWS credentials:", result);
+      logger.debug(result, "[AWS] Verified AWS credentials:");
     } catch (error) {
       throw error;
     }
@@ -84,13 +84,15 @@ export class AWSClientBase {
   ) {
     try {
       if (this.isRoot) {
-        logger.debug("[AWS] Skipping permission simulation for root account", {
+        logger.debug(
+          {
           actions,
           resources,
-        });
+        },
+        "[AWS] Skipping permission simulation for root account");
         return [true, []];
       }
-      logger.debug("[AWS] Checking permission", { actions, resources, contextEntries });
+      logger.debug({ actions, resources, contextEntries }, "[AWS] Checking permission");
       const command = new SimulatePrincipalPolicyCommand({
         PolicySourceArn: this.arn,
         ActionNames: actions,
@@ -109,7 +111,7 @@ export class AWSClientBase {
       return [Result, EvaluationResults];
     } catch (e) {
       if (e instanceof Error) {
-        logger.error("[AWS] Failed to check permission", e);
+        logger.error(e, "[AWS] Failed to check permission");
       }
       throw e;
     }

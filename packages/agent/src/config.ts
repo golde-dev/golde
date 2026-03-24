@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { config } from "dotenv";
-import { exit } from "node:process";
+import { loadEnvFile } from "node:process";
+import { exit, env } from "node:process";
 
-config({ override: true });
+loadEnvFile();
 
-const defaultLogLevel = "INFO";
-const defaultPretty = "false";
+const defaultLogLevel = "info";
+const defaultPretty = false;
 
 const schema = z.object({
   API_LOG_PRETTY: z
@@ -18,13 +18,13 @@ const schema = z.object({
 });
 
 const result = schema.safeParse({
-  API_LOG_PRETTY: Deno.env.get("API_LOG_PRETTY"),
-  API_LOG_LEVEL: Deno.env.get("API_LOG_LEVEL"),
-  API_PORT: Deno.env.get("API_PORT"),
+  API_LOG_PRETTY: env.API_LOG_PRETTY,
+  API_LOG_LEVEL: env.API_LOG_LEVEL,
+  API_PORT: env.API_PORT,
 });
 
 if (!result.success) {
-  console.error("Invalid environment variables:", result.error.format());
+  console.error("Invalid environment variables:", z.treeifyError(result.error));
   exit(1);
 }
 

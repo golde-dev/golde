@@ -161,9 +161,9 @@ export async function assertCreatePermission(this: AWSClient, name: string, regi
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for logGroup ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(`[Plan][AWS][Cloudwatch] Checked permission for logGroup ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Create permission denied for log group ${arn}`, reason);
+    logger.error(reason, `[Plan][AWS][Cloudwatch] Create permission denied for log group ${arn}`);
     throw new PlanError(`Cannot create log group ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -180,9 +180,9 @@ export async function assertDeletePermission(this: AWSClient, name: string, regi
     [arn, streamsArn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for log group ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(`[Plan][AWS][Cloudwatch] Checked permission for log group ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Delete permission denied for log group ${arn}`, reason);
+    logger.error(reason, `[Plan][AWS][Cloudwatch] Delete permission denied for log group ${arn}`);
     throw new PlanError(`Cannot delete log group ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -199,9 +199,9 @@ export async function assertUpdatePermission(this: AWSClient, name: string, regi
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission for log group ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(`[Plan][AWS][Cloudwatch] Checked permission for log group ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Update permission denied for log group ${arn}`, reason);
+    logger.error(reason, `[Plan][AWS][Cloudwatch] Update permission denied for log group ${arn}`);
     throw new PlanError(`Cannot update log group ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }

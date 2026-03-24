@@ -10,9 +10,9 @@ export default defineConfig({
     starlight({
       title: "Golde Docs",
       disable404Route: true,
-      social: {
-        github: "https://github.com/golde-dev/golde",
-      },
+      social: [
+        { icon: "github", label: "GitHub", href: "https://github.com/withastro/starlight" },
+      ],
       sidebar: [
         {
           label: "Guides",

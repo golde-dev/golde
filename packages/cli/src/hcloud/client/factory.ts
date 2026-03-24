@@ -12,11 +12,11 @@ export async function createHCloudClient(
     return client;
   } catch (error) {
     logger.error(
-      "Failed to initialize HCloud provider, check your apiKey and key policy",
       {
         error,
         apiKey: "<redacted>",
       },
+      "Failed to initialize HCloud provider, check your apiKey and key policy",
     );
     throw error;
   }

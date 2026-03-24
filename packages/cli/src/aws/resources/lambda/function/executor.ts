@@ -1,4 +1,5 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
+import { readFile } from "node:fs/promises";
 import { PlanError, PlanErrorCode } from "../../../../error.ts";
 import { logger } from "../../../../logger.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
@@ -24,7 +25,7 @@ const cache: Record<string, Uint8Array> = {};
 
 async function readCode(zipFile: string) {
   if (!cache[zipFile]) {
-    cache[zipFile] = await Deno.readFile(zipFile);
+    cache[zipFile] = await readFile(zipFile);
   }
   return cache[zipFile];
 }
@@ -363,7 +364,7 @@ export async function assertCreatePermission(this: AWSClient, name: string, regi
   const end = performance.now();
   logger.debug(`[AWS] Checked permission lambda function ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Create permission denied for lambda function ${arn}`, reason);
+    logger.error(reason, `[AWS][LambdaFunction] Create permission denied for ${arn}`);
     throw new PlanError(`Cannot create lambda function ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -380,9 +381,9 @@ export async function assertDeletePermission(this: AWSClient, name: string, regi
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission lambda function ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS][LambdaFunction] Checked delete permission ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Delete permission lambda function ${arn} denied`, reason);
+    logger.error(reason, `[AWS][LambdaFunction] Delete permission for ${arn} denied`);
     throw new PlanError(`Cannot delete lambda function ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
@@ -400,9 +401,9 @@ export async function assertUpdatePermission(this: AWSClient, name: string, regi
     [arn],
   );
   const end = performance.now();
-  logger.debug(`[AWS] Checked permission lambda function ${arn} in ${formatDuration(end - start)}`);
+  logger.debug(`[AWS][LambdaFunction] Checked permission ${arn} in ${formatDuration(end - start)}`);
   if (!allowed) {
-    logger.error(`[AWS] Update tags permission denied for lambda function ${arn}`, reason);
+    logger.error(reason, `[AWS][LambdaFunction] Update tags permission denied for ${arn}`);
     throw new PlanError(`Cannot update lambda function ${arn}`, PlanErrorCode.PERMISSION_DENIED);
   }
 }
