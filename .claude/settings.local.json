@@ -18,7 +18,9 @@
       "Bash(which:*)",
       "Bash(deno test:*)",
       "Bash(deno lint:*)",
-      "Bash(deno check:*)"
+      "Bash(deno check:*)",
+      "Bash(gh auth:*)",
+      "Bash(yarn lint:cli)"
     ]
   }
 }

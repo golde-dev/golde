@@ -154,9 +154,13 @@ parallelTask("lint", [
   "lint:rest",
 ]);
 
-spawnTask("version", 
+spawnTask("version",
   "lerna", ["version", "--yes"],
 )
+
+seriesTask("post-version", [
+  "dist",
+]);
 
 task("version:clean", () => {
   rmSync("./local.json", { force: true });

@@ -3,9 +3,10 @@ import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 
 const decoder = new TextDecoder();
-const { version } = JSON.parse(
+const { version: rawVersion } = JSON.parse(
   readFileSync("../../lerna.json", { encoding: "utf-8" }),
 );
+const version = `v${rawVersion}`;
 
 const { values: { local } } = parseArgs({
   options: {
@@ -37,9 +38,9 @@ function updateLocalAgent() {
  
 }
 
-function publish() {
+async function publish() {
   logger.info("Publishing to remote registry");
-  uploadReleaseArtifacts();
+  await uploadReleaseArtifacts();
 }
 
 function publishLocal() {
