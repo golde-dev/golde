@@ -3,12 +3,12 @@ import { GoldeClient } from "./client.ts";
 import { homedir } from "node:os";
 import { readJSON } from "../../utils/json.ts";
 import type { GoldeClientConfig } from "../types.ts";
-import { exit } from "node:process";
+import { env, exit } from "node:process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 export const getGoldeConfig = (): GoldeClientConfig | void => {
-  const apiKey = Deno.env.get("GOLDE_API_KEY");
+  const apiKey = env.GOLDE_API_KEY;
   if (apiKey) {
     return {
       apiKey,

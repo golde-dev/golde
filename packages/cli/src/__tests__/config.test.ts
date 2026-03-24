@@ -2,10 +2,11 @@ import { describe, it } from "@std/testing/bdd";
 import { resolveConfig } from "../config.ts";
 import { expect } from "@std/expect/expect";
 import { getGitInfo, type GitInfo } from "../utils/git.ts";
+import process from "node:process";
 
 describe("resolveConfig", () => {
-  Deno.env.set("TEST", "test");
-  Deno.env.set("NAME", "name");
+  process.env.TEST = "test";
+  process.env.NAME = "name";
 
   it("should resolve env variables", () => {
     const gitInfo = getGitInfo();

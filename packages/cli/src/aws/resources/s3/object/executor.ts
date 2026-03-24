@@ -1,4 +1,5 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
+import { readFile } from "node:fs/promises";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { logger } from "@/logger.ts";
 import { join } from "node:path";
@@ -32,7 +33,7 @@ export async function createObject(
     version,
   } = object;
 
-  const body = await Deno.readFile(path);
+  const body = await readFile(path);
 
   const start = performance.now();
   await this.putS3Object({

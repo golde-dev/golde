@@ -3,7 +3,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
 import { PlanError, PlanErrorCode } from "@/error.ts";
 import { memoizeAsync } from "@/utils/memoize.ts";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { copy } from "@std/fs";
@@ -158,7 +158,7 @@ async function createFromIncludes(
       }
 
       if (fromStat.isDirectory()) {
-        for (const entry of Deno.readDirSync(fromPath)) {
+        for (const entry of readdirSync(fromPath, { withFileTypes: true })) {
           const entryFromPath = join(fromPath, entry.name);
           const entryToPath = join(tmpDir, entry.name);
 

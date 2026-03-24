@@ -24,13 +24,14 @@ import {
 import { VERSION } from "./version.ts";
 import { logger } from "./logger.ts";
 import { join } from "node:path";
-import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readlinkSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import process from "node:process";
 
 function isLinkChanges(nextTarget: string, linkName: string) {
   if (!existsSync(linkName)) {
     return true;
   }
-  const currentTarget = Deno.readLinkSync(linkName);
+  const currentTarget = readlinkSync(linkName, "utf-8");
   return currentTarget !== nextTarget;
 }
 
@@ -52,7 +53,7 @@ export async function install() {
   ensureDirSync(AGENT_BIN_DIR);
   ensureFileSync(AGENT_ENV_FILE_PATH);
 
-  const execPath = Deno.execPath();
+  const execPath = process.execPath;
 
   const versionedAgentPath = join(
     AGENT_VERSIONS_DIR,
@@ -72,15 +73,10 @@ export async function install() {
   );
   if (isServiceVersionChanged) {
     logger.info("Symlinking agent to version " + VERSION);
-    const o = await new Deno.Command("ln", {
-      args: ["-sfn", versionedAgentPath, AGENT_EXEC_PATH],
-    }).output();
-    const decoder = new TextDecoder();
-    logger.info(decoder.decode(o.stdout));
-    if (o.code !== 0) {
-      logger.error(decoder.decode(o.stderr));
-      throw new Error("Failed to symlink agent");
+    if(existsSync(AGENT_EXEC_PATH)) {
+      unlinkSync(AGENT_EXEC_PATH);
     }
+    symlinkSync(versionedAgentPath, AGENT_EXEC_PATH);
   }
 
   const service = createService();

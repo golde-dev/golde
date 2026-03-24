@@ -1,4 +1,5 @@
 import { isEqual } from "@es-toolkit/es-toolkit";
+import { readFile } from "node:fs/promises";
 import { PlanError, PlanErrorCode } from "../../../../error.ts";
 import { logger } from "../../../../logger.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
@@ -24,7 +25,7 @@ const cache: Record<string, Uint8Array> = {};
 
 async function readCode(zipFile: string) {
   if (!cache[zipFile]) {
-    cache[zipFile] = await Deno.readFile(zipFile);
+    cache[zipFile] = await readFile(zipFile);
   }
   return cache[zipFile];
 }
