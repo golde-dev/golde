@@ -16,7 +16,7 @@
   "devDependencies": {
     "@chyzwar/eslint-config": "^0.2.24",
     "@chyzwar/runner": "^0.4.25",
-    "@golde/cli": "^0.2.0",
+    "@golde/cli": "*",
     "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",

@@ -10,6 +10,7 @@ import { env } from "node:process";
 import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/client-s3";
+import { $ } from "execa";
 
 if (existsSync(".env")) {
   loadEnvFile();
@@ -35,6 +36,7 @@ const packages = [
   "cli-darwin-arm64",
 ];
 
+
 const examples: string[] = [];
 for await (const { path } of walk("../../examples", { maxDepth: 1 })) {
   if (existsSync(join(path, "package.json"))) {
@@ -42,39 +44,27 @@ for await (const { path } of walk("../../examples", { maxDepth: 1 })) {
   }
 }
 
-const decoder = new TextDecoder();
-function decode(buffer: BufferSource): string {
-  return decoder.decode(buffer);
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function uploadReleaseArtifacts() {
   logger.info("[Publish][CLI] Updating artifacts");
-  const o = await new Deno.Command("gh", {
-    args: ["release", "upload", `v${VERSION}`, "*"],
-    cwd: `./dist/bin`,
-  }).output();
-  logger.info(decode(o.stdout));
-  logger.error(decode(o.stderr));
+  const { stdout, stderr } = await $({ cwd: "./dist/bin", shell: true })`gh release upload v${VERSION} *`;
+  logger.info(stdout);
+  logger.error(stderr);
 }
 
 async function publishNPMPackages(
   pkgs: string[],
-  registry: string,
 ) {
   for (const pkg of pkgs) {
-    const command = new Deno.Command("npm", {
-      args: ["publish", "--registry", registry, "--loglevel",  "warn", "--access",  "public"],
-      cwd: `dist/npm/@golde/${pkg}`,
-      stdout: "piped",
-      stderr: "piped",
-    });
-
-    const { stdout, stderr, success } = await command.output();
-
-    logger.info(decode(stdout));
-    logger.error(decode(stderr));
-    if (!success) {
-      logger.error("[Publish][CLI] Failed to publish package");
+    try {
+      const { stdout, stderr } = await $({ cwd: `dist/npm/@golde/${pkg}` })`npm publish --access public`;
+      logger.info(stdout);
+      logger.error(stderr);
+    } catch (error) {
+      logger.error(error, "[Publish][CLI] Failed to publish package");
       exit(1);
     }
   }
@@ -106,54 +96,32 @@ function devUpdateExamples(examples: string[]) {
 
 async function prodUpdateExamples(
   examples: string[],
-  registry: string,
 ) {
   for (const example of examples) {
     logger.info(`[Publish][CLI] Updating ${example}`);
+    const cwd = `../../examples/${example}`;
 
-    await new Deno.Command("yarn", {
-      args: ["config", "set", "npmRegistryServer", registry],
-      cwd: `../../examples/${example}`,
-    }).output();
-
-    const o = await new Deno.Command("yarn", {
-      args: ["up", "@golde/*", "--caret"],
-      cwd: `../../examples/${example}`,
-    }).output();
-    logger.info(decode(o.stdout));
-    logger.error(decode(o.stderr));
-
-    await new Deno.Command("yarn", {
-      args: ["config", "unset", "npmRegistryServer"],
-      cwd: `../../examples/${example}`,
-    }).output();
+    const { stdout, stderr } = await $({ cwd })`yarn up @golde/* --caret`;
+    logger.info(stdout);
+    logger.error(stderr);
   }
 }
 
 async function commitExamplesChanges() {
   logger.info("[Publish][CLI] Committing examples changes");
-  const o1 = await new Deno.Command("git", {
-    args: ["add", "."],
-    cwd: `../../examples`,
-  })
-    .output();
-  logger.info(decode(o1.stdout));
-  logger.error(decode(o1.stderr));
+  const cwd = "../../examples";
 
-  const o2 = await new Deno.Command("git", {
-    args: ["commit", "-m", "chore(examples): update cli client"],
-    cwd: `../../examples`,
-  })
-    .output();
-  logger.info(decode(o2.stdout));
-  logger.error(decode(o2.stderr));
+  const o1 = await $({ cwd })`git add .`;
+  logger.info(o1.stdout);
+  logger.error(o1.stderr);
 
-  const o3 = await new Deno.Command("git", {
-    args: ["push"],
-  })
-    .output();
-  logger.info(decode(o3.stdout));
-  logger.error(decode(o3.stderr));
+  const o2 = await $({ cwd })`git commit -m ${"chore(examples): update examples cli client"}`;
+  logger.info(o2.stdout);
+  logger.error(o2.stderr);
+
+  const o3 = await $`git push`;
+  logger.info(o3.stdout);
+  logger.error(o3.stderr);
 }
 
 async function updateLocalCLI(): Promise<void> {
@@ -229,13 +197,15 @@ async function uploadToS3() {
 
 async function publishProd() {
   logger.info("[Publish][CLI] Publishing to remote registry");
+  
   await publishNPMPackages(
     packages,
-    publicRegistry,
   );
+
+  await sleep(20_000)
+
   await prodUpdateExamples(
     examples,
-    publicRegistry,
   );
   await uploadToS3();
   await commitExamplesChanges();
