@@ -11,6 +11,6 @@
     "show:toml": "golde show -c golde.toml"
   },
   "devDependencies": {
-    "@golde/cli": "*"
+    "@golde/cli": "^0.4.3"
   }
 }

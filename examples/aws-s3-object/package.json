@@ -8,6 +8,6 @@
     "golde:apply": "golde apply"
   },
   "devDependencies": {
-    "@golde/cli": "*"
+    "@golde/cli": "^0.4.3"
   }
 }
