@@ -41,50 +41,50 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@golde/cli-darwin-arm64@npm:0.4.0-1727085269666":
-  version: 0.4.0-1727085269666
-  resolution: "@golde/cli-darwin-arm64@npm:0.4.0-1727085269666"
+"@golde/cli-darwin-arm64@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@golde/cli-darwin-arm64@npm:0.4.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@golde/cli-darwin-x64@npm:0.4.0-1727085269666":
-  version: 0.4.0-1727085269666
-  resolution: "@golde/cli-darwin-x64@npm:0.4.0-1727085269666"
+"@golde/cli-darwin-x64@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@golde/cli-darwin-x64@npm:0.4.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@golde/cli-linux-arm64@npm:0.4.0-1727085269666":
-  version: 0.4.0-1727085269666
-  resolution: "@golde/cli-linux-arm64@npm:0.4.0-1727085269666"
+"@golde/cli-linux-arm64@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@golde/cli-linux-arm64@npm:0.4.2"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@golde/cli-linux-x64@npm:0.4.0-1727085269666":
-  version: 0.4.0-1727085269666
-  resolution: "@golde/cli-linux-x64@npm:0.4.0-1727085269666"
+"@golde/cli-linux-x64@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@golde/cli-linux-x64@npm:0.4.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@golde/cli-win32-x64@npm:0.4.0-1727085269666":
-  version: 0.4.0-1727085269666
-  resolution: "@golde/cli-win32-x64@npm:0.4.0-1727085269666"
+"@golde/cli-win32-x64@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@golde/cli-win32-x64@npm:0.4.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@golde/cli@npm:0.4.0-1727085269666":
-  version: 0.4.0-1727085269666
-  resolution: "@golde/cli@npm:0.4.0-1727085269666"
+"@golde/cli@npm:*":
+  version: 0.4.2
+  resolution: "@golde/cli@npm:0.4.2"
   dependencies:
-    "@golde/cli-darwin-arm64": "npm:0.4.0-1727085269666"
-    "@golde/cli-darwin-x64": "npm:0.4.0-1727085269666"
-    "@golde/cli-linux-arm64": "npm:0.4.0-1727085269666"
-    "@golde/cli-linux-x64": "npm:0.4.0-1727085269666"
-    "@golde/cli-win32-x64": "npm:0.4.0-1727085269666"
+    "@golde/cli-darwin-arm64": "npm:0.4.2"
+    "@golde/cli-darwin-x64": "npm:0.4.2"
+    "@golde/cli-linux-arm64": "npm:0.4.2"
+    "@golde/cli-linux-x64": "npm:0.4.2"
+    "@golde/cli-win32-x64": "npm:0.4.2"
   dependenciesMeta:
     "@golde/cli-darwin-arm64":
       optional: true
@@ -98,15 +98,15 @@ __metadata:
       optional: true
   bin:
     golde: bin/cli.cjs
-  checksum: 10c2/2a40b987bdfb641c4d7b14906e52e17464e427718566744b51cf43d8b12a009c3d387a2cbcfda75811268ea8989e8d93fb8cb95c56cf560419c82a1f16f9f779
+  checksum: 10c2/72d2df90d26d2cd716fa65f39153e6ae715317c636bfec3b4bc34e70f1290a187506503d16edcfad5cd911c7824f542e1dcde7a338677d41da81f8aa55d5853d
   languageName: node
   linkType: hard
 
-"@golde/example-dns-cloudflare@workspace:.":
+"@golde/example-github-ghcr-docker-image@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@golde/example-dns-cloudflare@workspace:."
+  resolution: "@golde/example-github-ghcr-docker-image@workspace:."
   dependencies:
-    "@golde/cli": "npm:0.4.0-1727085269666"
+    "@golde/cli": "npm:*"
     fastify: "npm:5.0.0"
   languageName: unknown
   linkType: soft
