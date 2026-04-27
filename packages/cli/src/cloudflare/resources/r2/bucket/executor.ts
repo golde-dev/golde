@@ -2,6 +2,7 @@ import { logger } from "../../../../logger.ts";
 import type { OmitExecutionContext, WithBranch } from "../../../../types/config.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
+import { getIgnoreAlreadyCreated, getIgnoreAlreadyDeleted } from "../../../../asyncStorage.ts";
 import type { CloudflareClient } from "../../../client/client.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
 
@@ -11,12 +12,30 @@ export async function createBucket(
   config: WithBranch<BucketConfig>,
   dependsOn: ResourceDependency[] = [],
 ): Promise<OmitExecutionContext<BucketState>> {
-  const start = Date.now();
   const {
     locationHint,
     storageClass,
     cfR2Jurisdiction = "default",
   } = config;
+
+  if (getIgnoreAlreadyCreated()) {
+    const existing = await this.getBucket(name, cfR2Jurisdiction);
+    if (existing) {
+      logger.warn(
+        `[Execute][Cloudflare] r2 bucket ${name} already exists, skipping create (--ignore-already-created)`,
+      );
+      const synthesized = {
+        location: existing.location,
+        createdAt: existing.creation_date,
+        name,
+        config,
+        dependsOn,
+      };
+      return synthesized;
+    }
+  }
+
+  const start = Date.now();
 
   const bucket = await this.createBucket(
     {
@@ -45,6 +64,16 @@ export async function deleteBucket(
   name: string,
   cfR2Jurisdiction?: string,
 ) {
+  if (getIgnoreAlreadyDeleted()) {
+    const exists = await this.checkBucketExists(name, cfR2Jurisdiction);
+    if (!exists) {
+      logger.warn(
+        `[Execute][Cloudflare] r2 bucket ${name} already deleted, skipping (--ignore-already-deleted)`,
+      );
+      return;
+    }
+  }
+
   const start = Date.now();
   await this.deleteBucket(name, cfR2Jurisdiction);
   const end = Date.now();

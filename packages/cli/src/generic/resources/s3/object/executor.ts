@@ -5,6 +5,7 @@ import { formatDuration } from "@/utils/duration.ts";
 import { assertBranch } from "@/utils/resource.ts";
 import { toTagsList } from "@/utils/tags.ts";
 import { nowStringDate } from "@/utils/date.ts";
+import { getIgnoreAlreadyCreated, getIgnoreAlreadyDeleted } from "../../../../asyncStorage.ts";
 import type { Object, ObjectConfig, ObjectState } from "@/generic/resources/s3/object/types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import type { S3 } from "@/generic/client/s3.ts";
@@ -51,6 +52,22 @@ export const createObjectExecutors = (client: S3): GenericExecutors => {
       version,
     } = object;
 
+    if (getIgnoreAlreadyCreated()) {
+      const exists = await client.checkS3ObjectExists(bucketName, key);
+      if (exists) {
+        logger.warn(
+          `[Execute][${provider}] ${serviceName} object ${key} already exists, updating settings (--ignore-already-created)`,
+        );
+        return await updateObject(key, config, {
+          key,
+          version,
+          createdAt: nowStringDate(),
+          dependsOn: [],
+          config,
+        });
+      }
+    }
+
     const body = await readFile(path);
 
     const start = performance.now();
@@ -84,6 +101,16 @@ export const createObjectExecutors = (client: S3): GenericExecutors => {
     bucketName: string,
     name: string,
   ): Promise<void> {
+    if (getIgnoreAlreadyDeleted()) {
+      const exists = await client.checkS3ObjectExists(bucketName, name);
+      if (!exists) {
+        logger.warn(
+          `[Execute][${provider}] ${serviceName} object ${name} already deleted, skipping (--ignore-already-deleted)`,
+        );
+        return;
+      }
+    }
+
     const start = performance.now();
     await client.deleteS3Object(bucketName, name);
     const end = performance.now();
@@ -143,6 +170,12 @@ export const createObjectExecutors = (client: S3): GenericExecutors => {
       }`,
     );
     if (!exists) {
+      if (getIgnoreAlreadyDeleted()) {
+        logger.warn(
+          `[Plan][${provider}] ${serviceName} object ${key} does not exist, skipping assertion (--ignore-already-deleted)`,
+        );
+        return;
+      }
       throw new PlanError(
         `${serviceName} object ${key} does not exist`,
         PlanErrorCode.RESOURCE_NOT_FOUND,

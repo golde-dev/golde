@@ -1,4 +1,12 @@
-import { HCloudClientBase } from "./base.ts";
+import { logger } from "../../logger.ts";
+import {
+  type Action,
+  type ApiResponse,
+  getErrorStatus,
+  getFetchErrorCause,
+  HCloudClientBase,
+  HCloudError,
+} from "./base.ts";
 
 /**
  * @see https://docs.hetzner.cloud/#locations-get-all-locations
@@ -170,19 +178,6 @@ interface Server {
   volumes?: number[];
 }
 
-interface ResultBase {
-  error?: {
-    code: string;
-    message: string;
-    details: ErrorDetails;
-  };
-  meta?: object;
-}
-
-interface LocationsResponse extends ResultBase {
-  locations: Location;
-}
-
 /**
  * Create server request
  * @see https://docs.hetzner.cloud/#servers-create-a-server
@@ -212,31 +207,128 @@ interface CreateServerRequest {
   volumes?: number[];
 }
 
-interface CreateServerResponse extends ResultBase {
+interface LocationsResponse extends ApiResponse {
+  locations: Location[];
+}
+
+interface ServersResponse extends ApiResponse {
+  servers: Server[];
+}
+
+interface ServerResponse extends ApiResponse {
   server: Server;
 }
 
-interface ErrorDetails {
-  code: string;
-  message: string;
-  details: ErrorDetails;
+interface CreateServerResponse extends ApiResponse {
+  server: Server;
+  action: Action;
+  next_actions: Action[];
+  root_password: string | null;
+}
+
+interface DeleteServerResponse extends ApiResponse {
+  action: Action;
 }
 
 export class ServerClient extends HCloudClientBase {
-  public getLocations() {
-    const query = new URLSearchParams({
-      per_page: "200",
-    }).toString();
-    return this.makeRequest<LocationsResponse>(
-      `/locations?${query}`,
-    );
+  public async getLocations(): Promise<Location[]> {
+    const errorMessage = `[HCloud] failed to list locations`;
+    logger.debug({}, "[HCloud] Listing locations");
+    try {
+      const { locations, error } = await this.api
+        .get("locations", { searchParams: { per_page: "200" } })
+        .json<LocationsResponse>();
+
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return locations;
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
   }
 
-  public createServer(config: CreateServerRequest) {
-    return this.makeRequest<CreateServerResponse>(
-      "/servers",
-      "POST",
-      JSON.stringify(config),
-    );
+  public async listServers(): Promise<Server[]> {
+    const errorMessage = `[HCloud] failed to list servers`;
+    logger.debug({}, "[HCloud] Listing servers");
+    try {
+      const { servers, error } = await this.api
+        .get("servers", { searchParams: { per_page: "50" } })
+        .json<ServersResponse>();
+
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return servers;
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  public async getServer(id: number): Promise<Server> {
+    const errorMessage = `[HCloud] failed to get a server with id ${id}`;
+    logger.debug({ id }, "[HCloud] Getting server");
+    try {
+      const { server, error } = await this.api
+        .get(`servers/${id}`)
+        .json<ServerResponse>();
+
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return server;
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  public async checkServerExists(id: number): Promise<boolean> {
+    try {
+      await this.getServer(id);
+      return true;
+    } catch (error) {
+      const status = getErrorStatus(error);
+      if (status === 404) {
+        return false;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  public async createServer(config: CreateServerRequest): Promise<Server> {
+    const errorMessage = `[HCloud] failed to create a server with a name ${config.name}`;
+    logger.debug({ config }, "[HCloud] Creating server");
+    try {
+      const { action, error, server } = await this.api
+        .post("servers", { json: config })
+        .json<CreateServerResponse>();
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+
+      await this.waitForAction(action);
+
+      return await this.getServer(server.id);
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  public async deleteServer(id: number): Promise<void> {
+    const errorMessage = `[HCloud] failed to delete a server with id ${id}`;
+    logger.debug({ id }, "[HCloud] Deleting server");
+    try {
+      const { action, error } = await this.api
+        .delete(`servers/${id}`)
+        .json<DeleteServerResponse>();
+
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      await this.waitForAction(action);
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
   }
 }

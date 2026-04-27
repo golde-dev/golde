@@ -1,9 +1,8 @@
 import { parseArgs } from "node:util";
+import { $, ExecaError } from "execa";
 import { logger } from "./src/logger.ts";
 import { mkdirSync } from "node:fs";
 import { existsSync } from "node:fs";
-
-const decoder = new TextDecoder();
 
 const { values: { dev } } = parseArgs({
   options: {
@@ -66,21 +65,20 @@ async function compile(target: Target, path: string) {
     "./src/bin/agent.ts",
   ];
 
-  const { stderr, stdout, success } = await new Deno.Command("deno", {
-    args,
-  }).output();
-
-  if (!success) {
-    logger.error(`[Compile][Agent] Failed compilation for ${target} path: ${path}`);
-    const error = decoder.decode(stderr);
-    if (error) {
-      console.error(error);
-    }
-    const output = decoder.decode(stdout);
-    if (output) {
-      console.info(output);
-    }
-  } else {
+  try {
+    await $`deno ${args}`;
     logger.info(`[Compile][Agent] Agent complete target: ${target}`);
+  } catch (error) {
+    logger.error(`[Compile][Agent] Failed compilation for ${target} path: ${path}`);
+    if (error instanceof ExecaError) {
+      if (error.stderr) {
+        console.error(error.stderr);
+      }
+      if (error.stdout) {
+        console.info(error.stdout);
+      }
+    } else {
+      throw error;
+    }
   }
 }

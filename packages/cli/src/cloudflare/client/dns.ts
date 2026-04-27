@@ -1,5 +1,11 @@
 import { logger } from "../../logger.ts";
-import { CloudflareBase, CloudflareError } from "./base.ts";
+import {
+  type ApiResponse,
+  CloudflareBase,
+  CloudflareError,
+  getErrorStatus,
+  getFetchErrorCause,
+} from "./base.ts";
 
 /**
  * @see https://developers.cloudflare.com/api/operations/zones-get
@@ -59,10 +65,22 @@ export class DNSClient extends CloudflareBase {
   /**
    * Get list of zones that account have access to
    */
-  public async getZones(query?: object): Promise<Zone[]> {
+  public async getZones(query?: Record<string, string>): Promise<Zone[]> {
+    const errorMessage = `Cloudflare failed to list zones`;
     const cacheKey = JSON.stringify(query);
     if (!zonesCache[cacheKey]) {
-      zonesCache[cacheKey] = await this.makeListRequest<Zone[]>("/zones", query);
+      try {
+        const { result, success, errors } = await this.api
+          .get("zones", { searchParams: { per_page: "20", ...query } })
+          .json<ApiResponse<Zone[]>>();
+
+        if (!success) {
+          throw new CloudflareError(errorMessage, errors);
+        }
+        zonesCache[cacheKey] = result;
+      } catch (error) {
+        throw new CloudflareError(errorMessage, getFetchErrorCause(error));
+      }
     }
     return zonesCache[cacheKey];
   }
@@ -85,20 +103,21 @@ export class DNSClient extends CloudflareBase {
     zoneName: string,
     config: ZoneRecordRequest,
   ): Promise<ZoneRecord> {
+    const errorMessage =
+      `Cloudflare failed to create a dns record with a name ${config.name} in zone ${zoneName}`;
     const zoneId = await this.getZoneId(zoneName);
     logger.debug({ zoneName, config }, "Creating dns record");
     try {
-      const record = await this.makeRequest<ZoneRecord>(
-        `/zones/${zoneId}/dns_records`,
-        "POST",
-        config,
-      );
-      return record;
-    } catch (e) {
-      if (e instanceof CloudflareError) {
-        logger.error(e.cause, "Cloudflare: failed to dns record");
+      const { result, success, errors } = await this.api
+        .post(`zones/${zoneId}/dns_records`, { json: config })
+        .json<ApiResponse<ZoneRecord>>();
+
+      if (!success) {
+        throw new CloudflareError(errorMessage, errors);
       }
-      throw e;
+      return result;
+    } catch (error) {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
     }
   }
 
@@ -110,20 +129,62 @@ export class DNSClient extends CloudflareBase {
     recordId: string,
     config: ZoneRecordRequest,
   ): Promise<ZoneRecord> {
+    const errorMessage =
+      `Cloudflare failed to update a dns record with a name ${config.name} in zone ${zoneName}`;
     const zoneId = await this.getZoneId(zoneName);
     logger.debug({ zoneId, recordId, config }, "Updating dns record");
     try {
-      const record = await this.makeRequest<ZoneRecord>(
-        `/zones/${zoneId}/dns_records/${recordId}`,
-        "PATCH",
-        config,
-      );
-      return record;
-    } catch (e) {
-      if (e instanceof CloudflareError) {
-        logger.error(e.cause, "Cloudflare: failed to update dns record");
+      const { result, success, errors } = await this.api
+        .patch(`zones/${zoneId}/dns_records/${recordId}`, { json: config })
+        .json<ApiResponse<ZoneRecord>>();
+
+      if (!success) {
+        throw new CloudflareError(errorMessage, errors);
       }
-      throw e;
+      return result;
+    } catch (error) {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  /**
+   * Get a single dns record by id, or null if it does not exist
+   */
+  public async getZoneRecord(
+    zoneName: string,
+    recordId: string,
+  ): Promise<ZoneRecord | null> {
+    const zoneId = await this.getZoneId(zoneName);
+    const errorMessage = `[Cloudflare] failed to get a dns record with id ${recordId} in zone ${zoneName}`;
+    logger.debug({ zoneId, recordId }, "[Cloudflare] Getting dns record");
+    try {
+      const { result, success, errors } = await this.api
+        .get(`zones/${zoneId}/dns_records/${recordId}`)
+        .json<ApiResponse<ZoneRecord>>();
+
+      if (!success) {
+        throw new CloudflareError(errorMessage, errors);
+      }
+      return result;
+    } catch (error) {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  public async checkZoneRecordExists(
+    zoneName: string,
+    recordId: string,
+  ): Promise<boolean> {
+    try {
+      await this.getZoneRecord(zoneName, recordId)
+      return true;
+    } catch (error) {
+      const status = getErrorStatus(error);
+      if (status === 404) {
+        return false;
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -134,18 +195,20 @@ export class DNSClient extends CloudflareBase {
     zoneName: string,
     recordId: string,
   ): Promise<void> {
+    const errorMessage =
+      `Cloudflare failed to delete a dns record with id ${recordId} in zone ${zoneName}`;
     const zoneId = await this.getZoneId(zoneName);
     logger.debug({ zoneId, recordId }, "Deleting dns record");
     try {
-      await this.makeRequest(
-        `/zones/${zoneId}/dns_records/${recordId}`,
-        "DELETE",
-      );
-    } catch (e) {
-      if (e instanceof CloudflareError) {
-        logger.error(e.cause, "Cloudflare: failed to delete dns record");
+      const { success, errors } = await this.api
+        .delete(`zones/${zoneId}/dns_records/${recordId}`)
+        .json<ApiResponse<unknown>>();
+
+      if (!success) {
+        throw new CloudflareError(errorMessage, errors);
       }
-      throw e;
+    } catch (error) {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
     }
   }
 }

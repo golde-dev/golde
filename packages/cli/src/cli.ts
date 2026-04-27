@@ -11,6 +11,7 @@ import { getExternalResources } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
 import { createOutputs } from "./output.ts";
 import { configure } from "./configure.ts";
+import { initExecutionContext } from "./asyncStorage.ts";
 import { exit } from "node:process";
 import { existsSync } from "node:fs";
 import {
@@ -164,6 +165,14 @@ program
   .option("-j, --json", "log output as json")
   .option("-y, --yes", "destroy without prompting")
   .option("-a, --all", "destroy all resources across all branches")
+  .option(
+    "--ignore-already-deleted",
+    "skip errors when deleting resources that no longer exist",
+  )
+  .option(
+    "--ignore-already-created",
+    "skip errors when creating resources that already exist",
+  )
   .action(
     async (options: {
       logLevel: Level;
@@ -171,9 +180,19 @@ program
       json: boolean;
       yes: boolean;
       all: boolean;
+      ignoreAlreadyDeleted: boolean;
+      ignoreAlreadyCreated: boolean;
     }) => {
-      const { logLevel, json, config: configPath, yes } = options;
+      const {
+        logLevel,
+        json,
+        config: configPath,
+        yes,
+        ignoreAlreadyDeleted = false,
+        ignoreAlreadyCreated = false,
+      } = options;
       logger.configure(logLevel, json);
+      initExecutionContext({ ignoreAlreadyDeleted, ignoreAlreadyCreated });
 
       const branchName = getBranchName();
 
@@ -263,15 +282,33 @@ program
   .option("-c, --config <config>", "location of config file")
   .option("-y, --yes", "apply plan without prompting")
   .option("-j, --json", "log output as json")
+  .option(
+    "--ignore-already-deleted",
+    "skip errors when deleting resources that no longer exist",
+  )
+  .option(
+    "--ignore-already-created",
+    "skip errors when creating resources that already exist",
+  )
   .action(
     async (options: {
       logLevel: Level;
       yes: boolean;
       config: string;
       json: boolean;
+      ignoreAlreadyDeleted: boolean;
+      ignoreAlreadyCreated: boolean;
     }) => {
-      const { logLevel, json, config: configPath, yes = false } = options;
+      const {
+        logLevel,
+        json,
+        config: configPath,
+        yes = false,
+        ignoreAlreadyDeleted = false,
+        ignoreAlreadyCreated = false,
+      } = options;
       logger.configure(logLevel, json);
+      initExecutionContext({ ignoreAlreadyDeleted, ignoreAlreadyCreated });
 
       const branchName = getBranchName();
 

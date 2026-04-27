@@ -1,6 +1,11 @@
 import { logger } from "../../logger.ts";
-import { CloudflareError } from "./base.ts";
-import { CloudflareBase } from "./base.ts";
+import {
+  type ApiResponse,
+  CloudflareBase,
+  CloudflareError,
+  getErrorStatus,
+  getFetchErrorCause,
+} from "./base.ts";
 import type { Region } from "./types.ts";
 
 /**
@@ -21,48 +26,68 @@ interface D1Database {
 }
 
 export class D1Client extends CloudflareBase {
-  public async createD1Database(config: D1DatabaseRequest) {
+  public async createD1Database(config: D1DatabaseRequest): Promise<D1Database> {
+    const errorMessage = `[Cloudflare] failed to create a database with a name ${config.name}`;
     logger.debug({ config }, "[Cloudflare] Creating d1 database");
     try {
-      const bucket = await this.makeRequest<D1Database>(
-        `accounts/${this.accountId}}/d1/database`,
-        "POST",
-        config,
-      );
-      return bucket;
-    } catch (e) {
-      if (e instanceof CloudflareError) {
-        logger.error(e.cause, "[Cloudflare] Failed to create d1 database");
+      const { result, success, errors } = await this.api
+        .post(`accounts/${this.accountId}/d1/database`, { json: config })
+        .json<ApiResponse<D1Database>>();
+
+      if (!success) {
+        throw new CloudflareError(errorMessage, errors);
       }
-      throw e;
+      return result;
+    } catch (error) {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
     }
   }
 
-  public async deleteD1Database(name: string) {
+  public async deleteD1Database(name: string): Promise<void> {
+    const errorMessage = `[Cloudflare] failed to delete a database with a name ${name}`;
     logger.debug({ name }, "[Cloudflare] Deleting D1 database");
     try {
-      await this.makeRequest(
-        `/accounts/${this.accountId}/d1/database/${name}`,
-        "DELETE",
-      );
-    } catch (e) {
-      if (e instanceof CloudflareError) {
-        logger.error(e.cause, "[Cloudflare] Failed to delete D1 database");
+      const { success, errors } = await this.api
+        .delete(`accounts/${this.accountId}/d1/database/${name}`)
+        .json<ApiResponse<unknown>>();
+
+      if (!success) {
+        throw new CloudflareError(errorMessage, errors);
       }
-      throw e;
+    } catch (error) {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  public async getD1Database(name: string): Promise<D1Database | null> {
+    const errorMessage = `[Cloudflare] failed to get a database with a name ${name}`;
+    logger.debug({ name }, "[Cloudflare] Getting D1 database");
+    try {
+      const { result, success, errors } = await this.api
+        .get(`accounts/${this.accountId}/d1/database/${name}`)
+        .json<ApiResponse<D1Database>>();
+
+         if (!success) {
+          throw new CloudflareError(errorMessage, errors);
+         }
+
+        return result;
+    } catch (error)  {
+      throw new CloudflareError(errorMessage, getFetchErrorCause(error));
     }
   }
 
   public async checkD1DatabaseExists(name: string): Promise<boolean> {
-    logger.debug({ name }, "[Cloudflare] Deleting D1 database");
     try {
-      await this.makeRequest(
-        `/accounts/${this.accountId}/d1/database/${name}`,
-        "GET",
-      );
+      await this.getD1Database(name)
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      const status = getErrorStatus(error);
+      if (status === 404) {
+        return false;
+      } else {
+        throw error;
+      }
     }
   }
 }
