@@ -12,24 +12,13 @@ export async function hashByteArray(data: Uint8Array): Promise<string> {
   return Buffer.from(hashBuffer).toString("base64url");
 }
 
-export function getFileHash(path: string): Promise<Buffer> {
+export async function getFileHash(path: string): Promise<Buffer> {
   const hash = createHash("sha384");
-
-  return new Promise((resolve, reject) => {
-    const stream = createReadStream(path);
-    stream.on("data", (data) => {
-      hash.update(data);
-    });
-    stream.on("end", () => {
-      stream.destroy();
-      const digest = hash.digest();
-      resolve(digest);
-    });
-    stream.on("error", (err) => {
-      stream.destroy();
-      reject(err);
-    });
-  });
+  const stream = createReadStream(path);
+  for await (const chunk of stream) {
+    hash.update(chunk);
+  }
+  return hash.digest();
 }
 
 export async function getDirHash(dirPath: string): Promise<Buffer> {
