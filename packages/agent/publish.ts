@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
+import { $ } from "execa";
 import { logger } from "./src/logger.ts";
 import { parseArgs } from "node:util";
 
-const decoder = new TextDecoder();
 const { version: rawVersion } = JSON.parse(
   readFileSync("../../lerna.json", { encoding: "utf-8" }),
 );
@@ -25,12 +25,12 @@ if (local) {
 
 async function uploadReleaseArtifacts() {
   logger.info("Updating artifacts");
-  const { stdout, stderr } = await new Deno.Command("gh", {
-    args: ["release", "upload", version, "*"],
-    cwd: `./dist/bin`,
-  }).output();
-  logger.info(decoder.decode(stdout));
-  logger.error(decoder.decode(stderr));
+  const { stdout, stderr } = await $({
+    cwd: "./dist/bin",
+    shell: true,
+  })`gh release upload ${version} *`;
+  logger.info(stdout);
+  logger.error(stderr);
 }
 
 function updateLocalAgent() {

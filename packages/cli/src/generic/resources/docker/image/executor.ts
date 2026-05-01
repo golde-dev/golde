@@ -2,11 +2,14 @@ import { logger } from "@/logger.ts";
 import { buildImage, createVersionTag } from "./utils.ts";
 import { nowStringDate } from "@/utils/date.ts";
 import { formatDuration } from "@/utils/duration.ts";
+import { getIgnoreAlreadyCreated, getIgnoreAlreadyDeleted } from "../../../../asyncStorage.ts";
 import type { DockerClient } from "../../../client/docker.ts";
 import type { ImageConfig, ImageState } from "./types.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 
 export interface RegistryClient {
+  packageExists: (packageName: string) => Promise<boolean>;
+  packageVersionExists: (packageName: string, tag: string) => Promise<boolean>;
   deletePackageVersion: (packageName: string, tag: string) => Promise<void>;
   deletePackage: (packageName: string) => Promise<void>;
 }
@@ -74,6 +77,21 @@ export function createDockerImageExecutor(
       versionId,
     ];
 
+    if (getIgnoreAlreadyCreated() && registryClient) {
+      const exists = await registryClient.packageVersionExists(imageName, versionId);
+      if (exists) {
+        logger.warn(
+          `[Execute][${provider}] ${serviceName} image ${imageName}:${versionId} already exists, skipping push (--ignore-already-created)`,
+        );
+        return {
+          version,
+          imageId,
+          createdAt: nowStringDate(),
+          config,
+        };
+      }
+    }
+
     await client.login();
     await client.pushImage(imageName, imageId, tagsWithConfig);
     logger.debug({
@@ -95,6 +113,16 @@ export function createDockerImageExecutor(
       throw new Error("Registry client required for image deletion");
     }
 
+    if (getIgnoreAlreadyDeleted()) {
+      const exists = await registryClient.packageExists(imageName);
+      if (!exists) {
+        logger.warn(
+          `[Execute][${provider}] ${serviceName} image ${imageName} already deleted, skipping (--ignore-already-deleted)`,
+        );
+        return;
+      }
+    }
+
     const start = performance.now();
     await registryClient.deletePackage(imageName);
     const end = performance.now();
@@ -109,6 +137,16 @@ export function createDockerImageExecutor(
   ): Promise<void> {
     if (!registryClient) {
       throw new Error("Registry client required for image tag deletion");
+    }
+
+    if (getIgnoreAlreadyDeleted()) {
+      const exists = await registryClient.packageVersionExists(imageName, tag);
+      if (!exists) {
+        logger.warn(
+          `[Execute][${provider}] ${serviceName} image ${imageName}:${tag} already deleted, skipping (--ignore-already-deleted)`,
+        );
+        return;
+      }
     }
 
     const start = performance.now();

@@ -1,6 +1,8 @@
+import ky, { HTTPError, type KyInstance } from "ky";
 import { S3 } from "@/generic/client/s3.ts";
 import { logger } from "../../logger.ts";
 import type { CloudflareS3Credentials } from "@/cloudflare/types.ts";
+import { get } from "es-toolkit/compat";
 
 interface ErrorCause {
   code: string;
@@ -8,19 +10,13 @@ interface ErrorCause {
   error_chain: unknown[];
 }
 
-interface ListResponse<D> {
-  result?: D;
+export interface ApiResponse<D> {
+  result: D;
   success: boolean;
   errors?: ErrorCause[];
   resultInfo?: {
     total_count: number;
   };
-}
-
-interface Response<D> {
-  result?: D;
-  success: boolean;
-  errors?: ErrorCause[];
 }
 
 /**
@@ -37,9 +33,30 @@ interface FetchErrorCause {
   url: string;
   status: number;
   statusText: string;
+  body?: unknown;
+}
+
+export function getFetchErrorCause(error: unknown): FetchErrorCause | undefined {
+  if (error instanceof HTTPError) {
+    const { response, request } = error;
+    return {
+      url: request.url,
+      status: response.status,
+      statusText: response.statusText,
+      body: response.body,
+    };
+  }
+  return;
+}
+
+export function getErrorStatus(error: unknown): number | undefined {
+  if (error instanceof Error) {
+    return get(error, "cause.status");
+  }
 }
 
 export class CloudflareError extends Error {
+  override cause?: ErrorCause[] | FetchErrorCause;
   public constructor(message: string, cause?: ErrorCause[] | FetchErrorCause) {
     super(message, { cause });
     this.cause = cause;
@@ -47,14 +64,29 @@ export class CloudflareError extends Error {
 }
 
 export class CloudflareBase {
-  protected readonly apiToken: string;
   protected readonly accountId: string;
-  protected readonly baseUrl = "https://api.cloudflare.com/client/v4";
+  protected readonly api: KyInstance;
   protected s3?: S3;
 
   public constructor(apiToken: string, accountId: string, s3?: CloudflareS3Credentials) {
-    this.apiToken = apiToken;
     this.accountId = accountId;
+
+    this.api = ky.create({
+      baseUrl: "https://api.cloudflare.com/client/v4/",
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+      },
+      hooks: {
+        beforeRequest: [
+          ({ request }) => {
+            logger.debug(
+              { url: request.url, method: request.method },
+              "[Cloudflare] request",
+            );
+          },
+        ],
+      },
+    });
 
     if (s3) {
       const {
@@ -79,123 +111,30 @@ export class CloudflareBase {
     return this.s3;
   }
 
-  protected makeListRequest<T>(
-    path: string,
-    extraQuery?: object,
-  ): Promise<T> {
-    const query = new URLSearchParams({
-      per_page: "20",
-      ...extraQuery,
-    }).toString();
-
-    logger.debug({
-      path,
-      query,
-      method: "GET",
-    }, "[Cloudflare] list request");
-    return fetch(`${this.baseUrl}${path}?${query}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${this.apiToken}`,
-        "Content-Type": "application/json",
-      },
-    }).then(async (r) => {
-      if (!r.ok) {
-        throw new CloudflareError("Cloudflare request error", {
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
-      }
-
-      const {
-        result,
-        success,
-        errors,
-      } = await r.json() as ListResponse<T>;
-
-      if (success && result) {
-        return result;
-      } else {
-        throw new CloudflareError("Cloudflare request error", errors);
-      }
-    }).catch((error) => {
-      if (error instanceof CloudflareError) {
-        throw error;
-      }
-      throw new CloudflareError("Cloudflare request error", error);
-    });
-  }
-
-  protected makeRequest<T>(
-    path: string,
-    method = "GET",
-    body?: object,
-    headers?: Record<string, string>,
-  ): Promise<T> {
-    logger.debug({
-      path,
-      body,
-      method: "GET",
-    }, "[Cloudflare] request");
-
-    return fetch(`${this.baseUrl}${path}`, {
-      method,
-      body: JSON.stringify(body),
-      headers: {
-        "Authorization": `Bearer ${this.apiToken}`,
-        "Content-Type": "application/json",
-        ...headers,
-      },
-    }).then(async (r) => {
-      if (!r.ok) {
-        throw new CloudflareError("Cloudflare request error", {
-          url: r.url,
-          status: r.status,
-          statusText: r.statusText,
-        });
-      }
-
-      const {
-        result,
-        success,
-        errors,
-      } = await r.json() as Response<T>;
-
-      if (success && result) {
-        return result;
-      } else {
-        throw new CloudflareError("Cloudflare response error", errors);
-      }
-    }).catch((error) => {
-      if (error instanceof CloudflareError) {
-        throw error;
-      }
-      throw new CloudflareError("Cloudflare request error", error);
-    });
-  }
-
   /**
    * Verify that user or account supplied token is active
    */
   public async verifyUserToken(): Promise<void> {
     const { accountId } = this;
+    let result: VerifyTokenResult | undefined;
 
     try {
-      const { status: userTokenStatus } = await this.makeRequest<VerifyTokenResult>(
-        "/user/tokens/verify",
-      );
-      if (userTokenStatus !== "active") {
-        throw new CloudflareError(`Token is not active: ${userTokenStatus}`);
-      }
+      ({ result } = await this.api.get("user/tokens/verify")
+        .json<ApiResponse<VerifyTokenResult>>());
     } catch {
-      const { status: accountTokenStatus } = await this.makeRequest<VerifyTokenResult>(
-        `/accounts/${accountId}/tokens/verify`,
-      );
-
-      if (accountTokenStatus !== "active") {
-        throw new CloudflareError(`Token is not active: ${accountTokenStatus}`);
+      try {
+        ({ result } = await this.api.get(`accounts/${accountId}/tokens/verify`)
+          .json<ApiResponse<VerifyTokenResult>>());
+      } catch (error) {
+        throw new CloudflareError(
+          "Cloudflare failed to verify user token",
+          getFetchErrorCause(error),
+        );
       }
+    }
+
+    if (result.status !== "active") {
+      throw new CloudflareError(`Token is not active: ${result.status}`);
     }
   }
 }

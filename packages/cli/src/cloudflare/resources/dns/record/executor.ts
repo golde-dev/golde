@@ -4,8 +4,12 @@ import { toTagsArray } from "../../../../utils/tags.ts";
 import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
 import type { CloudflareClient } from "../../../client/client.ts";
 import { normalizeToArray } from "../../../../utils/array.ts";
+import { getIgnoreAlreadyDeleted } from "../../../../asyncStorage.ts";
 import type { RecordConfig, RecordState, RecordType } from "./types.ts";
 
+// Note: --ignore-already-created is not wired on the create path. Cloudflare allows
+// duplicate name+type DNS records, so "already exists" has no clean identification
+// before we get a recordId back from the API.
 async function createZoneRecord(
   this: CloudflareClient,
   zoneName: string,
@@ -139,11 +143,21 @@ async function deleteZoneRecord(
   state: RecordState,
 ): Promise<void> {
   const start = performance.now();
+  const ignoreAlreadyDeleted = getIgnoreAlreadyDeleted();
 
   await Promise.all(
-    Object.values(state.records).map((recordId) =>
-      this.deleteZoneRecord(zoneName, recordId)
-    ),
+    Object.values(state.records).map(async (recordId) => {
+      if (ignoreAlreadyDeleted) {
+        const exists = await this.checkZoneRecordExists(zoneName, recordId);
+        if (!exists) {
+          logger.warn(
+            `[Execute][Cloudflare] dns record ${recordId} already deleted, skipping (--ignore-already-deleted)`,
+          );
+          return;
+        }
+      }
+      await this.deleteZoneRecord(zoneName, recordId);
+    }),
   );
 
   const end = performance.now();

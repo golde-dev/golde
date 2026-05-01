@@ -234,7 +234,7 @@ export async function executePlanRecursively(
       );
       chunksChanges.push(...chunkChanges);
     }
-    return executePlanRecursively(initialPlan, remainingPlan, changes.concat(...chunksChanges));
+    return executePlanRecursively(initialPlan, remainingPlan, changes.concat(chunksChanges));
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);
