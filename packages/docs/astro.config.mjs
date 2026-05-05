@@ -11,19 +11,36 @@ export default defineConfig({
       title: "Golde Docs",
       disable404Route: true,
       social: [
-        { icon: "github", label: "GitHub", href: "https://github.com/withastro/starlight" },
+        { icon: "github", label: "GitHub", href: "https://github.com/golde-dev/golde" },
       ],
       sidebar: [
         {
-          label: "Guides",
-          items: [
-            // Each item here is one entry in the navigation menu.
-            { label: "Example Guide", link: "/guides/example/" },
-          ],
+          label: "Start Here",
+          autogenerate: { directory: "start-here" },
         },
         {
-          label: "Reference",
-          autogenerate: { directory: "reference" },
+          label: "Concepts",
+          autogenerate: { directory: "concepts" },
+        },
+        {
+          label: "Guides",
+          autogenerate: { directory: "guides" },
+        },
+        {
+          label: "Providers",
+          autogenerate: { directory: "providers" },
+        },
+        {
+          label: "CLI Reference",
+          autogenerate: { directory: "cli" },
+        },
+        {
+          label: "Configuration Reference",
+          autogenerate: { directory: "config" },
+        },
+        {
+          label: "Self-Hosted Agent",
+          autogenerate: { directory: "agent" },
         },
       ],
     }),
