@@ -230,6 +230,18 @@ interface DeleteServerResponse extends ApiResponse {
   action: Action;
 }
 
+interface ActionsResponse extends ApiResponse {
+  action: Action;
+}
+
+/**
+ * @see https://docs.hetzner.cloud/#servers-update-a-server
+ */
+interface UpdateServerRequest {
+  name?: string;
+  labels?: Record<string, string>;
+}
+
 export class ServerClient extends HCloudClientBase {
   public async getLocations(): Promise<Location[]> {
     const errorMessage = `[HCloud] failed to list locations`;
@@ -327,6 +339,115 @@ export class ServerClient extends HCloudClientBase {
         throw new HCloudError(errorMessage, error);
       }
       await this.waitForAction(action);
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  /**
+   * Update a server's name and/or labels via PUT /servers/{id}.
+   * No action is returned, so no polling is required.
+   * @see https://docs.hetzner.cloud/#servers-update-a-server
+   */
+  public async updateServer(
+    id: number,
+    body: UpdateServerRequest,
+  ): Promise<Server> {
+    const errorMessage = `[HCloud] failed to update server ${id}`;
+    logger.debug({ id, body }, "[HCloud] Updating server");
+    try {
+      const { server, error } = await this.api
+        .put(`servers/${id}`, { json: body })
+        .json<ServerResponse>();
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return server;
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  /**
+   * Change a server's type. Server must be powered off; the upgrade is
+   * irreversible when `upgrade_disk: true`.
+   * @see https://docs.hetzner.cloud/#server-actions-change-the-type-of-a-server
+   */
+  public async changeServerType(
+    id: number,
+    serverType: string,
+    upgradeDisk = false,
+  ): Promise<Action> {
+    const errorMessage = `[HCloud] failed to change type of server ${id} to ${serverType}`;
+    logger.debug({ id, serverType, upgradeDisk }, "[HCloud] Changing server type");
+    try {
+      const { action, error } = await this.api
+        .post(`servers/${id}/actions/change_type`, {
+          json: { server_type: serverType, upgrade_disk: upgradeDisk },
+        })
+        .json<ActionsResponse>();
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return await this.waitForAction(action);
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  /**
+   * Rename a server (changes the API `name` field).
+   * @see https://docs.hetzner.cloud/#server-actions-rename-a-server
+   */
+  public async renameServer(id: number, name: string): Promise<Action> {
+    const errorMessage = `[HCloud] failed to rename server ${id} to ${name}`;
+    logger.debug({ id, name }, "[HCloud] Renaming server");
+    try {
+      const { action, error } = await this.api
+        .post(`servers/${id}/actions/rename`, { json: { name } })
+        .json<ActionsResponse>();
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return await this.waitForAction(action);
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  /**
+   * @see https://docs.hetzner.cloud/#server-actions-power-on-a-server
+   */
+  public async powerOnServer(id: number): Promise<Action> {
+    const errorMessage = `[HCloud] failed to power on server ${id}`;
+    logger.debug({ id }, "[HCloud] Powering on server");
+    try {
+      const { action, error } = await this.api
+        .post(`servers/${id}/actions/poweron`)
+        .json<ActionsResponse>();
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return await this.waitForAction(action);
+    } catch (error) {
+      throw new HCloudError(errorMessage, getFetchErrorCause(error));
+    }
+  }
+
+  /**
+   * @see https://docs.hetzner.cloud/#server-actions-power-off-a-server
+   */
+  public async powerOffServer(id: number): Promise<Action> {
+    const errorMessage = `[HCloud] failed to power off server ${id}`;
+    logger.debug({ id }, "[HCloud] Powering off server");
+    try {
+      const { action, error } = await this.api
+        .post(`servers/${id}/actions/poweroff`)
+        .json<ActionsResponse>();
+      if (error) {
+        throw new HCloudError(errorMessage, error);
+      }
+      return await this.waitForAction(action);
     } catch (error) {
       throw new HCloudError(errorMessage, getFetchErrorCause(error));
     }

@@ -1,4 +1,4 @@
-import type { ServersConfig, ServersState } from "./resources/servers/types.ts";
+import type { ServerConfigs, ServerStates } from "./resources/server/types.ts";
 
 export interface HCloudCredentials {
   /**
@@ -7,10 +7,11 @@ export interface HCloudCredentials {
    */
   apiKey: string;
 }
+
 export interface HCloudResourcesConfig {
-  servers?: ServersConfig;
+  server?: ServerConfigs;
 }
 
 export interface HCloudResourcesState {
-  servers?: ServersState;
+  server?: ServerStates;
 }

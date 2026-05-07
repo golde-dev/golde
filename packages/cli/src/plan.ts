@@ -4,6 +4,7 @@ import { createCloudflareDestroyPlan, createCloudflarePlan } from "./cloudflare/
 import { createAWSDestroyPlan, createAWSPlan } from "./aws/plan.ts";
 import { createGithubDestroyPlan, createGithubPlan } from "./github/plan.ts";
 import { createGoldeDestroyPlan, createGoldePlan } from "@/golde/plan.ts";
+import { createHCloudDestroyPlan, createHCloudPlan } from "@/hcloud/plan.ts";
 import { PlanError } from "./error.ts";
 import { Type } from "./types/plan.ts";
 import { formatDuration } from "./utils/duration.ts";
@@ -164,6 +165,7 @@ export async function createPlan(
           createCloudflarePlan(context),
           createGithubPlan(context),
           createGoldePlan(context),
+          createHCloudPlan(context),
         ],
       )
     ).flat();
@@ -198,6 +200,7 @@ export async function createDestroyPlan(context: Context): Promise<Plan> {
           createCloudflareDestroyPlan(context),
           createGithubDestroyPlan(context),
           createGoldeDestroyPlan(context),
+          createHCloudDestroyPlan(context),
         ],
       )
     ).flat();

@@ -7,7 +7,7 @@ import { awsCredentialsSchema, awsResourcesConfigSchema } from "./aws/schema.ts"
 import { goldeCredentialsSchema, goldeResourcesConfigSchema } from "./golde/schema.ts";
 import { githubCredentialsSchema, githubResourcesConfigSchema } from "./github/schema.ts";
 import { slackCredentialsSchema, slackOutputsSchema } from "@/slack/schema.ts";
-import { hcloudCredentialsSchema } from "./hcloud/schema.ts";
+import { hcloudCredentialsSchema, hcloudResourcesConfigSchema } from "./hcloud/schema.ts";
 import { cloudflareCredentialsSchema, cloudflareResourcesConfigSchema} from "./cloudflare/schema.ts";
 import type { Config, ProvidersConfig, Resources } from "./types/config.ts";
 import type { Outputs } from "@/types/output.ts";
@@ -38,6 +38,7 @@ export const resourcesSchema = implement<Resources>().with({
   github: githubResourcesConfigSchema.optional(),
   cloudflare: cloudflareResourcesConfigSchema.optional(),
   golde: goldeResourcesConfigSchema.optional(),
+  hcloud: hcloudResourcesConfigSchema.optional(),
 });
 
 export const schema = implement<Config>().with({

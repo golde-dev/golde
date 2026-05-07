@@ -1,44 +1,52 @@
+import type { Config } from '@golde/cli'
 
-const config = {
+const config: Config = {
+  name: "example-hcloud-server",
+  tags: {
+    Project: "GoldeExamples",
+    Stack: "example-hcloud-server",
+    Branch: "{{ git.BRANCH_NAME }}",
+  },
   providers: {
     golde: {
-      apiKey: "{{ env.GOLDE_API_KEY }}"
+      apiKey: "{{ env.GOLDE_API_KEY }}",
+    },
+    hcloud: {
+      apiKey: "{{ env.HCLOUD_TOKEN }}",
     },
     cloudflare: {
-      apiKey: "{{ env.CLOUDFLARE_API_KEY }}"
+      apiToken: "{{ env.CLOUDFLARE_API_TOKEN }}",
+      accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
     },
-    hCloud: {
-      token: "{{ env.HCLOUD_TOKEN }}"
-    }
   },
-  servers: {
-    "hetzner-server-1": {
-      type: "hCloud",
-      serverType: "cpx11",
-      image: "ubuntu-22.04",
-      userData: "",
-    },
-    "hetzner-server-2": {
-      type: "hCloud",
-      serverType: "cpx11",
-      image: "ubuntu-22.04",
-      userData: ""
-    }
-  },
-  dns: {
-    "golde.dev": {
-      type: "cloudflare",
-      records: {
+  resources: {
+    hcloud: {
+      server: {
         "hetzner-server-1": {
-          record: "hetzner-server-1",
-          type: "A", 
-          value: "{{ servers.hetzner-server-1.ip_address }}",
-          ttl: "3600",
-          proxied: false, 
+          image: "ubuntu-22.04",
+          serverType: "cpx11",
+          location: "fsn1",
+          branch: "master",
         },
-      }
-    }
+      },
+    },
+    cloudflare: {
+      dns: {
+        record: {
+          "golde-cf.dev": {
+            "A": {
+              "hetzner-server-1.golde-cf.dev": {
+                value: "{{ resources.hcloud.server.hetzner-server-1.ipv4 }}",
+                branch: "master",
+                ttl: 3600,
+                proxied: false,
+              },
+            },
+          },
+        },
+      },
+    },
   },
 };
 
-export default config;
+export default config

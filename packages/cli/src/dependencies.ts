@@ -8,12 +8,13 @@ import type { ResourceDependency, SavedResource } from "./types/dependencies.ts"
 import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
 import { matchGithubPath } from "@/github/path.ts";
+import { matchHCloudPath } from "@/hcloud/path.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=resources.)(.*)/);
 
 export const matchStatePath = memoize((path: string) =>
-  matchAWSPath(path) ?? matchCloudflarePath(path) ?? matchGithubPath(path)
+  matchAWSPath(path) ?? matchCloudflarePath(path) ?? matchGithubPath(path) ?? matchHCloudPath(path)
 );
 
 export function dependenciesSearch(

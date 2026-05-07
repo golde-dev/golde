@@ -5,12 +5,14 @@ import type { GithubResourcesState } from "../github/types.ts";
 import type { Change } from "./plan.ts";
 import type { SavedResource } from "@/types/dependencies.ts";
 import type { GoldeResourcesState } from "../golde/types.ts";
+import type { HCloudResourcesState } from "../hcloud/types.ts";
 
 export interface State {
   aws?: AWSResourcesState;
   github?: GithubResourcesState;
   cloudflare?: CloudflareResourcesState;
   golde?: GoldeResourcesState;
+  hcloud?: HCloudResourcesState;
 }
 
 export abstract class AbstractStateClient {

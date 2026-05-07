@@ -1,7 +1,7 @@
 import type { AWSCredentials, AWSResourcesConfig } from "../aws/types.ts";
 import type { CloudflareCredentials, CloudflareResourcesConfig } from "../cloudflare/types.ts";
 import type { GoldeClientConfig, GoldeResourcesConfig } from "../golde/types.ts";
-import type { HCloudCredentials } from "../hcloud/types.ts";
+import type { HCloudCredentials, HCloudResourcesConfig } from "../hcloud/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Outputs } from "./output.ts";
 import type { SlackCredentials } from "../slack/types.ts";
@@ -60,6 +60,11 @@ export interface Resources {
    * Golde resources
    */
   golde?: GoldeResourcesConfig;
+
+  /**
+   * Hetzner Cloud resources
+   */
+  hcloud?: HCloudResourcesConfig;
 }
 
 export type Config = {

@@ -640,6 +640,22 @@
             }
           },
           "additionalProperties": false
+        },
+        "hcloud": {
+          "type": "object",
+          "properties": {
+            "server": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 63,
+                "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
