@@ -21,11 +21,18 @@ const config: Config = {
   },
   resources: {
     hcloud: {
+      sshKey: {
+        "example-deploy": {
+          publicKey: "{{ file(./id_ed25519.pub) }}",
+          branch: "master",
+        },
+      },
       server: {
         "hetzner-server-1": {
           image: "ubuntu-22.04",
           serverType: "cpx11",
           location: "fsn1",
+          sshKeys: ["{{ resources.hcloud.sshKey.example-deploy.name }}"],
           branch: "master",
         },
       },

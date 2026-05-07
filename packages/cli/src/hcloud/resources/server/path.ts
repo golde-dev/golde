@@ -24,11 +24,15 @@ const stateAttributes = ensureAllowedKeys<ServerState>({
   updatedAt: true,
 });
 
-const configAttributes = ensureAllowedKeys<ServerConfig>({
+// Exclude properties from the config schema because they overlap with state
+type ServerConfigAttributes = Pick<
+  ServerConfig,
+  "image" | "serverType" | "userData" | "enableIpv4" | "enableIpv6" | "branch" | "branchPattern"
+>;
+
+const configAttributes = ensureAllowedKeys<ServerConfigAttributes>({
   image: true,
   serverType: true,
-  location: true,
-  datacenter: true,
   userData: true,
   enableIpv4: true,
   enableIpv6: true,

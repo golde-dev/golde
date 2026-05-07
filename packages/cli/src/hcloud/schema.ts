@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import { serversSchema } from "./resources/server/schema.ts";
+import { sshKeysSchema } from "./resources/sshKey/schema.ts";
 import type { HCloudCredentials, HCloudResourcesConfig } from "./types.ts";
 
 export const hcloudResourcesConfigSchema = implement<HCloudResourcesConfig>()
   .with({
     server: serversSchema.optional(),
+    sshKey: sshKeysSchema.optional(),
   })
   .strict();
 

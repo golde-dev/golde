@@ -1,33 +1,9 @@
 import { z } from "zod";
 import { implement } from "../../../utils/zod.ts";
 import { branchPatternSchema, branchSchema, transformBranch } from "../../../utils/resource.ts";
+import { labelsSchema } from "../../utils.ts";
 import type { ServerConfig, ServerConfigs } from "./types.ts";
 import type { ZodType } from "zod";
-
-const labelKeySchema = z
-  .string()
-  .min(1)
-  .max(63)
-  .regex(
-    /^[A-Za-z][A-Za-z0-9._-]*$/,
-    {
-      message: "Hetzner label key must start with a letter and contain only [A-Za-z0-9._-]",
-    },
-  );
-
-const labelValueSchema = z
-  .string()
-  .max(63)
-  .regex(
-    /^[A-Za-z0-9._-]*$/,
-    {
-      message: "Hetzner label value may contain only [A-Za-z0-9._-]",
-    },
-  );
-
-const labelsSchema = z
-  .record(labelKeySchema, labelValueSchema)
-  .optional();
 
 export const serverSchema: ZodType<ServerConfig> = implement<ServerConfig>()
   .with({

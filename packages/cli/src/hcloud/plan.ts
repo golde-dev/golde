@@ -3,6 +3,8 @@ import { isEmpty } from "../utils/object.ts";
 import { PlanError, PlanErrorCode } from "../error.ts";
 import { createServerDestroyPlan, createServerPlan } from "./resources/server/plan.ts";
 import { createServerExecutors } from "./resources/server/executor.ts";
+import { createSshKeyDestroyPlan, createSshKeyPlan } from "./resources/sshKey/plan.ts";
+import { createSshKeyExecutors } from "./resources/sshKey/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 
@@ -27,8 +29,13 @@ export async function createHCloudPlan(context: Context): Promise<Plan> {
     );
   }
 
-  const { server: serverConfig } = hcloudConfig ?? {};
-  const { server: serverState } = hcloudState ?? {};
+  const { server: serverConfig, sshKey: sshKeyConfig } = hcloudConfig ?? {};
+  const { server: serverState, sshKey: sshKeyState } = hcloudState ?? {};
+
+  if (!isEmpty(sshKeyState) || !isEmpty(sshKeyConfig)) {
+    const executors = createSshKeyExecutors(hcloud);
+    plan.push(createSshKeyPlan(executors, sshKeyState, sshKeyConfig));
+  }
 
   if (!isEmpty(serverState) || !isEmpty(serverConfig)) {
     const executors = createServerExecutors(hcloud);
@@ -57,11 +64,16 @@ export async function createHCloudDestroyPlan(context: Context): Promise<Plan> {
     );
   }
 
-  const { server: serverState } = hcloudState ?? {};
+  const { server: serverState, sshKey: sshKeyState } = hcloudState ?? {};
 
   if (!isEmpty(serverState)) {
     const executors = createServerExecutors(hcloud);
     plan.push(createServerDestroyPlan(executors, serverState));
+  }
+
+  if (!isEmpty(sshKeyState)) {
+    const executors = createSshKeyExecutors(hcloud);
+    plan.push(createSshKeyDestroyPlan(executors, sshKeyState));
   }
 
   return (await Promise.all(plan)).flat();

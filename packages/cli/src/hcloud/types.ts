@@ -1,4 +1,5 @@
 import type { ServerConfigs, ServerStates } from "./resources/server/types.ts";
+import type { SSHKeyConfigs, SSHKeyStates } from "./resources/sshKey/types.ts";
 
 export interface HCloudCredentials {
   /**
@@ -10,8 +11,10 @@ export interface HCloudCredentials {
 
 export interface HCloudResourcesConfig {
   server?: ServerConfigs;
+  sshKey?: SSHKeyConfigs;
 }
 
 export interface HCloudResourcesState {
   server?: ServerStates;
+  sshKey?: SSHKeyStates;
 }
