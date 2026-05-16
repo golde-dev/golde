@@ -662,6 +662,126 @@
                 "maxLength": 64
               },
               "additionalProperties": {}
+            },
+            "dns": {
+              "type": "object",
+              "properties": {
+                "zone": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
+                  },
+                  "additionalProperties": {}
+                },
+                "record": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "propertyNames": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "A"
+                        },
+                        {
+                          "type": "string",
+                          "const": "AAAA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "CAA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "CNAME"
+                        },
+                        {
+                          "type": "string",
+                          "const": "DS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "HINFO"
+                        },
+                        {
+                          "type": "string",
+                          "const": "HTTPS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "MX"
+                        },
+                        {
+                          "type": "string",
+                          "const": "NS"
+                        },
+                        {
+                          "type": "string",
+                          "const": "PTR"
+                        },
+                        {
+                          "type": "string",
+                          "const": "RP"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SOA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SRV"
+                        },
+                        {
+                          "type": "string",
+                          "const": "SVCB"
+                        },
+                        {
+                          "type": "string",
+                          "const": "TLSA"
+                        },
+                        {
+                          "type": "string",
+                          "const": "TXT"
+                        }
+                      ]
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255,
+                        "pattern": "^(@|[a-z0-9_*-]+(\\.[a-z0-9_*-]+)*)$"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "required": [
+                      "A",
+                      "AAAA",
+                      "CAA",
+                      "CNAME",
+                      "DS",
+                      "HINFO",
+                      "HTTPS",
+                      "MX",
+                      "NS",
+                      "PTR",
+                      "RP",
+                      "SOA",
+                      "SRV",
+                      "SVCB",
+                      "TLSA",
+                      "TXT"
+                    ]
+                  }
+                }
+              },
+              "additionalProperties": false
             }
           },
           "additionalProperties": false

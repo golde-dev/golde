@@ -5,6 +5,10 @@ import { createServerDestroyPlan, createServerPlan } from "./resources/server/pl
 import { createServerExecutors } from "./resources/server/executor.ts";
 import { createSshKeyDestroyPlan, createSshKeyPlan } from "./resources/sshKey/plan.ts";
 import { createSshKeyExecutors } from "./resources/sshKey/executor.ts";
+import { createZoneDestroyPlan, createZonePlan } from "./resources/zone/plan.ts";
+import { createZoneExecutors } from "./resources/zone/executor.ts";
+import { createDNSDestroyPlan, createDNSPlan } from "./resources/dns/record/plan.ts";
+import { createDNSExecutors } from "./resources/dns/record/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 
@@ -29,8 +33,21 @@ export async function createHCloudPlan(context: Context): Promise<Plan> {
     );
   }
 
-  const { server: serverConfig, sshKey: sshKeyConfig } = hcloudConfig ?? {};
-  const { server: serverState, sshKey: sshKeyState } = hcloudState ?? {};
+  const {
+    server: serverConfig,
+    sshKey: sshKeyConfig,
+    dns: { zone: zoneConfig, record: dnsRecordConfig } = {},
+  } = hcloudConfig ?? {};
+  const {
+    server: serverState,
+    sshKey: sshKeyState,
+    dns: { zone: zoneState, record: dnsRecordState } = {},
+  } = hcloudState ?? {};
+
+  if (!isEmpty(zoneState) || !isEmpty(zoneConfig)) {
+    const executors = createZoneExecutors(hcloud);
+    plan.push(createZonePlan(executors, zoneState, zoneConfig));
+  }
 
   if (!isEmpty(sshKeyState) || !isEmpty(sshKeyConfig)) {
     const executors = createSshKeyExecutors(hcloud);
@@ -40,6 +57,11 @@ export async function createHCloudPlan(context: Context): Promise<Plan> {
   if (!isEmpty(serverState) || !isEmpty(serverConfig)) {
     const executors = createServerExecutors(hcloud);
     plan.push(createServerPlan(executors, serverState, serverConfig));
+  }
+
+  if (!isEmpty(dnsRecordState) || !isEmpty(dnsRecordConfig)) {
+    const executors = createDNSExecutors(hcloud);
+    plan.push(createDNSPlan(executors, dnsRecordState, dnsRecordConfig, zoneConfig));
   }
 
   return (await Promise.all(plan)).flat();
@@ -64,7 +86,18 @@ export async function createHCloudDestroyPlan(context: Context): Promise<Plan> {
     );
   }
 
-  const { server: serverState, sshKey: sshKeyState } = hcloudState ?? {};
+  const {
+    server: serverState,
+    sshKey: sshKeyState,
+    dns: { zone: zoneState, record: dnsRecordState } = {},
+  } = hcloudState ?? {};
+
+  // Delete order: records first (so zones aren't deleted while records exist),
+  // then servers, then ssh keys, then zones.
+  if (!isEmpty(dnsRecordState)) {
+    const executors = createDNSExecutors(hcloud);
+    plan.push(createDNSDestroyPlan(executors, dnsRecordState));
+  }
 
   if (!isEmpty(serverState)) {
     const executors = createServerExecutors(hcloud);
@@ -74,6 +107,11 @@ export async function createHCloudDestroyPlan(context: Context): Promise<Plan> {
   if (!isEmpty(sshKeyState)) {
     const executors = createSshKeyExecutors(hcloud);
     plan.push(createSshKeyDestroyPlan(executors, sshKeyState));
+  }
+
+  if (!isEmpty(zoneState)) {
+    const executors = createZoneExecutors(hcloud);
+    plan.push(createZoneDestroyPlan(executors, zoneState));
   }
 
   return (await Promise.all(plan)).flat();

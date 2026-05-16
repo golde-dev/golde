@@ -14,10 +14,6 @@ const config: Config = {
     hcloud: {
       apiKey: "{{ env.HCLOUD_TOKEN }}",
     },
-    cloudflare: {
-      apiToken: "{{ env.CLOUDFLARE_API_TOKEN }}",
-      accountId: "{{ env.CLOUDFLARE_ACCOUNT_ID }}",
-    },
   },
   resources: {
     hcloud: {
@@ -36,17 +32,21 @@ const config: Config = {
           branch: "master",
         },
       },
-    },
-    cloudflare: {
       dns: {
+        zone: {
+          "golde.dev": {
+            mode: "primary",
+            ttl: 86400,
+            branch: "master",
+          },
+        },
         record: {
-          "golde-cf.dev": {
+          "golde.dev": {
             "A": {
-              "hetzner-server-1.golde-cf.dev": {
+              "hetzner-server-1": {
                 value: "{{ resources.hcloud.server.hetzner-server-1.ipv4 }}",
                 branch: "master",
                 ttl: 3600,
-                proxied: false,
               },
             },
           },
