@@ -16,31 +16,31 @@ export default defineConfig({
       sidebar: [
         {
           label: "Start Here",
-          autogenerate: { directory: "start-here" },
+          items: [{ autogenerate: { directory: "start-here" } }],
         },
         {
           label: "Concepts",
-          autogenerate: { directory: "concepts" },
+          items: [{ autogenerate: { directory: "concepts" } }],
         },
         {
           label: "Guides",
-          autogenerate: { directory: "guides" },
+          items: [{ autogenerate: { directory: "guides" } }],
         },
         {
           label: "Providers",
-          autogenerate: { directory: "providers" },
+          items: [{ autogenerate: { directory: "providers" } }],
         },
         {
           label: "CLI Reference",
-          autogenerate: { directory: "cli" },
+          items: [{ autogenerate: { directory: "cli" } }],
         },
         {
           label: "Configuration Reference",
-          autogenerate: { directory: "config" },
+          items: [{ autogenerate: { directory: "config" } }],
         },
         {
           label: "Self-Hosted Agent",
-          autogenerate: { directory: "agent" },
+          items: [{ autogenerate: { directory: "agent" } }],
         },
       ],
     }),
