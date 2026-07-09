@@ -154,7 +154,9 @@ export function filterExecutionUnits(plan: Plan): ExecutionUnit[] {
 
 export async function createPlan(
   context: Context,
+  options: { exitOnNoChanges?: boolean } = {},
 ): Promise<Plan> {
+  const { exitOnNoChanges = true } = options;
   try {
     logger.debug("[Plan] Creating plan");
     const start = performance.now();
@@ -174,7 +176,9 @@ export async function createPlan(
 
     if (!hasChanges(initialPlan)) {
       logger.info(`[Plan] No changes detected in ${formatDuration(end - start)}`);
-      exit(0);
+      if (exitOnNoChanges) {
+        exit(0);
+      }
     }
 
     logger.debug(`[Plan] Created plan in ${formatDuration(end - start)}`);

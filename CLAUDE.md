@@ -10,7 +10,7 @@ Golde is a GitOps-based infrastructure as code and deployment tool. It's a decla
 
 - TypeScript/JavaScript/Python-based configuration (no HCL)
 - Git branch-based resource ownership (master vs feature/* branches)
-- Template system for dynamic configuration (`{{ env.VAR }}`, `{{ git.BRANCH }}`, `{{ state.aws.s3.bucket.arn }}`)
+- Template system for dynamic configuration (`{{ env.VAR }}`, `{{ git.BRANCH_NAME }}`, `{{ resources.aws.s3.bucket.my-bucket.arn }}`)
 - Deep schema validation with Zod
 - Automatic dependency resolution via template references
 - Multiple state backends (Golde API, S3, filesystem)
@@ -124,7 +124,7 @@ golde apply [--branch <name>] [--yes]
   ↓
 11. Save state changes
   ↓
-12. Generate outputs
+12. Resolve and persist outputs, dispatch lifecycle hooks (`on`)
 ```
 
 ### Resource Architecture
@@ -165,9 +165,9 @@ provider/resources/service/type/
 
 1. Environment variables: `{{ env.VAR_NAME }}`
 2. File contents: `{{ file.path/to/file }}`
-3. Git info: `{{ git.BRANCH_NAME }}`, `{{ git.BRANCH_SLUG }}`, `{{ git.BRANCH_HASH }}`
+3. Git info: `{{ git.BRANCH_NAME }}`, `{{ git.BRANCH_SLUG }}`
 4. Managed config: `{{ config.key }}`
-5. Resource state: `{{ state.aws.s3.bucket-name.arn }}`
+5. Resource state: `{{ resources.aws.s3.bucket.my-bucket.arn }}`
 
 **Branch-based resource control:**
 
@@ -188,9 +188,9 @@ Dependencies are **automatically extracted** from template references:
 // Lambda depends on S3 bucket and IAM role
 lambda: {
   "my-function": {
-    role: "{{ state.aws.iamRole.lambda-role.arn }}",  // dependency
+    role: "{{ resources.aws.iam.role.lambda-role.arn }}",  // dependency
     code: {
-      s3Bucket: "{{ state.aws.s3.my-bucket.name }}"   // dependency
+      s3Bucket: "{{ resources.aws.s3.bucket.my-bucket.name }}"   // dependency
     }
   }
 }
@@ -226,7 +226,7 @@ State stores:
 - **Golde**: Managed infrastructure (Docker containers, static sites)
 - **Hetzner Cloud**: Servers (schema only)
 - **Docker Hub**: Image management
-- **Slack**: Notifications and outputs
+- **Slack**: Notification hooks (`on` lifecycle events)
 
 ## Important Implementation Notes
 
@@ -250,14 +250,14 @@ The CLI and agent packages use **Deno** (not Node.js):
 ```bash
 # CLI tests
 cd packages/cli
-deno test --allow-env --allow-read --allow-run
+deno test --allow-env --allow-read --allow-run --allow-sys --allow-write
 
 # Agent tests
 cd packages/agent
 deno test --allow-env --allow-read --allow-run
 
 # Test specific file
-deno test --allow-env --allow-read --allow-run --filter "test name"
+deno test --allow-env --allow-read --allow-run --allow-sys --allow-write --filter "test name"
 ```
 
 ### Common Compilation/Build Tasks
