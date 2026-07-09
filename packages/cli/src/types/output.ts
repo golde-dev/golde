@@ -1,5 +1,4 @@
-import type { SlackOutputConfig } from "@/slack/types.ts";
-
-export interface Outputs {
-	slack?: SlackOutputConfig;
-}
+/**
+ * Named output values, resolved against resource state after apply
+ */
+export type Outputs = Record<string, string>;

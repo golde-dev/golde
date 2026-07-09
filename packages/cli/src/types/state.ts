@@ -38,4 +38,15 @@ export abstract class AbstractStateClient {
     state: Change[],
     locks: Lock[],
   ): Promise<State>;
+
+  public abstract getOutputs(
+    project: string,
+    branch: string,
+  ): Promise<Record<string, string>>;
+
+  public abstract saveOutputs(
+    project: string,
+    branch: string,
+    outputs: Record<string, string>,
+  ): Promise<void>;
 }

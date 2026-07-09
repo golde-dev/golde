@@ -113,6 +113,30 @@ export class FSStateClient implements AbstractStateClient {
   }
 
   /**
+   * Get outputs file path for a branch
+   */
+  private getOutputsPath(branch: string) {
+    return join(this.path, `${slugify(branch)}.outputs.json`);
+  }
+
+  public getOutputs(_: string, branch: string): Promise<Record<string, string>> {
+    const path = this.getOutputsPath(branch);
+    if (!existsSync(path)) {
+      return Promise.resolve({});
+    }
+    return Promise.resolve(readJSON<Record<string, string>>(path));
+  }
+
+  public saveOutputs(
+    _: string,
+    branch: string,
+    outputs: Record<string, string>,
+  ): Promise<void> {
+    writeJSON(this.getOutputsPath(branch), outputs);
+    return Promise.resolve();
+  }
+
+  /**
    * Get locks for a branch
    */
   private getStateLockPath(branch: string) {

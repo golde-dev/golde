@@ -4,6 +4,7 @@ import type { ManagedConfig } from "../config.ts";
 import type { Unit } from "@/types/plan.ts";
 import { get, isArray, isPlainObject, isString } from "es-toolkit/compat";
 import type { Config } from "@/types/config.ts";
+import type { RunInfo } from "@/hooks/types.ts";
 import type { Resource, SavedResource } from "@/types/dependencies.ts";
 import { matchStatePath } from "@/dependencies.ts";
 import { existsSync, readFileSync } from "node:fs";
@@ -213,6 +214,40 @@ export const fileTemplate = (value: string): string => {
       fileName,
     );
   }
+};
+
+const outputsRe = new RegExp(/(?<=outputs\.)(.*)/);
+
+export const outputsTemplate =
+  (outputs: Record<string, string>) => (value: string): string => {
+    const match = outputsRe.exec(value.trim());
+    if (!match) {
+      return originalTemplateString(value);
+    }
+    const [outputName] = match;
+    const outputValue = outputs[outputName];
+    if (outputValue === undefined) {
+      return originalTemplateString(value);
+    }
+    return outputValue;
+  };
+
+const runRe = new RegExp(/(?<=run\.)(.*)/);
+
+export const runTemplate = (run: RunInfo) => (value: string): string => {
+  const match = runRe.exec(value.trim());
+  if (!match) {
+    return originalTemplateString(value);
+  }
+  const [variableName] = match;
+  if (variableName === "status" || variableName === "command" ||
+    variableName === "duration" || variableName === "changes") {
+    return run[variableName];
+  }
+  if (variableName === "error" && run.error !== undefined) {
+    return run.error;
+  }
+  return originalTemplateString(value);
 };
 
 const resourcesRe = new RegExp(/(?<=resources.)(.*)/);
