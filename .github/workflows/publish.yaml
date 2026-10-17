@@ -68,10 +68,20 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: yarn run version
 
+    # lerna version tags HEAD only when it cut a release, merges without changes have no tag
+    - name: Check release
+      id: release
+      run: |
+        tag=$(git tag --points-at HEAD --list 'v*' | head -n 1)
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        if [ -z "$tag" ]; then echo "No new version, skipping build and publish"; fi
+
     - name: Build
+      if: steps.release.outputs.tag != ''
       run: yarn run dist
 
     - name: Publish
+      if: steps.release.outputs.tag != ''
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
