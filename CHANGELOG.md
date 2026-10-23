@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/golde-dev/golde/compare/v0.6.0...v0.6.1) (2026-10-23)
+
+### Bug Fixes
+
+* **cli:** prune GHCR versions of org images and publish CLI binaries again ([4fa00b1](https://github.com/golde-dev/golde/commit/4fa00b1da3946ec1bdcdfbec5a85a78405e4e952)) - by @chyzwar
+
 ## [0.6.0](https://github.com/golde-dev/golde/compare/v0.5.0...v0.6.0) (2026-05-16)
 
 ### Features
