@@ -25,8 +25,6 @@ const { values: { dev } } = parseArgs({
   },
 });
 
-const publicRegistry = "https://registry.npmjs.org/";
-
 const packages = [
   "cli",
   "cli-linux-x64",
@@ -141,20 +139,13 @@ async function updateLocalCLI(): Promise<void> {
 async function uploadToS3() {
   logger.info("[Publish][CLI] Publishing CLI to S3 bucket");
 
-  const endpoint = env.S3_ENDPOINT;
-  if (!endpoint) {
-    logger.error("[Publish][CLI] S3 endpoint not found skipping upload");
-    return;
-  }
-  const accessKeyId = env.S3_ACCESS_KEY_ID;
-  if (!accessKeyId) {
-    logger.error("[Publish][CLI] S3 access key id not found skipping upload");
-    return;
-  }
-  const secretAccessKey = env.S3_SECRET_ACCESS_KEY;
-  if (!secretAccessKey) {
-    logger.error("[Publish][CLI] S3 secret access key not found skipping upload");
-    return;
+  const {
+    S3_ENDPOINT: endpoint,
+    S3_ACCESS_KEY_ID: accessKeyId,
+    S3_SECRET_ACCESS_KEY: secretAccessKey,
+  } = env;
+  if (!endpoint || !accessKeyId || !secretAccessKey) {
+    throw new Error("[Publish][CLI] S3_ENDPOINT, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required");
   }
   const client = new S3Client({
     region: "auto",
@@ -178,7 +169,7 @@ async function uploadToS3() {
   for (const version of versions) {
     const binary = readFileSync(`./dist/bin/${version}`);
     const cliBinaryCommand = new PutObjectCommand({
-      Bucket: "mapka-download",
+      Bucket: "golde-download",
       Key: version,
       Body: binary,
     });
@@ -201,26 +192,25 @@ async function publishProd() {
   await publishNPMPackages(
     packages,
   );
+  await uploadReleaseArtifacts();
+  await uploadToS3();
 
   await sleep(20_000)
 
   await prodUpdateExamples(
     examples,
   );
-  await uploadToS3();
   await commitExamplesChanges();
-  await uploadReleaseArtifacts();
 }
 
 async function publishDev() {
   logger.info("[Publish][CLI] Publishing locally");
   await devUpdateExamples(examples);
   await updateLocalCLI();
-  await uploadToS3();
 }
 
 if (dev) {
-  publishDev();
+  await publishDev();
 } else {
-  publishProd();
+  await publishProd();
 }
