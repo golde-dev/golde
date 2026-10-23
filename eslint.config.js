@@ -11,6 +11,7 @@ export default tsEslint.config(
       "**/.astro",
       "**/.next",
       "**/.yarn",
+      "examples",
       "packages/agent", 
       "packages/cli",
     ],
