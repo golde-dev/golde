@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.4](https://github.com/golde-dev/golde/compare/v0.6.3...v0.6.4) (2026-10-23)
+
+### Bug Fixes
+
+* **cli:** list GHCR package versions once per run ([9006faf](https://github.com/golde-dev/golde/commit/9006faf24b16610200fc5ab3762e9171c8685753)) - by @chyzwar
+
 ## [0.6.3](https://github.com/golde-dev/golde/compare/v0.6.2...v0.6.3) (2026-10-23)
 
 ### Bug Fixes
