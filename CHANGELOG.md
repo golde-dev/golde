@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.3](https://github.com/golde-dev/golde/compare/v0.6.2...v0.6.3) (2026-10-23)
+
+### Bug Fixes
+
+* **cli:** bundle configs with the Deno esbuild build in the compiled CLI ([fbec78a](https://github.com/golde-dev/golde/commit/fbec78a6d47d183ba427a8f300143f10f1be8fad)) - by @chyzwar
+
 ## [0.6.2](https://github.com/golde-dev/golde/compare/v0.6.1...v0.6.2) (2026-10-23)
 
 ### Bug Fixes
