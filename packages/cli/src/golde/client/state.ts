@@ -105,6 +105,48 @@ export class StateClient extends GoldeClientBase implements AbstractStateClient 
     }
   }
 
+  public async getOutputs(project: string, branch: string): Promise<Record<string, string>> {
+    const query = new URLSearchParams({ branch }).toString();
+    logger.debug({ project, branch }, "[Golde] fetching outputs");
+    try {
+      const outputs = await this.makeRequest<Record<string, string>>(
+        `/projects/${project}/outputs?${query}`,
+        "GET",
+      );
+      return outputs ?? {};
+    } catch (e) {
+      if (e instanceof GoldeError) {
+        logger.error(e.cause, "Golde failed to get outputs");
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Outputs endpoint is not deployed on all golde servers yet,
+   * failure to save outputs must not fail the apply
+   */
+  public async saveOutputs(
+    project: string,
+    branch: string,
+    outputs: Record<string, string>,
+  ): Promise<void> {
+    logger.debug({ project, branch }, "[Golde] saving outputs");
+    try {
+      await this.makeRequest(
+        `/projects/${project}/outputs`,
+        "PUT",
+        { branch, outputs },
+      );
+    } catch (e) {
+      if (e instanceof GoldeError) {
+        logger.warn(e.cause, "[Golde] Outputs endpoint unavailable, skipping outputs save");
+        return;
+      }
+      throw e;
+    }
+  }
+
   public async createLock(
     project: string,
     branch: string,

@@ -1,5 +1,12 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { configTemplate, gitTemplate, resolveTemplate, resolveUnitState } from "../template.ts";
+import {
+  configTemplate,
+  gitTemplate,
+  outputsTemplate,
+  resolveTemplate,
+  resolveUnitState,
+  runTemplate,
+} from "../template.ts";
 import { ConfigError } from "../../error.ts";
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
@@ -7,6 +14,7 @@ import { Type } from "@/types/plan.ts";
 import type { GitInfo } from "../git.ts";
 import type { CreateUnit } from "@/types/plan.ts";
 import type { ResourceConfig, ResourceState } from "@/types/config.ts";
+import type { RunInfo } from "@/hooks/types.ts";
 
 describe("resolveTemplate", () => {
   it(
@@ -163,6 +171,87 @@ describe("resolveTemplate", () => {
       "boolean": true,
     };
     assertEquals(resolveTemplate(input, configTemplate(managedConfig)), expected);
+  });
+});
+
+describe("outputsTemplate", () => {
+  const outputs = {
+    apiUrl: "https://api.example.com",
+    bucketArn: "arn:aws:s3:::assets",
+  };
+
+  it("should resolve output references", () => {
+    assertEquals(
+      resolveTemplate("{{ outputs.apiUrl }}", outputsTemplate(outputs)),
+      "https://api.example.com",
+    );
+  });
+
+  it("should resolve output references nested in strings", () => {
+    assertEquals(
+      resolveTemplate(
+        "Deployed to {{ outputs.apiUrl }} ({{ outputs.bucketArn }})",
+        outputsTemplate(outputs),
+      ),
+      "Deployed to https://api.example.com (arn:aws:s3:::assets)",
+    );
+  });
+
+  it("should keep the original template for missing outputs", () => {
+    assertEquals(
+      resolveTemplate("{{ outputs.missing }}", outputsTemplate(outputs)),
+      "{{ outputs.missing }}",
+    );
+  });
+
+  it("should keep the original template for other prefixes", () => {
+    assertEquals(
+      resolveTemplate("{{ git.BRANCH_NAME }}", outputsTemplate(outputs)),
+      "{{ git.BRANCH_NAME }}",
+    );
+  });
+});
+
+describe("runTemplate", () => {
+  const run: RunInfo = {
+    status: "success",
+    command: "apply",
+    duration: "1.2s",
+    changes: "3 created, 1 updated",
+  };
+
+  it("should resolve run variables", () => {
+    assertEquals(
+      resolveTemplate(
+        "{{ run.status }} {{ run.command }} in {{ run.duration }}: {{ run.changes }}",
+        runTemplate(run),
+      ),
+      "success apply in 1.2s: 3 created, 1 updated",
+    );
+  });
+
+  it("should resolve run.error when present", () => {
+    assertEquals(
+      resolveTemplate(
+        "{{ run.error }}",
+        runTemplate({ ...run, status: "failure", error: "boom" }),
+      ),
+      "boom",
+    );
+  });
+
+  it("should keep the original template for absent run.error", () => {
+    assertEquals(
+      resolveTemplate("{{ run.error }}", runTemplate(run)),
+      "{{ run.error }}",
+    );
+  });
+
+  it("should keep the original template for unknown run variables", () => {
+    assertEquals(
+      resolveTemplate("{{ run.unknown }}", runTemplate(run)),
+      "{{ run.unknown }}",
+    );
   });
 });
 

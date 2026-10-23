@@ -6,11 +6,11 @@ import { tagsSchema } from "./utils/tags.ts";
 import { awsCredentialsSchema, awsResourcesConfigSchema } from "./aws/schema.ts";
 import { goldeCredentialsSchema, goldeResourcesConfigSchema } from "./golde/schema.ts";
 import { githubCredentialsSchema, githubResourcesConfigSchema } from "./github/schema.ts";
-import { slackCredentialsSchema, slackOutputsSchema } from "@/slack/schema.ts";
+import { slackCredentialsSchema } from "@/slack/schema.ts";
 import { hcloudCredentialsSchema, hcloudResourcesConfigSchema } from "./hcloud/schema.ts";
 import { cloudflareCredentialsSchema, cloudflareResourcesConfigSchema} from "./cloudflare/schema.ts";
+import { onSchema } from "./hooks/schema.ts";
 import type { Config, ProvidersConfig, Resources } from "./types/config.ts";
-import type { Outputs } from "@/types/output.ts";
 
 export const projectNameSchema = z
   .string()
@@ -29,9 +29,10 @@ export const providersSchema =  implement<ProvidersConfig>().with({
     slack: slackCredentialsSchema.optional(),
   })
 
-export const outputsSchema = implement<Outputs>().with({
-  slack: slackOutputsSchema.optional(),
-});
+export const outputsSchema = z.record(
+  z.string(),
+  z.string().describe("Output value template"),
+);
 
 export const resourcesSchema = implement<Resources>().with({
   aws: awsResourcesConfigSchema.optional(),
@@ -48,6 +49,7 @@ export const schema = implement<Config>().with({
   providers: providersSchema.optional(),
   resources: resourcesSchema.optional(),
   outputs: outputsSchema.optional(),
+  on: onSchema.optional(),
 }).strict();
 
 export function validateConfig(config: unknown): Config {

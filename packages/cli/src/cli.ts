@@ -9,7 +9,9 @@ import { confirmExecutePlan, executePlan, printChanges, updateState } from "./ap
 import { getBranchName, verifyInstalled } from "./utils/git.ts";
 import { getExternalResources } from "./dependencies.ts";
 import { lockDependencies, releaseLocks } from "./lock.ts";
-import { createOutputs } from "./output.ts";
+import { buildRunInfo, formatOutputs, persistOutputs, printOutputs, resolveOutputs } from "./output.ts";
+import { dispatchHooks } from "./hooks/dispatch.ts";
+import { applyChangeSet } from "./state/utils/apply.ts";
 import { configure } from "./configure.ts";
 import { initExecutionContext } from "./asyncStorage.ts";
 import { exit } from "node:process";
@@ -18,6 +20,7 @@ import {
   createDestroyPlan,
   createPlan,
   filterExecutionUnits,
+  hasChanges,
   printPlan,
   validatePlan,
 } from "./plan.ts";
@@ -92,6 +95,10 @@ program
 
       logger.info(`[Config] current config for ${branchName}`);
       printConfig(finalConfig);
+      printOutputs(resolveOutputs(config.outputs, [
+        ...(context.previousResources ?? []),
+        ...external,
+      ]));
       exit(0);
     },
   );
@@ -122,6 +129,52 @@ program
       );
 
       logger.info(previousState, `[State] Current state for ${branchName}`);
+      exit(0);
+    },
+  );
+
+program
+  .command("output")
+  .description("Show output values from the last apply")
+  .argument("[name]", "print a single output value")
+  .option("-l, --logLevel <level>", "define log level", "warn")
+  .option("-c, --config <config>", "location of config file")
+  .option("-j, --json", "print outputs as JSON")
+  .action(
+    async (
+      name: string | undefined,
+      {
+        logLevel,
+        json,
+        config,
+      }: {
+        logLevel: Level;
+        config: string;
+        json: boolean;
+      },
+    ) => {
+      logger.configure(logLevel, false);
+
+      const branchName = getBranchName();
+      const loadedConfig = await getConfig(branchName, config);
+      const context = await initializeContext(branchName, loadedConfig);
+
+      const outputs = await context.state.getOutputs(loadedConfig.name, branchName);
+
+      if (name) {
+        const value = outputs[name];
+        if (value) {
+          logger.error(`[Output] Unknown output: ${name}`);
+          exit(1);
+        }
+        console.log(value);
+      } else if (json) {
+        console.log(JSON.stringify(outputs, null, 2));
+      } else {
+        for (const line of formatOutputs(outputs)) {
+          console.log(line);
+        }
+      }
       exit(0);
     },
   );
@@ -195,6 +248,7 @@ program
       initExecutionContext({ ignoreAlreadyDeleted, ignoreAlreadyCreated });
 
       const branchName = getBranchName();
+      const started = performance.now();
 
       const config = await getConfig(branchName, configPath);
       const context = await initializeContext(branchName, config, yes);
@@ -208,17 +262,38 @@ program
       validatePlan(finalPlan);
       printPlan(finalPlan);
 
+      const previousResources = context.previousResources ?? [];
+
       const locks = await lockDependencies(context, finalPlan, external);
       const executionUnits = filterExecutionUnits(finalPlan);
 
       const shouldExecute = yes || (await confirmExecutePlan());
 
       if (shouldExecute) {
-        const changes = await executePlan(initialPlan, executionUnits);
-        printChanges(changes);
+        try {
+          const changes = await executePlan(initialPlan, executionUnits);
+          printChanges(changes);
 
-        const state = await updateState(context, changes, locks);
-        createOutputs(context, state);
+          await updateState(context, changes, locks);
+          await persistOutputs(context, {});
+          await dispatchHooks(
+            context,
+            ["destroy"],
+            buildRunInfo("destroy", "success", started, changes),
+            {},
+            [...applyChangeSet(previousResources, changes), ...external],
+          );
+        } catch (error) {
+          await dispatchHooks(
+            context,
+            ["failure"],
+            buildRunInfo("destroy", "failure", started, [], error),
+            {},
+            [...previousResources, ...external],
+          );
+          await releaseLocks(context, locks);
+          exit(1);
+        }
       }
       await releaseLocks(context, locks);
       exit(0);
@@ -311,18 +386,36 @@ program
       initExecutionContext({ ignoreAlreadyDeleted, ignoreAlreadyCreated });
 
       const branchName = getBranchName();
+      const started = performance.now();
 
       const config = await getConfig(branchName, configPath);
       const context = await initializeContext(branchName, config, yes);
 
-      const initialPlan = await createPlan(context);
+      const initialPlan = await createPlan(context, { exitOnNoChanges: false });
       const external = await getExternalResources(context, initialPlan);
 
       const finalContext = await getFinalContext(context, external);
-      const finalPlan = await createPlan(finalContext);
+      const finalPlan = await createPlan(finalContext, { exitOnNoChanges: false });
 
       validatePlan(finalPlan);
       printPlan(finalPlan);
+
+      const previousResources = context.previousResources ?? [];
+
+      if (!hasChanges(finalPlan)) {
+        const resources = [...previousResources, ...external];
+        const outputs = resolveOutputs(context.config.outputs, resources);
+        printOutputs(outputs);
+        await persistOutputs(context, outputs);
+        await dispatchHooks(
+          context,
+          ["unchanged"],
+          buildRunInfo("apply", "success", started, []),
+          outputs,
+          resources,
+        );
+        exit(0);
+      }
 
       const locks = await lockDependencies(context, finalPlan, external);
       const executionUnits = filterExecutionUnits(finalPlan);
@@ -330,11 +423,34 @@ program
       const shouldExecute = yes || (await confirmExecutePlan());
 
       if (shouldExecute) {
-        const changes = await executePlan(initialPlan, executionUnits);
-        printChanges(changes);
+        try {
+          const changes = await executePlan(initialPlan, executionUnits);
+          printChanges(changes);
 
-        const state = await updateState(context, changes, locks);
-        createOutputs(context, state);
+          await updateState(context, changes, locks);
+
+          const resources = [...applyChangeSet(previousResources, changes), ...external];
+          const outputs = resolveOutputs(context.config.outputs, resources);
+          printOutputs(outputs);
+          await persistOutputs(context, outputs);
+          await dispatchHooks(
+            context,
+            ["success", "changed"],
+            buildRunInfo("apply", "success", started, changes),
+            outputs,
+            resources,
+          );
+        } catch (error) {
+          await dispatchHooks(
+            context,
+            ["failure"],
+            buildRunInfo("apply", "failure", started, [], error),
+            {},
+            [...previousResources, ...external],
+          );
+          await releaseLocks(context, locks);
+          exit(1);
+        }
       }
       await releaseLocks(context, locks);
       exit(0);

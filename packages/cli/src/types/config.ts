@@ -4,6 +4,7 @@ import type { GoldeClientConfig, GoldeResourcesConfig } from "../golde/types.ts"
 import type { HCloudCredentials, HCloudResourcesConfig } from "../hcloud/types.ts";
 import type { StateConfig } from "../state/types.ts";
 import type { Outputs } from "./output.ts";
+import type { On } from "../hooks/types.ts";
 import type { SlackCredentials } from "../slack/types.ts";
 import type { ResourceDependency } from "./dependencies.ts";
 import type { GithubCredentials, GithubResourcesConfig } from "../github/types.ts";
@@ -94,9 +95,14 @@ export type Config = {
   state?: StateConfig;
 
   /**
-   * Config for golde outputs
+   * Named output values resolved from resource state after apply
    */
   outputs?: Outputs;
+
+  /**
+   * Lifecycle hooks triggered by apply/destroy events
+   */
+  on?: On;
 };
 
 export interface ConfigLock {

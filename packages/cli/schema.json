@@ -791,26 +791,67 @@
     },
     "outputs": {
       "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "description": "Output value template"
+      }
+    },
+    "on": {
+      "type": "object",
       "properties": {
-        "slack": {
-          "type": "object",
-          "properties": {
-            "channel": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "object",
-                  "propertyNames": {
+        "success": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "discord": {
+                    "type": "object",
+                    "properties": {
+                      "webhook": {
+                        "type": "string",
+                        "description": "Discord webhook URL"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "webhook",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
                     "type": "string"
                   },
-                  "additionalProperties": {
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "discord"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slack": {
                     "type": "object",
                     "properties": {
                       "channel": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Slack channel"
                       },
                       "text": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Message template"
                       }
                     },
                     "required": [
@@ -818,19 +859,656 @@
                       "text"
                     ],
                     "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
                   }
-                }
+                },
+                "required": [
+                  "slack"
+                ],
+                "additionalProperties": false
               },
-              "required": [
-                "message"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "channel"
-          ],
-          "additionalProperties": false
+              {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "Webhook URL"
+                      },
+                      "method": {
+                        "description": "HTTP method, defaults to POST",
+                        "type": "string"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "body": {
+                        "description": "Body template, defaults to a JSON payload",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "webhook"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "failure": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "discord": {
+                    "type": "object",
+                    "properties": {
+                      "webhook": {
+                        "type": "string",
+                        "description": "Discord webhook URL"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "webhook",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "discord"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slack": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "type": "string",
+                        "description": "Slack channel"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "slack"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "Webhook URL"
+                      },
+                      "method": {
+                        "description": "HTTP method, defaults to POST",
+                        "type": "string"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "body": {
+                        "description": "Body template, defaults to a JSON payload",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "webhook"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "discord": {
+                    "type": "object",
+                    "properties": {
+                      "webhook": {
+                        "type": "string",
+                        "description": "Discord webhook URL"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "webhook",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "discord"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slack": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "type": "string",
+                        "description": "Slack channel"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "slack"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "Webhook URL"
+                      },
+                      "method": {
+                        "description": "HTTP method, defaults to POST",
+                        "type": "string"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "body": {
+                        "description": "Body template, defaults to a JSON payload",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "webhook"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "unchanged": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "discord": {
+                    "type": "object",
+                    "properties": {
+                      "webhook": {
+                        "type": "string",
+                        "description": "Discord webhook URL"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "webhook",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "discord"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slack": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "type": "string",
+                        "description": "Slack channel"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "slack"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "Webhook URL"
+                      },
+                      "method": {
+                        "description": "HTTP method, defaults to POST",
+                        "type": "string"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "body": {
+                        "description": "Body template, defaults to a JSON payload",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "webhook"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "destroy": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "discord": {
+                    "type": "object",
+                    "properties": {
+                      "webhook": {
+                        "type": "string",
+                        "description": "Discord webhook URL"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "webhook",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "discord"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slack": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "type": "string",
+                        "description": "Slack channel"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "slack"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "Webhook URL"
+                      },
+                      "method": {
+                        "description": "HTTP method, defaults to POST",
+                        "type": "string"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "body": {
+                        "description": "Body template, defaults to a JSON payload",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "webhook"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "prune": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "discord": {
+                    "type": "object",
+                    "properties": {
+                      "webhook": {
+                        "type": "string",
+                        "description": "Discord webhook URL"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "webhook",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "discord"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slack": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "type": "string",
+                        "description": "Slack channel"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "Message template"
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "slack"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "Webhook URL"
+                      },
+                      "method": {
+                        "description": "HTTP method, defaults to POST",
+                        "type": "string"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "body": {
+                        "description": "Body template, defaults to a JSON payload",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "branchPattern": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "webhook"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
         }
       },
       "additionalProperties": false

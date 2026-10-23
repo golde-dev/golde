@@ -15,6 +15,9 @@ const getStateKey = (projectName: string, branch: string) =>
 const getLockKey = (projectName: string, branch: string) =>
   `projects/${projectName}/${slugify(branch)}.lock.json`;
 
+const getOutputsKey = (projectName: string, branch: string) =>
+  `projects/${projectName}/${slugify(branch)}.outputs.json`;
+
 export interface S3StateConfig {
   bucket: string;
   region: string;
@@ -130,6 +133,21 @@ export class S3StateClient implements AbstractStateClient {
 
     await this.saveResources(project, branch, updatedResources);
     return resourcesToState(updatedResources);
+  }
+
+  public async getOutputs(project: string, branch: string): Promise<Record<string, string>> {
+    const outputs = await notFoundAsUndefined(
+      this.s3.getJSONObject<Record<string, string>>(this.bucket, getOutputsKey(project, branch)),
+    );
+    return outputs ?? {};
+  }
+
+  public async saveOutputs(
+    project: string,
+    branch: string,
+    outputs: Record<string, string>,
+  ): Promise<void> {
+    await this.s3.putJSONObject(this.bucket, getOutputsKey(project, branch), outputs);
   }
 
   public createLock(

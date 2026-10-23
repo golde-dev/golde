@@ -3,7 +3,6 @@ import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
 import { sortByPath } from "@/plan.ts";
-import { exit } from "node:process";
 import { chunk, get } from "es-toolkit/compat";
 import { hasResolved, resolveUnitState } from "./utils/template.ts";
 import type { Context } from "./types/context.ts";
@@ -239,7 +238,7 @@ export async function executePlanRecursively(
     if (error instanceof Error) {
       logger.error(`[Execute] Failed to execute plan: ${error.message}`);
     }
-    return exit(1);
+    throw error;
   }
 }
 
@@ -296,7 +295,7 @@ export async function updateState(
     if (error instanceof Error) {
       logger.error(`[Apply] Failed to update state: ${error.message}`);
     }
-    exit(1);
+    throw error;
   }
 }
 
