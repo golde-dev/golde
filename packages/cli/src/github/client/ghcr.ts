@@ -12,9 +12,13 @@ interface PackageVersion {
   };
 }
 
+type TagIndex = Map<string, number>;
+
 const PAGE_SIZE = 100;
 
 export class GhcrClient extends GithubClientBase {
+  private tagIndexes?: Map<string, Promise<TagIndex>>;
+
   /**
    * Image names are `<owner>/<package>`; packages of other owners are reachable only through their org.
    */
@@ -27,26 +31,43 @@ export class GhcrClient extends GithubClientBase {
     return `${scope}/packages/container/${encodeURIComponent(rest.join("/"))}`;
   }
 
-  private async findPackageVersion(
-    imageName: string,
-    tag: string,
-  ): Promise<PackageVersion | undefined> {
+  private async fetchTagIndex(imageName: string): Promise<TagIndex> {
     const errorMessage = `[GitHub] failed to list package versions for ${imageName}`;
     const path = `${this.packagePath(imageName)}/versions`;
+    const index: TagIndex = new Map();
     try {
       for (let page = 1;; page++) {
         const versions = await this.api
           .get(path, { searchParams: { per_page: PAGE_SIZE, page } })
           .json<PackageVersion[]>();
-          
-        const version = versions.find((v) => v.metadata.container.tags.includes(tag));
-        if (version || versions.length < PAGE_SIZE) {
-          return version;
+
+        for (const { id, metadata } of versions) {
+          for (const tag of metadata.container.tags) {
+            index.set(tag, id);
+          }
+        }
+        if (versions.length < PAGE_SIZE) {
+          return index;
         }
       }
     } catch (error) {
       throw new GithubError(errorMessage, getFetchErrorCause(error));
     }
+  }
+
+  /**
+   * Listed once per package: a maxVersions cleanup deletes hundreds of tags, and GITHUB_TOKEN allows ~1000 requests an hour.
+   */
+  private tagIndex(imageName: string): Promise<TagIndex> {
+    this.tagIndexes ??= new Map();
+    const cached = this.tagIndexes.get(imageName);
+    if (cached) {
+      return cached;
+    }
+    const index = this.fetchTagIndex(imageName);
+    this.tagIndexes.set(imageName, index);
+    index.catch(() => this.tagIndexes?.delete(imageName));
+    return index;
   }
 
   public async packageExists(imageName: string): Promise<boolean> {
@@ -70,7 +91,7 @@ export class GhcrClient extends GithubClientBase {
     tag: string,
   ): Promise<boolean> {
     try {
-      return Boolean(await this.findPackageVersion(imageName, tag));
+      return (await this.tagIndex(imageName)).has(tag);
     } catch (error) {
       if (getErrorStatus(error) === 404) {
         return false;
@@ -85,21 +106,27 @@ export class GhcrClient extends GithubClientBase {
   ): Promise<void> {
     const errorMessage = `[GitHub] failed to delete package version ${imageName}:${tag}`;
     const start = performance.now();
-    const version = await this.findPackageVersion(imageName, tag);
+    const index = await this.tagIndex(imageName);
+    const id = index.get(tag);
 
-    if (!version) {
+    if (!id) {
       throw new GithubError(
         `[GitHub] package version with tag ${tag} not found for package ${imageName}`,
       );
     }
 
     try {
-      await this.api.delete(`${this.packagePath(imageName)}/versions/${version.id}`);
+      await this.api.delete(`${this.packagePath(imageName)}/versions/${id}`);
     } catch (error) {
       throw new GithubError(errorMessage, getFetchErrorCause(error));
     }
+    for (const [versionTag, versionId] of index) {
+      if (versionId === id) {
+        index.delete(versionTag);
+      }
+    }
     logger.debug(
-      `[GitHub][GHCR] Deleted package version ${imageName}:${tag} (id: ${version.id}) in ${
+      `[GitHub][GHCR] Deleted package version ${imageName}:${tag} (id: ${id}) in ${
         formatDuration(performance.now() - start)
       }`,
     );
@@ -114,6 +141,7 @@ export class GhcrClient extends GithubClientBase {
     } catch (error) {
       throw new GithubError(errorMessage, getFetchErrorCause(error));
     }
+    this.tagIndexes?.delete(imageName);
     logger.debug(
       `[GitHub][GHCR] Deleted package ${imageName} in ${formatDuration(performance.now() - start)}`,
     );
