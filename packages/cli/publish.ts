@@ -53,10 +53,19 @@ async function uploadReleaseArtifacts() {
   logger.error(stderr);
 }
 
+async function isPublished(pkg: string): Promise<boolean> {
+  const { stdout } = await $({ reject: false })`npm view @golde/${pkg}@${VERSION} version`;
+  return stdout.trim() === VERSION;
+}
+
 async function publishNPMPackages(
   pkgs: string[],
 ) {
   for (const pkg of pkgs) {
+    if (await isPublished(pkg)) {
+      logger.info(`[Publish][CLI] @golde/${pkg}@${VERSION} already published, skipping`);
+      continue;
+    }
     try {
       const { stdout, stderr } = await $({ cwd: `dist/npm/@golde/${pkg}` })`npm publish --access public`;
       logger.info(stdout);
