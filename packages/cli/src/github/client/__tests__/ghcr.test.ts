@@ -17,12 +17,13 @@ function json(body: unknown, status = 200): Response {
 }
 
 describe("GhcrClient", () => {
-  const client = new GithubClient("chyzwar", "token");
   const requests: string[] = [];
+  let client: GithubClient;
   let route: Route = () => undefined;
   let fetchStub: Stub<typeof globalThis, Parameters<typeof fetch>, Promise<Response>>;
 
   beforeEach(() => {
+    client = new GithubClient("chyzwar", "token");
     requests.length = 0;
     route = () => undefined;
     fetchStub = stub(globalThis, "fetch", (input, init) => {
@@ -78,7 +79,7 @@ describe("GhcrClient", () => {
     expect(await client.packageExists("acme/team/app")).toBe(true);
   });
 
-  it("should page through versions until the tag is found", async () => {
+  it("should page through versions until a short page", async () => {
     route = (url) => {
       const page = Number(url.searchParams.get("page"));
       if (page === 1) {
@@ -93,11 +94,46 @@ describe("GhcrClient", () => {
     expect(requests).toHaveLength(2);
   });
 
-  it("should stop paging at a short page when the tag is missing", async () => {
+  it("should list a package's versions once for every lookup and delete", async () => {
+    route = (_url, method) =>
+      method === "DELETE" ? new Response(null, { status: 204 }) : json([
+        version(1, ["latest"]),
+        version(2, ["old-a"]),
+        version(3, ["old-b"]),
+      ]);
+
+    expect(await client.packageVersionExists("acme/app", "gone")).toBe(false);
+    await client.deletePackageVersion("acme/app", "old-a");
+    await client.deletePackageVersion("acme/app", "old-b");
+
+    expect(requests).toEqual([
+      "GET /orgs/acme/packages/container/app/versions?per_page=100&page=1",
+      "DELETE /orgs/acme/packages/container/app/versions/2",
+      "DELETE /orgs/acme/packages/container/app/versions/3",
+    ]);
+  });
+
+  it("should drop every tag of a deleted version", async () => {
+    route = (_url, method) =>
+      method === "DELETE"
+        ? new Response(null, { status: 204 })
+        : json([version(1, ["old", "old-alias"])]);
+
+    await client.deletePackageVersion("acme/app", "old");
+
+    expect(await client.packageVersionExists("acme/app", "old")).toBe(false);
+    expect(await client.packageVersionExists("acme/app", "old-alias")).toBe(false);
+  });
+
+  it("should list again after a failed listing", async () => {
+    route = () => json({ message: "Server Error" }, 500);
+    await expect(client.packageVersionExists("acme/app", "latest")).rejects.toThrow(
+      "failed to list package versions",
+    );
+
     route = () => json([version(1, ["latest"])]);
 
-    expect(await client.packageVersionExists("acme/app", "wanted")).toBe(false);
-    expect(requests).toHaveLength(1);
+    expect(await client.packageVersionExists("acme/app", "latest")).toBe(true);
   });
 
   it("should report a missing package as not existing", async () => {
