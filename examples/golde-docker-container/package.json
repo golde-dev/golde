@@ -1,6 +1,6 @@
 {
   "name": "@golde/example-golde-docker-container",
-  "packageManager": "yarn@4.5.0",
+  "packageManager": "yarn@4.18.1",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,9 +8,9 @@
     "golde:apply": "golde apply"
   },
   "dependencies": {
-    "fastify": "^5.2.2"
+    "fastify": "^5.12.7"
   },
   "devDependencies": {
-    "@golde/cli": "^0.4.3"
+    "@golde/cli": "^0.6.3"
   }
 }
