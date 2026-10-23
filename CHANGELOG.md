@@ -4,6 +4,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.5](https://github.com/golde-dev/golde/compare/v0.6.4...v0.6.5) (2026-10-23)
+
+### Bug Fixes
+
+* **deps:** keep root eslint out of examples ([37c6321](https://github.com/golde-dev/golde/commit/37c63211ebd85225b1b1ec0f513d8ba502963921)) - by @chyzwar
+* **docs:** provide @emnapi/runtime to @astrojs/astro2tsx ([8f71a47](https://github.com/golde-dev/golde/commit/8f71a4767ea71d600cd5c5dc08e0f37f2e8626dc)) - by @chyzwar
+
 ## [0.6.4](https://github.com/golde-dev/golde/compare/v0.6.3...v0.6.4) (2026-10-23)
 
 ### Bug Fixes
