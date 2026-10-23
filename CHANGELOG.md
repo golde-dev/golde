@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.2](https://github.com/golde-dev/golde/compare/v0.6.1...v0.6.2) (2026-10-23)
+
+### Bug Fixes
+
+* **cli:** skip npm packages already published at the release version ([2caf29e](https://github.com/golde-dev/golde/commit/2caf29e9803004bcc69c262a65da9fb5da319fe9)) - by @chyzwar
+
 ## [0.6.1](https://github.com/golde-dev/golde/compare/v0.6.0...v0.6.1) (2026-10-23)
 
 ### Bug Fixes
