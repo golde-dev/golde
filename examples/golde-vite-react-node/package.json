@@ -1,26 +1,28 @@
 {
   "name": "@golde/service-vite-react-node",
-  "packageManager": "yarn@4.5.0",
-  "type": "commonjs",
+  "packageManager": "yarn@4.18.1",
+  "type": "module",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "start": "runner start",
-    "lint": "eslint . --ext .ts,.js,.tsx",
-    "lint:fix": "eslint . --ext .ts,.js,.tsx --fix",
-    "build": "tsc --build",
-    "build:watch": "tsc --build --watch --preserveWatchOutput"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build": "yarn workspaces foreach --all run build",
+    "build:watch": "yarn workspace @golde/service-vite-react-node-client run build --watch"
   },
   "devDependencies": {
-    "@chyzwar/eslint-config": "^0.2.24",
-    "@chyzwar/runner": "^0.4.25",
-    "@golde/cli": "^0.4.3",
-    "@types/node": "^20.11.19",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.3"
+    "@chyzwar/runner": "^0.14.2",
+    "@eslint/js": "^10.0.1",
+    "@golde/cli": "^0.6.3",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0"
   }
 }
