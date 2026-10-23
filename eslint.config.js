@@ -7,8 +7,11 @@ export default tsEslint.config(
   ...tsEslint.configs.recommended,
   {
     ignores: [
-      "packages/*/dist",
-      "packages/*/.astro",
+      "**/dist",
+      "**/.astro",
+      "**/.next",
+      "**/.yarn",
+      "examples",
       "packages/agent", 
       "packages/cli",
     ],

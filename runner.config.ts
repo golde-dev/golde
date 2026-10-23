@@ -4,7 +4,7 @@ import {spawn} from "child_process";
 import {rmSync, writeFileSync } from "fs";
 import {debounce} from "es-toolkit";
 import {parseArgs} from 'node:util';
-import { ChildProcessWithoutNullStreams } from 'node:child_process';
+import type { ChildProcessWithoutNullStreams } from 'node:child_process';
 
 const {positionals: [firstPositional]} = parseArgs({
   args: process.argv.slice(3),
