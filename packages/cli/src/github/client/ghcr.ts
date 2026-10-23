@@ -12,7 +12,7 @@ interface PackageVersion {
   };
 }
 
-type TagIndex = Map<string, number>;
+type TagIndex = Map<string, PackageVersion>;
 
 const PAGE_SIZE = 100;
 
@@ -31,27 +31,29 @@ export class GhcrClient extends GithubClientBase {
     return `${scope}/packages/container/${encodeURIComponent(rest.join("/"))}`;
   }
 
-  private async fetchTagIndex(imageName: string): Promise<TagIndex> {
-    const errorMessage = `[GitHub] failed to list package versions for ${imageName}`;
+  private async *listVersions(imageName: string): AsyncGenerator<PackageVersion> {
     const path = `${this.packagePath(imageName)}/versions`;
-    const index: TagIndex = new Map();
-    try {
-      for (let page = 1;; page++) {
-        const versions = await this.api
-          .get(path, { searchParams: { per_page: PAGE_SIZE, page } })
-          .json<PackageVersion[]>();
+    for (let page = 1;; page++) {
+      const versions = await this.api
+        .get(path, { searchParams: { per_page: PAGE_SIZE, page } })
+        .json<PackageVersion[]>();
 
-        for (const { id, metadata } of versions) {
-          for (const tag of metadata.container.tags) {
-            index.set(tag, id);
-          }
-        }
-        if (versions.length < PAGE_SIZE) {
-          return index;
-        }
+      yield* versions;
+      if (versions.length < PAGE_SIZE) {
+        return;
       }
+    }
+  }
+
+  private async fetchTagIndex(imageName: string): Promise<TagIndex> {
+    try {
+      const versions = await Array.fromAsync(this.listVersions(imageName));
+      return new Map(versions.flatMap((v) => v.metadata.container.tags.map((tag) => [tag, v])));
     } catch (error) {
-      throw new GithubError(errorMessage, getFetchErrorCause(error));
+      throw new GithubError(
+        `[GitHub] failed to list package versions for ${imageName}`,
+        getFetchErrorCause(error),
+      );
     }
   }
 
@@ -60,14 +62,11 @@ export class GhcrClient extends GithubClientBase {
    */
   private tagIndex(imageName: string): Promise<TagIndex> {
     this.tagIndexes ??= new Map();
-    const cached = this.tagIndexes.get(imageName);
-    if (cached) {
-      return cached;
-    }
-    const index = this.fetchTagIndex(imageName);
-    this.tagIndexes.set(imageName, index);
-    index.catch(() => this.tagIndexes?.delete(imageName));
-    return index;
+    return this.tagIndexes.getOrInsertComputed(imageName, () => {
+      const index = this.fetchTagIndex(imageName);
+      index.catch(() => this.tagIndexes?.delete(imageName));
+      return index;
+    });
   }
 
   public async packageExists(imageName: string): Promise<boolean> {
@@ -107,26 +106,24 @@ export class GhcrClient extends GithubClientBase {
     const errorMessage = `[GitHub] failed to delete package version ${imageName}:${tag}`;
     const start = performance.now();
     const index = await this.tagIndex(imageName);
-    const id = index.get(tag);
+    const version = index.get(tag);
 
-    if (!id) {
+    if (!version) {
       throw new GithubError(
         `[GitHub] package version with tag ${tag} not found for package ${imageName}`,
       );
     }
 
     try {
-      await this.api.delete(`${this.packagePath(imageName)}/versions/${id}`);
+      await this.api.delete(`${this.packagePath(imageName)}/versions/${version.id}`);
     } catch (error) {
       throw new GithubError(errorMessage, getFetchErrorCause(error));
     }
-    for (const [versionTag, versionId] of index) {
-      if (versionId === id) {
-        index.delete(versionTag);
-      }
+    for (const versionTag of version.metadata.container.tags) {
+      index.delete(versionTag);
     }
     logger.debug(
-      `[GitHub][GHCR] Deleted package version ${imageName}:${tag} (id: ${id}) in ${
+      `[GitHub][GHCR] Deleted package version ${imageName}:${tag} (id: ${version.id}) in ${
         formatDuration(performance.now() - start)
       }`,
     );
