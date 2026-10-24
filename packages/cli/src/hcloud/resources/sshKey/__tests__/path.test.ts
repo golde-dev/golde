@@ -1,5 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect/expect";
+import { describe, expect, it } from "vitest";
 import { BASE_PATH, matchHCloudSSHKey, sshKeyPath } from "../path.ts";
 
 describe("matchHCloudSSHKey", () => {

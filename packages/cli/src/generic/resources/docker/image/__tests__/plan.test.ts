@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "@/types/plan.ts";
 import { createDockerImagesPlanFactory } from "../plan.ts";
 import { createVersionTag } from "../utils.ts";
@@ -24,13 +22,13 @@ let buildVersionCounter = 0;
 
 function createExecutors(): GenericExecutors {
   return {
-    buildDockerImage: spy((_imageName: string, _config: ImageConfig) =>
+    buildDockerImage: vi.fn((_imageName: string, _config: ImageConfig) =>
       Promise.resolve({
         imageId: `sha256:new-image-${++buildVersionCounter}`,
         versionId: `new-version-${buildVersionCounter}`,
       })
     ),
-    createDockerImage: spy((_imageName: string, _imageId: string, _version: string, _config: WithBranch<ImageConfig>) =>
+    createDockerImage: vi.fn((_imageName: string, _imageId: string, _version: string, _config: WithBranch<ImageConfig>) =>
       Promise.resolve({
         version: "new-version",
         imageId: "sha256:new-image",
@@ -38,7 +36,7 @@ function createExecutors(): GenericExecutors {
         config: {} as WithBranch<ImageConfig>,
       })
     ),
-    updateDockerImage: spy((_imageName: string, _imageId: string, _version: string, _config: WithBranch<ImageConfig>, _state: ImageState) =>
+    updateDockerImage: vi.fn((_imageName: string, _imageId: string, _version: string, _config: WithBranch<ImageConfig>, _state: ImageState) =>
       Promise.resolve({
         version: "new-version",
         imageId: "sha256:new-image",
@@ -46,11 +44,11 @@ function createExecutors(): GenericExecutors {
         config: {} as WithBranch<ImageConfig>,
       })
     ),
-    deleteDockerImage: spy(() => Promise.resolve()),
-    deleteDockerImageTag: spy(() => Promise.resolve()),
-    assertCreatePermission: spy(() => Promise.resolve()),
-    assertDeletePermission: spy(() => Promise.resolve()),
-    assertUpdatePermission: spy(() => Promise.resolve()),
+    deleteDockerImage: vi.fn(() => Promise.resolve()),
+    deleteDockerImageTag: vi.fn(() => Promise.resolve()),
+    assertCreatePermission: vi.fn(() => Promise.resolve()),
+    assertDeletePermission: vi.fn(() => Promise.resolve()),
+    assertUpdatePermission: vi.fn(() => Promise.resolve()),
   } as GenericExecutors;
 }
 
@@ -314,7 +312,7 @@ describe("docker image maxVersions", () => {
 
       // Build returns a specific versionId — set it up so it matches an existing version
       const matchingVersion = "existing-hash";
-      executors.buildDockerImage = spy(() =>
+      executors.buildDockerImage = vi.fn(() =>
         Promise.resolve({
           imageId: "sha256:existing",
           versionId: matchingVersion,

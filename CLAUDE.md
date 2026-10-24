@@ -41,7 +41,7 @@ yarn test:agent
 yarn test:cli
 
 # Run a single test by name/pattern
-yarn test "ResourceName"  # Passes as --filter argument to Deno
+yarn test "ResourceName"  # Passes as -t (test name pattern) to Vitest
 ```
 
 ### Linting
@@ -247,17 +247,22 @@ The CLI and agent packages use **Deno** (not Node.js):
 
 ### Running Individual Package Tests
 
+Tests run on Vitest under Deno (`deno run -A npm:vitest run`), not Node: some
+dependencies (e.g. `@deno-library/compress`) use `Deno.*` APIs. `@deno/vite-plugin`
+resolves the `deno.json` import map (`@/`, `jsr:`) for Vite.
+
 ```bash
 # CLI tests
 cd packages/cli
-deno test --allow-env --allow-read --allow-run
+deno task test
 
 # Agent tests
 cd packages/agent
-deno test --allow-env --allow-read --allow-run
+deno task test
 
-# Test specific file
-deno test --allow-env --allow-read --allow-run --filter "test name"
+# Test specific file or test name
+deno task test src/utils/__tests__/template.test.ts
+deno task test -t "test name"
 ```
 
 ### Common Compilation/Build Tasks
@@ -407,9 +412,9 @@ logger.error(error, "[Component] Error message");
 
 ### Testing Conventions
 
-- Tests use Deno's standard testing framework
-- Assertions via `@std/assert` or `@std/expect`
-- Test files named `*_test.ts` or in `__tests__/` directory
+- Tests use Vitest with explicit imports (`import { describe, expect, it, vi } from "vitest"`, no globals)
+- Mocks via `vi.fn()` / `vi.spyOn()`
+- Test files named `*.test.ts` in `__tests__/` directories
 - Mock external API calls (AWS SDK, Cloudflare API, etc.)
 - Use fixtures for test data when appropriate
 

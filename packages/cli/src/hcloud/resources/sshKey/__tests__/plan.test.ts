@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "../../../../types/plan.ts";
 import { createSshKeyPlan } from "../plan.ts";
 import { assertBranch } from "../../../../utils/resource.ts";
@@ -20,9 +18,9 @@ import type {
 import type { WithBranch } from "../../../../types/config.ts";
 
 const executors = {
-  createSshKey: spy(),
-  updateSshKey: spy(),
-  deleteSshKey: spy(),
+  createSshKey: vi.fn(),
+  updateSshKey: vi.fn(),
+  deleteSshKey: vi.fn(),
 } as unknown as Executors;
 
 describe("hcloud ssh key plan", () => {

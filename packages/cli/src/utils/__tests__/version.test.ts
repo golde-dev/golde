@@ -1,6 +1,5 @@
-import { expect } from "@std/expect/expect";
+import { describe, expect, it } from "vitest";
 import { getDirHashVersion, getFileHashVersion } from "../version.ts";
-import { describe, it } from "@std/testing/bdd";
 import { join } from "node:path";
 
 describe("getFileHashVersion", () => {

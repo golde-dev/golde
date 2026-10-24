@@ -1,5 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect/expect";
+import { describe, expect, it } from "vitest";
 import { BASE_PATH, matchS3Bucket, s3BucketPath } from "../path.ts";
 
 describe("matchS3Bucket", () => {

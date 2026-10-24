@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "../../../../../types/plan.ts";
 import { createR2Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "../executor.ts";
@@ -9,9 +7,9 @@ import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../../../types/plan
 import { assertBranch } from "../../../../../utils/resource.ts";
 
 const executors = {
-  createBucket: spy(),
-  deleteBucket: spy(),
-  updateBucket: spy(),
+  createBucket: vi.fn(),
+  deleteBucket: vi.fn(),
+  updateBucket: vi.fn(),
 } as Executors;
 
 describe("cloudflare buckets", () => {
@@ -101,7 +99,7 @@ describe("cloudflare buckets", () => {
       const execution: DeleteUnit<BucketState, DeleteBucket> = {
         type: Type.Delete,
         executor: executors.deleteBucket,
-        args: ["bucket1"],
+        args: ["bucket1", undefined],
         path: "cloudflare.r2.bucket.bucket1",
         state: state.bucket1,
         dependsOn: [],
@@ -143,7 +141,7 @@ describe("cloudflare buckets", () => {
       const deleted: DeleteUnit<BucketState, DeleteBucket> = {
         type: Type.Delete,
         executor: executors.deleteBucket,
-        args: ["bucket1"],
+        args: ["bucket1", undefined],
         path: "cloudflare.r2.bucket.bucket1",
         state: state.bucket1,
         dependsOn: [],

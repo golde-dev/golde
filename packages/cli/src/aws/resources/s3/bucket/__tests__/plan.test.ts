@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "../../../../../types/plan.ts";
 import { createS3Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "../executor.ts";
@@ -12,15 +10,15 @@ import { addDefaultRegion } from "../../../../utils.ts";
 
 const executors = {
   getDefaultRegion: () => "us-east-1",
-  assertBucketExist: spy(),
-  assertBucketNotExist: spy(),
-  assertCreatePermission: spy(),
-  assertDeletePermission: spy(),
-  assertUpdatePermission: spy(),
-  assertBucketNameAvailable: spy(),
-  createBucket: spy(),
-  deleteBucket: spy(),
-  updateBucket: spy(),
+  assertBucketExist: vi.fn(),
+  assertBucketNotExist: vi.fn(),
+  assertCreatePermission: vi.fn(),
+  assertDeletePermission: vi.fn(),
+  assertUpdatePermission: vi.fn(),
+  assertBucketNameAvailable: vi.fn(),
+  createBucket: vi.fn(),
+  deleteBucket: vi.fn(),
+  updateBucket: vi.fn(),
 } as Executors;
 
 describe("aws s3 buckets", () => {

@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "../../../../types/plan.ts";
 import { createZonePlan } from "../plan.ts";
 import type { CreateZone, DeleteZone, Executors, UpdateZone } from "../executor.ts";
@@ -14,9 +12,9 @@ import type {
 import type { WithBranch } from "../../../../types/config.ts";
 
 const executors = {
-  createZone: spy(),
-  updateZone: spy(),
-  deleteZone: spy(),
+  createZone: vi.fn(),
+  updateZone: vi.fn(),
+  deleteZone: vi.fn(),
 } as unknown as Executors;
 
 describe("hcloud zone plan", () => {
