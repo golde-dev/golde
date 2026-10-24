@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Type } from "../../../../../types/plan.ts";
-import { createR2Plan } from "../plan.ts";
+import { createR2DestroyPlan, createR2Plan } from "../plan.ts";
 import type { CreateBucket, DeleteBucket, Executors } from "../executor.ts";
 import type { BucketConfig, BucketState, R2BucketConfig, R2BucketState } from "../types.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit } from "../../../../../types/plan.ts";
@@ -195,6 +195,34 @@ describe("cloudflare buckets", () => {
         dependsOn: [],
       };
       expect(result).toEqual([noop]);
+    });
+  });
+
+  describe("destroy buckets", () => {
+    it("should delete bucket in its jurisdiction", async () => {
+      const state: R2BucketState = {
+        "bucket1": {
+          name: "bucket1",
+          location: "weur",
+          createdAt: "2022-01-01T00:00:00.000Z",
+          dependsOn: [],
+          config: {
+            branch: "master",
+            cfR2Jurisdiction: "eu",
+          },
+        },
+      };
+
+      const deleted: DeleteUnit<BucketState, DeleteBucket> = {
+        type: Type.Delete,
+        executor: executors.deleteBucket,
+        args: ["bucket1", "eu"],
+        path: "cloudflare.r2.bucket.bucket1",
+        state: state.bucket1,
+        dependsOn: [],
+      };
+
+      expect(await createR2DestroyPlan(executors, state)).toEqual([deleted]);
     });
   });
 });
