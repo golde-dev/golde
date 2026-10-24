@@ -6,7 +6,7 @@ import { addDefaultRegion, assertRegion } from "../../../utils.ts";
 import { omitUndefined } from "../../../../utils/object.ts";
 import { cloudwatchLogGroupPath } from "./path.ts";
 import { findResourceDependencies } from "../../../../dependencies.ts";
-import { isConfigEqual } from "@/utils/config.ts";
+import { isConfigEqual } from "#/utils/config.ts";
 import type { Tags } from "../../../../types/config.ts";
 import type { CreateLogGroup, DeleteLogGroup, Executors, UpdateLogGroup } from "./executor.ts";
 import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../../../types/plan.ts";

@@ -1,12 +1,11 @@
-import { logger } from "@/logger.ts";
+import { logger } from "#/logger.ts";
 import { basename, dirname, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
-import { PlanError, PlanErrorCode } from "@/error.ts";
-import { memoizeAsync } from "@/utils/memoize.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
+import { memoizeAsync } from "#/utils/memoize.ts";
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { mkdtemp } from "node:fs/promises";
+import { cp, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { copy } from "@std/fs";
 
 import {
   getDirHashVersion,
@@ -14,7 +13,7 @@ import {
   getGitContextVersion,
   getGitVersion,
   getLastUpdatedVersion,
-} from "@/utils/version.ts";
+} from "#/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 
 async function getVersion(
@@ -101,7 +100,7 @@ async function createFromSource(
       to: toPath,
     }, `[Plan] Object ${name} copying`);
 
-    await copy(fromPath, toPath, { preserveTimestamps: true, overwrite: true});
+    await cp(fromPath, toPath, { recursive: true, preserveTimestamps: true });
     const archivePath = await compress(toPath, name);
     const newVersion = await getVersion(toPath, context, version);
     return [archivePath, newVersion];
@@ -141,7 +140,7 @@ async function createFromIncludes(
           to: toPath,
         }, `Object ${name} copying`);
   
-        await copy(fromPath, toPath, { overwrite: true, preserveTimestamps: true });
+        await cp(fromPath, toPath, { recursive: true, preserveTimestamps: true });
         continue;
       }
 
@@ -153,7 +152,12 @@ async function createFromIncludes(
           from: fromPath,
           to: fileToPath,
         }, `Object ${name} copying`);
-        await copy(fromPath, fileToPath, { preserveTimestamps: true, overwrite: false});
+        await cp(fromPath, fileToPath, {
+          recursive: true,
+          preserveTimestamps: true,
+          force: false,
+          errorOnExist: true,
+        });
         continue;
       }
 
@@ -167,7 +171,12 @@ async function createFromIncludes(
             to: entryToPath,
           }, `Object ${name} copying`);
 
-          await copy(entryFromPath, entryToPath, { preserveTimestamps: true, overwrite: false});
+          await cp(entryFromPath, entryToPath, {
+            recursive: true,
+            preserveTimestamps: true,
+            force: false,
+            errorOnExist: true,
+          });
         }
         continue;
       }

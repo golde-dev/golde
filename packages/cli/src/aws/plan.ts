@@ -23,7 +23,7 @@ import {
 } from "./resources/lambda/function/plan.ts";
 import type { Plan } from "../types/plan.ts";
 import type { Context } from "../types/context.ts";
-import { logger } from "@/logger.ts";
+import { logger } from "#/logger.ts";
 
 export async function createAWSPlan(context: Context): Promise<Plan> {
   logger.debug("[Plan][AWS] Creating plan");

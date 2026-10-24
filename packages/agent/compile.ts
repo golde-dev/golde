@@ -57,6 +57,10 @@ async function compile(target: Target, path: string) {
 
   const args = [
     "compile",
+    // Without these, the whole node_modules (devDependencies and every
+    // target's native bindings) gets embedded into the binary.
+    "--node-modules-dir=none",
+    "--exclude-unused-npm",
     ...perms,
     "--target",
     target,

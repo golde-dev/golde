@@ -1,6 +1,6 @@
 import { ensureAllowedKeys, prefixPath, removePrefix } from "../../../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
-import { PlanError, PlanErrorCode } from "@/error.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
 
 export const BASE_PATH = "aws.s3.bucket";
 

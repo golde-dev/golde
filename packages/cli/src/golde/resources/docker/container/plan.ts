@@ -1,21 +1,21 @@
-import { omitUndefined } from "@/utils/object.ts";
-import { findResourceDependencies } from "@/dependencies.ts";
+import { omitUndefined } from "#/utils/object.ts";
+import { findResourceDependencies } from "#/dependencies.ts";
 import { dockerContainerPath } from "./path.ts";
-import { Type } from "@/types/plan.ts";
-import { logger } from "@/logger.ts";
-import { assertBranch } from "@/utils/resource.ts";
-import { mergeProjectTags } from "@/utils/tags.ts";
-import type { Tags } from "@/types/config.ts";
+import { Type } from "#/types/plan.ts";
+import { logger } from "#/logger.ts";
+import { assertBranch } from "#/utils/resource.ts";
+import { mergeProjectTags } from "#/utils/tags.ts";
+import type { Tags } from "#/types/config.ts";
 import type { Executors } from "./executor.ts";
-import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "@/types/plan.ts";
-import type { ResourceDependency } from "@/types/dependencies.ts";
+import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "#/types/plan.ts";
+import type { ResourceDependency } from "#/types/dependencies.ts";
 import type {
   ContainerConfig,
   ContainersConfig,
   ContainersState,
   ContainerState,
 } from "./types.ts";
-import { isConfigEqual } from "@/utils/config.ts";
+import { isConfigEqual } from "#/utils/config.ts";
 
 function getPrevious(containers: ContainersState = {}) {
   const previous: {

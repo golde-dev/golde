@@ -4,10 +4,10 @@ import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient, State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
+import type { SavedResource } from "#/types/dependencies.ts";
 import { cwd } from "node:process";
 import { join } from "node:path";
-import { resourcesToState } from "@/utils/state.ts";
+import { resourcesToState } from "#/utils/state.ts";
 import { existsSync, readdirSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 

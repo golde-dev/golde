@@ -1,5 +1,5 @@
-import type { ResourceConfig, Tags, WithBranch } from "@/types/config.ts";
-import type { ResourceDependency } from "@/types/dependencies.ts";
+import type { ResourceConfig, Tags, WithBranch } from "#/types/config.ts";
+import type { ResourceDependency } from "#/types/dependencies.ts";
 
 export interface ContainerConfig extends ResourceConfig {
   server: string;

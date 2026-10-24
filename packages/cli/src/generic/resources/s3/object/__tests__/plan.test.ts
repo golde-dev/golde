@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { Type } from "@/types/plan.ts";
+import { Type } from "#/types/plan.ts";
 import { createS3PlanFactory } from "../plan.ts";
 import { createObjectKey } from "../utils.ts";
 import type { GenericExecutors } from "../executor.ts";
 import type { ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "../types.ts";
-import type { WithBranch } from "@/types/config.ts";
+import type { WithBranch } from "#/types/config.ts";
 import type {
   CreateVersionUnit,
   DeleteVersionUnit,
-} from "@/types/plan.ts";
+} from "#/types/plan.ts";
 
 const s3ObjectPath = (name: string) => `aws.s3.object.${name}`;
 

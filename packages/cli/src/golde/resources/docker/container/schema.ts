@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { implement } from "@/utils/zod.ts";
+import { implement } from "#/utils/zod.ts";
 import type { ContainerConfig } from "./types.ts";
-import { branchPatternSchema, branchSchema, transformBranch } from "@/utils/resource.ts";
-import { tagsSchema } from "@/utils/tags.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "#/utils/resource.ts";
+import { tagsSchema } from "#/utils/tags.ts";
 
 export const containerSchema = implement<ContainerConfig>()
   .with({

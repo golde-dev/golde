@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveConfig } from "../config.ts";
+import { getConfigRaw, resolveConfig } from "../config.ts";
 import { getGitInfo, type GitInfo } from "../utils/git.ts";
 import process from "node:process";
+import { join } from "node:path";
 
 describe("resolveConfig", () => {
   process.env.TEST = "test";
@@ -247,6 +248,42 @@ describe("resolveConfig", () => {
           },
         },
       }
+    });
+  });
+});
+
+describe("getConfigRaw", () => {
+  const fixture = (path: string) => join(import.meta.dirname ?? "", "__fixtures__/config", path);
+
+  it("should load a ts config importing a relative module", async () => {
+    expect(await getConfigRaw(fixture("ts/golde.config.ts"))).toEqual({
+      name: "ts_config",
+      providers: {},
+    });
+  });
+
+  it("should load a cjs config", async () => {
+    expect(await getConfigRaw(fixture("cjs/golde.config.cjs"))).toEqual({
+      name: "cjs_config",
+      providers: {},
+    });
+  });
+
+  it("should load a json config", async () => {
+    expect(await getConfigRaw(fixture("json/golde.config.json"))).toEqual({
+      name: "json_config",
+      providers: {},
+    });
+  });
+
+  it("should load yaml and toml configs", async () => {
+    expect(await getConfigRaw(fixture("yaml/golde.yaml"))).toEqual({
+      name: "yaml_config",
+      providers: {},
+    });
+    expect(await getConfigRaw(fixture("toml/golde.toml"))).toEqual({
+      name: "toml_config",
+      providers: {},
     });
   });
 });

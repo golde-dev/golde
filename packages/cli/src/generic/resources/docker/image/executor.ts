@@ -1,11 +1,11 @@
-import { logger } from "@/logger.ts";
+import { logger } from "#/logger.ts";
 import { buildImage, createVersionTag } from "./utils.ts";
-import { nowStringDate } from "@/utils/date.ts";
-import { formatDuration } from "@/utils/duration.ts";
+import { nowStringDate } from "#/utils/date.ts";
+import { formatDuration } from "#/utils/duration.ts";
 import { getIgnoreAlreadyCreated, getIgnoreAlreadyDeleted } from "../../../../asyncStorage.ts";
 import type { DockerClient } from "../../../client/docker.ts";
 import type { ImageConfig, ImageState } from "./types.ts";
-import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
+import type { OmitExecutionContext, WithBranch } from "#/types/config.ts";
 
 export interface RegistryClient {
   packageExists: (packageName: string) => Promise<boolean>;

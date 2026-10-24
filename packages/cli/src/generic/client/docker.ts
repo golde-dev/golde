@@ -1,5 +1,5 @@
-import { logger } from "@/logger.ts";
-import { PlanError, PlanErrorCode } from "@/error.ts";
+import { logger } from "#/logger.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
 import { $ } from "execa";
 
 export interface DockerInfo {

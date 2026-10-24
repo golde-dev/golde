@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { Type } from "@/types/plan.ts";
+import { Type } from "#/types/plan.ts";
 import { createDockerImagesPlanFactory } from "../plan.ts";
 import { createVersionTag } from "../utils.ts";
 import type { GenericExecutors } from "../executor.ts";
 import type { ImageConfig, ImagesConfig, ImagesState, ImageState } from "../types.ts";
-import type { WithBranch } from "@/types/config.ts";
+import type { WithBranch } from "#/types/config.ts";
 import type {
   CreateVersionUnit,
   DeleteVersionUnit,
-} from "@/types/plan.ts";
+} from "#/types/plan.ts";
 
 const dockerImagePath = (name: string) => `github.registry.dockerImage.${name}`;
 

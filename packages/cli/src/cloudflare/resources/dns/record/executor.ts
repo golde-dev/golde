@@ -1,7 +1,7 @@
 import { logger } from "../../../../logger.ts";
 import { formatDuration } from "../../../../utils/duration.ts";
 import { toTagsArray } from "../../../../utils/tags.ts";
-import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
+import type { OmitExecutionContext, WithBranch } from "#/types/config.ts";
 import type { CloudflareClient } from "../../../client/client.ts";
 import { normalizeToArray } from "../../../../utils/array.ts";
 import { getIgnoreAlreadyDeleted } from "../../../../asyncStorage.ts";

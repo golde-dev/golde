@@ -3,7 +3,7 @@ import type { CloudflareResourcesState } from "../cloudflare/types.ts";
 import type { Lock } from "./lock.ts";
 import type { GithubResourcesState } from "../github/types.ts";
 import type { Change } from "./plan.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
+import type { SavedResource } from "#/types/dependencies.ts";
 import type { GoldeResourcesState } from "../golde/types.ts";
 import type { HCloudResourcesState } from "../hcloud/types.ts";
 

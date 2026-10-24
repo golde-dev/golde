@@ -5,12 +5,12 @@ import { isEmpty } from "./utils/object.ts";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseYaml } from "@std/yaml";
 import { ConfigError, ConfigErrorCode } from "./error.ts";
-import { dynamicImport } from "./utils/import.ts";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { getBranchName, getGitInfo, type GitInfo } from "./utils/git.ts";
 import { isPlainObject } from "es-toolkit";
 import { basename, extname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   configTemplate,
   envTemplate,
@@ -27,11 +27,16 @@ const loadConfig = async (
   logger.info(`[Config] Loading config from: ${basename(path)}`);
 
   switch (extname(path)) {
+    case ".json": {
+      const { default: config } = await import(pathToFileURL(resolve(path)).href, {
+        with: { type: "json" },
+      });
+      return config;
+    }
     case ".cjs":
-    case ".json":
     case ".js":
     case ".ts": {
-      const { default: config } = await dynamicImport(path);
+      const { default: config } = await import(pathToFileURL(resolve(path)).href);
       return config;
     }
     case ".toml": {

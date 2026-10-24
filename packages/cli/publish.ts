@@ -1,11 +1,10 @@
 import { exit, loadEnvFile } from "node:process";
 import { VERSION } from "./src/version.ts";
 import { logger } from "./src/logger.ts";
-import { walk } from "@std/fs";
 import { homedir } from "node:os";
-import { basename, join, resolve } from "node:path";
-import { existsSync, readFileSync } from "node:fs";
-import { copy } from "@std/fs/copy";
+import { join, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { cp } from "node:fs/promises";
 import { env } from "node:process";
 import { parseArgs } from "node:util";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -35,12 +34,11 @@ const packages = [
 ];
 
 
-const examples: string[] = [];
-for await (const { path } of walk("../../examples", { maxDepth: 1 })) {
-  if (existsSync(join(path, "package.json"))) {
-    examples.push(basename(path));
-  }
-}
+const examples = readdirSync("../../examples", { withFileTypes: true })
+  .filter((entry) =>
+    entry.isDirectory() && existsSync(join(entry.parentPath, entry.name, "package.json"))
+  )
+  .map((entry) => entry.name);
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -90,13 +88,7 @@ function devUpdateExamples(examples: string[]) {
       const from = resolve(npmDistDir);
       const to = join(exampleBaseDir, example, goldeModules);
 
-      return copy(
-        from,
-        to,
-        {
-          overwrite: true,
-        },
-      );
+      return cp(from, to, { recursive: true });
     }),
   );
 }
@@ -137,11 +129,7 @@ async function updateLocalCLI(): Promise<void> {
   const home = homedir();
   const from = resolve("./dist/bin/cli-linux-x64");
   const to = join(home, ".local/bin/golde");
-  await copy(
-    from,
-    to,
-    { overwrite: true },
-  );
+  await cp(from, to);
 }
 
 

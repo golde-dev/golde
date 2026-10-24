@@ -1,5 +1,5 @@
 import ky, { HTTPError, type KyInstance } from "ky";
-import { logger } from "@/logger.ts";
+import { logger } from "#/logger.ts";
 import { get } from "es-toolkit/compat";
 
 interface FetchErrorCause {

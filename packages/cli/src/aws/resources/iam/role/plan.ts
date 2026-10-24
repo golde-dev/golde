@@ -11,7 +11,7 @@ import { iamRolePath } from "./path.ts";
 import type { CreateRole, DeleteRole, Executors, UpdateRole } from "./executor.ts";
 import { findResourceDependencies } from "../../../../dependencies.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
-import { isConfigEqual } from "@/utils/config.ts";
+import { isConfigEqual } from "#/utils/config.ts";
 
 function getCurrent(roles: IAMRoleState = {}) {
   const previous: {

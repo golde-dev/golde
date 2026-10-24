@@ -1,5 +1,5 @@
-import { PlanError, PlanErrorCode } from "@/error.ts";
-import { prefixPath, removePrefix } from "@/utils/object.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
+import { prefixPath, removePrefix } from "#/utils/object.ts";
 
 export function matchFactory(
   basePath: string,

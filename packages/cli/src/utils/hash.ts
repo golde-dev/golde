@@ -1,6 +1,7 @@
 import { createReadStream } from "node:fs";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { walk } from "@std/fs";
 import { subtle } from "node:crypto";
 import { Buffer } from "node:buffer";
 
@@ -22,18 +23,13 @@ export async function getFileHash(path: string): Promise<Buffer> {
 }
 
 export async function getDirHash(dirPath: string): Promise<Buffer> {
-  const walker = walk(dirPath, {
-    includeFiles: true,
-    includeDirs: false,
-    includeSymlinks: false,
-  });
-  const entries = await Array.fromAsync(
-    walker,
-    (entry) => entry.path,
-  );
+  const entries = await readdir(dirPath, { recursive: true, withFileTypes: true });
 
   const combinedHash = createHash("sha384");
-  const sortedEntries = entries.toSorted();
+  const sortedEntries = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name))
+    .toSorted();
 
   for (const path of sortedEntries) {
     combinedHash.update(await getFileHash(path));

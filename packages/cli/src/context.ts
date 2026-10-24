@@ -10,13 +10,13 @@ import { getGitInfo } from "./utils/git.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { createSlackClient } from "./slack/client/factory.ts";
 import { createGithubClient } from "./github/client/factory.ts";
-import { resolveConfigState } from "@/utils/template.ts";
-import { ConfigError } from "@/error.ts";
-import { resourcesToState } from "@/utils/state.ts";
+import { resolveConfigState } from "#/utils/template.ts";
+import { ConfigError } from "#/error.ts";
+import { resourcesToState } from "#/utils/state.ts";
 import { exit } from "node:process";
 import type { Context } from "./types/context.ts";
 import type { Config } from "./types/config.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
+import type { SavedResource } from "#/types/dependencies.ts";
 
 export const initializeContext = async (
   branchName: string,
