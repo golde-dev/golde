@@ -18,7 +18,6 @@
   "imports": {
     "@/": "./src/",
     "@deno/dnt": "jsr:@deno/dnt@^0.44.0",
-    "@std/fs": "jsr:@std/fs@^1.0.24",
     "@std/yaml": "jsr:@std/yaml@^1.3.0",
     "@std/toml": "jsr:@std/toml@^1.0.11",
     "@deno-library/compress": "jsr:@deno-library/compress@^0.5.6",
