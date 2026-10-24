@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.6](https://github.com/golde-dev/golde/compare/v0.6.5...v0.6.6) (2026-10-24)
+
+### Bug Fixes
+
+* **cli:** pass r2 jurisdiction when destroying buckets ([3d64d1f](https://github.com/golde-dev/golde/commit/3d64d1f07436d375425d1327825953c6978aa849)) - by @chyzwar
+
 ## [0.6.5](https://github.com/golde-dev/golde/compare/v0.6.4...v0.6.5) (2026-10-23)
 
 **Note:** Version bump only for package @golde/cli
