@@ -14,13 +14,14 @@ const { values: { dev } } = parseArgs({
   },
 });
 
+const plat = platform();
+
 if (dev) {
   compileDev();
 } else {
   compileProd();
 }
 
-const plat = platform()
 /**
  * Detect and only compile for current arch
  */
