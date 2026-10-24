@@ -16,8 +16,7 @@
     "test": "deno run -A npm:vitest run"
   },
   "imports": {
-    "@/": "./src/",
-    "esbuild": "https://deno.land/x/esbuild@v0.28.1/mod.js"
+    "@/": "./src/"
   },
   "fmt": {
     "lineWidth": 100
