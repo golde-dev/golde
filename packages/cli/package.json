@@ -38,8 +38,12 @@
     "@aws-sdk/client-route-53": "^3.1155.0",
     "@aws-sdk/client-s3": "^3.1155.0",
     "@aws-sdk/client-sts": "^3.1155.0",
+    "@deno-library/compress": "jsr:^0.5.6",
     "@inquirer/prompts": "^8.7.4",
+    "@luca/esbuild-deno-loader": "jsr:^0.11.1",
     "@sindresorhus/slugify": "^3.0.1",
+    "@std/toml": "jsr:^1.0.11",
+    "@std/yaml": "jsr:^1.3.0",
     "commander": "^15.0.0",
     "es-toolkit": "^1.52.0",
     "execa": "^10.2.0",
@@ -49,6 +53,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@deno/dnt": "jsr:^0.44.0",
     "@deno/vite-plugin": "^2.0.4",
     "vitest": "^5.0.5"
   }
