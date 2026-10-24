@@ -45,7 +45,7 @@ jobs:
     - name: "Setup Deno"
       uses: denoland/setup-deno@v2
       with:
-        deno-version: v2.x
+        deno-version: 2.9.8
         cache: true
 
     - name: Install
