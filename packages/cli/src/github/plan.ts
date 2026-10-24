@@ -1,13 +1,13 @@
 import { PlanError, PlanErrorCode } from "../error.ts";
-import { createDockerImageExecutor } from "@/generic/resources/docker/image/executor.ts";
+import { createDockerImageExecutor } from "#/generic/resources/docker/image/executor.ts";
 import type { Context } from "../types/context.ts";
 import type { Plan } from "../types/plan.ts";
 import { isEmpty } from "../utils/object.ts";
 import {
   createRegistryDockerImageDestroyPlan,
   createRegistryDockerImagePlan,
-} from "@/github/resources/registry/dockerImage/plan.ts";
-import { DockerClient } from "@/generic/client/docker.ts";
+} from "#/github/resources/registry/dockerImage/plan.ts";
+import { DockerClient } from "#/generic/client/docker.ts";
 
 export async function createGithubPlan(context: Context): Promise<Plan> {
   const {

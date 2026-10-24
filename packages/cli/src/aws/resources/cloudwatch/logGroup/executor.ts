@@ -8,7 +8,7 @@ import type { AWSClient } from "../../../client/client.ts";
 import type { WithRegion } from "../../../types.ts";
 import type { LogGroupConfig, LogGroupState } from "./types.ts";
 import { nowStringDate } from "../../../../utils/date.ts";
-import type { OmitExecutionContext } from "@/types/config.ts";
+import type { OmitExecutionContext } from "#/types/config.ts";
 
 function logGroupArn({ accountId }: AWSClient, region: string, name: string) {
   if (!accountId) {

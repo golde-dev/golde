@@ -1,15 +1,15 @@
 import { isEqual } from "es-toolkit";
 import { readFile } from "node:fs/promises";
-import { PlanError, PlanErrorCode } from "@/error.ts";
-import { logger } from "@/logger.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
+import { logger } from "#/logger.ts";
 import { join } from "node:path";
-import { formatDuration } from "@/utils/duration.ts";
-import { assertBranch } from "@/utils/resource.ts";
-import { toTagsList } from "@/utils/tags.ts";
-import { nowStringDate } from "@/utils/date.ts";
+import { formatDuration } from "#/utils/duration.ts";
+import { assertBranch } from "#/utils/resource.ts";
+import { toTagsList } from "#/utils/tags.ts";
+import { nowStringDate } from "#/utils/date.ts";
 import type { AWSClient } from "../../../client/client.ts";
-import type { Object, ObjectConfig, ObjectState } from "@/generic/resources/s3/object/types.ts";
-import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
+import type { Object, ObjectConfig, ObjectState } from "#/generic/resources/s3/object/types.ts";
+import type { OmitExecutionContext, WithBranch } from "#/types/config.ts";
 
 function s3ObjectArn(bucketName: string, key: string) {
   return `arn:aws:s3:::${join(bucketName, key)}`;

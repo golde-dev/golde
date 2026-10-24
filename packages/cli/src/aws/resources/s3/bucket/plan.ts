@@ -11,7 +11,7 @@ import type { CreateUnit, DeleteUnit, NoopUnit, Plan, UpdateUnit } from "../../.
 import type { BucketConfig, BucketState, S3BucketConfig, S3BucketState } from "./types.ts";
 import type { CreateBucket, DeleteBucket, Executors, UpdateBucket } from "./executor.ts";
 import type { ResourceDependency } from "../../../../types/dependencies.ts";
-import { isConfigEqual } from "@/utils/config.ts";
+import { isConfigEqual } from "#/utils/config.ts";
 
 function getCurrent(buckets: S3BucketState = {}) {
   const previous: {

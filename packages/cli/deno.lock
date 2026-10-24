@@ -8,7 +8,6 @@
     "npm:@aws-sdk/client-route-53@^3.1155.0": "3.1155.0",
     "npm:@aws-sdk/client-s3@^3.1155.0": "3.1155.0",
     "npm:@aws-sdk/client-sts@^3.1155.0": "3.1155.0",
-    "npm:@deno/vite-plugin@^2.0.4": "2.0.4_vite@8.3.5",
     "npm:@inquirer/prompts@^8.7.4": "8.7.4",
     "npm:@jsr/deno-library__compress@~0.5.6": "0.5.6",
     "npm:@jsr/deno__dnt@0.44": "0.44.0",
@@ -314,14 +313,6 @@
     "@aws/lambda-invoke-store@0.3.0": {
       "integrity": "sha512-sl4Bm6yiMNYrZKkqqDFWN0UfnWhlS8ivKxrYl+6t0gCLrqr8y3B2IqZZbFRkfaVVp7C/baApyh71P+LeE1A2sQ=="
     },
-    "@deno/vite-plugin@2.0.4_vite@8.3.5": {
-      "integrity": "sha512-v9bm0NJx0SVPAyUeUi+iMXCByFIkaTtpWbGXwuNdDwfIdwHOVqe6sZz2wvWwulZqpA4QeGnxlJAkC4sZfoHCfQ==",
-      "dependencies": [
-        "@deno/loader@npm:@jsr/deno__loader@0.5.0",
-        "@std/jsonc@npm:@jsr/std__jsonc@1.0.3",
-        "vite"
-      ]
-    },
     "@inquirer/ansi@2.0.9": {
       "integrity": "sha512-0Ywt3S8tqM6TWUcsRlBFQ1x+X3/o8kktX0ZiKAnByYb9GFDknnOhse1PVtfiD2BXPI8ar+BWx9PV9R0lQIcygw=="
     },
@@ -486,10 +477,6 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/deno__dnt/0.44.0.tgz"
     },
-    "@jsr/deno__loader@0.5.0": {
-      "integrity": "sha512-sf/YBwnyAsbyeYYB71Zdj2Ca2Q9tt25EZpAiZdDA9W7Mm3GcpjA2WMeqj19xPIurZK12G3OAsa5yrtPB7E+gvA==",
-      "tarball": "https://npm.jsr.io/~/11/@jsr/deno__loader/0.5.0.tgz"
-    },
     "@jsr/std__bytes@1.0.6": {
       "integrity": "sha512-St6yKggjFGhxS52IFLJWvkchRFbAKg2Xh8UxA4S1EGz7GJ2Ui+ssDDldj/w2c8vCxvl6qgR0HaYbKeFJNqujmA==",
       "tarball": "https://npm.jsr.io/~/11/@jsr/std__bytes/1.0.6.tgz"
@@ -515,20 +502,6 @@
         "@jsr/std__bytes"
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/std__io/0.225.0.tgz"
-    },
-    "@jsr/std__json@1.1.0": {
-      "integrity": "sha512-a9Eylh7ox33tFn5RxhESnvI4akpefQP5Qn+ePz3Ih4IJ/EPA8p0SKq0aztRfN1sGDhfyWMPWwlUcwNxONt+Ncg==",
-      "dependencies": [
-        "@jsr/std__streams"
-      ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/std__json/1.1.0.tgz"
-    },
-    "@jsr/std__jsonc@1.0.3": {
-      "integrity": "sha512-NALyuVr8/MJsdKnVFCXKNyWzCJTbLlXASTF/4YyfQN2evCRWaZoTeQ17estdejU5a/xhdPfJ4aDv6MP0b17UHQ==",
-      "dependencies": [
-        "@jsr/std__json"
-      ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/std__jsonc/1.0.3.tgz"
     },
     "@jsr/std__path@1.0.8": {
       "integrity": "sha512-eNBGlh/8ZVkMxtFH4bwIzlAeKoHYk5in4wrBZhi20zMdOiuX4QozP4+19mIXBT2lzHDjhuVLyECbhFeR304iDg==",
@@ -1251,7 +1224,6 @@
         "npm:@aws-sdk/client-route-53@^3.1155.0",
         "npm:@aws-sdk/client-s3@^3.1155.0",
         "npm:@aws-sdk/client-sts@^3.1155.0",
-        "npm:@deno/vite-plugin@^2.0.4",
         "npm:@inquirer/prompts@^8.7.4",
         "npm:@jsr/deno-library__compress@~0.5.6",
         "npm:@jsr/deno__dnt@0.44",

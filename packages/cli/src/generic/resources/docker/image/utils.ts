@@ -1,9 +1,9 @@
-import { logger } from "@/logger.ts";
+import { logger } from "#/logger.ts";
 import type { DockerClient } from "../../../client/docker.ts";
 import type { ImageConfig } from "./types.ts";
-import { memoizeAsync } from "@/utils/memoize.ts";
-import type { GitVersion, ImageVersion } from "@/types/version.ts";
-import { getGitContextVersion, getGitVersion } from "@/utils/version.ts";
+import { memoizeAsync } from "#/utils/memoize.ts";
+import type { GitVersion, ImageVersion } from "#/types/version.ts";
+import { getGitContextVersion, getGitVersion } from "#/utils/version.ts";
 import slugify from "@sindresorhus/slugify";
 
 function prefixImageHash(imageHash: string): string {

@@ -1,8 +1,8 @@
 import { get, set } from "es-toolkit/compat";
-import { removePrefix } from "@/utils/object.ts";
-import type { ResourceState } from "@/types/config.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
-import type { State } from "@/types/state.ts";
+import { removePrefix } from "#/utils/object.ts";
+import type { ResourceState } from "#/types/config.ts";
+import type { SavedResource } from "#/types/dependencies.ts";
+import type { State } from "#/types/state.ts";
 
 const AWS_RESOURCES = [
   "aws.s3.bucket",

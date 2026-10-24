@@ -1,12 +1,12 @@
-import { isTemplate } from "@/utils/template.ts";
-import { isConfigEqual } from "@/utils/config.ts";
+import { isTemplate } from "#/utils/template.ts";
+import { isConfigEqual } from "#/utils/config.ts";
 import { createVersionTag } from "./utils.ts";
-import { findResourceDependencies } from "@/dependencies.ts";
-import { logger } from "@/logger.ts";
-import { Type } from "@/types/plan.ts";
-import { assertBranch } from "@/utils/resource.ts";
-import type { ResourceDependency } from "@/types/dependencies.ts";
-import type { Tags } from "@/types/config.ts";
+import { findResourceDependencies } from "#/dependencies.ts";
+import { logger } from "#/logger.ts";
+import { Type } from "#/types/plan.ts";
+import { assertBranch } from "#/utils/resource.ts";
+import type { ResourceDependency } from "#/types/dependencies.ts";
+import type { Tags } from "#/types/config.ts";
 import type { ImageConfig, ImagesConfig, ImagesState, ImageState } from "./types.ts";
 import type { GenericExecutors } from "./executor.ts";
 import type {
@@ -16,7 +16,7 @@ import type {
   NoopUnit,
   Plan,
   UpdateVersionUnit,
-} from "@/types/plan.ts";
+} from "#/types/plan.ts";
 
 export function createDockerImagesPlanFactory<E extends GenericExecutors>(
   dockerImagePath: (name: string) => string,

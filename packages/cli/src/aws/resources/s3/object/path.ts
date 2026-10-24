@@ -1,6 +1,6 @@
-import { ensureAllowedKeys } from "@/utils/object.ts";
-import { matchFactory } from "@/generic/path.ts";
-import type { ObjectConfig, ObjectState } from "@/generic/resources/s3/object/types.ts";
+import { ensureAllowedKeys } from "#/utils/object.ts";
+import { matchFactory } from "#/generic/path.ts";
+import type { ObjectConfig, ObjectState } from "#/generic/resources/s3/object/types.ts";
 
 export const BASE_PATH = "aws.s3.object";
 

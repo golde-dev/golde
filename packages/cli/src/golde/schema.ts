@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { implement } from "../utils/zod.ts";
 import type { GoldeClientConfig, GoldeResourcesConfig } from "./types.ts";
-import { containersSchema } from "@/golde/resources/docker/container/schema.ts";
+import { containersSchema } from "#/golde/resources/docker/container/schema.ts";
 
 export const goldeCredentialsSchema = implement<GoldeClientConfig>().with({
   apiKey: z

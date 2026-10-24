@@ -1,7 +1,7 @@
 import ky, { HTTPError, type KyInstance } from "ky";
-import { S3 } from "@/generic/client/s3.ts";
+import { S3 } from "#/generic/client/s3.ts";
 import { logger } from "../../logger.ts";
-import type { CloudflareS3Credentials } from "@/cloudflare/types.ts";
+import type { CloudflareS3Credentials } from "#/cloudflare/types.ts";
 import { get } from "es-toolkit/compat";
 
 interface ErrorCause {

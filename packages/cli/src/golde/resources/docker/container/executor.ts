@@ -1,8 +1,8 @@
-import type { GoldeClient } from "@/golde/client/client.ts";
+import type { GoldeClient } from "#/golde/client/client.ts";
 import type { ContainerConfig, ContainerState } from "./types.ts";
-import type { OmitExecutionContext, WithBranch } from "@/types/config.ts";
-import { PlanError, PlanErrorCode } from "@/error.ts";
-import { logger } from "@/logger.ts";
+import type { OmitExecutionContext, WithBranch } from "#/types/config.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
+import { logger } from "#/logger.ts";
 
 export function createDockerContainerExecutors(golde: GoldeClient) {
   async function createContainer(

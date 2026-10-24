@@ -1,5 +1,5 @@
-import { GoldeClientBase, GoldeError, notFoundAsUndefined } from "@/golde/client/base.ts";
-import { logger } from "@/logger.ts";
+import { GoldeClientBase, GoldeError, notFoundAsUndefined } from "#/golde/client/base.ts";
+import { logger } from "#/logger.ts";
 import type { ContainerConfig } from "../resources/docker/container/types.ts";
 
 interface Container {

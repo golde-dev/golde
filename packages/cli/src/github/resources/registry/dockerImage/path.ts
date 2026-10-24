@@ -1,6 +1,6 @@
-import { ensureAllowedKeys } from "@/utils/object.ts";
+import { ensureAllowedKeys } from "#/utils/object.ts";
 import type { ImageConfig, ImageState } from "../../../../generic/resources/docker/image/types.ts";
-import { matchFactory } from "@/generic/path.ts";
+import { matchFactory } from "#/generic/path.ts";
 
 export const BASE_PATH = "github.registry.dockerImage";
 

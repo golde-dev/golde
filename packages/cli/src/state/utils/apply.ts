@@ -1,7 +1,7 @@
-import type { ResourceState } from "@/types/config.ts";
+import type { ResourceState } from "#/types/config.ts";
 import type { Change } from "../../types/plan.ts";
 import { Type } from "../../types/plan.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
+import type { SavedResource } from "#/types/dependencies.ts";
 
 const getCreatedAt = (state: ResourceState): string => {
   if ("createdAt" in state) {

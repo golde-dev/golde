@@ -15,9 +15,6 @@
     "compile:dev": "deno run --allow-write --allow-env --allow-sys --allow-read --allow-run --allow-net compile.ts --dev",
     "test": "deno run -A npm:vitest run"
   },
-  "imports": {
-    "@/": "./src/"
-  },
   "fmt": {
     "lineWidth": 100
   }

@@ -30,6 +30,9 @@
   "bugs": {
     "url": "https://github.com/golde-dev/golde/issues"
   },
+  "imports": {
+    "#/*": "./src/*"
+  },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.1155.0",
     "@aws-sdk/client-iam": "^3.1155.0",
@@ -53,7 +56,6 @@
   },
   "devDependencies": {
     "@deno/dnt": "jsr:^0.44.0",
-    "@deno/vite-plugin": "^2.0.4",
     "vitest": "^5.0.5"
   }
 }

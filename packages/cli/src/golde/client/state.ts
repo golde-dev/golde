@@ -6,7 +6,7 @@ import type { Change } from "../../types/plan.ts";
 import type { State } from "../../types/state.ts";
 import type { AbstractStateClient } from "../../types/state.ts";
 import type { SavedResource } from "../../types/dependencies.ts";
-import { resourcesToState } from "@/utils/state.ts";
+import { resourcesToState } from "#/utils/state.ts";
 
 export class StateClient extends GoldeClientBase implements AbstractStateClient {
   public async getBranchResources(project: string, branch: string): Promise<SavedResource[]> {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { configTemplate, gitTemplate, resolveTemplate, resolveUnitState } from "../template.ts";
 import { ConfigError } from "../../error.ts";
-import { Type } from "@/types/plan.ts";
+import { Type } from "#/types/plan.ts";
 import type { GitInfo } from "../git.ts";
-import type { CreateUnit } from "@/types/plan.ts";
-import type { ResourceConfig, ResourceState } from "@/types/config.ts";
+import type { CreateUnit } from "#/types/plan.ts";
+import type { ResourceConfig, ResourceState } from "#/types/config.ts";
 
 describe("resolveTemplate", () => {
   it(

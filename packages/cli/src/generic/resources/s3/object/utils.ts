@@ -1,8 +1,8 @@
-import { logger } from "@/logger.ts";
+import { logger } from "#/logger.ts";
 import { basename, dirname, join, resolve } from "node:path";
 import { tar, tgz, zip } from "@deno-library/compress";
-import { PlanError, PlanErrorCode } from "@/error.ts";
-import { memoizeAsync } from "@/utils/memoize.ts";
+import { PlanError, PlanErrorCode } from "#/error.ts";
+import { memoizeAsync } from "#/utils/memoize.ts";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { cp, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -13,7 +13,7 @@ import {
   getGitContextVersion,
   getGitVersion,
   getLastUpdatedVersion,
-} from "@/utils/version.ts";
+} from "#/utils/version.ts";
 import type { Include, Object, ObjectConfig, Version } from "./types.ts";
 
 async function getVersion(

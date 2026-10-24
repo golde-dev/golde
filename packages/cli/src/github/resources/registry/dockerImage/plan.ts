@@ -1,4 +1,4 @@
-import { createDockerImagesPlanFactory } from "@/generic/resources/docker/image/plan.ts";
+import { createDockerImagesPlanFactory } from "#/generic/resources/docker/image/plan.ts";
 import { registryDockerImagePath } from "./path.ts";
 
 const { createDockerImagesPlan, createDockerImagesDestroyPlan } = createDockerImagesPlanFactory(

@@ -1,6 +1,6 @@
 import { ensureAllowedKeys } from "../../../../utils/object.ts";
 import type { BucketConfig, BucketState } from "./types.ts";
-import { matchFactory } from "@/generic/path.ts";
+import { matchFactory } from "#/generic/path.ts";
 
 export const BASE_PATH = "cloudflare.r2.bucket";
 

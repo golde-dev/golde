@@ -2,7 +2,7 @@ import { confirm } from "@inquirer/prompts";
 import { logger } from "./logger.ts";
 import { formatDuration } from "./utils/duration.ts";
 import { Type } from "./types/plan.ts";
-import { sortByPath } from "@/plan.ts";
+import { sortByPath } from "#/plan.ts";
 import { exit } from "node:process";
 import { chunk, get } from "es-toolkit/compat";
 import { hasResolved, resolveUnitState } from "./utils/template.ts";

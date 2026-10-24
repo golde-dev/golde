@@ -1,15 +1,15 @@
-import { findResourceDependencies } from "@/dependencies.ts";
-import { logger } from "@/logger.ts";
+import { findResourceDependencies } from "#/dependencies.ts";
+import { logger } from "#/logger.ts";
 import { createObject, createObjectKey } from "./utils.ts";
-import { Type } from "@/types/plan.ts";
-import { omitUndefined } from "@/utils/object.ts";
-import { assertBranch } from "@/utils/resource.ts";
-import { isTemplate } from "@/utils/template.ts";
-import { isConfigEqual } from "@/utils/config.ts";
-import { mergeProjectTags } from "@/utils/tags.ts";
+import { Type } from "#/types/plan.ts";
+import { omitUndefined } from "#/utils/object.ts";
+import { assertBranch } from "#/utils/resource.ts";
+import { isTemplate } from "#/utils/template.ts";
+import { isConfigEqual } from "#/utils/config.ts";
+import { mergeProjectTags } from "#/utils/tags.ts";
 import type { ObjectConfig, ObjectsConfig, ObjectsState, ObjectState } from "./types.ts";
-import type { ResourceDependency } from "@/types/dependencies.ts";
-import type { Tags } from "@/types/config.ts";
+import type { ResourceDependency } from "#/types/dependencies.ts";
+import type { Tags } from "#/types/config.ts";
 import type { GenericExecutors } from "./executor.ts";
 import type {
   ChangeVersionUnit,
@@ -18,7 +18,7 @@ import type {
   NoopUnit,
   Plan,
   UpdateVersionUnit,
-} from "@/types/plan.ts";
+} from "#/types/plan.ts";
 
 export function createS3PlanFactory<E extends GenericExecutors>(
   s3ObjectPath: (name: string) => string,

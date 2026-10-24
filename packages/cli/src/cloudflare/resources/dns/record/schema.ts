@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { tagsSchema } from "@/utils/tags.ts";
-import { domainNameSchema } from "@/generic/schema.ts";
-import { branchPatternSchema, branchSchema, transformBranch } from "@/utils/resource.ts";
+import { tagsSchema } from "#/utils/tags.ts";
+import { domainNameSchema } from "#/generic/schema.ts";
+import { branchPatternSchema, branchSchema, transformBranch } from "#/utils/resource.ts";
 import type { DNSConfig, RecordConfig } from "./types.ts";
 import type { ZodType } from "zod";
 

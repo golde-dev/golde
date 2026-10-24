@@ -7,8 +7,8 @@ import type { Context } from "./types/context.ts";
 import type { ResourceDependency, SavedResource } from "./types/dependencies.ts";
 import type { Plan } from "./types/plan.ts";
 import { Type } from "./types/plan.ts";
-import { matchGithubPath } from "@/github/path.ts";
-import { matchHCloudPath } from "@/hcloud/path.ts";
+import { matchGithubPath } from "#/github/path.ts";
+import { matchHCloudPath } from "#/hcloud/path.ts";
 
 const templateRe = new RegExp(/\{\{([^{}]*)\}\}/g);
 const stateRe = new RegExp(/(?<=resources.)(.*)/);

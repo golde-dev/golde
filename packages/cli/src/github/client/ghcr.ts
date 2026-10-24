@@ -1,5 +1,5 @@
-import { logger } from "@/logger.ts";
-import { formatDuration } from "@/utils/duration.ts";
+import { logger } from "#/logger.ts";
+import { formatDuration } from "#/utils/duration.ts";
 import { getErrorStatus, getFetchErrorCause, GithubClientBase, GithubError } from "./base.ts";
 
 interface PackageVersion {

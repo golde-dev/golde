@@ -1,4 +1,4 @@
-import type { ObjectsConfig, ObjectsState } from "@/generic/resources/s3/object/types.ts";
+import type { ObjectsConfig, ObjectsState } from "#/generic/resources/s3/object/types.ts";
 import type { D1DatabaseConfig, D1DatabaseState } from "./resources/d1/database/types.ts";
 import type { DNSConfig } from "./resources/dns/record/types.ts";
 import type { DNSState } from "./resources/dns/record/types.ts";

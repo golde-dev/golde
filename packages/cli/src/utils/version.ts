@@ -1,5 +1,5 @@
-import { getContextRefHash, getRefHash } from "@/utils/git.ts";
-import { getDirHash, getFileHash } from "@/utils/hash.ts";
+import { getContextRefHash, getRefHash } from "#/utils/git.ts";
+import { getDirHash, getFileHash } from "#/utils/hash.ts";
 import { stat } from "node:fs/promises";
 
 /**

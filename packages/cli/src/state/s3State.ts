@@ -1,13 +1,13 @@
 import slugify from "@sindresorhus/slugify";
 import { notFoundAsUndefined } from "../generic/client/s3.ts";
 import { S3 } from "../generic/client/s3.ts";
-import { resourcesToState } from "@/utils/state.ts";
+import { resourcesToState } from "#/utils/state.ts";
 import { applyChangeSet } from "./utils/apply.ts";
 import type { AbstractStateClient } from "../types/state.ts";
 import type { State } from "../types/state.ts";
 import type { Lock } from "../types/lock.ts";
 import type { Change } from "../types/plan.ts";
-import type { SavedResource } from "@/types/dependencies.ts";
+import type { SavedResource } from "#/types/dependencies.ts";
 
 const getStateKey = (projectName: string, branch: string) =>
   `projects/${projectName}/${slugify(branch)}.state.json`;

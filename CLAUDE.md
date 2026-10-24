@@ -248,8 +248,9 @@ The CLI and agent packages use **Deno** (not Node.js):
 ### Running Individual Package Tests
 
 Tests run on Vitest under Deno (`deno run -A npm:vitest run`), not Node: some
-dependencies (e.g. `@deno-library/compress`) use `Deno.*` APIs. `@deno/vite-plugin`
-resolves the `deno.json` import map (`@/`, `jsr:`) for Vite.
+dependencies (e.g. `@deno-library/compress`) use `Deno.*` APIs. Dependencies live in
+`package.json` (JSR packages as `jsr:` specifiers) and `src/` is imported via the
+`#/*` subpath import, so there is no `deno.json` import map.
 
 ```bash
 # CLI tests

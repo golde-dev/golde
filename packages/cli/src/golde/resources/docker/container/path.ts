@@ -1,5 +1,5 @@
-import { ensureAllowedKeys } from "@/utils/object.ts";
-import { matchFactory } from "@/generic/path.ts";
+import { ensureAllowedKeys } from "#/utils/object.ts";
+import { matchFactory } from "#/generic/path.ts";
 import type { ContainerConfig, ContainerState } from "./types.ts";
 
 export const BASE_PATH = "golde.docker.container";
