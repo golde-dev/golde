@@ -1,5 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect/expect";
+import { describe, expect, it } from "vitest";
 import { dnsPath, dnsRecordPath } from "../path.ts";
 import { matchDNSRecord } from "../path.ts";
 

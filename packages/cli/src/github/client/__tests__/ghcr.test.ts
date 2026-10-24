@@ -1,6 +1,4 @@
-import { expect } from "@std/expect/expect";
-import { afterEach, beforeEach, describe, it } from "@std/testing/bdd";
-import { type Stub, stub } from "@std/testing/mock";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GithubClient } from "../client.ts";
 
 type Route = (url: URL, method: string) => Response | undefined;
@@ -20,13 +18,12 @@ describe("GhcrClient", () => {
   const requests: string[] = [];
   let client: GithubClient;
   let route: Route = () => undefined;
-  let fetchStub: Stub<typeof globalThis, Parameters<typeof fetch>, Promise<Response>>;
 
   beforeEach(() => {
     client = new GithubClient("chyzwar", "token");
     requests.length = 0;
     route = () => undefined;
-    fetchStub = stub(globalThis, "fetch", (input, init) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
       const request = new Request(input, init);
       const url = new URL(request.url);
       requests.push(`${request.method} ${url.pathname}${url.search}`);
@@ -34,7 +31,7 @@ describe("GhcrClient", () => {
     });
   });
 
-  afterEach(() => fetchStub.restore());
+  afterEach(() => vi.restoreAllMocks());
 
   it("should delete a version of an org-owned image through the org packages api", async () => {
     route = (url, method) => {

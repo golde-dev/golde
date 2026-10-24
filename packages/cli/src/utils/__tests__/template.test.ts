@@ -1,8 +1,6 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { describe, expect, it } from "vitest";
 import { configTemplate, gitTemplate, resolveTemplate, resolveUnitState } from "../template.ts";
 import { ConfigError } from "../../error.ts";
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect/expect";
 import { Type } from "@/types/plan.ts";
 import type { GitInfo } from "../git.ts";
 import type { CreateUnit } from "@/types/plan.ts";
@@ -13,33 +11,31 @@ describe("resolveTemplate", () => {
     "should return the same value if it's undefined, null, boolean, number, or bigint",
     () => {
       const f = (t: string) => t;
-      assertEquals(resolveTemplate(undefined, f), undefined);
-      assertEquals(resolveTemplate(null, f), null);
-      assertEquals(resolveTemplate(true, f), true);
-      assertEquals(resolveTemplate(42, f), 42);
-      assertEquals(resolveTemplate(BigInt(123), f), BigInt(123));
+      expect(resolveTemplate(undefined, f)).toEqual(undefined);
+      expect(resolveTemplate(null, f)).toEqual(null);
+      expect(resolveTemplate(true, f)).toEqual(true);
+      expect(resolveTemplate(42, f)).toEqual(42);
+      expect(resolveTemplate(BigInt(123), f)).toEqual(BigInt(123));
     },
   );
 
   it("should replace template placeholders in a string", () => {
     const onTemplate = () => "replaced";
-    assertEquals(
-      resolveTemplate("Hello {{name}}!", onTemplate),
-      "Hello replaced!",
-    );
+    expect(resolveTemplate("Hello {{name}}!", onTemplate)).toBe("Hello replaced!");
   });
 
   it(
     "should throw an error for symbols, sets, maps and functions",
     () => {
       const onTemplate = (t: string) => t;
-      assertThrows(() => resolveTemplate(Symbol(), onTemplate), ConfigError);
-      assertThrows(() => resolveTemplate(new Set(), onTemplate), ConfigError);
-      assertThrows(() => resolveTemplate(new Map(), onTemplate), ConfigError);
-      assertThrows(() =>
+      expect(() => resolveTemplate(Symbol(), onTemplate)).toThrow(ConfigError);
+      expect(() => resolveTemplate(new Set(), onTemplate)).toThrow(ConfigError);
+      expect(() => resolveTemplate(new Map(), onTemplate)).toThrow(ConfigError);
+      expect(() =>
         resolveTemplate(() => {
           return;
-        }, onTemplate), ConfigError);
+        }, onTemplate)
+      ).toThrow(ConfigError);
     },
   );
 
@@ -51,7 +47,7 @@ describe("resolveTemplate", () => {
     const expected = [1, "Hello resolved!", [true, "resolved"], {
       key: "resolved",
     }];
-    assertEquals(resolveTemplate(input, onTemplate), expected);
+    expect(resolveTemplate(input, onTemplate)).toEqual(expected);
   });
 
   it("should recursively resolve templates in objects", () => {
@@ -72,7 +68,7 @@ describe("resolveTemplate", () => {
         city: "resolved",
       },
     };
-    assertEquals(resolveTemplate(input, onTemplate), expected);
+    expect(resolveTemplate(input, onTemplate)).toEqual(expected);
   });
 
   it("should resolve templates object keys", () => {
@@ -83,7 +79,7 @@ describe("resolveTemplate", () => {
     const expected = {
       resolved: "name",
     };
-    assertEquals(resolveTemplate(input, onTemplate), expected);
+    expect(resolveTemplate(input, onTemplate)).toEqual(expected);
   });
 
   it("should handle multiple templates in strings", () => {
@@ -100,7 +96,7 @@ describe("resolveTemplate", () => {
       fullName: "John - Knight",
     };
 
-    assertEquals(resolveTemplate(input, onTemplate), expected);
+    expect(resolveTemplate(input, onTemplate)).toEqual(expected);
   });
 
   it("should resolve git template variables", () => {
@@ -110,12 +106,12 @@ describe("resolveTemplate", () => {
     } as GitInfo;
     const input = "This is the {{git.BRANCH_SLUG}} branch on {{git.BRANCH_NAME}}";
     const expected = "This is the feature/branch branch on main";
-    assertEquals(resolveTemplate(input, gitTemplate(gitInfo)), expected);
+    expect(resolveTemplate(input, gitTemplate(gitInfo))).toEqual(expected);
 
     const input2 = { "{{git.BRANCH_SLUG}}-test": "branch on {{git.BRANCH_NAME}}" };
     const expected2 = { "feature/branch-test": "branch on main" };
 
-    assertEquals(resolveTemplate(input2, gitTemplate(gitInfo)), expected2);
+    expect(resolveTemplate(input2, gitTemplate(gitInfo))).toEqual(expected2);
   });
 
   it("should resolve nested config template variables", () => {
@@ -141,7 +137,7 @@ describe("resolveTemplate", () => {
       "boolean": true,
     };
     const withGitInfo = resolveTemplate(input, gitTemplate(gitInfo));
-    assertEquals(resolveTemplate(withGitInfo, configTemplate(managedConfig)), expected);
+    expect(resolveTemplate(withGitInfo, configTemplate(managedConfig))).toEqual(expected);
   });
 
   it("should resolve managed config template variables of different types", () => {
@@ -162,7 +158,7 @@ describe("resolveTemplate", () => {
       "age": 42,
       "boolean": true,
     };
-    assertEquals(resolveTemplate(input, configTemplate(managedConfig)), expected);
+    expect(resolveTemplate(input, configTemplate(managedConfig))).toEqual(expected);
   });
 });
 

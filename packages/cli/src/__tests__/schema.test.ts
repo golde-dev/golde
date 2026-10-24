@@ -1,8 +1,7 @@
 import { validateConfig } from "../schema.ts";
 import { ConfigError } from "../error.ts";
 import type { Config } from "../types/config.ts";
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect/expect";
+import { describe, expect, it } from "vitest";
 
 describe("validateConfig for project", () => {
   it("should throw an error if the config is invalid", () => {

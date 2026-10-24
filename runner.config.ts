@@ -82,45 +82,17 @@ parallelTask("dist:dev", [
 ]);
 
 
+const testArgs = firstPositional ? ["-t", firstPositional] : [];
+
 spawnTask("test:agent",
-  "deno", firstPositional ? [
-    "test",
-    "--allow-env",
-    "--allow-read",
-    "--allow-run",
-    "--allow-sys",
-    "--filter",
-    firstPositional
-  ] :[
-    "test",
-    "--allow-env",
-    "--allow-read",
-    "--allow-run",
-    "--allow-sys"
-  ],
+  "deno", ["task", "test", ...testArgs],
   {
     cwd: "./packages/agent",
   }
 );
 
 spawnTask("test:cli",
-  "deno", firstPositional ? [
-    "test",
-    "--allow-env",
-    "--allow-read",
-    "--allow-run",
-    "--allow-sys",
-    "--allow-write",
-    "--filter",
-    firstPositional
-  ] :[
-    "test",
-    "--allow-env",
-    "--allow-read",
-    "--allow-run",
-    "--allow-sys",
-    "--allow-write"
-  ],
+  "deno", ["task", "test", ...testArgs],
   {
     cwd: "./packages/cli",
   }

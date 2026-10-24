@@ -136,7 +136,7 @@ export function createR2DestroyPlan(
     const deleteUnit: DeleteUnit<BucketState, DeleteBucket> = {
       type: Type.Delete,
       executor: executors.deleteBucket,
-      args: [name],
+      args: [name, state.config.cfR2Jurisdiction],
       path: key,
       state: state,
       dependsOn: state.dependsOn,

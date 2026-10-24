@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "@/types/plan.ts";
 import { createS3PlanFactory } from "../plan.ts";
 import { createObjectKey } from "../utils.ts";
@@ -22,23 +20,23 @@ const { createObjectsPlan } = createS3PlanFactory<GenericExecutors>(
 
 function createExecutors(): GenericExecutors {
   return {
-    createObject: spy(() => Promise.resolve({
+    createObject: vi.fn(() => Promise.resolve({
       key: "test-key",
       version: "new-version",
       createdAt: "2026-01-01T00:00:00.000Z",
       config: {} as WithBranch<ObjectConfig>,
     })),
-    updateObject: spy(() => Promise.resolve({
+    updateObject: vi.fn(() => Promise.resolve({
       key: "test-key",
       version: "new-version",
       createdAt: "2026-01-01T00:00:00.000Z",
       config: {} as WithBranch<ObjectConfig>,
     })),
-    deleteObject: spy(() => Promise.resolve()),
-    assertCreatePermission: spy(() => Promise.resolve()),
-    assertDeletePermission: spy(() => Promise.resolve()),
-    assertUpdatePermission: spy(() => Promise.resolve()),
-    assertObjectExist: spy(() => Promise.resolve()),
+    deleteObject: vi.fn(() => Promise.resolve()),
+    assertCreatePermission: vi.fn(() => Promise.resolve()),
+    assertDeletePermission: vi.fn(() => Promise.resolve()),
+    assertUpdatePermission: vi.fn(() => Promise.resolve()),
+    assertObjectExist: vi.fn(() => Promise.resolve()),
   } as GenericExecutors;
 }
 

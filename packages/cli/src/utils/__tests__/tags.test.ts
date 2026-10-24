@@ -1,6 +1,5 @@
-import { describe, it } from "@std/testing/bdd";
+import { describe, expect, it } from "vitest";
 import { mergeTags } from "../tags.ts";
-import { expect } from "@std/expect/expect";
 
 describe("tags", () => {
   describe("mergeTags", () => {

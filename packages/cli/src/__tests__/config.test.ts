@@ -1,6 +1,5 @@
-import { describe, it } from "@std/testing/bdd";
+import { describe, expect, it } from "vitest";
 import { resolveConfig } from "../config.ts";
-import { expect } from "@std/expect/expect";
 import { getGitInfo, type GitInfo } from "../utils/git.ts";
 import process from "node:process";
 

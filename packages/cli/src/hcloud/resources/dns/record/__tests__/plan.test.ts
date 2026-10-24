@@ -1,6 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
-import { expect } from "@std/expect";
-import { spy } from "@std/testing/mock";
+import { describe, expect, it, vi } from "vitest";
 import { Type } from "../../../../../types/plan.ts";
 import { createDNSPlan } from "../plan.ts";
 import type { CreateRecord, DeleteRecord, Executors, UpdateRecord } from "../executor.ts";
@@ -15,9 +13,9 @@ import type {
 import type { WithBranch } from "../../../../../types/config.ts";
 
 const executors = {
-  createRecord: spy(),
-  updateRecord: spy(),
-  deleteRecord: spy(),
+  createRecord: vi.fn(),
+  updateRecord: vi.fn(),
+  deleteRecord: vi.fn(),
 } as unknown as Executors;
 
 describe("hcloud dns record plan", () => {
